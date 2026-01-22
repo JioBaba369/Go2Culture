@@ -1,3 +1,94 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "A vibrant outdoor dinner party at dusk",
+      "imageUrl": "https://images.unsplash.com/photo-1530062845289-9109b2c9c868?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwZGlubmVyfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "outdoor dinner"
+    },
+    {
+      "id": "host-cta",
+      "description": "A host welcoming guests into their home",
+      "imageUrl": "https://images.unsplash.com/photo-1625213035705-f37ae3048266?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3ZWxjb21pbmclMjBob21lfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "welcoming home"
+    },
+    {
+      "id": "exp-1-main",
+      "description": "A beautiful plate of handmade pasta",
+      "imageUrl": "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwYXN0YSUyMGRpc2h8ZW58MHx8fHwxNzY5MDE4NDE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pasta dish"
+    },
+    {
+      "id": "exp-1-thumb-1",
+      "description": "People laughing around a dinner table",
+      "imageUrl": "https://images.unsplash.com/photo-1699730148588-42aabafe9c72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkaW5uZXIlMjBwYXJ0eXxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dinner party"
+    },
+    {
+      "id": "exp-1-thumb-2",
+      "description": "A cozy dining room setup",
+      "imageUrl": "https://images.unsplash.com/photo-1767719798483-0dbf68b5cc97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjb3p5JTIwZGluaW5nfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cozy dining"
+    },
+    {
+      "id": "exp-2-main",
+      "description": "A colorful array of tacos on a wooden board",
+      "imageUrl": "https://images.unsplash.com/photo-1690874684451-92358e91b14c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx0YWNvJTIwcGxhdHRlcnxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "taco platter"
+    },
+    {
+      "id": "exp-3-main",
+      "description": "A traditional Japanese tea ceremony setup",
+      "imageUrl": "https://images.unsplash.com/photo-1519095615130-d36e0fe3bf63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx0ZWElMjBjZXJlbW9ueXxlbnwwfHx8fDE3NjkwMzU1Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tea ceremony"
+    },
+    {
+      "id": "exp-4-main",
+      "description": "A South Indian thali meal on a banana leaf",
+      "imageUrl": "https://images.unsplash.com/photo-1742281258189-3b933879867a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjB0aGFsaXxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indian thali"
+    },
+    {
+      "id": "host-1",
+      "description": "Portrait of a smiling woman, Maria",
+      "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c21pbGluZyUyMHdvbWFufGVufDB8fHx8MTc2OTA0MzEzN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smiling woman"
+    },
+    {
+      "id": "host-2",
+      "description": "Portrait of a smiling man, Kenji",
+      "imageUrl": "https://images.unsplash.com/photo-1613419441661-6a5af1751d30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzbWlsaW5nJTIwbWFufGVufDB8fHx8MTc2OTA0MTY5OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smiling man"
+    },
+    {
+      "id": "host-3",
+      "description": "Portrait of a smiling woman, Priya",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2OTA5MjI1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "host-4",
+      "description": "Portrait of a smiling man, Javier",
+      "imageUrl": "https://images.unsplash.com/photo-1624395213043-fa2e123b2656?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjkxMDMyNzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "admin-id",
+      "description": "A sample government ID card for verification",
+      "imageUrl": "https://images.unsplash.com/photo-1614267119077-51bdcbf9f77a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxpZCUyMGNhcmR8ZW58MHx8fHwxNzY5MDgwODc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "id card"
+    },
+    {
+      "id": "admin-selfie",
+      "description": "A sample selfie for verification",
+      "imageUrl": "https://images.unsplash.com/photo-1597912744403-e1f1a0488ae4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c2VsZmllJTIwcGhvdG98ZW58MHx8fHwxNzY5MTA4MzEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "selfie photo"
+    },
+    {
+      "id": "dining-area",
+      "description": "A photo of a clean and welcoming dining area",
+      "imageUrl": "https://images.unsplash.com/photo-1758977403562-1a5fcc5af6b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkaW5pbmclMjBhcmVhfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dining area"
+    }
+  ]
 }
