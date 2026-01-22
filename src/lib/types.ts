@@ -1,3 +1,16 @@
+
+export type ComplianceFields = {
+  foodBusinessRegistered?: boolean;
+  councilName?: string;
+  foodSafetyTrainingCompleted?: boolean;
+  foodActClassification?: boolean;
+  foodTraderRegistered?: boolean;
+  foodBusinessLicense?: boolean;
+  foodSafetySupervisor?: boolean;
+  foodBusinessNotification?: boolean;
+  [key: string]: any;
+};
+
 export type Host = {
   id: string;
   name: string;
@@ -48,6 +61,7 @@ export type Experience = {
     pets: boolean;
     smoking: boolean;
     seatingType: 'Table' | 'Floor' | 'Mixed';
+    homeType?: string;
     accessibilityNotes?: string;
   };
 };
@@ -57,6 +71,7 @@ export type HostApplication = {
   hostName: string;
   city: string;
   country: string;
+  state: string;
   experienceTitle: string;
   status: 'Pending' | 'Approved' | 'Changes Needed' | 'Rejected';
   submittedDate: string;
@@ -74,9 +89,7 @@ export type HostApplication = {
     status: 'Verified' | 'Pending' | 'Failed';
   };
   experience: Omit<Experience, 'id' | 'host' | 'reviews' | 'rating' | 'reviewCount' | 'availability'>;
-  compliance: {
-    foodBusinessRegistered: boolean;
-    councilName?: string;
-    foodSafetyTrainingCompleted: boolean;
-  };
+  compliance: ComplianceFields;
 };
+
+    

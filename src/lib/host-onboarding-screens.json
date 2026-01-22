@@ -1,0 +1,90 @@
+
+[
+  {
+    "screen": 1,
+    "title": "Your Basic Information",
+    "fields": [
+      "fullName",
+      "email"
+    ]
+  },
+  {
+    "screen": 2,
+    "title": "Create Your Host Profile",
+    "fields": [
+      "profilePhoto",
+      "bio",
+      "culture",
+      "languages",
+      "hostingStyle"
+    ]
+  },
+  {
+    "screen": 3,
+    "title": "Your Experience Basics",
+    "fields": [
+      "experienceTitle",
+      "category",
+      "duration"
+    ]
+  },
+  {
+    "screen": 4,
+    "title": "Menu & Food Details",
+    "fields": [
+      "menuDescription",
+      "cuisineType",
+      "spiceLevel",
+      "allergens"
+    ]
+  },
+  {
+    "screen": 5,
+    "title": "Location & Home Setup",
+    "fields": [
+      "country",
+      "state",
+      "address",
+      "postcode",
+      "homeType",
+      "seatingType",
+      "maxGuests",
+      "accessibilityNotes",
+      "hasPets",
+      "smokingAllowed"
+    ]
+  },
+  {
+    "screen": 6,
+    "title": "Upload Photos",
+    "fields": [
+      "foodPhotos",
+      "diningAreaPhoto"
+    ]
+  },
+  {
+    "screen": 7,
+    "title": "Legal & Compliance",
+    "fields": [
+      "foodBusinessRegistered",
+      "councilName",
+      "foodSafetyTrainingCompleted",
+      "foodActClassification",
+      "foodTraderRegistered",
+      "foodBusinessLicense",
+      "foodSafetySupervisor",
+      "foodBusinessNotification"
+    ]
+  },
+  {
+    "screen": 8,
+    "title": "Pricing & Final Agreements",
+    "fields": [
+      "pricePerGuest",
+      "agreeToFoodSafety",
+      "agreeToGuidelines"
+    ]
+  }
+]
+
+    

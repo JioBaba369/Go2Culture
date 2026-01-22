@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -13,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, PartyPopper } from "lucide-react";
+import { countries, states } from "@/lib/location-data";
+import { complianceRequirementsByState, type ComplianceRequirement } from "@/lib/compliance-data";
 
 const hostingStyleOptions = [
   { id: 'family-style', label: 'Family-style' },
@@ -42,7 +45,9 @@ const formSchema = z.object({
   cuisineType: z.string().min(3, "Cuisine type is required."),
   allergens: z.string().optional(),
   spiceLevel: z.string({ required_error: "Please select a spice level." }),
-
+  
+  country: z.string({ required_error: "Please select your country." }),
+  state: z.string().optional(),
   address: z.string().min(5, "Your full address is required."),
   postcode: z.string().min(3, "Postcode is required."),
   homeType: z.string({ required_error: "Please select your home type." }),
@@ -57,14 +62,85 @@ const formSchema = z.object({
 
   pricePerGuest: z.coerce.number().min(10, "Price must be at least $10."),
   
-  foodBusinessRegistered: z.boolean().default(false),
+  // Compliance fields are all optional here; refinement logic will enforce requirements
+  foodBusinessRegistered: z.boolean().optional(),
   councilName: z.string().optional(),
-  foodSafetyTrainingCompleted: z.boolean().default(false),
+  foodSafetyTrainingCompleted: z.boolean().optional(),
+  foodActClassification: z.boolean().optional(),
+  foodTraderRegistered: z.boolean().optional(),
+  foodBusinessLicense: z.boolean().optional(),
+  foodSafetySupervisor: z.boolean().optional(),
+  foodBusinessNotification: z.boolean().optional(),
+
   agreeToFoodSafety: z.boolean().refine(val => val === true, "You must agree to the food safety responsibilities."),
   agreeToGuidelines: z.boolean().refine(val => val === true, "You must agree to the host guidelines."),
+}).superRefine((data, ctx) => {
+  if (data.country === 'AU' && !data.state) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'State is required for hosts in Australia.',
+      path: ['state'],
+    });
+  }
+
+  if (data.country === 'AU' && data.state) {
+    const stateCompliance = complianceRequirementsByState[data.state];
+    if (stateCompliance) {
+      stateCompliance.requirements.forEach(req => {
+        if (req.required && !data[req.id as keyof typeof data]) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "This field is required.",
+            path: [req.id],
+          });
+        }
+        if (req.condition && data[req.condition as keyof typeof data] && !data[req.id as keyof typeof data]) {
+           ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Please provide details.`,
+              path: [req.id],
+          });
+        }
+      });
+    }
+  }
 });
 
 type OnboardingFormValues = z.infer<typeof formSchema>;
+
+const ComplianceField = ({ control, requirement }: { control: any, requirement: ComplianceRequirement }) => {
+  const watchCondition = requirement.condition ? useForm<OnboardingFormValues>().watch(requirement.condition) : true;
+  if (!watchCondition) return null;
+
+  return (
+    <FormField
+      control={control}
+      name={requirement.id}
+      render={({ field }) => (
+        <FormItem>
+          {requirement.type === 'checkbox' ? (
+             <div className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
+                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>{requirement.label}</FormLabel>
+                {requirement.description && <FormDescription>{requirement.description}</FormDescription>}
+              </div>
+            </div>
+          ) : (
+            <>
+              <FormLabel>{requirement.label}</FormLabel>
+              {requirement.description && <FormDescription>{requirement.description}</FormDescription>}
+              <FormControl><Input {...field} placeholder={requirement.description} /></FormControl>
+            </>
+          )}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
 
 export default function BecomeAHostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,15 +156,19 @@ export default function BecomeAHostPage() {
       maxGuests: 4,
       pricePerGuest: 50,
       hostingStyle: [],
-      foodBusinessRegistered: false,
-      foodSafetyTrainingCompleted: false,
     },
   });
+
+  const watchCountry = form.watch('country');
+  const watchState = form.watch('state');
+  
+  const availableStates = states.filter(s => s.countryId === watchCountry);
+  const compliance = watchCountry === 'AU' && watchState ? complianceRequirementsByState[watchState] : null;
+
 
   async function onSubmit(values: OnboardingFormValues) {
     setIsSubmitting(true);
     try {
-      // Simulate API call
       console.log(values);
       await new Promise(resolve => setTimeout(resolve, 2000));
       setSubmissionState('success');
@@ -183,7 +263,7 @@ export default function BecomeAHostPage() {
                                   checked={field.value?.includes(item.label)}
                                   onCheckedChange={(checked) => {
                                     return checked
-                                      ? field.onChange([...field.value, item.label])
+                                      ? field.onChange([...(field.value || []), item.label])
                                       : field.onChange(field.value?.filter((value) => value !== item.label));
                                   }}
                                 />
@@ -253,6 +333,16 @@ export default function BecomeAHostPage() {
               <CardDescription>Your exact address is never shared until a booking is confirmed.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="country" render={({ field }) => (
+                        <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                    )} />
+                     {watchCountry === 'AU' && (
+                        <FormField control={form.control} name="state" render={({ field }) => (
+                            <FormItem><FormLabel>State/Territory</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl><SelectContent>{availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                        )} />
+                     )}
+                </div>
                <FormField control={form.control} name="address" render={({ field }) => (
                 <FormItem><FormLabel>Full Address</FormLabel><FormControl><Input {...field} placeholder="123 Main Street, Sydney" /></FormControl><FormMessage /></FormItem>
               )} />
@@ -303,21 +393,22 @@ export default function BecomeAHostPage() {
           {/* Section 7: Legal & Compliance */}
           <Card>
             <CardHeader>
-              <CardTitle>7. Legal & Compliance (Australia)</CardTitle>
+              <CardTitle>7. Legal & Compliance</CardTitle>
               <CardDescription>Please confirm the following for compliance with local regulations.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-               <FormField control={form.control} name="foodBusinessRegistered" render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>My food business is registered with my local council.</FormLabel></div></FormItem>
-                )} />
-                {form.watch('foodBusinessRegistered') && (
-                  <FormField control={form.control} name="councilName" render={({ field }) => (
-                    <FormItem><FormLabel>Council Name</FormLabel><FormControl><Input {...field} placeholder="e.g., City of Sydney" /></FormControl><FormMessage /></FormItem>
-                  )} />
+                {!watchCountry && <p className="text-muted-foreground">Please select your country in the Location section to see relevant compliance requirements.</p>}
+                {watchCountry && watchCountry !== 'AU' && <p className="text-muted-foreground">No specific compliance requirements for your selected country. Please ensure you follow all local laws.</p>}
+                {watchCountry === 'AU' && !watchState && <p className="text-muted-foreground">Please select your state/territory to see compliance requirements.</p>}
+                
+                {compliance && (
+                  <>
+                    <h3 className="font-medium text-foreground">Requirements for {compliance.name}</h3>
+                    {compliance.requirements.map((req) => (
+                      <ComplianceField key={req.id} control={form.control} requirement={req} />
+                    ))}
+                  </>
                 )}
-                 <FormField control={form.control} name="foodSafetyTrainingCompleted" render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>I have completed food safety training.</FormLabel></div></FormItem>
-                )} />
             </CardContent>
           </Card>
 
@@ -373,3 +464,5 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
+
+    

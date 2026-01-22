@@ -1,3 +1,4 @@
+
 export const countries = [
   { id: "IT", name: "Italy" },
   { id: "MX", name: "Mexico" },
@@ -7,12 +8,20 @@ export const countries = [
 ];
 
 export const states = [
+  // Australia
+  { id: "NSW", name: "New South Wales", countryId: "AU" },
+  { id: "VIC", name: "Victoria", countryId: "AU" },
+  { id: "QLD", name: "Queensland", countryId: "AU" },
+  { id: "SA", name: "South Australia", countryId: "AU" },
+  { id: "WA", name: "Western Australia", countryId: "AU" },
+  { id: "TAS", name: "Tasmania", countryId: "AU" },
+  { id: "ACT", name: "Australian Capital Territory", countryId: "AU" },
+  { id: "NT", name: "Northern Territory", countryId: "AU" },
+  // Other Countries
   { id: "LAZ", name: "Lazio", countryId: "IT" },
   { id: "MEX", name: "State of Mexico", countryId: "MX" },
   { id: "KYO", name: "Kyoto Prefecture", countryId: "JP" },
   { id: "KAR", name: "Karnataka", countryId: "IN" },
-  { id: "NSW", name: "New South Wales", countryId: "AU" },
-  { id: "VIC", name: "Victoria", countryId: "AU" },
 ];
 
 export const suburbs = [
@@ -34,3 +43,5 @@ export const localAreas = [
    { id: "NEWTOWN", name: "Newtown", suburbId: "SYD" },
    { id: "FITZROY", name: "Fitzroy", suburbId: "MEL" },
 ];
+
+    
