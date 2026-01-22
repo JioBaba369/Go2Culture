@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Users, Home as HomeIcon, Award } from "lucide-react";
@@ -10,12 +12,10 @@ import { ExperienceCard } from "@/components/experience-card";
 import { experiences } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, states, suburbs, localAreas } from "@/lib/location-data";
-import type { Experience } from "@/lib/types";
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
-
-  const [filteredExperiences, setFilteredExperiences] = useState<Experience[]>(experiences.slice(0, 4));
+  const router = useRouter();
 
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('');
@@ -60,17 +60,12 @@ export default function Home() {
   }, [selectedSuburb]);
 
   const handleSearch = () => {
-    let results = experiences;
-    if (selectedLocalArea) {
-      results = results.filter(e => e.localArea === selectedLocalArea);
-    } else if (selectedSuburb) {
-      results = results.filter(e => e.suburb === selectedSuburb);
-    } else if (selectedState) {
-      results = results.filter(e => e.state === selectedState);
-    } else if (selectedCountry) {
-      results = results.filter(e => e.country === selectedCountry);
-    }
-    setFilteredExperiences(results.slice(0, 4));
+    const params = new URLSearchParams();
+    if (selectedCountry) params.set('country', selectedCountry);
+    if (selectedState) params.set('state', selectedState);
+    if (selectedSuburb) params.set('suburb', selectedSuburb);
+    if (selectedLocalArea) params.set('localArea', selectedLocalArea);
+    router.push(`/discover?${params.toString()}`);
   };
 
   return (
@@ -165,13 +160,9 @@ export default function Home() {
       <section>
         <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Featured Experiences</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-          {filteredExperiences.length > 0 ? (
-            filteredExperiences.map((experience) => (
+          {experiences.slice(0, 4).map((experience) => (
               <ExperienceCard key={experience.id} experience={experience} />
-            ))
-          ) : (
-            <p className="col-span-full text-center text-muted-foreground">No experiences found for your selection.</p>
-          )}
+            ))}
         </div>
         <div className="text-center mt-8">
           <Button variant="outline" size="lg" asChild>
