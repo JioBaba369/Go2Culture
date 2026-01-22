@@ -1,17 +1,77 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { MapPin, UtensilsCrossed, Calendar as CalendarIcon, Search, Users, Home as HomeIcon, Award } from "lucide-react";
+import { Search, Users, Home as HomeIcon, Award } from "lucide-react";
 import { ExperienceCard } from "@/components/experience-card";
 import { experiences } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { countries, states, suburbs, localAreas } from "@/lib/location-data";
+import type { Experience } from "@/lib/types";
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
+
+  const [filteredExperiences, setFilteredExperiences] = useState<Experience[]>(experiences.slice(0, 4));
+
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedSuburb, setSelectedSuburb] = useState<string>('');
+  const [selectedLocalArea, setSelectedLocalArea] = useState<string>('');
+
+  const [availableStates, setAvailableStates] = useState<{id: string, name: string}[]>([]);
+  const [availableSuburbs, setAvailableSuburbs] = useState<{id: string, name: string}[]>([]);
+  const [availableLocalAreas, setAvailableLocalAreas] = useState<{id: string, name: string}[]>([]);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      setAvailableStates(states.filter(s => s.countryId === selectedCountry));
+      setSelectedState('');
+      setSelectedSuburb('');
+      setSelectedLocalArea('');
+      setAvailableSuburbs([]);
+      setAvailableLocalAreas([]);
+    } else {
+      setAvailableStates([]);
+    }
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    if (selectedState) {
+      setAvailableSuburbs(suburbs.filter(s => s.stateId === selectedState));
+      setSelectedSuburb('');
+      setSelectedLocalArea('');
+      setAvailableLocalAreas([]);
+    } else {
+      setAvailableSuburbs([]);
+    }
+  }, [selectedState]);
+
+  useEffect(() => {
+    if (selectedSuburb) {
+      setAvailableLocalAreas(localAreas.filter(l => l.suburbId === selectedSuburb));
+      setSelectedLocalArea('');
+    } else {
+      setAvailableLocalAreas([]);
+    }
+  }, [selectedSuburb]);
+
+  const handleSearch = () => {
+    let results = experiences;
+    if (selectedLocalArea) {
+      results = results.filter(e => e.localArea === selectedLocalArea);
+    } else if (selectedSuburb) {
+      results = results.filter(e => e.suburb === selectedSuburb);
+    } else if (selectedState) {
+      results = results.filter(e => e.state === selectedState);
+    } else if (selectedCountry) {
+      results = results.filter(e => e.country === selectedCountry);
+    }
+    setFilteredExperiences(results.slice(0, 4));
+  };
 
   return (
     <div className="space-y-16 md:space-y-24">
@@ -34,42 +94,39 @@ export default function Home() {
             Go Where Culture Lives
           </h1>
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-neutral-200 drop-shadow-md">
-            Book authentic home-cooked meals and cultural experiences with locals around the world.
+            Where do you want to experience culture?
           </p>
           <div className="mt-8 p-4 bg-background/90 backdrop-blur-sm rounded-lg w-full max-w-4xl shadow-lg">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input placeholder="City, Country" className="pl-10" />
-              </div>
-              <div className="relative">
-                <UtensilsCrossed className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Select>
-                  <SelectTrigger className="pl-10">
-                    <SelectValue placeholder="Cuisine" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="italian">Italian</SelectItem>
-                    <SelectItem value="mexican">Mexican</SelectItem>
-                    <SelectItem value="indian">Indian</SelectItem>
-                    <SelectItem value="japanese">Japanese</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="relative">
-                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal pl-10">
-                      <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      Pick a date
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <Button className="w-full md:w-auto">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+              <Select onValueChange={setSelectedCountry} value={selectedCountry}>
+                <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
+                <SelectContent>
+                  {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+
+              <Select onValueChange={setSelectedState} value={selectedState} disabled={!availableStates.length}>
+                <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
+                <SelectContent>
+                  {availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              
+              <Select onValueChange={setSelectedSuburb} value={selectedSuburb} disabled={!availableSuburbs.length}>
+                <SelectTrigger><SelectValue placeholder="Suburb/City" /></SelectTrigger>
+                <SelectContent>
+                  {availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+
+              <Select onValueChange={setSelectedLocalArea} value={selectedLocalArea} disabled={!availableLocalAreas.length}>
+                <SelectTrigger><SelectValue placeholder="Local Area" /></SelectTrigger>
+                <SelectContent>
+                  {availableLocalAreas.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+
+              <Button onClick={handleSearch} className="w-full md:w-auto">
                 <Search className="mr-2 h-4 w-4" /> Search
               </Button>
             </div>
@@ -108,9 +165,13 @@ export default function Home() {
       <section>
         <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Featured Experiences</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-          {experiences.slice(0, 4).map((experience) => (
-            <ExperienceCard key={experience.id} experience={experience} />
-          ))}
+          {filteredExperiences.length > 0 ? (
+            filteredExperiences.map((experience) => (
+              <ExperienceCard key={experience.id} experience={experience} />
+            ))
+          ) : (
+            <p className="col-span-full text-center text-muted-foreground">No experiences found for your selection.</p>
+          )}
         </div>
         <div className="text-center mt-8">
           <Button variant="outline" size="lg" asChild>

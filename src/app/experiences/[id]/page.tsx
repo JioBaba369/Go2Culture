@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Star, Clock, Users, MapPin, Languages, Utensils, Award, ShieldCheck, Sparkles } from "lucide-react";
+import { countries, states, suburbs, localAreas } from "@/lib/location-data";
 
 export default function ExperienceDetailPage({ params }: { params: { id: string } }) {
   const experience = experiences.find((exp) => exp.id === params.id);
@@ -19,6 +20,10 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
   const mainImage = PlaceHolderImages.find(p => p.id === experience.mainImageId);
   const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.avatarImageId);
   
+  const countryName = countries.find(c => c.id === experience.country)?.name || experience.country;
+  const suburbName = suburbs.find(s => s.id === experience.suburb)?.name || experience.suburb;
+  const localAreaName = localAreas.find(l => l.id === experience.localArea)?.name || experience.localArea;
+
   return (
     <div className="py-8">
       {/* Title Section */}
@@ -33,7 +38,7 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
           <span className="text-muted-foreground">·</span>
           <div className="flex items-center gap-1">
             <MapPin className="h-5 w-5" />
-            <span>{experience.location}, {experience.city}, {experience.country}</span>
+            <span>{localAreaName}, {suburbName}, {countryName}</span>
           </div>
         </div>
       </div>

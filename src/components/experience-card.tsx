@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { Experience } from "@/lib/types";
@@ -5,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MapPin } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { countries, suburbs } from "@/lib/location-data";
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -13,6 +16,9 @@ interface ExperienceCardProps {
 export function ExperienceCard({ experience }: ExperienceCardProps) {
   const mainImage = PlaceHolderImages.find(p => p.id === experience.mainImageId);
   const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.avatarImageId);
+
+  const countryName = countries.find(c => c.id === experience.country)?.name || experience.country;
+  const suburbName = suburbs.find(s => s.id === experience.suburb)?.name || experience.suburb;
 
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col">
@@ -43,7 +49,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
           </div>
           <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
-            <span>{experience.city}, {experience.country}</span>
+            <span>{suburbName}, {countryName}</span>
           </div>
           <div className="flex items-center gap-2 mt-2">
             <Avatar className="h-6 w-6">

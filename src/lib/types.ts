@@ -23,9 +23,10 @@ export type Experience = {
   id: string;
   title: string;
   host: Host;
-  location: string;
-  city: string;
   country: string;
+  state: string;
+  suburb: string;
+  localArea: string;
   category: 'Home-cooked meal' | 'Cultural dinner' | 'Cooking + dining';
   duration: string;
   maxGuests: number;
