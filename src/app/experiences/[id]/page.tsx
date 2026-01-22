@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
-import { Star, Clock, Users, MapPin, Languages, Utensils, Award, ShieldCheck, Sparkles } from "lucide-react";
+import { Star, Clock, Users, MapPin, Languages, Utensils, Award, ShieldCheck, Sparkles, Home, Wind, Accessibility } from "lucide-react";
 import { countries, states, suburbs, localAreas } from "@/lib/location-data";
 
 export default function ExperienceDetailPage({ params }: { params: { id: string } }) {
@@ -103,6 +103,18 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
                 <Badge variant="secondary">Spice: {experience.menu.spiceLevel}</Badge>
                 {experience.menu.dietary.map(d => <Badge key={d} variant="outline">{d}</Badge>)}
             </div>
+          </div>
+          <Separator />
+
+           {/* Home details */}
+          <div className="space-y-4">
+            <h3 className="font-headline text-2xl">About your host's home</h3>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2"><Home className="h-5 w-5 text-primary" /><span>{experience.houseRules.homeType} with {experience.houseRules.seatingType} seating</span></div>
+                <div className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /><span>Pets live here: {experience.houseRules.pets ? 'Yes' : 'No'}</span></div>
+                <div className="flex items-center gap-2"><Wind className="h-5 w-5 text-primary" /><span>Smoking allowed: {experience.houseRules.smoking ? 'Yes' : 'No'}</span></div>
+                {experience.houseRules.accessibilityNotes && <div className="flex items-center gap-2"><Accessibility className="h-5 w-5 text-primary" /><span>{experience.houseRules.accessibilityNotes}</span></div>}
+             </div>
           </div>
           <Separator />
           

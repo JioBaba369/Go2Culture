@@ -5,7 +5,7 @@ export type Host = {
   bio: string;
   languages: string[];
   culture: string;
-  hostingStyle: string[];
+  hostingStyle: ('Family-style' | 'Storytelling' | 'Quiet & traditional' | 'Festive & social')[];
 };
 
 export type Review = {
@@ -47,6 +47,8 @@ export type Experience = {
   houseRules: {
     pets: boolean;
     smoking: boolean;
+    seatingType: 'Table' | 'Floor' | 'Mixed';
+    accessibilityNotes?: string;
   };
 };
 
@@ -64,11 +66,17 @@ export type HostApplication = {
     bio: string;
     languages: string[];
     culture: string;
+    hostingStyle: ('Family-style' | 'Storytelling' | 'Quiet & traditional' | 'Festive & social')[];
   };
   verification: {
     idDocId: string;
     selfieId: string;
     status: 'Verified' | 'Pending' | 'Failed';
   };
-  experience: Omit<Experience, 'id' | 'host' | 'reviews' | 'rating' | 'reviewCount'>;
+  experience: Omit<Experience, 'id' | 'host' | 'reviews' | 'rating' | 'reviewCount' | 'availability'>;
+  compliance: {
+    foodBusinessRegistered: boolean;
+    councilName?: string;
+    foodSafetyTrainingCompleted: boolean;
+  };
 };

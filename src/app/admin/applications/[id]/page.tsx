@@ -21,6 +21,8 @@ import {
   Camera,
   Languages,
   Info,
+  Home,
+  AlertTriangle,
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
@@ -72,30 +74,43 @@ export default function ApplicationDetailPage({
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Utensils /> Experience Details</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Utensils /> Experience & Menu</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <h3 className="font-headline text-2xl">{application.experience.title}</h3>
               <p className="text-muted-foreground">{application.experience.description}</p>
               <Separator />
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="font-semibold">Cuisine</p>
-                  <p>{application.experience.menu.cuisine}</p>
-                </div>
-                 <div>
-                  <p className="font-semibold">Price</p>
-                  <p>${application.experience.pricePerGuest} / person</p>
-                </div>
-                 <div>
-                  <p className="font-semibold">Duration</p>
-                  <p>{application.experience.duration}</p>
-                </div>
-                 <div>
-                  <p className="font-semibold">Max Guests</p>
-                  <p>{application.experience.maxGuests}</p>
-                </div>
+                <div><p className="font-semibold">Cuisine</p><p>{application.experience.menu.cuisine}</p></div>
+                <div><p className="font-semibold">Price</p><p>${application.experience.pricePerGuest} / person</p></div>
+                <div><p className="font-semibold">Duration</p><p>{application.experience.duration}</p></div>
+                <div><p className="font-semibold">Max Guests</p><p>{application.experience.maxGuests}</p></div>
+                <div><p className="font-semibold">Spice Level</p><p>{application.experience.menu.spiceLevel}</p></div>
               </div>
+               <Separator />
+               <p className="font-semibold">Menu Description</p>
+               <p className="text-sm italic text-muted-foreground">"{application.experience.menu.description}"</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+             <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Home /> Home Setup</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                    <div><p className="font-semibold">Home Type</p><p>{application.experience.houseRules.homeType}</p></div>
+                    <div><p className="font-semibold">Seating</p><p>{application.experience.houseRules.seatingType}</p></div>
+                    <div><p className="font-semibold">Has Pets?</p><p>{application.experience.houseRules.pets ? 'Yes' : 'No'}</p></div>
+                    <div><p className="font-semibold">Smoking?</p><p>{application.experience.houseRules.smoking ? 'Yes' : 'No'}</p></div>
+                </div>
+                {application.experience.houseRules.accessibilityNotes && (
+                    <>
+                     <Separator className="my-4"/>
+                     <p className="font-semibold">Accessibility Notes</p>
+                     <p className="text-sm text-muted-foreground">{application.experience.houseRules.accessibilityNotes}</p>
+                    </>
+                )}
             </CardContent>
           </Card>
 
@@ -131,6 +146,11 @@ export default function ApplicationDetailPage({
                 <Info className="h-4 w-4 text-muted-foreground"/>
                 <span>Culture: {application.profile.culture}</span>
               </div>
+              <Separator />
+               <p className="font-semibold">Hosting Style</p>
+               <div className="flex flex-wrap gap-2">
+                {application.profile.hostingStyle.map(style => <Badge variant="secondary" key={style}>{style}</Badge>)}
+               </div>
             </CardContent>
           </Card>
           <Card>
@@ -148,6 +168,28 @@ export default function ApplicationDetailPage({
                         <p className="font-semibold text-sm">Selfie</p>
                         {selfiePhoto && <Image src={selfiePhoto.imageUrl} alt="Selfie" width={100} height={100} className="rounded-full mt-1" data-ai-hint={selfiePhoto.imageHint} />}
                     </div>
+                </div>
+            </CardContent>
+          </Card>
+
+           <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><AlertTriangle /> Compliance (AU)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                    <p>Food Business Registered?</p>
+                    <p className="font-semibold">{application.compliance.foodBusinessRegistered ? 'Yes' : 'No'}</p>
+                </div>
+                {application.compliance.councilName && (
+                     <div className="flex items-center justify-between text-sm">
+                        <p>Council Name</p>
+                        <p className="font-semibold">{application.compliance.councilName}</p>
+                    </div>
+                )}
+                <div className="flex items-center justify-between text-sm">
+                    <p>Food Safety Training?</p>
+                    <p className="font-semibold">{application.compliance.foodSafetyTrainingCompleted ? 'Yes' : 'No'}</p>
                 </div>
             </CardContent>
           </Card>

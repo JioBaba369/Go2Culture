@@ -8,7 +8,7 @@ export const hosts: Host[] = [
     bio: 'Passionate Italian home cook, sharing my grandmother\'s recipes with the world. I love opera, fresh pasta, and good conversation.',
     languages: ['Italian', 'English'],
     culture: 'Italian',
-    hostingStyle: ['Family-style meals', 'Storytelling & conversation'],
+    hostingStyle: ['Family-style', 'Storytelling'],
   },
   {
     id: 'host-2',
@@ -26,7 +26,7 @@ export const hosts: Host[] = [
     bio: 'My family and I love to host! We fill our home with the aromas of South Indian spices and the sounds of laughter. Come as a guest, leave as family.',
     languages: ['Tamil', 'English'],
     culture: 'South Indian',
-    hostingStyle: ['Festive & social', 'Family-style meals'],
+    hostingStyle: ['Festive & social', 'Family-style'],
   },
   {
     id: 'host-4',
@@ -35,7 +35,7 @@ export const hosts: Host[] = [
     bio: 'From Oaxaca with love. I bring the vibrant street food culture of Mexico to my home. Expect bold flavors, lots of color, and great stories.',
     languages: ['Spanish', 'English'],
     culture: 'Mexican',
-    hostingStyle: ['Festive & social', 'Storytelling & conversation'],
+    hostingStyle: ['Festive & social', 'Storytelling'],
   },
 ];
 
@@ -82,7 +82,7 @@ export const experiences: Experience[] = [
     reviewCount: 134,
     reviews: [reviews[0]],
     availability: ['Wednesday', 'Friday', 'Saturday'],
-    houseRules: { pets: true, smoking: false },
+    houseRules: { pets: true, smoking: false, seatingType: 'Table' },
   },
   {
     id: '2',
@@ -109,7 +109,7 @@ export const experiences: Experience[] = [
     reviewCount: 98,
     reviews: [],
     availability: ['Tuesday', 'Thursday', 'Saturday'],
-    houseRules: { pets: false, smoking: true },
+    houseRules: { pets: false, smoking: true, seatingType: 'Table' },
   },
   {
     id: '3',
@@ -136,7 +136,7 @@ export const experiences: Experience[] = [
     reviewCount: 72,
     reviews: [reviews[1]],
     availability: ['Monday', 'Friday'],
-    houseRules: { pets: false, smoking: false },
+    houseRules: { pets: false, smoking: false, seatingType: 'Floor' },
   },
   {
     id: '4',
@@ -163,7 +163,7 @@ export const experiences: Experience[] = [
     reviewCount: 150,
     reviews: [],
     availability: ['Saturday', 'Sunday'],
-    houseRules: { pets: false, smoking: false },
+    houseRules: { pets: false, smoking: false, seatingType: 'Mixed' },
   },
 ];
 
@@ -182,9 +182,11 @@ export const hostApplications: HostApplication[] = [
             bio: 'Passionate Italian home cook...',
             languages: ['Italian', 'English'],
             culture: 'Italian',
+            hostingStyle: ['Family-style', 'Storytelling'],
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         experience: experiences[0],
+        compliance: { foodBusinessRegistered: true, councilName: 'City of Rome', foodSafetyTrainingCompleted: true },
     },
     {
         id: 'app-2',
@@ -200,9 +202,11 @@ export const hostApplications: HostApplication[] = [
             bio: 'From Oaxaca with love...',
             languages: ['Spanish', 'English'],
             culture: 'Mexican',
+            hostingStyle: ['Festive & social', 'Storytelling'],
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Pending' },
         experience: experiences[1],
+        compliance: { foodBusinessRegistered: false, foodSafetyTrainingCompleted: true },
     },
     {
         id: 'app-3',
@@ -218,9 +222,11 @@ export const hostApplications: HostApplication[] = [
             bio: 'This bio contains bad words.',
             languages: ['French'],
             culture: 'French',
+            hostingStyle: ['Festive & social'],
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         experience: { ...experiences[2], title: 'Inappropriate Experience Title' },
+        compliance: { foodBusinessRegistered: false, foodSafetyTrainingCompleted: false },
     },
     {
         id: 'app-4',
@@ -236,8 +242,10 @@ export const hostApplications: HostApplication[] = [
             bio: 'I am a designer and a foodie from Tokyo.',
             languages: ['Japanese', 'English'],
             culture: 'Japanese',
+            hostingStyle: ['Quiet & traditional'],
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         experience: experiences[2],
+        compliance: { foodBusinessRegistered: true, councilName: 'Kyoto City', foodSafetyTrainingCompleted: true },
     }
 ];
