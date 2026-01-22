@@ -12,8 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PartyPopper, CheckCircle, AlertTriangle } from "lucide-react";
-import { moderateContent, type ModerateContentOutput } from "@/ai/flows/ai-powered-content-moderation";
+import { Loader2, PartyPopper, CheckCircle } from "lucide-react";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -50,7 +49,6 @@ type OnboardingFormValues = z.infer<typeof formSchema>;
 export default function BecomeAHostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionState, setSubmissionState] = useState<'idle' | 'success' | 'error'>('idle');
-  const [aiResult, setAiResult] = useState<ModerateContentOutput | null>(null);
 
   const { toast } = useToast();
 
@@ -67,28 +65,10 @@ export default function BecomeAHostPage() {
 
   async function onSubmit(values: OnboardingFormValues) {
     setIsSubmitting(true);
-    setAiResult(null);
     try {
-      const moderationResult = await moderateContent({
-        title: values.experienceTitle,
-        description: values.menuDescription,
-        text: values.bio,
-      });
-
-      setAiResult(moderationResult);
-      
-      if (!moderationResult.isAppropriate) {
-        toast({
-          variant: "destructive",
-          title: "Content Warning",
-          description: "Our AI moderation has flagged potential issues. Please review and submit again.",
-        });
-        setSubmissionState('error');
-      } else {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setSubmissionState('success');
-      }
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setSubmissionState('success');
     } catch (error) {
       toast({
         variant: "destructive",
@@ -274,19 +254,6 @@ export default function BecomeAHostPage() {
                     </FormItem>
                   )}
                 />
-
-                {aiResult && !aiResult.isAppropriate && (
-                  <div className="rounded-md border border-destructive bg-destructive/10 p-4">
-                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-destructive" />
-                      <h4 className="font-semibold text-destructive">AI Moderation Feedback</h4>
-                     </div>
-                     <p className="text-sm text-destructive/80 mt-2">Our system detected potential issues. Please review the following and adjust your submission:</p>
-                     <ul className="list-disc pl-5 mt-2 text-sm text-destructive">
-                      {aiResult.flagReasons.map(reason => <li key={reason}>{reason}</li>)}
-                     </ul>
-                  </div>
-                )}
             </CardContent>
           </Card>
 

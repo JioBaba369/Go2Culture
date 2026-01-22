@@ -18,11 +18,9 @@ import {
   User,
   ShieldCheck,
   Utensils,
-  Home,
   Camera,
   Languages,
   Info,
-  AlertTriangle,
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
@@ -69,24 +67,6 @@ export default function ApplicationDetailPage({
           </Button>
         </div>
       </div>
-
-      {!application.aiModeration.isAppropriate && (
-        <Card className="border-destructive">
-          <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-             <AlertTriangle className="h-6 w-6 text-destructive" />
-             <div>
-                <CardTitle>AI Moderation Warning</CardTitle>
-                <CardDescription>Our AI system has flagged this content as potentially inappropriate.</CardDescription>
-             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="font-semibold">Reasons:</p>
-            <ul className="list-disc pl-5 text-sm text-destructive">
-                {application.aiModeration.flagReasons.map(reason => <li key={reason}>{reason}</li>)}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

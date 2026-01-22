@@ -70,8 +70,4 @@ export type HostApplication = {
     status: 'Verified' | 'Pending' | 'Failed';
   };
   experience: Omit<Experience, 'id' | 'host' | 'reviews' | 'rating' | 'reviewCount'>;
-  aiModeration: {
-    isAppropriate: boolean | null;
-    flagReasons: string[];
-  };
 };

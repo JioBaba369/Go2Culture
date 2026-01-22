@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
-import { Star, Clock, Users, MapPin, Languages, Utensils, Award, ShieldCheck, Sparkles, Home } from "lucide-react";
+import { Star, Clock, Users, MapPin, Languages, Utensils, Award, ShieldCheck, Sparkles } from "lucide-react";
 
 export default function ExperienceDetailPage({ params }: { params: { id: string } }) {
   const experience = experiences.find((exp) => exp.id === params.id);

@@ -181,7 +181,6 @@ export const hostApplications: HostApplication[] = [
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         experience: experiences[0],
-        aiModeration: { isAppropriate: true, flagReasons: [] },
     },
     {
         id: 'app-2',
@@ -200,7 +199,6 @@ export const hostApplications: HostApplication[] = [
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Pending' },
         experience: experiences[1],
-        aiModeration: { isAppropriate: true, flagReasons: [] },
     },
     {
         id: 'app-3',
@@ -219,7 +217,6 @@ export const hostApplications: HostApplication[] = [
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         experience: { ...experiences[2], title: 'Inappropriate Experience Title' },
-        aiModeration: { isAppropriate: false, flagReasons: ['Inappropriate Language', 'Misleading content'] },
     },
     {
         id: 'app-4',
@@ -238,6 +235,5 @@ export const hostApplications: HostApplication[] = [
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         experience: experiences[2],
-        aiModeration: { isAppropriate: true, flagReasons: [] },
     }
 ];
