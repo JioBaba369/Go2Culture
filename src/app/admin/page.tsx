@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
+import { UsersChart, ExperiencesChart } from "@/components/admin/dashboard-charts";
 
 const ActivityIcon = ({ type }: { type: string }) => {
     switch (type) {
@@ -46,7 +47,7 @@ const ActivityItem = ({ activity }: { activity: any }) => {
         case 'experience':
             title = <>New experience created: <span className="font-semibold">{activity.data.title}</span></>;
             href = `/experiences/${activity.data.id}`;
-            imageId = activity.data.host.avatarImageId;
+            imageId = activity.data.host.profilePhotoId;
             fallbackName = activity.data.host.name;
             break;
         case 'user':
@@ -146,6 +147,15 @@ export default function AdminDashboardPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3">
+            <UsersChart />
+        </div>
+        <div className="lg:col-span-2">
+            <ExperiencesChart />
+        </div>
       </div>
 
       <Card>

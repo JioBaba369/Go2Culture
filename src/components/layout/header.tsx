@@ -27,8 +27,12 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-2">
-          <Button variant="ghost">Log In</Button>
-          <Button>Sign Up</Button>
+          <Button variant="ghost" asChild>
+            <Link href="/login">Log In</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/signup">Sign Up</Link>
+          </Button>
         </div>
         <div className="md:hidden">
           <Sheet>
@@ -50,8 +54,12 @@ export function Header() {
                   </Link>
                 ))}
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
-                  <Button variant="ghost" className="w-full justify-start">Log In</Button>
-                  <Button className="w-full justify-start">Sign Up</Button>
+                  <Button variant="ghost" className="w-full justify-start" asChild>
+                    <Link href="/login">Log In</Link>
+                  </Button>
+                  <Button className="w-full justify-start" asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
                 </div>
               </nav>
             </SheetContent>
