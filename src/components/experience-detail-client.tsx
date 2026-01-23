@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2 } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, where, limit, addDoc, serverTimestamp } from "firebase/firestore";
@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Label } from "./ui/label";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -261,6 +262,23 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
                 {experience.menu.dietary.map(d => <Badge key={d} variant="outline">{d}</Badge>)}
             </div>
           </div>
+          <Separator/>
+
+          <div className="space-y-4">
+            <h3 className="font-headline text-2xl">Allergen Information</h3>
+            <Alert variant="default" className="bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-800">
+              <AlertTriangle className="h-4 w-4 !text-amber-600" />
+              <AlertTitle className="text-amber-800 dark:text-amber-300 font-bold">Important Notice</AlertTitle>
+              <AlertDescription className="text-amber-700 dark:text-amber-400 space-y-2">
+                <p>In accordance with the <strong>Australia New Zealand Food Standards Code (FSANZ)</strong>, please be aware that food is prepared in a home kitchen where allergens are handled, and cross-contact may occur.</p>
+                {experience.menu.allergens && (
+                  <p><strong>Host-declared potential allergens for this experience:</strong> {experience.menu.allergens}</p>
+                )}
+                <p className="font-semibold">Guests with food allergies or intolerances are strongly advised to contact the host before booking to discuss their specific needs.</p>
+              </AlertDescription>
+            </Alert>
+          </div>
+
           <Separator />
 
           <div className="space-y-4">
