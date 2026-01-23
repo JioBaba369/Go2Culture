@@ -399,156 +399,41 @@
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores public user profiles and account-related data. Path-based ownership ensures only the user can access their own data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique ID of the user."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/hosts/{hostId}",
-        "definition": {
-          "entityName": "Host",
-          "schema": {
-            "$ref": "#/backend/entities/Host"
-          },
-          "description": "Stores host profiles. Path-based ownership ensures only the user can access their own host profile. Includes `userId` as a parameter.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The ID of the user who owns this host profile."
-            },
-            {
-              "name": "hostId",
-              "description": "The unique ID of the host profile."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/hostApplications/{applicationId}",
-        "definition": {
-          "entityName": "HostApplication",
-          "schema": {
-            "$ref": "#/backend/entities/HostApplication"
-          },
-          "description": "Stores applications from users wanting to become hosts.",
-          "params": [
-            {
-              "name": "applicationId",
-              "description": "The unique ID of the host application."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/experiences/{experienceId}",
-        "definition": {
-          "entityName": "Experience",
-          "schema": {
-            "$ref": "#/backend/entities/Experience"
-          },
-          "description": "Stores cultural experiences offered by hosts. Includes `hostId` to enable listing experiences by host. Uses experienceId as a parameter.",
-          "params": [
-            {
-              "name": "experienceId",
-              "description": "The unique ID of the experience."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/bookings/{bookingId}",
-        "definition": {
-          "entityName": "Booking",
-          "schema": {
-            "$ref": "#/backend/entities/Booking"
-          },
-          "description": "Stores booking information. Includes `guestId`, `experienceId`, and `hostId` for efficient querying and authorization. Uses bookingId as a parameter.",
-          "params": [
-            {
-              "name": "bookingId",
-              "description": "The unique ID of the booking."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/reviews/{reviewId}",
-        "definition": {
-          "entityName": "Review",
-          "schema": {
-            "$ref": "#/backend/entities/Review"
-          },
-          "description": "Stores reviews given by guests for experiences. Includes `guestId`, `experienceId`, and `hostId` for efficient querying and authorization. Uses reviewId as a parameter.",
-          "params": [
-            {
-              "name": "reviewId",
-              "description": "The unique ID of the review."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/messages/{messageId}",
-        "definition": {
-          "entityName": "Message",
-          "schema": {
-            "$ref": "#/backend/entities/Message"
-          },
-          "description": "Stores messages exchanged between hosts and guests. Includes `senderId`, `receiverId`, and `bookingId` for efficient querying and authorization. Uses messageId as a parameter.",
-          "params": [
-            {
-              "name": "messageId",
-              "description": "The unique ID of the message."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/reports/{reportId}",
-        "definition": {
-          "entityName": "Report",
-          "schema": {
-            "$ref": "#/backend/entities/Report"
-          },
-          "description": "Stores user-submitted reports and system flags for admin review.",
-          "params": [
-            {
-              "name": "reportId",
-              "description": "The unique ID of the report."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/admin_logs/{adminLogId}",
-        "definition": {
-          "entityName": "AdminLog",
-          "schema": {
-            "$ref": "#/backend/entities/AdminLog"
-          },
-          "description": "Stores logs of actions performed by administrators. Uses adminLogId as a parameter.",
-          "params": [
-            {
-              "name": "adminLogId",
-              "description": "The unique ID of the admin log."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore data structure is designed to support a secure and scalable marketplace for cultural experiences. It prioritizes authorization independence through denormalization, enabling robust security rules and atomic operations. Structural segregation ensures each collection has a homogeneous security posture, simplifying rules and improving debuggability. Access modeling follows consistent patterns, utilizing path-based ownership for user-owned data and membership maps for collaborative data. Data clarity is enhanced through explicit state modeling and predictable schemas. \n\nSpecifically, authorization independence is achieved by denormalizing relevant authorization data (e.g., `hostId` in `experiences`, `experienceId` and `hostId` in `bookings`, reviews, and messages). This eliminates the need for `get()` calls in security rules, preventing hierarchical authorization dependencies and enabling atomic operations. \n\nTo support required QAPs:\n\n*   Secure `list` operations are enabled through structural segregation (e.g., `/users/{userId}/hosts` ensures only the user can list their own hosts) and consistent use of path-based ownership.\n*   Membership maps (not applicable in this design as collaboration is implicit through bookings and reviews, which use denormalized ids for authorization).\n\nThis design ensures clarity of intent, DBAC (roles stored in the database), and invariants (ownership, timestamps) for a secure and maintainable application."
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores public user profiles and account-related data. Path-based ownership ensures only the user can access their own data."
+    },
+    "/users/{userId}/hosts/{hostId}": {
+      "schema": { "$ref": "#/entities/Host" },
+      "description": "Stores host profiles. Path-based ownership ensures only the user can access their own host profile. Includes `userId` as a parameter."
+    },
+    "/hostApplications/{applicationId}": {
+      "schema": { "$ref": "#/entities/HostApplication" },
+      "description": "Stores applications from users wanting to become hosts."
+    },
+    "/experiences/{experienceId}": {
+      "schema": { "$ref": "#/entities/Experience" },
+      "description": "Stores cultural experiences offered by hosts. Includes `hostId` to enable listing experiences by host."
+    },
+    "/bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Stores booking information. Includes `guestId`, `experienceId`, and `hostId` for efficient querying and authorization."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores reviews given by guests for experiences. Includes `guestId`, `experienceId`, and `hostId` for efficient querying and authorization."
+    },
+    "/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Stores messages exchanged between hosts and guests. Includes `senderId`, `receiverId`, and `bookingId` for efficient querying and authorization."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/Report" },
+      "description": "Stores user-submitted reports and system flags for admin review."
+    },
+    "/admin_logs/{adminLogId}": {
+      "schema": { "$ref": "#/entities/AdminLog" },
+      "description": "Stores logs of actions performed by administrators."
+    }
   }
 }

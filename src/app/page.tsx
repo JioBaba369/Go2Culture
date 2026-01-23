@@ -8,38 +8,18 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Search, Users, Home as HomeIcon, Award, Star } from "lucide-react";
-import { ExperienceCard } from "@/components/experience-card";
+import { Search, Award } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, limit, query } from "firebase/firestore";
-import { Experience, Review } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TestimonialCard } from "@/components/testimonial-card";
-import { Card, CardContent } from "@/components/ui/card";
+import { FeaturedExperiencesSection } from "@/components/home/featured-experiences";
+import { HowItWorksSection } from "@/components/home/how-it-works";
+import { FeaturedCitiesSection } from "@/components/home/featured-cities";
+import { TestimonialsSection } from "@/components/home/testimonials";
 
-
-const cityImageMap: Record<string, string> = {
-    SYD: 'city-sydney',
-    MEL: 'city-melbourne',
-    AKL: 'city-auckland',
-    WLG: 'city-wellington',
-    BRI: 'city-brisbane',
-    PER: 'city-perth',
-    ADL: 'city-adelaide',
-    CBR: 'city-canberra',
-    HBA: 'city-hobart',
-    CHC: 'city-christchurch',
-    ZQN: 'city-queenstown',
-    HLZ: 'city-hamilton',
-    TRG: 'city-tauranga',
-}
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
   const router = useRouter();
-  const firestore = useFirestore();
 
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedRegion, setSelectedRegion] = useState<string>('');
@@ -49,25 +29,6 @@ export default function Home() {
   const [availableRegions, setAvailableRegions] = useState<{id: string, name: string}[]>([]);
   const [availableSuburbs, setAvailableSuburbs] = useState<{id: string, name: string}[]>([]);
   const [availableLocalAreas, setAvailableLocalAreas] = useState<{id: string, name: string}[]>([]);
-
-  const experiencesQuery = useMemoFirebase(
-    () => firestore ? query(collection(firestore, 'experiences'), limit(4)) : null,
-    [firestore]
-  );
-  const { data: experiences, isLoading } = useCollection<Experience>(experiencesQuery);
-
-  const reviewsQuery = useMemoFirebase(
-    () => firestore ? query(collection(firestore, 'reviews'), limit(3)) : null,
-    [firestore]
-  );
-  const { data: reviews, isLoading: areReviewsLoading } = useCollection<Review>(reviewsQuery);
-
-  const featuredCities = useMemo(() => {
-    // Only feature a few distinct cities for the homepage
-    const cityIds = ['SYD', 'MEL', 'AKL', 'WLG'];
-    return suburbs.filter(s => cityIds.includes(s.id));
-}, []);
-
 
   useEffect(() => {
     if (selectedCountry) {
@@ -180,116 +141,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="text-center">
-        <h2 className="font-headline text-3xl md:text-4xl font-semibold">How It Works</h2>
-        <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">A new way to experience culture, in three simple steps.</p>
-        <div className="grid md:grid-cols-3 gap-8 mt-8 max-w-5xl mx-auto">
-          <div className="flex flex-col items-center">
-            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-              <Search className="h-8 w-8" />
-            </div>
-            <h3 className="text-xl font-bold font-headline">Discover</h3>
-            <p className="text-muted-foreground mt-2">Find unique cultural experiences hosted by passionate locals in their homes.</p>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-              <HomeIcon className="h-8 w-8" />
-            </div>
-            <h3 className="text-xl font-bold font-headline">Book Securely</h3>
-            <p className="text-muted-foreground mt-2">Choose your date, book your seat, and connect with your host through our trusted platform.</p>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-              <Users className="h-8 w-8" />
-            </div>
-            <h3 className="text-xl font-bold font-headline">Experience</h3>
-            <p className="text-muted-foreground mt-2">Share a meal, stories, and traditions. It's more than travel, it's connection.</p>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Featured Experiences</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            ))
-          ) : (
-            experiences?.map((experience) => (
-                <ExperienceCard key={experience.id} experience={experience} />
-              ))
-          )}
-        </div>
-        <div className="text-center mt-8">
-          <Button variant="outline" size="lg" asChild>
-            <Link href="/discover">Explore All Experiences</Link>
-          </Button>
-        </div>
-      </section>
-      
-      <section>
-        <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Featured Cities</h2>
-        <p className="mt-2 text-muted-foreground max-w-2xl mx-auto text-center">Discover authentic experiences in our most popular destinations.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-lg" />)
-          ) : (
-            featuredCities.map(city => {
-              const cityImageId = cityImageMap[city.id];
-              const cityImage = PlaceHolderImages.find(p => p.id === cityImageId);
-              return (
-                <Link key={city.id} href={`/discover?suburb=${city.id}`} className="group block">
-                  <Card className="overflow-hidden relative h-80 rounded-lg">
-                    {cityImage && (
-                      <Image
-                        src={cityImage.imageUrl}
-                        alt={city.name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        data-ai-hint={cityImage.imageHint}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <h3 className="font-headline absolute bottom-4 left-4 text-2xl font-bold text-white">
-                      {city.name}
-                    </h3>
-                  </Card>
-                </Link>
-              )
-            })
-          )}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">What Our Community is Saying</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 max-w-7xl mx-auto">
-          {areReviewsLoading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="h-full">
-                <CardContent className="p-6">
-                  <div className="flex mb-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-5 w-5" />)}</div>
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-4/5 mb-4" />
-                  <div className="flex items-center gap-3 mt-6 pt-4 border-t">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            reviews?.map(review => (
-              <TestimonialCard key={review.id} review={review} />
-            ))
-          )}
-        </div>
-      </section>
+      <HowItWorksSection />
+      <FeaturedExperiencesSection />
+      <FeaturedCitiesSection />
+      <TestimonialsSection />
 
       <section className="bg-card rounded-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
         <div className="flex-1">
