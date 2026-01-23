@@ -192,7 +192,7 @@ export type HostApplication = {
   experience: {
     title: string;
     description: string;
-    duration: string; // Keep as string for mock/display
+    durationMinutes: number;
     category: string;
     
     menu: {

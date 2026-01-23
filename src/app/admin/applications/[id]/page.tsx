@@ -84,7 +84,7 @@ export default function ApplicationDetailPage({
               <div className="grid grid-cols-2 gap-4">
                 <div><p className="font-semibold">Cuisine</p><p>{application.experience.menu.cuisine}</p></div>
                 <div><p className="font-semibold">Price</p><p>${application.experience.pricing.pricePerGuest} / person</p></div>
-                <div><p className="font-semibold">Duration</p><p>{application.experience.duration}</p></div>
+                <div><p className="font-semibold">Duration</p><p>{application.experience.durationMinutes / 60} hours</p></div>
                 <div><p className="font-semibold">Max Guests</p><p>{application.experience.pricing.maxGuests}</p></div>
                 <div><p className="font-semibold">Spice Level</p><p>{application.experience.menu.spiceLevel}</p></div>
               </div>

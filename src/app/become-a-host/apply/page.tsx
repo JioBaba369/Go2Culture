@@ -42,7 +42,7 @@ const formSchema = z.object({
   experience: z.object({
     title: z.string().min(5, "Experience title is required."),
     category: z.string({ required_error: "Please select a category." }),
-    duration: z.string().min(1, "Duration is required."),
+    durationMinutes: z.coerce.number().min(30, "Duration must be at least 30 minutes."),
     menu: z.object({
       description: z.string().min(20, "Please describe the menu (min. 20 characters)."),
       cuisine: z.string().min(3, "Cuisine type is required."),
@@ -319,8 +319,8 @@ export default function BecomeAHostPage() {
                   <FormField control={form.control} name="experience.category" render={({ field }) => (
                     <FormItem><FormLabel>Category</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent><SelectItem value="home-cooked-meal">Home-cooked Meal</SelectItem><SelectItem value="cultural-dinner">Cultural Dinner</SelectItem><SelectItem value="cooking-dining">Cooking + Dining</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
-                   <FormField control={form.control} name="experience.duration" render={({ field }) => (
-                    <FormItem><FormLabel>Duration</FormLabel><FormControl><Input {...field} placeholder="e.g., 3 hours" /></FormControl><FormMessage /></FormItem>
+                   <FormField control={form.control} name="experience.durationMinutes" render={({ field }) => (
+                    <FormItem><FormLabel>Duration (in minutes)</FormLabel><FormControl><Input {...field} type="number" placeholder="e.g., 180" /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
             </CardContent>

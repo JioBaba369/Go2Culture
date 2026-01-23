@@ -571,7 +571,7 @@ export const hostApplications: HostApplication[] = [
         experience: {
             title: 'Nonna\'s Roman Pasta Feast',
             description: experiences[0].description,
-            duration: '3 hours',
+            durationMinutes: 180,
             category: experiences[0].category,
             menu: {
               cuisine: 'Italian',
@@ -602,7 +602,7 @@ export const hostApplications: HostApplication[] = [
         experience: {
             title: 'Oaxacan Street Taco Fiesta',
             description: experiences[1].description,
-            duration: '2.5 hours',
+            durationMinutes: 150,
             category: experiences[1].category,
             menu: {
               cuisine: 'Mexican',
@@ -633,7 +633,7 @@ export const hostApplications: HostApplication[] = [
         experience: {
             title: 'Malaysian Nasi Lemak Lunch',
             description: "Learn to make Malaysia's national dish, Nasi Lemak, with all its delicious accompaniments like sambal, fried chicken, and crispy anchovies.",
-            duration: '3 hours',
+            durationMinutes: 180,
             category: 'Cooking + dining',
             menu: {
               cuisine: 'Malaysian',
@@ -664,7 +664,7 @@ export const hostApplications: HostApplication[] = [
         experience: {
             title: 'Desert Camp Dinner',
             description: "Dinner under the stars.",
-            duration: '4 hours',
+            durationMinutes: 240,
             category: 'Cultural dinner',
             menu: {
               cuisine: 'Middle Eastern',
