@@ -47,15 +47,15 @@ export function ApplicationDetailClient({
   const [isProcessing, setIsProcessing] = useState<null | 'approve' | 'changes' | 'reject'>(null);
 
   const appRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'hostApplications', applicationId) : null, [firestore, user, applicationId]);
-  const { data: application, isLoading: isDocLoading } = useDoc<HostApplication>(appRef);
+  const { data: application, isLoading: isDocLoading, error } = useDoc<HostApplication>(appRef);
 
   const isLoading = isAuthLoading || (!!user && isDocLoading);
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!application || !firestore) return;
     setIsProcessing('approve');
     try {
-      approveApplication(firestore, application);
+      await approveApplication(firestore, application);
       toast({
         title: "Application Approved!",
         description: `${application.hostName} is now a host.`,
@@ -65,47 +65,49 @@ export function ApplicationDetailClient({
       toast({
         variant: "destructive",
         title: "Approval Failed",
-        description: error.message || "Could not approve the application.",
+        description: "Could not approve the application. Check permissions.",
       });
     } finally {
       setIsProcessing(null);
     }
   }
 
-  const handleRequestChanges = () => {
+  const handleRequestChanges = async () => {
      if (!application || !firestore) return;
     setIsProcessing('changes');
     try {
-      requestChangesForApplication(firestore, application.id);
+      await requestChangesForApplication(firestore, application.id);
       toast({
         title: "Changes Requested",
         description: `The application status has been updated to 'Changes Needed'.`,
       });
+      router.refresh();
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Update Failed",
-        description: error.message || "Could not update the application.",
+        description: "Could not update the application. Check permissions.",
       });
     } finally {
       setIsProcessing(null);
     }
   }
   
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!application || !firestore) return;
     setIsProcessing('reject');
     try {
-      rejectApplication(firestore, application.id);
+      await rejectApplication(firestore, application.id);
       toast({
         title: "Application Rejected",
         description: `The application from ${application.hostName} has been rejected.`,
       });
+       router.refresh();
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Update Failed",
-        description: error.message || "Could not reject the application.",
+        description: "Could not reject the application. Check permissions.",
       });
     } finally {
       setIsProcessing(null);
@@ -114,6 +116,15 @@ export function ApplicationDetailClient({
 
   if (isLoading) {
     return <Skeleton className="h-screen w-full" />;
+  }
+  
+  if (error) {
+     return (
+        <div className="py-20 text-center">
+            <h1 className="text-2xl font-bold">Error Loading Application</h1>
+            <p className="text-muted-foreground">Could not load the application. You may not have permission to view it.</p>
+        </div>
+    );
   }
 
   if (!application) {
