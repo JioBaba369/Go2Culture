@@ -51,10 +51,10 @@ export default function HostApplicationsPage() {
           </Badge>
         </TableCell>
         <TableCell>
-          <Button asChild variant="ghost" size="icon">
+          <Button asChild variant="outline" size="sm">
             <Link href={`/admin/applications/${app.id}`}>
-              <Eye className="h-4 w-4" />
-              <span className="sr-only">View Application</span>
+              <Eye />
+              View
             </Link>
           </Button>
         </TableCell>
@@ -115,7 +115,7 @@ export default function HostApplicationsPage() {
                 <TableHead>Experience Title</TableHead>
                 <TableHead>Submitted</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
