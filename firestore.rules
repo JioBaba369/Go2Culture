@@ -83,6 +83,20 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
 
+     /**
+     * @description Manages host applications.
+     * @path /hostApplications/{applicationId}
+     */
+    match /hostApplications/{applicationId} {
+      // Any authenticated user can create an application for themselves.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      // For now, allow any signed-in user to read/list, to support admin functionality.
+      // In a production app, this should be restricted to admin roles.
+      allow get, list: if isSignedIn();
+      // Only admins should update/delete. For now, restricted.
+      allow update, delete: if false; 
+    }
+
     /**
      * @description Manages cultural experiences. Experiences are public to view, but only the host who created it can manage it.
      * @path /experiences/{experienceId}

@@ -151,6 +151,7 @@ export type Review = {
 // A denormalized type for the admin application view
 export type HostApplication = {
   id: string;
+  userId: string;
   hostName: string;
   submittedDate: any; // Allow ServerTimestamp
   status: 'Pending' | 'Approved' | 'Changes Needed' | 'Rejected';

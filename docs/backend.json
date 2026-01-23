@@ -141,6 +141,91 @@
       },
       "required": ["id", "userId", "name", "profilePhotoId", "status", "profile", "verification", "location", "homeSetup", "compliance", "rating", "createdAt"]
     },
+    "HostApplication": {
+      "title": "Host Application",
+      "type": "object",
+      "description": "Represents a host's application to join the platform.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "hostName": { "type": "string" },
+        "submittedDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Changes Needed", "Rejected"] },
+        "riskFlag": { "type": "string", "enum": ["Low", "Medium", "High", "null"] },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "photoId": { "type": "string" },
+            "bio": { "type": "string" },
+            "languages": { "type": "array", "items": { "type": "string" } },
+            "culturalBackground": { "type": "string" },
+            "hostingStyles": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "verification": {
+          "type": "object",
+          "properties": {
+            "idDocId": { "type": "string" },
+            "selfieId": { "type": "string" },
+            "status": { "type": "string", "enum": ["Verified", "Pending", "Failed"] }
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "country": { "type": "string" },
+            "state": { "type": "string" },
+            "suburb": { "type": "string" },
+            "localArea": { "type": "string" },
+            "postcode": { "type": "string" },
+            "address": { "type": "string" }
+          }
+        },
+        "homeSetup": {
+          "type": "object",
+          "properties": {
+            "homeType": { "type": "string" },
+            "seating": { "type": "string" },
+            "maxGuests": { "type": "number" },
+            "pets": { "type": "boolean" },
+            "smoking": { "type": "boolean" },
+            "accessibility": { "type": "string" }
+          }
+        },
+        "experience": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "durationMinutes": { "type": "number" },
+            "category": { "type": "string" },
+            "menu": {
+              "type": "object",
+              "properties": {
+                "cuisine": { "type": "string" },
+                "description": { "type": "string" },
+                "spiceLevel": { "type": "string", "enum": ["Mild", "Medium", "Spicy"] },
+                "allergens": { "type": "string" }
+              }
+            },
+            "pricing": {
+              "type": "object",
+              "properties": {
+                "pricePerGuest": { "type": "number" },
+                "maxGuests": { "type": "number" }
+              }
+            },
+            "photos": {
+              "type": "object",
+              "properties": {
+                "mainImageId": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "required": ["id", "userId", "hostName", "submittedDate", "status"]
+    },
     "Experience": {
       "title": "Experience",
       "type": "object",
@@ -309,6 +394,22 @@
             {
               "name": "hostId",
               "description": "The unique ID of the host profile."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/hostApplications/{applicationId}",
+        "definition": {
+          "entityName": "HostApplication",
+          "schema": {
+            "$ref": "#/backend/entities/HostApplication"
+          },
+          "description": "Stores applications from users wanting to become hosts.",
+          "params": [
+            {
+              "name": "applicationId",
+              "description": "The unique ID of the host application."
             }
           ]
         }

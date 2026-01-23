@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PartyPopper } from "lucide-react";
+import { Loader2, PartyPopper, User as UserIcon } from "lucide-react";
 import { countries, states } from "@/lib/location-data";
 import { complianceRequirementsByState, type ComplianceRequirement } from "@/lib/compliance-data";
+import { useFirestore, useUser } from "@/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import type { HostApplication } from "@/lib/types";
 
 const hostingStyleOptions = [
   { id: 'family-style', label: 'Family-style' },
@@ -159,12 +162,15 @@ const ComplianceField = ({ control, requirement }: { control: any, requirement: 
 export default function BecomeAHostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionState, setSubmissionState] = useState<'idle' | 'success' | 'error'>('idle');
-
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
 
   const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      fullName: user?.displayName || '',
+      email: user?.email || '',
       homeSetup: {
         pets: false,
         smoking: false,
@@ -180,7 +186,7 @@ export default function BecomeAHostPage() {
       }
     },
   });
-
+  
   const watchCountry = form.watch('location.country');
   const watchState = form.watch('location.state');
   
@@ -189,12 +195,53 @@ export default function BecomeAHostPage() {
 
 
   async function onSubmit(values: OnboardingFormValues) {
+    if (!firestore || !user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be logged in to submit an application.",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
-      console.log(values);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const {
+        profile: { profilePhoto, ...profileData },
+        experience: { photos, ...experienceData },
+        ...restOfValues
+      } = values;
+
+      const applicationData: Omit<HostApplication, 'id'> = {
+        ...restOfValues,
+        userId: user.uid,
+        hostName: values.fullName,
+        profile: {
+          ...profileData,
+          photoId: 'guest-1', // Placeholder
+        },
+        experience: {
+          ...experienceData,
+          // We are not handling file uploads yet, so use placeholders
+          photos: {
+            mainImageId: 'dining-area',
+          }
+        },
+        verification: {
+          idDocId: 'admin-id', // Placeholder
+          selfieId: 'admin-selfie', // Placeholder
+          status: 'Pending',
+        },
+        status: 'Pending',
+        submittedDate: serverTimestamp(),
+        riskFlag: null,
+      };
+
+      await addDoc(collection(firestore, 'hostApplications'), applicationData);
       setSubmissionState('success');
+
     } catch (error) {
+      console.error("Application submission error:", error);
       toast({
         variant: "destructive",
         title: "Submission Failed",
@@ -206,6 +253,34 @@ export default function BecomeAHostPage() {
     }
   }
   
+  if (isUserLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-20">
+        <UserIcon className="h-16 w-16 text-muted-foreground mb-4" />
+        <h1 className="font-headline text-4xl font-bold">Please Log In</h1>
+        <p className="mt-4 text-muted-foreground max-w-lg">
+          You need to be logged into a Go2Culture account before you can apply to become a host.
+        </p>
+        <div className="flex gap-4 mt-8">
+          <Button asChild>
+            <Link href="/login">Log In</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/signup">Create Account</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (submissionState === 'success') {
     return (
       <div className="flex flex-col items-center justify-center text-center py-20">
@@ -256,7 +331,7 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                <FormField control={form.control} name="profile.profilePhoto" render={({ field }) => (
-                  <FormItem><FormLabel>Profile Photo</FormLabel><FormControl><Input type="file" /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Profile Photo</FormLabel><FormDescription>You can upload a real photo later. We'll use a placeholder for now.</FormDescription><FormControl><Input type="file" disabled/></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="profile.bio" render={({ field }) => (
                 <FormItem><FormLabel>Your Bio</FormLabel><FormDescription>Tell guests about you, your passions, and your culture.</FormDescription><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
@@ -341,7 +416,7 @@ export default function BecomeAHostPage() {
                     <FormItem><FormLabel>Cuisine Type</FormLabel><FormControl><Input {...field} placeholder="e.g., Italian, Mexican, Japanese" /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="experience.menu.spiceLevel" render={({ field }) => (
-                    <FormItem><FormLabel>Spice Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select spice level" /></SelectTrigger></FormControl><SelectContent><SelectItem value="mild">Mild</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="spicy">Spicy</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Spice Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select spice level" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Mild">Mild</SelectItem><SelectItem value="Medium">Medium</SelectItem><SelectItem value="Spicy">Spicy</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
                </div>
                <FormField control={form.control} name="experience.menu.allergens" render={({ field }) => (
@@ -402,14 +477,14 @@ export default function BecomeAHostPage() {
            <Card>
             <CardHeader>
               <CardTitle>6. Upload Photos</CardTitle>
-              <CardDescription>Real photos perform better. Show off your food and dining area.</CardDescription>
+              <CardDescription>Real photos perform better. We'll use placeholders for now.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField control={form.control} name="experience.photos.foodPhotos" render={({ field }) => (
-                  <FormItem><FormLabel>Food Photos (select up to 5)</FormLabel><FormControl><Input type="file" multiple /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Food Photos (select up to 5)</FormLabel><FormControl><Input type="file" multiple disabled /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="experience.photos.diningAreaPhoto" render={({ field }) => (
-                  <FormItem><FormLabel>Dining Area Photo</FormLabel><FormControl><Input type="file" /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Dining Area Photo</FormLabel><FormControl><Input type="file" disabled /></FormControl><FormMessage /></FormItem>
               )} />
             </CardContent>
           </Card>
@@ -488,5 +563,3 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
-
-    
