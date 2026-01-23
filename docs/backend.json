@@ -360,6 +360,22 @@
       },
       "required": ["id", "senderId", "receiverId", "bookingId", "messageText", "timestamp"]
     },
+    "Report": {
+      "title": "Report",
+      "type": "object",
+      "description": "Represents a report filed against a user, experience, or review.",
+      "properties": {
+        "id": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["Review", "Experience", "User"] },
+        "targetId": { "type": "string" },
+        "reason": { "type": "string" },
+        "reportedBy": { "type": "string" },
+        "reportedUserLink": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Open", "In Progress", "Resolved"] }
+      },
+      "required": ["id", "targetType", "targetId", "reason", "reportedBy", "date", "status"]
+    },
     "AdminLog": {
       "title": "AdminLog",
       "type": "object",
@@ -496,6 +512,22 @@
             {
               "name": "messageId",
               "description": "The unique ID of the message."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/reports/{reportId}",
+        "definition": {
+          "entityName": "Report",
+          "schema": {
+            "$ref": "#/backend/entities/Report"
+          },
+          "description": "Stores user-submitted reports and system flags for admin review.",
+          "params": [
+            {
+              "name": "reportId",
+              "description": "The unique ID of the report."
             }
           ]
         }

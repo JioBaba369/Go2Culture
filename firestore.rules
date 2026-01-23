@@ -167,6 +167,21 @@ service cloud.firestore {
     }
 
     /**
+     * @description Manages user-submitted reports and system flags.
+     * @path /reports/{reportId}
+     * @allow (get, list) Any signed-in user (acting as admin) can read reports.
+     * @deny (create, update, delete) For now, these actions are restricted to prevent unauthorized writes.
+     */
+    match /reports/{reportId} {
+      // For now, allow any signed-in user to read/list, to support admin functionality.
+      // In a production app, this should be restricted to admin roles.
+      allow get, list: if isSignedIn();
+
+      // Client-side report creation is not yet implemented. Disallow writes for now.
+      allow create, update, delete: if false;
+    }
+
+    /**
      * @description Locks down administrator logs. No client-side access is permitted.
      * @path /admin_logs/{adminLogId}
      * @allow (none) No operations are allowed from any client.
