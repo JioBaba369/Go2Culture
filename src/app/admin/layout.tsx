@@ -21,10 +21,13 @@ import {
   Utensils,
   MessageSquareWarning,
   LogOut,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { usePathname, useRouter } from 'next/navigation';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import React from 'react';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -36,7 +39,28 @@ const menuItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const adminAvatar = PlaceHolderImages.find(p => p.id === 'admin-avatar');
+  const router = useRouter();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
+
+  React.useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login?redirect=/admin');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || !user) {
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -67,21 +91,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Logout">
+              <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
                 <LogOut />
                 <span>Logout</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <div className="flex items-center gap-2 p-2">
+              <Link href="/profile" className="flex items-center gap-2 p-2 rounded-md hover:bg-sidebar-accent">
                 <Avatar className="h-8 w-8">
-                  {adminAvatar ? <AvatarImage src={adminAvatar.imageUrl} data-ai-hint={adminAvatar.imageHint}/> : <AvatarFallback>A</AvatarFallback>}
+                  {user.photoURL ? <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} /> : <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>}
                 </Avatar>
                 <div className="overflow-hidden whitespace-nowrap group-data-[collapsible=icon]:hidden">
-                  <p className="font-semibold text-sm">Admin User</p>
-                  <p className="text-xs text-muted-foreground">admin@go2culture.com</p>
+                  <p className="font-semibold text-sm">{user.displayName || 'User Profile'}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
-              </div>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
