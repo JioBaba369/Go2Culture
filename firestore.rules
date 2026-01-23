@@ -1,3 +1,4 @@
+
 /**
  * This ruleset enforces a security model for a comprehensive marketplace application.
  * The core philosophy is to provide strict authorization based on user roles and
@@ -153,3 +154,5 @@ service cloud.firestore {
     }
   }
 }
+
+    
