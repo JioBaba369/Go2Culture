@@ -43,7 +43,48 @@ export default function AdminReportsPage() {
         <p className="text-muted-foreground">Manage user-submitted reports and system flags.</p>
       </div>
       
-      <Card>
+       {/* Mobile Card View */}
+      <div className="grid gap-4 md:hidden">
+        <h2 className="text-xl font-semibold">Active Reports</h2>
+         {reports.map((report) => (
+          <Card key={report.id} className="p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="font-semibold">{report.reason}</p>
+                <p className="text-sm text-muted-foreground">
+                  Reported by: <span className="font-medium">{report.reportedBy}</span>
+                </p>
+                <p className="text-xs text-muted-foreground">Target: {report.targetType} ({report.targetId})</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuItem>View Details</DropdownMenuItem>
+                  <DropdownMenuItem>Mark as Resolved</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Suspend User</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive">Delete Content</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+             <div className="mt-4 flex items-center justify-between">
+              <Badge variant={statusVariantMap[report.status]} className="capitalize">
+                {report.status}
+              </Badge>
+              <p className="text-sm text-muted-foreground">{format(new Date(report.date), 'PP')}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+
+      {/* Desktop Table View */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>Active Reports</CardTitle>
           <CardDescription>
@@ -55,8 +96,8 @@ export default function AdminReportsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Target</TableHead>
-                <TableHead className="hidden md:table-cell">Reason</TableHead>
-                <TableHead className="hidden sm:table-cell">Reported By</TableHead>
+                <TableHead>Reason</TableHead>
+                <TableHead>Reported By</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
@@ -69,8 +110,8 @@ export default function AdminReportsPage() {
                       <div className="font-medium">{report.targetType}</div>
                       <div className="text-xs text-muted-foreground">{report.targetId}</div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell max-w-xs truncate">{report.reason}</TableCell>
-                  <TableCell className="hidden sm:table-cell">
+                  <TableCell className="max-w-xs truncate">{report.reason}</TableCell>
+                  <TableCell>
                     {report.reportedUserLink ? (
                         <Link href={report.reportedUserLink} className="hover:underline">{report.reportedBy}</Link>
                     ) : (

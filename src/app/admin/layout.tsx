@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -34,10 +35,11 @@ const menuItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const adminAvatar = PlaceHolderImages.find(p => p.id === 'admin-avatar');
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar variant="inset">
         <SidebarHeader>
           <div className="flex items-center justify-between">
             <Logo />
@@ -72,8 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <SidebarMenuItem>
               <div className="flex items-center gap-2 p-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://picsum.photos/seed/admin/100/100" />
-                  <AvatarFallback>A</AvatarFallback>
+                  {adminAvatar ? <AvatarImage src={adminAvatar.imageUrl} data-ai-hint={adminAvatar.imageHint}/> : <AvatarFallback>A</AvatarFallback>}
                 </Avatar>
                 <div className="overflow-hidden whitespace-nowrap group-data-[collapsible=icon]:hidden">
                   <p className="font-semibold text-sm">Admin User</p>

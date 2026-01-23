@@ -50,8 +50,54 @@ export default function AdminUsersPage() {
         <h1 className="text-3xl font-headline font-bold">Users</h1>
         <p className="text-muted-foreground">Manage all users on the platform.</p>
        </div>
+
+      {/* Mobile Card View */}
+       <div className="grid gap-4 md:hidden">
+        <h2 className="text-xl font-semibold">All Users</h2>
+        {users.map((user) => {
+            const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
+            return (
+                <Card key={user.id} className="p-4">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10">
+                                {userImage && <AvatarImage src={userImage.imageUrl} alt={user.fullName} data-ai-hint={userImage.imageHint} />}
+                                <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="space-y-1">
+                                <p className="font-semibold">{user.fullName}</p>
+                                <p className="text-sm text-muted-foreground">{user.email}</p>
+                            </div>
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-5 w-5" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>View Profile</DropdownMenuItem>
+                                <DropdownMenuItem>Edit User</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive">Suspend User</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between">
+                         <div className="flex items-center gap-2">
+                             <Badge variant={roleVariantMap[user.role]} className="capitalize">{user.role}</Badge>
+                             <Badge variant={statusVariantMap[user.status]} className="capitalize">{user.status}</Badge>
+                         </div>
+                        <p className="text-sm text-muted-foreground">{format(new Date(user.createdAt), 'PP')}</p>
+                    </div>
+                </Card>
+            );
+        })}
+      </div>
       
-      <Card>
+      {/* Desktop Table View */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>All Users</CardTitle>
           <CardDescription>
@@ -63,10 +109,10 @@ export default function AdminUsersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
-                <TableHead className="hidden md:table-cell">Email</TableHead>
-                <TableHead className="hidden sm:table-cell">Role</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="hidden lg:table-cell">Joined</TableHead>
+                <TableHead>Joined</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
@@ -83,12 +129,11 @@ export default function AdminUsersPage() {
                         </Avatar>
                         <div className="grid gap-0.5">
                           <span className="font-semibold">{user.fullName}</span>
-                          <span className="text-xs text-muted-foreground md:hidden">{user.email}</span>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">{user.email}</TableCell>
-                    <TableCell className="hidden sm:table-cell">
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
                       <Badge variant={roleVariantMap[user.role]} className="capitalize">
                         {user.role}
                       </Badge>
@@ -98,7 +143,7 @@ export default function AdminUsersPage() {
                         {user.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell">
+                    <TableCell>
                       {format(new Date(user.createdAt), 'PP')}
                     </TableCell>
                     <TableCell>

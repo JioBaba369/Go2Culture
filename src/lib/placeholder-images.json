@@ -163,6 +163,12 @@
       "imageHint": "selfie photo"
     },
     {
+      "id": "admin-avatar",
+      "description": "Avatar for an admin user",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2OTA5MjI1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
       "id": "dining-area",
       "description": "A photo of a clean and welcoming dining area",
       "imageUrl": "https://images.unsplash.com/photo-1758977403562-1a5fcc5af6b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkaW5pbmclMjBhcmVhfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
