@@ -2,7 +2,6 @@
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
       "description": "Represents a user of the Go2Culture platform, who can be a guest, a host, or both.",
@@ -29,9 +28,9 @@
           "type": "string",
           "description": "The user's phone number."
         },
-        "profilePhoto": {
+        "profilePhotoId": {
           "type": "string",
-          "description": "URL to the user's profile photo."
+          "description": "ID of the user's profile photo from placeholder images."
         },
         "preferences": {
           "type": "object",
@@ -78,383 +77,196 @@
       "required": ["id", "role", "fullName", "email", "status", "createdAt", "updatedAt"]
     },
     "Host": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Host",
       "type": "object",
       "description": "Represents a host on the Go2Culture platform who offers cultural experiences.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Host entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:1 Host). This is the user account associated with this host profile."
-        },
-        "profilePhoto": {
-          "type": "string",
-          "description": "URL to the host's profile photo."
-        },
-        "bio": {
-          "type": "string",
-          "description": "A short biography of the host."
-        },
-        "languagesSpoken": {
-          "type": "array",
-          "description": "An array of languages spoken by the host.",
-          "items": {
-            "type": "string"
+        "id": { "type": "string", "description": "Unique identifier for the Host entity." },
+        "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:1 Host)." },
+        "name": { "type": "string", "description": "Denormalized host name for display." },
+        "profilePhotoId": { "type": "string", "description": "Denormalized host profile photo ID for display." },
+        "status": { "type": "string", "enum": ["draft", "under_review", "approved", "needs_changes", "suspended"] },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "bio": { "type": "string" },
+            "languages": { "type": "array", "items": { "type": "string" } },
+            "culturalBackground": { "type": "string" },
+            "hostingStyles": { "type": "array", "items": { "type": "string" } }
           }
         },
-        "culturalBackground": {
-          "type": "string",
-          "description": "The cultural background of the host."
-        },
-        "hostingStyle": {
-          "type": "array",
-          "description": "An array of hosting styles the host identifies with.",
-          "items": {
-            "type": "string"
+        "verification": {
+          "type": "object",
+          "properties": {
+            "idVerified": { "type": "boolean" },
+            "selfieVerified": { "type": "boolean" },
+            "verifiedAt": { "type": "string", "format": "date-time" }
           }
         },
-        "isVerified": {
-          "type": "boolean",
-          "description": "Indicates whether the host's identity has been verified."
+        "location": {
+          "type": "object",
+          "properties": {
+            "country": { "type": "string" },
+            "state": { "type": "string" },
+            "suburb": { "type": "string" },
+            "localArea": { "type": "string" },
+            "postcode": { "type": "string" }
+          }
         },
-        "address": {
-          "type": "string",
-          "description": "The address of the host; exact address revealed only after booking."
-        }
+        "homeSetup": {
+          "type": "object",
+          "properties": {
+            "homeType": { "type": "string" },
+            "seating": { "type": "string" },
+            "maxGuests": { "type": "number" },
+            "pets": { "type": "boolean" },
+            "smoking": { "type": "boolean" },
+            "accessibility": { "type": "string" }
+          }
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "guidelinesAccepted": { "type": "boolean" }
+          }
+        },
+        "rating": {
+          "type": "object",
+          "properties": {
+            "average": { "type": "number" },
+            "count": { "type": "number" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "userId",
-        "profilePhoto",
-        "bio",
-        "languagesSpoken",
-        "culturalBackground",
-        "hostingStyle",
-        "isVerified",
-        "address"
-      ]
+      "required": ["id", "userId", "name", "profilePhotoId", "status", "profile", "verification", "location", "homeSetup", "compliance", "rating", "createdAt"]
     },
     "Experience": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Experience",
       "type": "object",
       "description": "Represents a cultural experience offered by a host.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Experience entity."
-        },
-        "hostId": {
-          "type": "string",
-          "description": "Reference to Host. (Relationship: Host 1:N Experience)"
-        },
-        "title": {
-          "type": "string",
-          "description": "Title of the experience."
-        },
-        "category": {
-          "type": "string",
-          "description": "Category of the experience (e.g., Home-cooked meal, Cultural Restaurant, Special Event).",
-          "enum": [
-            "Home-cooked meal",
-            "Cultural dinner",
-            "Cooking + dining",
-            "Cultural Restaurant",
-            "Special Event"
-          ]
-        },
-        "duration": {
-          "type": "string",
-          "description": "Duration of the experience (e.g., 2-3 hours)."
-        },
-        "maxGuests": {
-          "type": "number",
-          "description": "Maximum number of guests allowed for the experience."
-        },
-        "menuDescription": {
-          "type": "string",
-          "description": "Description of the menu offered during the experience."
-        },
-        "cuisineType": {
-          "type": "string",
-          "description": "Type of cuisine offered (e.g., Italian, Indian)."
-        },
-        "dietaryInfo": {
-          "type": "array",
-          "description": "Dietary information about the experience (e.g., Vegetarian, Vegan, Halal, Allergens).",
-          "items": {
-            "type": "string"
+        "id": { "type": "string" },
+        "hostId": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["In-Home Dining", "Cooking Class", "Restaurant Experience", "Special Event"] },
+        "description": { "type": "string" },
+        "durationMinutes": { "type": "number" },
+        "menu": {
+          "type": "object",
+          "properties": {
+            "cuisine": { "type": "string" },
+            "description": { "type": "string" },
+            "dietary": { "type": "array", "items": { "type": "string" } },
+            "allergens": { "type": "string" },
+            "spiceLevel": { "type": "string", "enum": ["Mild", "Medium", "Spicy"] }
           }
         },
-        "spiceLevel": {
-          "type": "string",
-          "description": "Spice level of the food offered."
-        },
-        "locationArea": {
-          "type": "string",
-          "description": "The general location area of the experience."
-        },
-        "homeType": {
-          "type": "string",
-          "description": "Type of home where the experience takes place (e.g., apartment, house)."
-        },
-        "seatingStyle": {
-          "type": "string",
-          "description": "Style of seating arrangement for the experience."
-        },
-        "isPetFriendly": {
-          "type": "boolean",
-          "description": "Indicates whether pets are allowed during the experience."
-        },
-        "isSmokingAllowed": {
-          "type": "boolean",
-          "description": "Indicates whether smoking is allowed during the experience."
+        "pricing": {
+          "type": "object",
+          "properties": {
+            "pricePerGuest": { "type": "number" },
+            "minGuests": { "type": "number" },
+            "maxGuests": { "type": "number" }
+          }
         },
         "availability": {
-          "type": "array",
-          "description": "An array of available dates and times for the experience.",
-          "items": {
-            "type": "string"
+          "type": "object",
+          "properties": {
+            "days": { "type": "array", "items": { "type": "string" } },
+            "timeSlots": { "type": "array", "items": { "type": "string" } }
           }
         },
-        "pricePerGuest": {
-          "type": "number",
-          "description": "Price per guest for the experience."
-        },
-        "minimumGuests": {
-          "type": "number",
-          "description": "Minimum number of guests required for the experience (optional)."
+        "location": {
+          "type": "object",
+          "properties": {
+            "country": { "type": "string" },
+            "state": { "type": "string" },
+            "suburb": { "type": "string" },
+            "localArea": { "type": "string" }
+          }
         },
         "photos": {
-          "type": "array",
-          "description": "URLs of food and dining area photos.",
-          "items": {
-            "type": "string"
+          "type": "object",
+          "properties": {
+            "mainImageId": { "type": "string" },
+            "thumbnailImageIds": { "type": "array", "items": { "type": "string" } }
           }
-        }
+        },
+        "status": { "type": "string", "enum": ["draft", "live", "paused"] },
+        "rating": {
+          "type": "object",
+          "properties": {
+            "average": { "type": "number" },
+            "count": { "type": "number" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "hostId",
-        "title",
-        "category",
-        "duration",
-        "maxGuests",
-        "menuDescription",
-        "cuisineType",
-        "dietaryInfo",
-        "spiceLevel",
-        "locationArea",
-        "homeType",
-        "seatingStyle",
-        "isPetFriendly",
-        "isSmokingAllowed",
-        "availability",
-        "pricePerGuest",
-        "photos"
-      ]
+      "required": ["id", "hostId", "title", "category", "description", "durationMinutes", "menu", "pricing", "availability", "location", "photos", "status", "rating", "createdAt"]
     },
     "Booking": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Booking",
       "type": "object",
       "description": "Represents a booking made by a guest for an experience.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Booking entity."
-        },
-        "guestId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Booking). The user ID of the guest who made the booking."
-        },
-        "experienceId": {
-          "type": "string",
-          "description": "Reference to Experience. (Relationship: Experience 1:N Booking)"
-        },
-        "hostId": {
-          "type": "string",
-          "description": "Reference to Host. (Relationship: Host 1:N Booking)"
-        },
-        "bookingDate": {
-          "type": "string",
-          "description": "Date and time of the booking.",
-          "format": "date-time"
-        },
-        "numberOfGuests": {
-          "type": "number",
-          "description": "Number of guests included in the booking."
-        },
-        "totalPrice": {
-          "type": "number",
-          "description": "Total price of the booking."
-        },
-        "status": {
-          "type": "string",
-          "description": "Status of the booking (e.g., Pending, Confirmed, Cancelled)."
-        },
-        "cancellationReason": {
-          "type": "string",
-          "description": "Reason for cancellation, if applicable."
-        }
+        "id": { "type": "string" },
+        "guestId": { "type": "string", "description": "Reference to User." },
+        "experienceId": { "type": "string", "description": "Reference to Experience." },
+        "hostId": { "type": "string", "description": "Reference to Host." },
+        "bookingDate": { "type": "string", "format": "date-time" },
+        "numberOfGuests": { "type": "number" },
+        "totalPrice": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled"] },
+        "cancellationReason": { "type": "string" }
       },
-      "required": [
-        "id",
-        "guestId",
-        "experienceId",
-        "hostId",
-        "bookingDate",
-        "numberOfGuests",
-        "totalPrice",
-        "status"
-      ]
+      "required": ["id", "guestId", "experienceId", "hostId", "bookingDate", "numberOfGuests", "totalPrice", "status"]
     },
     "Review": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Review",
       "type": "object",
       "description": "Represents a review given by a guest for an experience.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Review entity."
-        },
-        "guestId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Review)"
-        },
-        "experienceId": {
-          "type": "string",
-          "description": "Reference to Experience. (Relationship: Experience 1:N Review)"
-        },
-        "hostId": {
-          "type": "string",
-          "description": "Reference to Host. (Relationship: Host 1:N Review)"
-        },
-        "rating": {
-          "type": "number",
-          "description": "Rating given by the guest (e.g., 1-5 stars)."
-        },
-        "comment": {
-          "type": "string",
-          "description": "Comment provided by the guest."
-        },
-        "reviewDate": {
-          "type": "string",
-          "description": "Date when the review was submitted.",
-          "format": "date-time"
-        },
-        "hostResponse": {
-          "type": "string",
-          "description": "Response from the host to the review (optional)."
-        },
-        "flags": {
-          "type": "array",
-          "description": "Flags applied to the review (e.g., Inappropriate language, Fake review).",
-          "items": {
-            "type": "string"
-          }
-        }
+        "id": { "type": "string" },
+        "guestId": { "type": "string", "description": "Reference to User." },
+        "experienceId": { "type": "string", "description": "Reference to Experience." },
+        "hostId": { "type": "string", "description": "Reference to Host." },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "reviewDate": { "type": "string", "format": "date-time" },
+        "hostResponse": { "type": "string" },
+        "flags": { "type": "array", "items": { "type": "string" } }
       },
-      "required": [
-        "id",
-        "guestId",
-        "experienceId",
-        "hostId",
-        "rating",
-        "comment",
-        "reviewDate"
-      ]
+      "required": ["id", "guestId", "experienceId", "hostId", "rating", "comment", "reviewDate"]
     },
     "Message": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Message",
       "type": "object",
       "description": "Represents a message exchanged between a host and a guest.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Message entity."
-        },
-        "senderId": {
-          "type": "string",
-          "description": "Reference to User. The ID of the user who sent the message."
-        },
-        "receiverId": {
-          "type": "string",
-          "description": "Reference to User. The ID of the user who received the message."
-        },
-        "bookingId": {
-          "type": "string",
-          "description": "Reference to Booking. (Relationship: Booking 1:N Message). The ID of the booking associated with the message."
-        },
-        "messageText": {
-          "type": "string",
-          "description": "Text content of the message."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of when the message was sent.",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "senderId": { "type": "string", "description": "Reference to User." },
+        "receiverId": { "type": "string", "description": "Reference to User." },
+        "bookingId": { "type": "string", "description": "Reference to Booking." },
+        "messageText": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "senderId",
-        "receiverId",
-        "bookingId",
-        "messageText",
-        "timestamp"
-      ]
+      "required": ["id", "senderId", "receiverId", "bookingId", "messageText", "timestamp"]
     },
     "AdminLog": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "AdminLog",
       "type": "object",
       "description": "Represents a log entry for actions performed by administrators.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the AdminLog entity."
-        },
-        "adminId": {
-          "type": "string",
-          "description": "Reference to User. The ID of the administrator who performed the action."
-        },
-        "action": {
-          "type": "string",
-          "description": "Description of the action performed (e.g., Approved host, Suspended user)."
-        },
-        "affectedEntity": {
-          "type": "string",
-          "description": "The type of entity affected by the action (e.g., Host, User, Experience)."
-        },
-        "affectedEntityId": {
-          "type": "string",
-          "description": "The ID of the specific entity affected by the action."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of when the action was performed.",
-          "format": "date-time"
-        },
-        "details": {
-          "type": "string",
-          "description": "Additional details about the action (optional)."
-        }
+        "id": { "type": "string" },
+        "adminId": { "type": "string", "description": "Reference to User." },
+        "action": { "type": "string" },
+        "affectedEntity": { "type": "string" },
+        "affectedEntityId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "details": { "type": "string" }
       },
-      "required": [
-        "id",
-        "adminId",
-        "action",
-        "affectedEntity",
-        "affectedEntityId",
-        "timestamp"
-      ]
+      "required": ["id", "adminId", "action", "affectedEntity", "affectedEntityId", "timestamp"]
     }
   },
   "auth": {
@@ -585,5 +397,3 @@
     "reasoning": "The Firestore data structure is designed to support a secure and scalable marketplace for cultural experiences. It prioritizes authorization independence through denormalization, enabling robust security rules and atomic operations. Structural segregation ensures each collection has a homogeneous security posture, simplifying rules and improving debuggability. Access modeling follows consistent patterns, utilizing path-based ownership for user-owned data and membership maps for collaborative data. Data clarity is enhanced through explicit state modeling and predictable schemas. \n\nSpecifically, authorization independence is achieved by denormalizing relevant authorization data (e.g., `hostId` in `experiences`, `experienceId` and `hostId` in `bookings`, reviews, and messages). This eliminates the need for `get()` calls in security rules, preventing hierarchical authorization dependencies and enabling atomic operations. \n\nTo support required QAPs:\n\n*   Secure `list` operations are enabled through structural segregation (e.g., `/users/{userId}/hosts` ensures only the user can list their own hosts) and consistent use of path-based ownership.\n*   Membership maps (not applicable in this design as collaboration is implicit through bookings and reviews, which use denormalized ids for authorization).\n\nThis design ensures clarity of intent, DBAC (roles stored in the database), and invariants (ownership, timestamps) for a secure and maintainable application."
   }
 }
-
-    

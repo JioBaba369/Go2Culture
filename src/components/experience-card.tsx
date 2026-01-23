@@ -16,7 +16,7 @@ interface ExperienceCardProps {
 
 export function ExperienceCard({ experience }: ExperienceCardProps) {
   const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
-  const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.avatarImageId);
+  const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.profilePhotoId);
 
   const countryName = countries.find(c => c.id === experience.location.country)?.name || experience.location.country;
   const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;

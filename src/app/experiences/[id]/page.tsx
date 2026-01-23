@@ -19,7 +19,7 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
   }
 
   const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
-  const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.avatarImageId);
+  const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.profilePhotoId);
   
   const countryName = countries.find(c => c.id === experience.location.country)?.name || experience.location.country;
   const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;
@@ -127,21 +127,28 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
               {experience.rating.average} ({experience.rating.count} reviews)
             </h3>
             <div className="space-y-6 mt-4">
-              {experience.reviews.slice(0, 2).map(review => (
-                <div key={review.id}>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                       <AvatarImage src={`https://picsum.photos/seed/${review.author.name}/100/100`} />
-                       <AvatarFallback>{review.author.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold">{review.author.name}</p>
-                      <p className="text-sm text-muted-foreground">{review.date}</p>
+              {experience.reviews.slice(0, 2).map(review => {
+                const authorImage = PlaceHolderImages.find(p => p.id === review.author.profilePhotoId);
+                return (
+                  <div key={review.id}>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        {authorImage ? (
+                           <AvatarImage src={authorImage.imageUrl} alt={review.author.name} data-ai-hint={authorImage.imageHint} />
+                        ) : (
+                           <AvatarImage src={`https://picsum.photos/seed/${review.author.name}/100/100`} />
+                        )}
+                         <AvatarFallback>{review.author.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-semibold">{review.author.name}</p>
+                        <p className="text-sm text-muted-foreground">{review.date}</p>
+                      </div>
                     </div>
+                    <p className="mt-3 text-muted-foreground">{review.comment}</p>
                   </div>
-                  <p className="mt-3 text-muted-foreground">{review.comment}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
              <Button variant="outline" className="mt-6">Show all {experience.rating.count} reviews</Button>
           </div>

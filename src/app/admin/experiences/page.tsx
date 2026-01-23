@@ -67,7 +67,7 @@ export default function AdminExperiencesPage() {
             </TableHeader>
             <TableBody>
               {experiences.map((exp) => {
-                const hostImage = PlaceHolderImages.find(p => p.id === exp.host.avatarImageId);
+                const hostImage = PlaceHolderImages.find(p => p.id === exp.host.profilePhotoId);
                 return (
                   <TableRow key={exp.id}>
                     <TableCell className="font-medium">

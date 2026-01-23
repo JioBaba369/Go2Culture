@@ -37,7 +37,7 @@ export type Host = {
   id: string; // hostId
   userId: string;
   name: string; // Denormalized for display
-  avatarImageId: string; // Denormalized for display
+  profilePhotoId: string; // Denormalized for display
   status: 'draft' | 'under_review' | 'approved' | 'needs_changes' | 'suspended';
   
   profile: {
@@ -85,7 +85,7 @@ export type ExperienceReview = {
   id: string;
   author: {
     name:string;
-    avatarImageId: string;
+    profilePhotoId: string;
   };
   rating: number;
   comment: string;
@@ -227,5 +227,3 @@ export type Report = {
   date: string;
   status: 'Open' | 'In Progress' | 'Resolved';
 };
-
-    

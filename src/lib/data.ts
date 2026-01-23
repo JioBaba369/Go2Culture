@@ -129,7 +129,7 @@ export const hosts: Host[] = [
     id: 'host-1',
     userId: 'user-1',
     name: 'Maria',
-    avatarImageId: 'host-1',
+    profilePhotoId: 'host-1',
     status: 'approved',
     profile: {
       bio: 'Passionate Italian home cook, sharing my grandmother\'s recipes with the world. I love opera, fresh pasta, and good conversation.',
@@ -148,7 +148,7 @@ export const hosts: Host[] = [
     id: 'host-2',
     userId: 'user-2',
     name: 'Kenji',
-    avatarImageId: 'host-2',
+    profilePhotoId: 'host-2',
     status: 'approved',
     profile: {
       bio: 'I am a designer and a foodie from Tokyo. Join me for a quiet, traditional meal where we can appreciate the beauty of simplicity in Japanese cuisine.',
@@ -167,7 +167,7 @@ export const hosts: Host[] = [
     id: 'host-3',
     userId: 'user-3',
     name: 'Priya',
-    avatarImageId: 'host-3',
+    profilePhotoId: 'host-3',
     status: 'approved',
     profile: {
       bio: 'My family and I love to host! We fill our home with the aromas of South Indian spices and the sounds of laughter. Come as a guest, leave as family.',
@@ -186,7 +186,7 @@ export const hosts: Host[] = [
     id: 'host-4',
     userId: 'user-4',
     name: 'Javier',
-    avatarImageId: 'host-4',
+    profilePhotoId: 'host-4',
     status: 'approved',
     profile: {
       bio: 'From Oaxaca with love. I bring the vibrant street food culture of Mexico to my home. Expect bold flavors, lots of color, and great stories.',
@@ -205,7 +205,7 @@ export const hosts: Host[] = [
     id: 'host-5',
     userId: 'user-9',
     name: 'Anya',
-    avatarImageId: 'host-5',
+    profilePhotoId: 'host-5',
     status: 'approved',
     profile: {
       bio: 'Let me transport you to Thailand with a home-cooked meal full of fragrant herbs and spices. I learned to cook from my mother in Bangkok.',
@@ -224,7 +224,7 @@ export const hosts: Host[] = [
     id: 'host-6',
     userId: 'user-10',
     name: 'Antoine',
-    avatarImageId: 'host-6',
+    profilePhotoId: 'host-6',
     status: 'approved',
     profile: {
       bio: 'Experience a taste of a Parisian bistro in my cozy apartment. I focus on classic French techniques and high-quality, local ingredients.',
@@ -243,7 +243,7 @@ export const hosts: Host[] = [
     id: 'host-7',
     userId: 'user-11',
     name: 'Sofia',
-    avatarImageId: 'host-7',
+    profilePhotoId: 'host-7',
     status: 'approved',
     profile: {
       bio: 'Join me for a vibrant Spanish evening filled with tapas, paella, and sangria. My home is your home!',
@@ -262,7 +262,7 @@ export const hosts: Host[] = [
     id: 'host-8',
     userId: 'user-12',
     name: 'Linh',
-    avatarImageId: 'host-8',
+    profilePhotoId: 'host-8',
     status: 'approved',
     profile: {
       bio: 'Taste the delicate balance of flavors in authentic Vietnamese home cooking. I make a legendary Pho that has been in my family for generations.',
@@ -326,14 +326,14 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   '1': [
     {
       id: 'review-1',
-      author: { name: 'Sophie', avatarImageId: 'guest-1' },
+      author: { name: 'Sophie', profilePhotoId: 'guest-1' },
       rating: 5,
       comment: 'An absolutely unforgettable evening! Maria\'s pasta was the best I\'ve ever had, and her stories made the experience so special. Felt like dinner with family.',
       date: '2023-10-15',
     },
     {
       id: 'review-4',
-      author: { name: 'Ben', avatarImageId: 'guest-3' },
+      author: { name: 'Ben', profilePhotoId: 'guest-3' },
       rating: 5,
       comment: 'Maria is a gem. So welcoming and warm. The food was divine. A must-do in Rome!',
       date: '2023-09-20',
@@ -342,7 +342,7 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   '2': [
     {
       id: 'review-3',
-      author: { name: 'Chloe', avatarImageId: 'host-3' },
+      author: { name: 'Chloe', profilePhotoId: 'host-3' },
       rating: 5,
       comment: 'The best tacos of my life. Javier has a real passion for his culture and food that shines through. Fun, vibrant, and delicious.',
       date: '2023-11-05',
@@ -351,7 +351,7 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   '3': [
      {
       id: 'review-2',
-      author: { name: 'David', avatarImageId: 'guest-2' },
+      author: { name: 'David', profilePhotoId: 'guest-2' },
       rating: 5,
       comment: 'The food was incredible, and the atmosphere was so peaceful. A truly authentic and meditative dining experience. Highly recommended.',
       date: '2023-10-12',
@@ -758,5 +758,3 @@ export const reports: Report[] = [
         status: 'Resolved',
     }
 ];
-
-    
