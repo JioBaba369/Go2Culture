@@ -231,5 +231,3 @@ export const localAreas = [
    { id: "NEWTOWN", name: "Newtown", suburbId: "SYD" },
    { id: "FITZROY", name: "Fitzroy", suburbId: "MEL" },
 ];
-
-    

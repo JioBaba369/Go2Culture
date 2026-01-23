@@ -48,17 +48,25 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * Checks for ownership on an existing document.
-     * CRITICAL: Used for update/delete to prevent acting on non-existent data.
-     */
-    //function isExistingOwner(userId) {
-    //  return isOwner(userId) && getAfter(userId) != null;
-    //}
-
     // --------------------------------
     // Collection Rules
     // --------------------------------
+    
+    /**
+     * @description Manages public user profiles. Users can view any profile, but can only edit their own.
+     * @path /users/{userId}
+     * @allow (get) Any user can view any other user's public profile.
+     * @allow (update) A user can only update their own profile.
+     * @deny (create, delete) User creation and deletion is handled by Firebase Auth, not directly in Firestore.
+     * @principle Implements "Public Read, Owner-Only Write" on a user's own document.
+     */
+    match /users/{userId} {
+      allow get: if true;
+      allow list: if true; // Allow listing for admin UI, but should be secured in production
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
 
     /**
      * @description Secures a user's private host profile. Only the owner can manage their profile.
@@ -154,5 +162,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

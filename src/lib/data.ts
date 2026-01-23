@@ -690,5 +690,3 @@ export const reports: Report[] = [
         status: 'Resolved',
     }
 ];
-
-    
