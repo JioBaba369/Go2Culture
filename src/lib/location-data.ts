@@ -4,7 +4,7 @@ export const countries = [
   { id: "NZ", name: "New Zealand" },
 ];
 
-export const states = [
+export const regions = [
   // Australia
   { id: "NSW", name: "New South Wales", countryId: "AU" },
   { id: "VIC", name: "Victoria", countryId: "AU" },
@@ -15,31 +15,41 @@ export const states = [
   { id: "ACT", name: "Australian Capital Territory", countryId: "AU" },
   { id: "NT", name: "Northern Territory", countryId: "AU" },
   // New Zealand
-  { id: 'AUK', name: 'Auckland', countryId: 'NZ' },
-  { id: 'WGN', name: 'Wellington', countryId: 'NZ' },
-  { id: 'CAN', name: 'Canterbury', countryId: 'NZ' },
-  { id: 'OTA', name: 'Otago', countryId: 'NZ' },
-  { id: 'BOP', name: 'Bay of Plenty', countryId: 'NZ' },
-  { id: 'WKO', name: 'Waikato', countryId: 'NZ' },
+  { id: "NTL", name: "Northland", countryId: "NZ" },
+  { id: "AUK", name: "Auckland", countryId: "NZ" },
+  { id: "WKO", name: "Waikato", countryId: "NZ" },
+  { id: "BOP", name: "Bay of Plenty", countryId: "NZ" },
+  { id: "GIS", name: "Gisborne", countryId: "NZ" },
+  { id: "HKB", name: "Hawke’s Bay", countryId: "NZ" },
+  { id: "TKI", name: "Taranaki", countryId: "NZ" },
+  { id: "MWT", name: "Manawatū-Whanganui", countryId: "NZ" },
+  { id: "WGN", name: "Wellington", countryId: "NZ" },
+  { id: "TAS", name: "Tasman", countryId: "NZ" },
+  { id: "NSN", name: "Nelson", countryId: "NZ" },
+  { id: "MBH", name: "Marlborough", countryId: "NZ" },
+  { id: "WTC", name: "West Coast", countryId: "NZ" },
+  { id: "CAN", name: "Canterbury", countryId: "NZ" },
+  { id: "OTA", name: "Otago", countryId: "NZ" },
+  { id: "STL", name: "Southland", countryId: "NZ" }
 ];
 
 export const suburbs = [
   // Australia
-  { id: "SYD", name: "Sydney", stateId: "NSW" },
-  { id: "MEL", name: "Melbourne", stateId: "VIC" },
-  { id: "BRI", name: "Brisbane", stateId: "QLD" },
-  { id: "PER", name: "Perth", stateId: "WA" },
-  { id: "ADL", name: "Adelaide", stateId: "SA" },
-  { id: "CBR", name: "Canberra", stateId: "ACT" },
-  { id: "HBA", name: "Hobart", stateId: "TAS" },
+  { id: "SYD", name: "Sydney", regionId: "NSW" },
+  { id: "MEL", name: "Melbourne", regionId: "VIC" },
+  { id: "BRI", name: "Brisbane", regionId: "QLD" },
+  { id: "PER", name: "Perth", regionId: "WA" },
+  { id: "ADL", name: "Adelaide", regionId: "SA" },
+  { id: "CBR", name: "Canberra", regionId: "ACT" },
+  { id: "HBA", name: "Hobart", regionId: "TAS" },
   
   // New Zealand
-  { id: 'AKL', name: 'Auckland', stateId: 'AUK' },
-  { id: 'WLG', name: 'Wellington', stateId: 'WGN' },
-  { id: 'CHC', name: 'Christchurch', stateId: 'CAN' },
-  { id: 'ZQN', name: 'Queenstown', stateId: 'OTA' },
-  { id: 'HLZ', name: 'Hamilton', stateId: 'WKO' },
-  { id: 'TRG', name: 'Tauranga', stateId: 'BOP' },
+  { id: 'AKL', name: 'Auckland', regionId: 'AUK' },
+  { id: 'WLG', name: 'Wellington', regionId: 'WGN' },
+  { id: 'CHC', name: 'Christchurch', regionId: 'CAN' },
+  { id: 'ZQN', name: 'Queenstown', regionId: 'OTA' },
+  { id: 'HLZ', name: 'Hamilton', regionId: 'WKO' },
+  { id: 'TRG', name: 'Tauranga', regionId: 'BOP' },
 ];
 
 export const localAreas = [

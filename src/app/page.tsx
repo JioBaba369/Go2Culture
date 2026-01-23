@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -10,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Search, Users, Home as HomeIcon, Award } from "lucide-react";
 import { ExperienceCard } from "@/components/experience-card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { countries, states, suburbs, localAreas } from "@/lib/location-data";
+import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, limit, query } from "firebase/firestore";
 import { Experience } from "@/lib/types";
@@ -22,11 +23,11 @@ export default function Home() {
   const firestore = useFirestore();
 
   const [selectedCountry, setSelectedCountry] = useState<string>('');
-  const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
   const [selectedSuburb, setSelectedSuburb] = useState<string>('');
   const [selectedLocalArea, setSelectedLocalArea] = useState<string>('');
 
-  const [availableStates, setAvailableStates] = useState<{id: string, name: string}[]>([]);
+  const [availableRegions, setAvailableRegions] = useState<{id: string, name: string}[]>([]);
   const [availableSuburbs, setAvailableSuburbs] = useState<{id: string, name: string}[]>([]);
   const [availableLocalAreas, setAvailableLocalAreas] = useState<{id: string, name: string}[]>([]);
 
@@ -38,27 +39,27 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedCountry) {
-      setAvailableStates(states.filter(s => s.countryId === selectedCountry));
-      setSelectedState('');
+      setAvailableRegions(regions.filter(s => s.countryId === selectedCountry));
+      setSelectedRegion('');
       setSelectedSuburb('');
       setSelectedLocalArea('');
       setAvailableSuburbs([]);
       setAvailableLocalAreas([]);
     } else {
-      setAvailableStates([]);
+      setAvailableRegions([]);
     }
   }, [selectedCountry]);
 
   useEffect(() => {
-    if (selectedState) {
-      setAvailableSuburbs(suburbs.filter(s => s.stateId === selectedState));
+    if (selectedRegion) {
+      setAvailableSuburbs(suburbs.filter(s => s.regionId === selectedRegion));
       setSelectedSuburb('');
       setSelectedLocalArea('');
       setAvailableLocalAreas([]);
     } else {
       setAvailableSuburbs([]);
     }
-  }, [selectedState]);
+  }, [selectedRegion]);
 
   useEffect(() => {
     if (selectedSuburb) {
@@ -72,7 +73,7 @@ export default function Home() {
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (selectedCountry) params.set('country', selectedCountry);
-    if (selectedState) params.set('state', selectedState);
+    if (selectedRegion) params.set('region', selectedRegion);
     if (selectedSuburb) params.set('suburb', selectedSuburb);
     if (selectedLocalArea) params.set('localArea', selectedLocalArea);
     router.push(`/discover?${params.toString()}`);
@@ -113,10 +114,10 @@ export default function Home() {
                 </div>
                 <Separator orientation="vertical" className="h-6 hidden sm:block" />
                 <div className="w-full sm:w-auto flex-1">
-                    <Select onValueChange={setSelectedState} value={selectedState} disabled={!availableStates.length}>
-                        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="State" /></SelectTrigger>
+                    <Select onValueChange={setSelectedRegion} value={selectedRegion} disabled={!availableRegions.length}>
+                        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="State / Region" /></SelectTrigger>
                         <SelectContent>
-                          {availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                          {availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>

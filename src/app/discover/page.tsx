@@ -61,7 +61,7 @@ function DiscoverPageContent() {
       if (exp.pricing.pricePerGuest > price[0]) return false;
       if (rating !== 'all' && exp.rating.average < Number(rating)) return false;
       if (searchParams.get('country') && exp.location.country !== searchParams.get('country')) return false;
-      if (searchParams.get('state') && exp.location.state !== searchParams.get('state')) return false;
+      if (searchParams.get('region') && exp.location.region !== searchParams.get('region')) return false;
       if (searchParams.get('suburb') && exp.location.suburb !== searchParams.get('suburb')) return false;
       if (searchParams.get('localArea') && exp.location.localArea !== searchParams.get('localArea')) return false;
       return true;

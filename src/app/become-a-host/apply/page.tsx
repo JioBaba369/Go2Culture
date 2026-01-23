@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, PartyPopper, User as UserIcon } from "lucide-react";
-import { countries, states } from "@/lib/location-data";
+import { countries, regions } from "@/lib/location-data";
 import { complianceRequirementsByState, countryComplianceRequirements, type ComplianceRequirement } from "@/lib/compliance-data";
 import { useFirestore, useUser } from "@/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -63,7 +63,7 @@ const formSchema = z.object({
 
   location: z.object({
     country: z.string({ required_error: "Please select your country." }),
-    state: z.string().optional(),
+    region: z.string().optional(),
     address: z.string().min(5, "Your full address is required."),
     postcode: z.string().min(3, "Postcode is required."),
   }),
@@ -92,17 +92,17 @@ const formSchema = z.object({
 
 }).superRefine((data, ctx) => {
   // Common state/region validation for AU and NZ
-  if ((data.location.country === 'AU' || data.location.country === 'NZ') && !data.location.state) {
+  if ((data.location.country === 'AU' || data.location.country === 'NZ') && !data.location.region) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'State/Region is required for hosts in Australia and New Zealand.',
-      path: ['location', 'state'],
+      path: ['location', 'region'],
     });
   }
 
   // Australia-specific state-level compliance
-  if (data.location.country === 'AU' && data.location.state) {
-    const stateCompliance = complianceRequirementsByState[data.location.state];
+  if (data.location.country === 'AU' && data.location.region) {
+    const stateCompliance = complianceRequirementsByState[data.location.region];
     if (stateCompliance) {
       stateCompliance.requirements.forEach(req => {
         const complianceData = data.compliance as Record<string, any>;
@@ -202,10 +202,10 @@ export default function BecomeAHostPage() {
   });
   
   const watchCountry = form.watch('location.country');
-  const watchState = form.watch('location.state');
+  const watchRegion = form.watch('location.region');
   
-  const availableStates = states.filter(s => s.countryId === watchCountry);
-  const stateCompliance = watchCountry === 'AU' && watchState ? complianceRequirementsByState[watchState] : null;
+  const availableRegions = regions.filter(s => s.countryId === watchCountry);
+  const stateCompliance = watchCountry === 'AU' && watchRegion ? complianceRequirementsByState[watchRegion] : null;
   const countryCompliance = watchCountry ? countryComplianceRequirements[watchCountry] : null;
 
   async function onSubmit(values: OnboardingFormValues) {
@@ -450,8 +450,19 @@ export default function BecomeAHostPage() {
                     <FormField control={form.control} name="location.country" render={({ field }) => (
                         <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="location.state" render={({ field }) => (
-                        <FormItem><FormLabel>State/Region</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled={!availableStates.length}><FormControl><SelectTrigger><SelectValue placeholder="Select your state/region" /></SelectTrigger></FormControl><SelectContent>{availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                    <FormField control={form.control} name="location.region" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!availableRegions.length}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>{availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                     )} />
                 </div>
                <FormField control={form.control} name="location.address" render={({ field }) => (
@@ -528,7 +539,7 @@ export default function BecomeAHostPage() {
                   </div>
                 )}
 
-                {watchCountry === 'AU' && !watchState && <p className="text-muted-foreground">Please select your state/territory to see specific compliance requirements.</p>}
+                {watchCountry === 'AU' && !watchRegion && <p className="text-muted-foreground">Please select your state/territory to see specific compliance requirements.</p>}
             </CardContent>
           </Card>
 

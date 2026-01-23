@@ -56,7 +56,7 @@
           "type": "object",
           "properties": {
             "country": { "type": "string" },
-            "state": { "type": "string" },
+            "region": { "type": "string" },
             "suburb": { "type": "string" }
           }
         },
@@ -107,7 +107,7 @@
           "type": "object",
           "properties": {
             "country": { "type": "string" },
-            "state": { "type": "string" },
+            "region": { "type": "string" },
             "suburb": { "type": "string" },
             "localArea": { "type": "string" },
             "postcode": { "type": "string" }
@@ -182,7 +182,7 @@
           "type": "object",
           "properties": {
             "country": { "type": "string" },
-            "state": { "type": "string" },
+            "region": { "type": "string" },
             "suburb": { "type": "string" },
             "localArea": { "type": "string" },
             "postcode": { "type": "string" },
@@ -288,7 +288,7 @@
           "type": "object",
           "properties": {
             "country": { "type": "string" },
-            "state": { "type": "string" },
+            "region": { "type": "string" },
             "suburb": { "type": "string" },
             "localArea": { "type": "string" }
           }

@@ -13,7 +13,7 @@ export type User = {
   };
   location?: {
     country: string;
-    state?: string;
+    region?: string;
     suburb?: string;
   }
   status: 'active' | 'suspended' | 'deleted';
@@ -55,7 +55,7 @@ export type Host = {
 
   location: {
     country: string;
-    state: string;
+    region: string;
     suburb: string;
     localArea?: string;
     postcode: string;
@@ -118,7 +118,7 @@ export type Experience = {
   };
   location: {
     country: string;
-    state: string;
+    region: string;
     suburb: string;
     localArea?: string;
   };
@@ -173,7 +173,7 @@ export type HostApplication = {
 
   location: {
     country: string;
-    state?: string;
+    region?: string;
     suburb: string;
     localArea?: string;
     postcode: string;

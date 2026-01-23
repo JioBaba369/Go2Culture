@@ -48,7 +48,7 @@ export async function approveApplication(
     },
     location: {
       country: application.location.country,
-      state: application.location.state || '',
+      region: application.location.region || '',
       suburb: application.location.suburb,
       localArea: application.location.localArea,
       postcode: application.location.postcode,
@@ -88,7 +88,7 @@ export async function approveApplication(
     },
     location: {
        country: application.location.country,
-       state: application.location.state || '',
+       region: application.location.region || '',
        suburb: application.location.suburb,
        localArea: application.location.localArea || '',
     },
