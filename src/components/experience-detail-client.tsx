@@ -3,19 +3,22 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { format } from "date-fns";
 import type { Experience } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, CalendarIcon } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
+import { cn } from "@/lib/utils";
 
 export function ExperienceDetailClient({ experience }: { experience: Experience }) {
-  const [date, setDate] = useState<string>('');
+  const [date, setDate] = useState<Date>();
 
   const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
   const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.profilePhotoId);
@@ -25,34 +28,15 @@ export function ExperienceDetailClient({ experience }: { experience: Experience 
   const localAreaName = localAreas.find(l => l.id === experience.location.localArea)?.name || experience.location.localArea;
   const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
 
-  const getTodayString = () => {
-    const today = new Date();
-    // Adjust for timezone to get correct local date
-    const offset = today.getTimezoneOffset();
-    const todayWithOffset = new Date(today.getTime() - (offset*60*1000));
-    return todayWithOffset.toISOString().split('T')[0];
-  }
-
-  const isDayAvailable = (day: Date) => {
+  const disabledDays = (day: Date) => {
     if (!experience.availability.days || experience.availability.days.length === 0) {
-      return true; // if no days are specified, assume all are available
+      return false; // If no availability is specified, assume all days are bookable
     }
-    const dayOfWeek = day.toLocaleDateString('en-US', { weekday: 'long' });
-    return experience.availability.days.includes(dayOfWeek);
+    const dayOfWeek = format(day, 'EEEE'); // e.g., "Monday"
+    // The 'disabled' prop disables the day if the function returns 'true'.
+    // So, we return 'true' if the day of the week is NOT in the host's availability list.
+    return !experience.availability.days.includes(dayOfWeek);
   };
-  
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = new Date(e.target.value);
-    // The date from input is UTC. We need to treat it as local.
-    const utcDate = new Date(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate());
-
-    if (!isDayAvailable(utcDate)) {
-      alert("This experience is not available on the selected day.");
-      setDate('');
-    } else {
-      setDate(e.target.value);
-    }
-  }
 
   return (
     <div className="py-8">
@@ -197,18 +181,34 @@ export function ExperienceDetailClient({ experience }: { experience: Experience 
             <CardContent>
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <label htmlFor="booking-date" className="text-sm font-medium">Select a date</label>
-                    <Input 
-                      id="booking-date"
-                      type="date"
-                      value={date}
-                      onChange={handleDateChange}
-                      min={getTodayString()}
-                      className="w-full"
-                    />
-                    {/* Note: Disabling specific days of the week based on host availability is not supported by the native date picker. */}
+                    <label className="text-sm font-medium">Select a date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          disabled={[
+                            { before: new Date() },
+                            disabledDays
+                          ]}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                   {date && <p className="text-sm text-muted-foreground">Selected: {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>}
                 </div>
                  <Button size="lg" className="w-full mt-4" disabled={!date}>Book Now</Button>
                  <p className="text-xs text-center text-muted-foreground mt-2">You won't be charged yet</p>
