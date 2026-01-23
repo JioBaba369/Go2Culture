@@ -4,68 +4,68 @@
 
 @layer base {
   :root {
-    --background: 60 56% 98%;
-    --foreground: 20 14% 4%;
-    --card: 60 56% 91%;
-    --card-foreground: 20 14% 4%;
-    --popover: 60 56% 91%;
-    --popover-foreground: 20 14% 4%;
-    --primary: 16 100% 66%;
-    --primary-foreground: 20 14% 4%;
-    --secondary: 60 56% 85%;
-    --secondary-foreground: 20 14% 4%;
-    --muted: 60 56% 85%;
-    --muted-foreground: 20 14% 35%;
-    --accent: 77 25% 45%;
-    --accent-foreground: 60 56% 98%;
-    --destructive: 0 59% 41%;
-    --destructive-foreground: 60 56% 91%;
-    --border: 60 20% 80%;
-    --input: 60 20% 80%;
-    --ring: 16 100% 66%;
-    --radius: 0.5rem;
+    --background: 210 20% 98%;
+    --foreground: 201 100% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 201 100% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 201 100% 18%;
+    --primary: 197 100% 43%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 198 79% 95%;
+    --secondary-foreground: 201 100% 18%;
+    --muted: 205 12% 68%;
+    --muted-foreground: 205 12% 48%;
+    --accent: 198 79% 95%;
+    --accent-foreground: 201 100% 18%;
+    --destructive: 0 54% 47%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 207 41% 90%;
+    --input: 207 41% 90%;
+    --ring: 197 100% 43%;
+    --radius: 0.8rem;
 
-    /* Custom Sidebar vars */
-    --sidebar-background: 20 14% 12%;
-    --sidebar-foreground: 48 33% 94%;
-    --sidebar-primary: 16 100% 66%;
-    --sidebar-primary-foreground: 20 14% 4%;
-    --sidebar-accent: 20 14% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 20 14% 20%;
-    --sidebar-ring: 16 100% 66%;
+    /* Custom Sidebar vars aligned with the new theme */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 201 100% 18%;
+    --sidebar-primary: 197 100% 43%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 198 79% 95%;
+    --sidebar-accent-foreground: 201 100% 18%;
+    --sidebar-border: 207 41% 90%;
+    --sidebar-ring: 197 100% 43%;
   }
 
   .dark {
-    --background: 210 8% 12%;
-    --foreground: 60 56% 91%;
-    --card: 210 8% 15%;
-    --card-foreground: 60 56% 91%;
-    --popover: 210 8% 15%;
-    --popover-foreground: 60 56% 91%;
-    --primary: 16 100% 66%;
-    --primary-foreground: 20 14% 4%;
-    --secondary: 210 8% 25%;
-    --secondary-foreground: 60 56% 91%;
-    --muted: 210 8% 25%;
-    --muted-foreground: 60 56% 80%;
-    --accent: 77 25% 45%;
-    --accent-foreground: 60 56% 91%;
-    --destructive: 0 59% 41%;
-    --destructive-foreground: 60 56% 91%;
-    --border: 210 8% 25%;
-    --input: 210 8% 25%;
-    --ring: 16 100% 66%;
+    --background: 201 100% 10%;
+    --foreground: 210 20% 98%;
+    --card: 201 100% 12%;
+    --card-foreground: 210 20% 98%;
+    --popover: 201 100% 12%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 197 100% 43%;
+    --primary-foreground: 201 100% 18%;
+    --secondary: 198 30% 20%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 205 10% 40%;
+    --muted-foreground: 205 10% 75%;
+    --accent: 198 30% 20%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 54% 47%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 201 30% 25%;
+    --input: 201 30% 25%;
+    --ring: 197 100% 43%;
      
-    /* Custom Sidebar vars */
-    --sidebar-background: 210 8% 12%;
-    --sidebar-foreground: 60 56% 91%;
-    --sidebar-primary: 16 100% 66%;
-    --sidebar-primary-foreground: 20 14% 4%;
-    --sidebar-accent: 210 8% 25%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 8% 25%;
-    --sidebar-ring: 16 100% 66%;
+    /* Custom Sidebar vars for dark mode */
+    --sidebar-background: 201 100% 10%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 197 100% 43%;
+    --sidebar-primary-foreground: 201 100% 18%;
+    --sidebar-accent: 198 30% 20%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 201 30% 25%;
+    --sidebar-ring: 197 100% 43%;
   }
 }
 
@@ -81,12 +81,12 @@
 /* UN GLOBAL FEEL */
 .un-calendar-card {
   width: 340px;
-  background: #ffffff;
+  background: hsl(var(--card));
   border-radius: 14px;
   padding: 20px;
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e6eef3;
+  border: 1px solid hsl(var(--border));
 }
 
 /* HEADER */
@@ -98,28 +98,28 @@
   display: inline-block;
   font-size: 11px;
   letter-spacing: 1px;
-  color: #009edb;
+  color: hsl(var(--primary));
   font-weight: 700;
 }
 
 .un-header h2 {
   margin: 6px 0 4px;
   font-size: 20px;
-  color: #003f5c;
+  color: hsl(var(--foreground));
 }
 
 .un-header p {
   margin: 0;
   font-size: 13px;
-  color: #6b7c87;
+  color: hsl(var(--muted-foreground));
 }
 
 /* CALENDAR CORE */
 .un-calendar {
-  --rdp-accent-color: #009edb;
-  --rdp-background-color: #eaf6fb;
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--secondary));
   --rdp-outline: none;
-  --rdp-selected-color: #ffffff;
+  --rdp-selected-color: hsl(var(--primary-foreground));
 }
 
 /* DAY STYLES */
@@ -128,12 +128,12 @@
 }
 
 .rdp-day:hover {
-  background: #eaf6fb;
+  background: hsl(var(--secondary));
 }
 
 .rdp-day_selected {
-  background-color: #009edb !important;
-  color: #ffffff !important;
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
   font-weight: 600;
 }
 
@@ -142,6 +142,6 @@
   margin-top: 14px;
   padding-top: 10px;
   font-size: 13px;
-  color: #003f5c;
-  border-top: 1px solid #e6eef3;
+  color: hsl(var(--foreground));
+  border-top: 1px solid hsl(var(--border));
 }
