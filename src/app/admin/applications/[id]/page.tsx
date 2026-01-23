@@ -1,6 +1,5 @@
-
 'use client';
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Card,
@@ -23,6 +22,7 @@ import {
   Info,
   Home,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
@@ -30,6 +30,9 @@ import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { HostApplication } from "@/lib/types";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { approveApplication, rejectApplication, requestChangesForApplication } from "@/lib/admin-actions";
 
 export default function ApplicationDetailPage({
   params,
@@ -37,7 +40,73 @@ export default function ApplicationDetailPage({
   params: { id: string };
 }) {
   const firestore = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState<null | 'approve' | 'changes' | 'reject'>(null);
+
   const { data: application, isLoading } = useDoc<HostApplication>(useMemoFirebase(() => firestore ? doc(firestore, 'hostApplications', params.id) : null, [firestore, params.id]));
+
+  const handleApprove = async () => {
+    if (!application || !firestore) return;
+    setIsProcessing('approve');
+    try {
+      await approveApplication(firestore, application);
+      toast({
+        title: "Application Approved!",
+        description: `${application.hostName} is now a host.`,
+      });
+      router.push('/admin/applications');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Approval Failed",
+        description: error.message || "Could not approve the application.",
+      });
+      console.error(error);
+    } finally {
+      setIsProcessing(null);
+    }
+  }
+
+  const handleRequestChanges = async () => {
+     if (!application || !firestore) return;
+    setIsProcessing('changes');
+    try {
+      await requestChangesForApplication(firestore, application.id);
+      toast({
+        title: "Changes Requested",
+        description: `The application status has been updated to 'Changes Needed'.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "Could not update the application.",
+      });
+    } finally {
+      setIsProcessing(null);
+    }
+  }
+  
+  const handleReject = async () => {
+    if (!application || !firestore) return;
+    setIsProcessing('reject');
+    try {
+      await rejectApplication(firestore, application.id);
+      toast({
+        title: "Application Rejected",
+        description: `The application from ${application.hostName} has been rejected.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "Could not reject the application.",
+      });
+    } finally {
+      setIsProcessing(null);
+    }
+  }
 
   if (isLoading) {
     return <Skeleton className="h-screen w-full" />;
@@ -51,6 +120,8 @@ export default function ApplicationDetailPage({
   const idDocPhoto = PlaceHolderImages.find(p => p.id === application.verification.idDocId);
   const selfiePhoto = PlaceHolderImages.find(p => p.id === application.verification.selfieId);
   const mainImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
+  
+  const areActionsDisabled = isProcessing !== null || application.status === 'Approved' || application.status === 'Rejected';
 
   return (
     <div className="space-y-6">
@@ -64,17 +135,18 @@ export default function ApplicationDetailPage({
             <span className="font-semibold text-foreground">
               {application.hostName}
             </span>
+             - <Badge>{application.status}</Badge>
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="default" className="bg-green-600 hover:bg-green-700">
-            <Check className="mr-2 h-4 w-4" /> Approve
+          <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={areActionsDisabled}>
+            {isProcessing === 'approve' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />} Approve
           </Button>
-          <Button variant="outline">
-            <Edit className="mr-2 h-4 w-4" /> Request Changes
+          <Button variant="outline" onClick={handleRequestChanges} disabled={areActionsDisabled}>
+            {isProcessing === 'changes' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Edit className="mr-2 h-4 w-4" />} Request Changes
           </Button>
-          <Button variant="destructive">
-            <X className="mr-2 h-4 w-4" /> Reject
+          <Button variant="destructive" onClick={handleReject} disabled={areActionsDisabled}>
+            {isProcessing === 'reject' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <X className="mr-2 h-4 w-4" />} Reject
           </Button>
         </div>
       </div>
