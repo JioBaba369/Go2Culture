@@ -11,14 +11,23 @@ import { experiences } from "@/lib/data";
 import { countries, states, suburbs, localAreas } from "@/lib/location-data";
 import type { Experience } from "@/lib/types";
 
+// Get unique cuisines for the filter
+const allCuisines = [...new Set(experiences.map(e => e.menu.cuisine))];
+
 function DiscoverPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Location filters
   const [selectedCountry, setSelectedCountry] = useState(searchParams.get('country') || '');
   const [selectedState, setSelectedState] = useState(searchParams.get('state') || '');
   const [selectedSuburb, setSelectedSuburb] = useState(searchParams.get('suburb') || '');
   const [selectedLocalArea, setSelectedLocalArea] = useState(searchParams.get('localArea') || '');
+
+  // New filters
+  const [selectedCuisine, setSelectedCuisine] = useState(searchParams.get('cuisine') || '');
+  const [selectedRating, setSelectedRating] = useState(searchParams.get('rating') || '');
+
 
   const [availableStates, setAvailableStates] = useState<{id: string, name: string}[]>([]);
   const [availableSuburbs, setAvailableSuburbs] = useState<{id: string, name: string}[]>([]);
@@ -54,6 +63,8 @@ function DiscoverPageContent() {
     setSelectedState(searchParams.get('state') || '');
     setSelectedSuburb(searchParams.get('suburb') || '');
     setSelectedLocalArea(searchParams.get('localArea') || '');
+    setSelectedCuisine(searchParams.get('cuisine') || '');
+    setSelectedRating(searchParams.get('rating') || '');
   }, [searchParams]);
 
 
@@ -63,6 +74,8 @@ function DiscoverPageContent() {
     if (selectedState) params.set('state', selectedState);
     if (selectedSuburb) params.set('suburb', selectedSuburb);
     if (selectedLocalArea) params.set('localArea', selectedLocalArea);
+    if (selectedCuisine) params.set('cuisine', selectedCuisine);
+    if (selectedRating) params.set('rating', selectedRating);
     router.push(`/discover?${params.toString()}`);
   };
 
@@ -72,6 +85,8 @@ function DiscoverPageContent() {
     const state = searchParams.get('state');
     const suburb = searchParams.get('suburb');
     const localArea = searchParams.get('localArea');
+    const cuisine = searchParams.get('cuisine');
+    const rating = searchParams.get('rating');
 
     if (country) {
       results = results.filter(e => e.location.country === country);
@@ -85,6 +100,12 @@ function DiscoverPageContent() {
     if (localArea) {
       results = results.filter(e => e.location.localArea === localArea);
     }
+    if (cuisine) {
+      results = results.filter(e => e.menu.cuisine === cuisine);
+    }
+    if (rating) {
+      results = results.filter(e => e.rating.average >= parseFloat(rating));
+    }
     
     return results;
   }, [searchParams]);
@@ -94,7 +115,7 @@ function DiscoverPageContent() {
       <div>
         <h1 className="font-headline text-4xl font-bold">Discover Experiences</h1>
         <p className="text-muted-foreground mt-2">
-          {filteredExperiences.length > 0 
+          {searchParams.toString().length > 0 
            ? `Found ${filteredExperiences.length} cultural adventures.`
            : 'Find your next cultural adventure.'
           }
@@ -102,7 +123,7 @@ function DiscoverPageContent() {
       </div>
 
       <div className="p-4 bg-card rounded-lg border shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-2">
           <Select onValueChange={(value) => { setSelectedCountry(value); setSelectedState(''); setSelectedSuburb(''); setSelectedLocalArea(''); }} value={selectedCountry}>
             <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
             <SelectContent>
@@ -130,10 +151,29 @@ function DiscoverPageContent() {
               {availableLocalAreas.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
             </SelectContent>
           </Select>
-
-          <Button onClick={handleSearch} className="w-full md:w-auto">
-            <Search className="mr-2 h-4 w-4" /> Search
-          </Button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <Select onValueChange={setSelectedCuisine} value={selectedCuisine}>
+                <SelectTrigger><SelectValue placeholder="Cuisine" /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="">All Cuisines</SelectItem>
+                    {allCuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+            </Select>
+            <Select onValueChange={setSelectedRating} value={selectedRating}>
+                <SelectTrigger><SelectValue placeholder="Rating" /></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="">Any Rating</SelectItem>
+                    <SelectItem value="4.5">4.5+ stars</SelectItem>
+                    <SelectItem value="4">4+ stars</SelectItem>
+                    <SelectItem value="3">3+ stars</SelectItem>
+                </SelectContent>
+            </Select>
+            <div className="col-span-1 lg:col-span-2">
+                 <Button onClick={handleSearch} className="w-full">
+                    <Search className="mr-2 h-4 w-4" /> Search
+                </Button>
+            </div>
         </div>
       </div>
 
@@ -146,7 +186,7 @@ function DiscoverPageContent() {
           <div className="col-span-full text-center py-16">
             <h3 className="font-headline text-2xl">No Experiences Found</h3>
             <p className="text-muted-foreground mt-2">Try adjusting your search filters or exploring a different area.</p>
-            <Button variant="outline" className="mt-4" onClick={() => router.push('/discover')}>Clear Search</Button>
+            <Button variant="outline" className="mt-4" onClick={() => router.push('/discover')}>Clear Filters</Button>
           </div>
         )}
       </div>
