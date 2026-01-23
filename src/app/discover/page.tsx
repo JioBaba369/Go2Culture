@@ -1,4 +1,149 @@
-<div className="p-8">
-  <h1 className="text-3xl font-bold">Discover Experiences</h1>
-  <p>This is the discover page. Content to be added.</p>
-</div>
+
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { experiences } from '@/lib/data';
+import type { Experience } from '@/lib/types';
+import { ExperienceCard } from '@/components/experience-card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+
+const allCuisines = [...new Set(experiences.map(e => e.menu.cuisine))];
+const allDietary = [...new Set(experiences.flatMap(e => e.menu.dietary))];
+const maxPrice = Math.max(...experiences.map(e => e.pricing.pricePerGuest));
+
+export default function DiscoverPage() {
+  const searchParams = useSearchParams();
+  
+  const [cuisine, setCuisine] = useState(searchParams.get('cuisine') || 'all');
+  const [dietary, setDietary] = useState<string[]>(searchParams.getAll('dietary'));
+  const [price, setPrice] = useState([maxPrice]);
+  const [rating, setRating] = useState('all');
+
+  const filteredExperiences = useMemo(() => {
+    return experiences.filter(exp => {
+      if (cuisine !== 'all' && exp.menu.cuisine !== cuisine) return false;
+      if (dietary.length > 0 && !dietary.every(d => exp.menu.dietary.includes(d))) return false;
+      if (exp.pricing.pricePerGuest > price[0]) return false;
+      if (rating !== 'all' && exp.rating.average < Number(rating)) return false;
+      // Location filtering from search params
+      if (searchParams.get('country') && exp.location.country !== searchParams.get('country')) return false;
+      if (searchParams.get('state') && exp.location.state !== searchParams.get('state')) return false;
+      if (searchParams.get('suburb') && exp.location.suburb !== searchParams.get('suburb')) return false;
+      if (searchParams.get('localArea') && exp.location.localArea !== searchParams.get('localArea')) return false;
+      return true;
+    });
+  }, [cuisine, dietary, price, rating, searchParams]);
+
+  const handleDietaryChange = (option: string) => {
+    setDietary(prev => 
+      prev.includes(option) ? prev.filter(item => item !== option) : [...prev, option]
+    );
+  };
+
+  return (
+    <div className="py-12">
+      <div className="text-center">
+        <h1 className="font-headline text-4xl md:text-5xl font-bold">Discover Experiences</h1>
+        <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+          Find your next unforgettable cultural dining experience.
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-12">
+        <aside className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Filter Results</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Cuisine</label>
+                <Select value={cuisine} onValueChange={setCuisine}>
+                  <SelectTrigger><SelectValue placeholder="Select Cuisine" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Cuisines</SelectItem>
+                    {allCuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Price</label>
+                <p className="text-sm text-muted-foreground">Up to ${price[0]}</p>
+                <Slider
+                  min={0}
+                  max={maxPrice}
+                  step={5}
+                  value={price}
+                  onValueChange={setPrice}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Dietary Options</label>
+                <div className="space-y-2">
+                  {allDietary.map(option => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`dietary-${option}`}
+                        checked={dietary.includes(option)}
+                        onCheckedChange={() => handleDietaryChange(option)}
+                      />
+                      <label htmlFor={`dietary-${option}`} className="text-sm">
+                        {option}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <Separator />
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Minimum Rating</label>
+                 <Select value={rating} onValueChange={setRating}>
+                  <SelectTrigger><SelectValue placeholder="Any Rating" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any Rating</SelectItem>
+                    <SelectItem value="4.5">4.5 stars & up</SelectItem>
+                    <SelectItem value="4">4 stars & up</SelectItem>
+                    <SelectItem value="3.5">3.5 stars & up</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+            </CardContent>
+          </Card>
+        </aside>
+
+        <main className="lg:col-span-3">
+          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {experiences.length} experiences.</p>
+          {filteredExperiences.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredExperiences.map(experience => (
+                <ExperienceCard key={experience.id} experience={experience} />
+              ))}
+            </div>
+          ) : (
+            <Card className="flex flex-col items-center justify-center text-center p-12 h-96">
+                <h3 className="text-xl font-semibold">No Experiences Found</h3>
+                <p className="text-muted-foreground mt-2">Try adjusting your filters to find more results.</p>
+            </Card>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
