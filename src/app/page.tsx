@@ -8,14 +8,33 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Search, Users, Home as HomeIcon, Award } from "lucide-react";
+import { Search, Users, Home as HomeIcon, Award, Star } from "lucide-react";
 import { ExperienceCard } from "@/components/experience-card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, limit, query } from "firebase/firestore";
-import { Experience } from "@/lib/types";
+import { Experience, Review } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TestimonialCard } from "@/components/testimonial-card";
+import { Card } from "@/components/ui/card";
+
+
+const cityImageMap: Record<string, string> = {
+    SYD: 'city-sydney',
+    MEL: 'city-melbourne',
+    AKL: 'city-auckland',
+    WLG: 'city-wellington',
+    BRI: 'city-brisbane',
+    PER: 'city-perth',
+    ADL: 'city-adelaide',
+    CBR: 'city-canberra',
+    HBA: 'city-hobart',
+    CHC: 'city-christchurch',
+    ZQN: 'city-queenstown',
+    HLZ: 'city-hamilton',
+    TRG: 'city-tauranga',
+}
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
@@ -36,6 +55,19 @@ export default function Home() {
     [firestore]
   );
   const { data: experiences, isLoading } = useCollection<Experience>(experiencesQuery);
+
+  const reviewsQuery = useMemoFirebase(
+    () => firestore ? query(collection(firestore, 'reviews'), limit(3)) : null,
+    [firestore]
+  );
+  const { data: reviews, isLoading: areReviewsLoading } = useCollection<Review>(reviewsQuery);
+
+  const featuredCities = useMemo(() => {
+    // Only feature a few distinct cities for the homepage
+    const cityIds = ['SYD', 'MEL', 'AKL', 'WLG'];
+    return suburbs.filter(s => cityIds.includes(s.id));
+}, []);
+
 
   useEffect(() => {
     if (selectedCountry) {
@@ -197,6 +229,65 @@ export default function Home() {
           <Button variant="outline" size="lg" asChild>
             <Link href="/discover">Explore All Experiences</Link>
           </Button>
+        </div>
+      </section>
+      
+      <section>
+        <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Featured Cities</h2>
+        <p className="mt-2 text-muted-foreground max-w-2xl mx-auto text-center">Discover authentic experiences in our most popular destinations.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-lg" />)
+          ) : (
+            featuredCities.map(city => {
+              const cityImageId = cityImageMap[city.id];
+              const cityImage = PlaceHolderImages.find(p => p.id === cityImageId);
+              return (
+                <Link key={city.id} href={`/discover?suburb=${city.id}`} className="group block">
+                  <Card className="overflow-hidden relative h-80 rounded-lg">
+                    {cityImage && (
+                      <Image
+                        src={cityImage.imageUrl}
+                        alt={city.name}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        data-ai-hint={cityImage.imageHint}
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <h3 className="font-headline absolute bottom-4 left-4 text-2xl font-bold text-white">
+                      {city.name}
+                    </h3>
+                  </Card>
+                </Link>
+              )
+            })
+          )}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">What Our Community is Saying</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 max-w-7xl mx-auto">
+          {areReviewsLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="h-full">
+                <CardContent className="p-6">
+                  <div className="flex mb-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-5 w-5" />)}</div>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-4/5 mb-4" />
+                  <div className="flex items-center gap-3 mt-6 pt-4 border-t">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            reviews?.map(review => (
+              <TestimonialCard key={review.id} review={review} />
+            ))
+          )}
         </div>
       </section>
 
