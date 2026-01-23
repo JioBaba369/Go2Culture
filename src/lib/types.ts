@@ -96,7 +96,6 @@ export type Experience = {
   id: string; // experienceId
   hostId: string;
   userId: string; // The user ID of the host
-  host: Host; // Denormalized for easy access in UI
   title: string;
   category: 'In-Home Dining' | 'Cooking Class' | 'Restaurant Experience' | 'Special Event';
   description: string;
@@ -132,7 +131,6 @@ export type Experience = {
     average: number;
     count: number;
   };
-  reviews: ExperienceReview[];
   createdAt: any; // Allow ServerTimestamp
 };
 

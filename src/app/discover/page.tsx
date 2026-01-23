@@ -3,7 +3,6 @@
 
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { experiences } from '@/lib/data';
 import type { Experience } from '@/lib/types';
 import { ExperienceCard } from '@/components/experience-card';
 import {
@@ -15,26 +14,40 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-
-const allCuisines = [...new Set(experiences.map(e => e.menu.cuisine))];
-const allDietary = [...new Set(experiences.flatMap(e => e.menu.dietary))];
-const allCategories = [...new Set(experiences.map(e => e.category))];
-const maxPrice = Math.max(...experiences.map(e => e.pricing.pricePerGuest));
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DiscoverPage() {
   const searchParams = useSearchParams();
-  
+  const firestore = useFirestore();
+
+  const { data: allExperiences, isLoading: areExperiencesLoading } = useCollection<Experience>(
+    useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore])
+  );
+
+  const allCuisines = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.menu.cuisine))] : [], [allExperiences]);
+  const allDietary = useMemo(() => allExperiences ? [...new Set(allExperiences.flatMap(e => e.menu.dietary))] : [], [allExperiences]);
+  const allCategories = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.category))] : [], [allExperiences]);
+  const maxPrice = useMemo(() => allExperiences ? Math.max(...allExperiences.map(e => e.pricing.pricePerGuest)) : 150, [allExperiences]);
+
   const [cuisine, setCuisine] = useState(searchParams.get('cuisine') || 'all');
   const [dietary, setDietary] = useState<string[]>(searchParams.getAll('dietary'));
   const [categories, setCategories] = useState<string[]>(searchParams.getAll('category'));
   const [price, setPrice] = useState([maxPrice]);
   const [rating, setRating] = useState('all');
 
+  // Update price slider's max value when data loads
+  useMemo(() => {
+    if(maxPrice > 0) setPrice([maxPrice]);
+  }, [maxPrice]);
+  
+
   const filteredExperiences = useMemo(() => {
-    return experiences.filter(exp => {
+    if (!allExperiences) return [];
+    return allExperiences.filter(exp => {
       if (cuisine !== 'all' && exp.menu.cuisine !== cuisine) return false;
       if (categories.length > 0 && !categories.includes(exp.category)) return false;
       if (dietary.length > 0 && !dietary.every(d => exp.menu.dietary.includes(d))) return false;
@@ -47,7 +60,7 @@ export default function DiscoverPage() {
       if (searchParams.get('localArea') && exp.location.localArea !== searchParams.get('localArea')) return false;
       return true;
     });
-  }, [cuisine, dietary, categories, price, rating, searchParams]);
+  }, [cuisine, dietary, categories, price, rating, searchParams, allExperiences]);
 
   const handleDietaryChange = (option: string) => {
     setDietary(prev => 
@@ -156,8 +169,18 @@ export default function DiscoverPage() {
         </aside>
 
         <main className="lg:col-span-3">
-          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {experiences.length} experiences.</p>
-          {filteredExperiences.length > 0 ? (
+          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {allExperiences?.length || 0} experiences.</p>
+          {areExperiencesLoading ? (
+             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ))}
+            </div>
+          ) : filteredExperiences.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredExperiences.map(experience => (
                 <ExperienceCard key={experience.id} experience={experience} />
@@ -174,5 +197,3 @@ export default function DiscoverPage() {
     </div>
   );
 }
-
-    

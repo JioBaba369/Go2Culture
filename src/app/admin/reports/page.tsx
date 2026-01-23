@@ -1,4 +1,5 @@
 
+'use client';
 import {
   Card,
   CardContent,
@@ -27,7 +28,10 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { reports } from "@/lib/data";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { Report } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
   Open: "destructive",
@@ -36,6 +40,9 @@ const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "de
 };
 
 export default function AdminReportsPage() {
+  const firestore = useFirestore();
+  const { data: reports, isLoading } = useCollection<Report>(useMemoFirebase(() => firestore ? collection(firestore, 'reports') : null, [firestore]));
+
   return (
     <div className="space-y-8">
       <div>
@@ -46,7 +53,8 @@ export default function AdminReportsPage() {
        {/* Mobile Card View */}
       <div className="grid gap-4 md:hidden">
         <h2 className="text-xl font-semibold">Active Reports</h2>
-         {reports.map((report) => (
+         {isLoading && Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+         {reports?.map((report) => (
           <Card key={report.id} className="p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
@@ -76,7 +84,7 @@ export default function AdminReportsPage() {
               <Badge variant={statusVariantMap[report.status]} className="capitalize">
                 {report.status}
               </Badge>
-              <p className="text-sm text-muted-foreground">{format(new Date(report.date), 'PP')}</p>
+              <p className="text-sm text-muted-foreground">{report.date?.toDate ? format(report.date.toDate(), 'PP') : ''}</p>
             </div>
           </Card>
         ))}
@@ -104,7 +112,10 @@ export default function AdminReportsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reports.map((report) => (
+              {isLoading && Array.from({length: 3}).map((_, i) => (
+                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+              ))}
+              {reports?.map((report) => (
                 <TableRow key={report.id}>
                   <TableCell>
                       <div className="font-medium">{report.targetType}</div>
@@ -118,7 +129,7 @@ export default function AdminReportsPage() {
                         <span>{report.reportedBy}</span>
                     )}
                   </TableCell>
-                  <TableCell>{format(new Date(report.date), 'PP')}</TableCell>
+                  <TableCell>{report.date?.toDate ? format(report.date.toDate(), 'PP') : ''}</TableCell>
                    <TableCell>
                       <Badge variant={statusVariantMap[report.status]} className="capitalize">
                         {report.status}

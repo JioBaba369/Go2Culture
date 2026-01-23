@@ -1,5 +1,5 @@
 
-import { hostApplications } from "@/lib/data";
+'use client';
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import {
@@ -7,7 +7,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,13 +26,22 @@ import {
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
+import { HostApplication } from "@/lib/types";
+import { doc } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ApplicationDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const application = hostApplications.find((app) => app.id === params.id);
+  const firestore = useFirestore();
+  const { data: application, isLoading } = useDoc<HostApplication>(useMemoFirebase(() => firestore ? doc(firestore, 'hostApplications', params.id) : null, [firestore, params.id]));
+
+  if (isLoading) {
+    return <Skeleton className="h-screen w-full" />;
+  }
 
   if (!application) {
     notFound();

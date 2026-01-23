@@ -1,4 +1,6 @@
 
+'use client';
+
 import {
   Card,
   CardContent,
@@ -24,11 +26,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { users } from "@/lib/data";
+import { User } from "@/lib/types";
 import { MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format } from 'date-fns';
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
   host: "secondary",
@@ -44,6 +50,9 @@ const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "de
 
 
 export default function AdminUsersPage() {
+  const firestore = useFirestore();
+  const { data: users, isLoading } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
+
   return (
     <div className="space-y-8">
        <div>
@@ -54,7 +63,8 @@ export default function AdminUsersPage() {
       {/* Mobile Card View */}
        <div className="grid gap-4 md:hidden">
         <h2 className="text-xl font-semibold">All Users</h2>
-        {users.map((user) => {
+        {isLoading && Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
+        {users?.map((user) => {
             const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
             return (
                 <Card key={user.id} className="p-4">
@@ -89,7 +99,7 @@ export default function AdminUsersPage() {
                              <Badge variant={roleVariantMap[user.role]} className="capitalize">{user.role}</Badge>
                              <Badge variant={statusVariantMap[user.status]} className="capitalize">{user.status}</Badge>
                          </div>
-                        <p className="text-sm text-muted-foreground">{format(new Date(user.createdAt), 'PP')}</p>
+                        <p className="text-sm text-muted-foreground">{user.createdAt?.toDate ? format(user.createdAt.toDate(), 'PP') : ''}</p>
                     </div>
                 </Card>
             );
@@ -117,7 +127,10 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => {
+              {isLoading && Array.from({length: 5}).map((_, i) => (
+                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-10 w-full"/></TableCell></TableRow>
+              ))}
+              {users?.map((user) => {
                 const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
                 return (
                   <TableRow key={user.id}>
@@ -144,7 +157,7 @@ export default function AdminUsersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(user.createdAt), 'PP')}
+                      {user.createdAt?.toDate ? format(user.createdAt.toDate(), 'PP') : ''}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
