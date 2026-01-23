@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -52,7 +53,13 @@ export default function ProfilePage() {
     if (userProfile) {
       form.reset({ fullName: userProfile.fullName });
     }
-  }, [userProfile, form]);
+  }, [userProfile, form.reset]);
+
+  React.useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login?redirect=/profile');
+    }
+  }, [isUserLoading, user, router]);
 
   async function onSubmit(data: ProfileFormValues) {
     if (!user || !firestore || !auth.currentUser) return;
@@ -101,7 +108,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    router.push('/login?redirect=/profile');
+    // Return null or a loader while the redirect effect runs.
     return null;
   }
   
