@@ -24,8 +24,8 @@ export function Footer() {
             <h3 className="font-semibold font-headline">Hosting</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="/become-a-host" className="text-muted-foreground hover:text-foreground">Become a Host</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground">Host Guidelines</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-foreground">Trust & Safety</Link></li>
+              <li><Link href="/host-guidelines" className="text-muted-foreground hover:text-foreground">Host Guidelines</Link></li>
+              <li><Link href="/trust-and-safety" className="text-muted-foreground hover:text-foreground">Trust & Safety</Link></li>
             </ul>
           </div>
           <div>
