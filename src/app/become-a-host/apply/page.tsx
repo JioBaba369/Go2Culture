@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -135,8 +135,9 @@ const formSchema = z.object({
 
 type OnboardingFormValues = z.infer<typeof formSchema>;
 
-const ComplianceField = ({ control, requirement }: { control: any, requirement: ComplianceRequirement }) => {
-  const watchCondition = requirement.condition ? useForm<OnboardingFormValues>().watch(`compliance.${requirement.condition}` as any) : true;
+const ComplianceField = ({ requirement }: { requirement: ComplianceRequirement }) => {
+  const { control, watch } = useFormContext<OnboardingFormValues>();
+  const watchCondition = requirement.condition ? watch(`compliance.${requirement.condition}` as any) : true;
   if (!watchCondition) return null;
 
   return (
@@ -148,7 +149,7 @@ const ComplianceField = ({ control, requirement }: { control: any, requirement: 
           {requirement.type === 'checkbox' ? (
              <div className="flex flex-row items-start space-x-3 space-y-0">
               <FormControl>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                <Checkbox checked={!!field.value} onCheckedChange={field.onChange} />
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>{requirement.label}</FormLabel>
@@ -329,10 +330,10 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                <FormField control={form.control} name="fullName" render={({ field }) => (
-                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} type="email" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} type="email" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
             </CardContent>
           </Card>
@@ -345,16 +346,16 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                <FormField control={form.control} name="profile.profilePhoto" render={({ field }) => (
-                  <FormItem><FormLabel>Profile Photo</FormLabel><FormDescription>You can upload a real photo later. We'll use a placeholder for now.</FormDescription><FormControl><Input type="file" disabled/></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Profile Photo</FormLabel><FormDescription>You can upload a real photo later. We'll use a placeholder for now.</FormDescription><FormControl><Input type="file" disabled /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="profile.bio" render={({ field }) => (
-                <FormItem><FormLabel>Your Bio</FormLabel><FormDescription>Tell guests about you, your passions, and your culture.</FormDescription><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Your Bio</FormLabel><FormDescription>Tell guests about you, your passions, and your culture.</FormDescription><FormControl><Textarea {...field} rows={5} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
                <FormField control={form.control} name="profile.culturalBackground" render={({ field }) => (
-                <FormItem><FormLabel>Cultural Background</FormLabel><FormDescription>E.g., "Italian-Australian", "Cantonese", "Nigerian", "Māori"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Cultural Background</FormLabel><FormDescription>E.g., "Italian-Australian", "Cantonese", "Nigerian", "Māori"</FormDescription><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="profile.languages" render={({ field }) => (
-                <FormItem><FormLabel>Languages Spoken</FormLabel><FormControl><Input {...field} placeholder="e.g., English, Spanish, Italian" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Languages Spoken</FormLabel><FormControl><Input {...field} placeholder="e.g., English, Spanish, Italian" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField
                 control={form.control}
@@ -402,7 +403,7 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <FormField control={form.control} name="experience.title" render={({ field }) => (
-                  <FormItem><FormLabel>Experience Title</FormLabel><FormControl><Input {...field} placeholder="e.g., Traditional Kerala Home Feast" /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Experience Title</FormLabel><FormControl><Input {...field} placeholder="e.g., Traditional Kerala Home Feast" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField control={form.control} name="experience.category" render={({ field }) => (
@@ -417,7 +418,7 @@ export default function BecomeAHostPage() {
                     </SelectContent></Select><FormMessage /></FormItem>
                   )} />
                    <FormField control={form.control} name="experience.durationMinutes" render={({ field }) => (
-                    <FormItem><FormLabel>Duration (in minutes)</FormLabel><FormControl><Input {...field} type="number" placeholder="e.g., 180" /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Duration (in minutes)</FormLabel><FormControl><Input {...field} type="number" placeholder="e.g., 180" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
             </CardContent>
@@ -431,18 +432,18 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField control={form.control} name="experience.menu.description" render={({ field }) => (
-                <FormItem><FormLabel>Menu Description</FormLabel><FormControl><Textarea {...field} rows={4} placeholder="Describe the courses, ingredients, and the story behind the food."/></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Menu Description</FormLabel><FormControl><Textarea {...field} rows={4} placeholder="Describe the courses, ingredients, and the story behind the food." value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField control={form.control} name="experience.menu.cuisine" render={({ field }) => (
-                    <FormItem><FormLabel>Cuisine Type</FormLabel><FormControl><Input {...field} placeholder="e.g., Italian, Mexican, Japanese" /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Cuisine Type</FormLabel><FormControl><Input {...field} placeholder="e.g., Italian, Mexican, Japanese" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                   )} />
                   <FormField control={form.control} name="experience.menu.spiceLevel" render={({ field }) => (
                     <FormItem><FormLabel>Spice Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select spice level" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Mild">Mild</SelectItem><SelectItem value="Medium">Medium</SelectItem><SelectItem value="Spicy">Spicy</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
                </div>
                <FormField control={form.control} name="experience.menu.allergens" render={({ field }) => (
-                  <FormItem><FormLabel>Allergens</FormLabel><FormDescription>List any potential allergens present in your kitchen (e.g., nuts, shellfish, dairy).</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Allergens</FormLabel><FormDescription>List any potential allergens present in your kitchen (e.g., nuts, shellfish, dairy).</FormDescription><FormControl><Input {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )} />
             </CardContent>
           </Card>
@@ -474,10 +475,10 @@ export default function BecomeAHostPage() {
                     )} />
                 </div>
                <FormField control={form.control} name="location.address" render={({ field }) => (
-                <FormItem><FormLabel>Full Address</FormLabel><FormControl><Input {...field} placeholder="123 Main Street, Sydney" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Full Address</FormLabel><FormControl><Input {...field} placeholder="123 Main Street, Sydney" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="location.postcode" render={({ field }) => (
-                <FormItem><FormLabel>Postcode</FormLabel><FormControl><Input {...field} placeholder="2000" /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Postcode</FormLabel><FormControl><Input {...field} placeholder="2000" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
               )} />
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <FormField control={form.control} name="homeSetup.homeType" render={({ field }) => (
@@ -488,17 +489,17 @@ export default function BecomeAHostPage() {
                   )} />
                </div>
                 <FormField control={form.control} name="homeSetup.maxGuests" render={({ field }) => (
-                    <FormItem><FormLabel>Max Guests</FormLabel><FormControl><Input {...field} type="number" min="1" max="20" /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Max Guests</FormLabel><FormControl><Input {...field} type="number" min="1" max="20" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                   )} />
                 <FormField control={form.control} name="homeSetup.accessibility" render={({ field }) => (
-                  <FormItem><FormLabel>Accessibility Notes</FormLabel><FormDescription>E.g., "There are 3 steps to enter", "Elevator access available".</FormDescription><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Accessibility Notes</FormLabel><FormDescription>E.g., "There are 3 steps to enter", "Elevator access available".</FormDescription><FormControl><Textarea {...field} rows={2} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )} />
                <div className="flex items-center space-x-8 pt-2">
                 <FormField control={form.control} name="homeSetup.pets" render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>I have pets</FormLabel></div></FormItem>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={!!field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>I have pets</FormLabel></div></FormItem>
                 )} />
                 <FormField control={form.control} name="homeSetup.smoking" render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Smoking is allowed</FormLabel></div></FormItem>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={!!field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Smoking is allowed</FormLabel></div></FormItem>
                 )} />
                </div>
             </CardContent>
@@ -533,7 +534,7 @@ export default function BecomeAHostPage() {
                   <div className="space-y-4">
                     <h3 className="font-medium text-foreground">Requirements for {countryCompliance.name}</h3>
                     {countryCompliance.requirements.map((req) => (
-                      <ComplianceField key={req.id} control={form.control} requirement={req} />
+                      <ComplianceField key={req.id} requirement={req} />
                     ))}
                   </div>
                 )}
@@ -542,7 +543,7 @@ export default function BecomeAHostPage() {
                   <div className="space-y-4">
                     <h3 className="font-medium text-foreground">Requirements for {stateCompliance.name}</h3>
                     {stateCompliance.requirements.map((req) => (
-                      <ComplianceField key={req.id} control={form.control} requirement={req} />
+                      <ComplianceField key={req.id} requirement={req} />
                     ))}
                   </div>
                 )}
@@ -560,12 +561,12 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-6">
                 <FormField control={form.control} name="experience.pricing.pricePerGuest" render={({ field }) => (
-                  <FormItem><FormLabel>Price per Guest (USD)</FormLabel><FormControl><Input {...field} type="number" min="10" /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Price per Guest (USD)</FormLabel><FormControl><Input {...field} type="number" min="10" value={field.value || ''} /></FormControl><FormMessage /></FormItem>
                 )} />
 
                 <FormField control={form.control} name="compliance.agreeToFoodSafety" render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
+                      <FormControl><Checkbox checked={!!field.value} onCheckedChange={field.onChange}/></FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>I acknowledge my food safety responsibilities.</FormLabel>
                         <FormDescription>I understand that I am responsible for preparing food safely and in accordance with local laws. Go2Culture is a platform, not a food provider.</FormDescription>
@@ -575,7 +576,7 @@ export default function BecomeAHostPage() {
 
                 <FormField control={form.control} name="compliance.guidelinesAccepted" render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
+                      <FormControl><Checkbox checked={!!field.value} onCheckedChange={field.onChange}/></FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>I agree to the Go2Culture Host Guidelines.</FormLabel>
                         <FormDescription>This includes respecting guests, maintaining hygiene, and following all platform rules.</FormDescription>
@@ -603,3 +604,5 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
+
+    
