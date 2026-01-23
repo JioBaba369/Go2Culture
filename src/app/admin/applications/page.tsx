@@ -15,10 +15,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Eye, AlertTriangle } from "lucide-react";
+import { Eye, AlertTriangle, MoreHorizontal } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { HostApplication } from "@/lib/types";
 import { collection } from "firebase/firestore";
@@ -60,12 +67,23 @@ export default function HostApplicationsPage() {
           </Badge>
         </TableCell>
         <TableCell>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/admin/applications/${app.id}`}>
-              <Eye className="mr-2 h-4 w-4"/>
-              View
-            </Link>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/applications/${app.id}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Application
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </TableCell>
       </TableRow>
     ));
@@ -80,11 +98,24 @@ export default function HostApplicationsPage() {
             <p className="text-sm text-muted-foreground">{app.experience.title}</p>
             <p className="text-xs text-muted-foreground">{app.location.suburb}, {app.location.country}</p>
           </div>
-            <Link href={`/admin/applications/${app.id}`} className="text-primary hover:underline flex items-center gap-1 text-sm">
-              <Eye className="h-4 w-4" /> View
-            </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/applications/${app.id}`}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Application
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-          <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between">
           <Badge variant={statusVariantMap[app.status]}>
             {app.status}
           </Badge>
