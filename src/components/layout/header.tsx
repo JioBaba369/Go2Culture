@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, User as UserIcon } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -17,6 +17,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 
 const navLinks = [
@@ -77,6 +78,15 @@ export function Header() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/profile">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>My Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
@@ -115,7 +125,12 @@ export function Header() {
                 ))}
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
                   {user ? (
-                     <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>Log Out</Button>
+                     <>
+                      <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
+                        <Link href="/profile">My Profile</Link>
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start text-lg font-medium" onClick={handleLogout}>Log Out</Button>
+                    </>
                   ) : (
                     <>
                       <Button variant="ghost" className="w-full justify-start" asChild>

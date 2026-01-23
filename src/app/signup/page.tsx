@@ -15,7 +15,7 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { useAuth, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
@@ -43,6 +43,9 @@ export default function SignupPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      
+      // Update auth profile displayName
+      await updateProfile(user, { displayName: fullName });
 
       // Create user document in Firestore
       const userRef = doc(firestore, 'users', user.uid);
