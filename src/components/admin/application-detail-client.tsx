@@ -34,6 +34,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { approveApplication, rejectApplication, requestChangesForApplication } from "@/lib/admin-actions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function ApplicationDetailClient({
   applicationId,
@@ -117,16 +118,32 @@ export function ApplicationDetailClient({
   if (isLoading) {
     return <Skeleton className="h-screen w-full" />;
   }
+
+  // If auth has loaded but there's no user, they shouldn't be here.
+  if (!isAuthLoading && !user) {
+    router.push('/login?redirect=/admin/applications'); // Redirect to login
+    return <Skeleton className="h-screen w-full" />; // Render skeleton while redirecting
+  }
   
   if (error) {
      return (
-        <div className="py-20 text-center">
+        <div className="py-20 px-4 text-center space-y-4">
             <h1 className="text-2xl font-bold">Error Loading Application</h1>
-            <p className="text-muted-foreground">Could not load the application. You may not have permission to view it.</p>
+            <Alert variant="destructive" className="max-w-2xl mx-auto text-left">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Permission Denied</AlertTitle>
+              <AlertDescription>
+                Could not load the application. You may not have permission to view it. Please ensure you are logged in with an admin account.
+                <pre className="mt-4 p-2 bg-background rounded-md text-xs whitespace-pre-wrap font-mono">
+                  {error.message}
+                </pre>
+              </AlertDescription>
+            </Alert>
         </div>
     );
   }
 
+  // Now that we know we're not loading and there's no error, if `application` is null, it really doesn't exist.
   if (!application) {
     notFound();
   }
@@ -234,7 +251,7 @@ export function ApplicationDetailClient({
               <p className="text-sm italic text-muted-foreground">"{application.profile.bio}"</p>
               <div className="flex items-center gap-2 text-sm">
                 <Languages className="h-4 w-4 text-muted-foreground"/>
-                <span>{application.profile.languages.join(", ")}</span>
+                <span>{Array.isArray(application.profile.languages) ? application.profile.languages.join(", ") : application.profile.languages}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Info className="h-4 w-4 text-muted-foreground"/>
