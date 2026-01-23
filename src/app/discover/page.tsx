@@ -99,10 +99,10 @@ function DiscoverPageContent() {
     if (localArea) {
       results = results.filter(e => e.location.localArea === localArea);
     }
-    if (cuisine) {
+    if (cuisine && cuisine !== 'all') {
       results = results.filter(e => e.menu.cuisine === cuisine);
     }
-    if (rating) {
+    if (rating && rating !== 'all') {
       results = results.filter(e => e.rating.average >= parseFloat(rating));
     }
     
@@ -155,14 +155,14 @@ function DiscoverPageContent() {
             <Select onValueChange={setSelectedCuisine} value={selectedCuisine}>
                 <SelectTrigger><SelectValue placeholder="Cuisine" /></SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="">All Cuisines</SelectItem>
+                    <SelectItem value="all">All Cuisines</SelectItem>
                     {allCuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
             </Select>
             <Select onValueChange={setSelectedRating} value={selectedRating}>
                 <SelectTrigger><SelectValue placeholder="Rating" /></SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="">Any Rating</SelectItem>
+                    <SelectItem value="all">Any Rating</SelectItem>
                     <SelectItem value="4.5">4.5+ stars</SelectItem>
                     <SelectItem value="4">4+ stars</SelectItem>
                     <SelectItem value="3">3+ stars</SelectItem>
