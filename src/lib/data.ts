@@ -362,6 +362,8 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   '6': [],
   '7': [],
   '8': [],
+  '9': [],
+  '10': [],
 }
 
 export const experiences: Experience[] = [
@@ -549,6 +551,52 @@ export const experiences: Experience[] = [
     reviews: experienceReviews['8'],
     createdAt: '2023-05-08T09:00:00Z',
   },
+  {
+    id: '9',
+    hostId: 'host-1',
+    host: hosts.find(h => h.id === 'host-1')!,
+    title: 'Maria\'s Trattoria Pop-up',
+    category: 'Cultural Restaurant',
+    description: 'For one week only, experience the magic of my family\'s cooking in a cozy restaurant setting. A special menu of regional Italian classics, served in a space we\'ve transformed into a little piece of Rome.',
+    durationMinutes: 180,
+    menu: {
+      cuisine: 'Italian',
+      description: 'A special 5-course tasting menu featuring dishes from the Lazio region.',
+      dietary: ['Vegetarian option available'],
+      spiceLevel: 'Mild',
+    },
+    pricing: { pricePerGuest: 110, maxGuests: 20 },
+    availability: { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], timeSlots: ['19:30'] },
+    location: { country: 'IT', state: 'LAZ', suburb: 'ROME', localArea: 'TRA' },
+    photos: { mainImageId: 'exp-9-main', thumbnailImageIds: [] },
+    status: 'live',
+    rating: { average: 5.0, count: 12 },
+    reviews: experienceReviews['9'],
+    createdAt: '2023-06-01T09:00:00Z',
+  },
+  {
+    id: '10',
+    hostId: 'host-3',
+    host: hosts.find(h => h.id === 'host-3')!,
+    title: 'Diwali Festival of Lights Dinner',
+    category: 'Special Event',
+    description: 'Celebrate Diwali, the festival of lights, with my family! A special festive menu, traditional sweets (mithai), stories about the festival, and a chance to light sparklers. This is a one-time event to share our most important celebration.',
+    durationMinutes: 240,
+    menu: {
+      cuisine: 'Indian',
+      description: 'A grand vegetarian feast (Thali) with special Diwali sweets and snacks.',
+      dietary: ['Vegetarian', 'Vegan'],
+      spiceLevel: 'Medium',
+    },
+    pricing: { pricePerGuest: 75, maxGuests: 15 },
+    availability: { days: ['Saturday'], timeSlots: ['18:00'] },
+    location: { country: 'IN', state: 'KAR', suburb: 'BANG', localArea: 'MALL' },
+    photos: { mainImageId: 'exp-10-main', thumbnailImageIds: [] },
+    status: 'live',
+    rating: { average: 4.9, count: 25 },
+    reviews: experienceReviews['10'],
+    createdAt: '2023-06-02T09:00:00Z',
+  },
 ];
 
 export const hostApplications: HostApplication[] = [
@@ -567,7 +615,7 @@ export const hostApplications: HostApplication[] = [
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         location: { country: 'IT', state: 'LAZ', suburb: 'Rome', postcode: '00153' },
-        homeSetup: { homeType: 'Apartment', seating: 'Table', accessibility: 'Elevator available', maxGuests: 6, pets: false, smoking: false },
+        homeSetup: { homeType: 'Apartment', seating: 'Table', accessibility: 'Elevator access', maxGuests: 6, pets: false, smoking: false },
         experience: {
             title: 'Nonna\'s Roman Pasta Feast',
             description: experiences[0].description,
@@ -710,3 +758,5 @@ export const reports: Report[] = [
         status: 'Resolved',
     }
 ];
+
+    

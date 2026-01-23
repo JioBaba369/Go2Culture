@@ -73,6 +73,18 @@
       "imageHint": "vietnamese pho"
     },
     {
+      "id": "exp-9-main",
+      "description": "The interior of a cozy, rustic Italian restaurant",
+      "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxpdGFsaWFuJTIwcmVzdGF1cmFudHxlbnwwfHx8fDE3Njk0MjE4MDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "italian restaurant"
+    },
+    {
+      "id": "exp-10-main",
+      "description": "A vibrant celebration of the Diwali festival with food and lights",
+      "imageUrl": "https://images.unsplash.com/photo-1667089422040-b63633df1821?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkaXdhbGklMjBjZWxlYnJhdGlvbnxlbnwwfHx8fDE3Njk0MjE4MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "diwali celebration"
+    },
+    {
       "id": "host-1",
       "description": "Portrait of a smiling woman, Maria",
       "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c21pbGluZyUyMHdvbWFufGVufDB8fHx8MTc2OTA0MzEzN3ww&ixlib=rb-4.1.0&q=80&w=1080",

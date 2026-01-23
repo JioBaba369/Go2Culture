@@ -97,7 +97,7 @@ export type Experience = {
   hostId: string;
   host: Host; // Denormalized for easy access in UI
   title: string;
-  category: 'Home-cooked meal' | 'Cultural dinner' | 'Cooking + dining';
+  category: 'Home-cooked meal' | 'Cultural dinner' | 'Cooking + dining' | 'Cultural Restaurant' | 'Special Event';
   description: string;
   durationMinutes: number;
   menu: {
@@ -227,3 +227,5 @@ export type Report = {
   date: string;
   status: 'Open' | 'In Progress' | 'Resolved';
 };
+
+    

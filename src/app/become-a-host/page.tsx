@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ShieldCheck, DollarSign, Globe, Heart, Home, User, Utensils, Camera } from 'lucide-react';
+import { ShieldCheck, DollarSign, Globe, Heart, Home, User, Utensils, Camera, Building, Calendar } from 'lucide-react';
 
 export default function BecomeAHostLandingPage() {
     const heroImage = PlaceHolderImages.find(p => p.id === 'exp-1-thumb-1');
@@ -30,7 +30,7 @@ export default function BecomeAHostLandingPage() {
             <section className="text-center">
                 <h1 className="font-headline text-4xl md:text-6xl font-bold">Open your home. Share your culture. Get paid.</h1>
                 <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                    Go2Culture lets you host guests in your home for authentic cultural meals and experiences. Turn your passion into an opportunity.
+                    Go2Culture lets you host guests for authentic cultural meals and events, whether it's in your home, at a pop-up, or in your restaurant.
                 </p>
                 <Button asChild size="lg" className="mt-8">
                     <Link href="/become-a-host/apply">🚀 Become a Host</Link>
@@ -49,6 +49,34 @@ export default function BecomeAHostLandingPage() {
                     />
                 </div>
             )}
+
+             {/* What can you host */}
+            <section>
+                <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">What Can You Host?</h2>
+                <div className="grid md:grid-cols-3 gap-8 mt-8 max-w-5xl mx-auto">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                            <Home className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold font-headline">In-Home Dining</h3>
+                        <p className="text-muted-foreground mt-2">The classic Go2Culture experience. Welcome guests to your table for a meal.</p>
+                    </div>
+                    <div className="flex flex-col items-center text-center">
+                        <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                            <Building className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold font-headline">Restaurant Experiences</h3>
+                        <p className="text-muted-foreground mt-2">Own a restaurant? Offer a special Go2Culture menu or a unique cultural tasting.</p>
+                    </div>
+                    <div className="flex flex-col items-center text-center">
+                        <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                            <Calendar className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold font-headline">Special Events</h3>
+                        <p className="text-muted-foreground mt-2">Host a one-off event like a festival dinner, a cooking workshop, or a pop-up.</p>
+                    </div>
+                </div>
+            </section>
 
             {/* Why Host Section */}
             <section>
@@ -132,3 +160,5 @@ export default function BecomeAHostLandingPage() {
         </div>
     );
 }
+
+    

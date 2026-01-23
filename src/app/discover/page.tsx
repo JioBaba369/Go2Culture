@@ -21,6 +21,7 @@ import { Separator } from '@/components/ui/separator';
 
 const allCuisines = [...new Set(experiences.map(e => e.menu.cuisine))];
 const allDietary = [...new Set(experiences.flatMap(e => e.menu.dietary))];
+const allCategories = [...new Set(experiences.map(e => e.category))];
 const maxPrice = Math.max(...experiences.map(e => e.pricing.pricePerGuest));
 
 export default function DiscoverPage() {
@@ -28,12 +29,14 @@ export default function DiscoverPage() {
   
   const [cuisine, setCuisine] = useState(searchParams.get('cuisine') || 'all');
   const [dietary, setDietary] = useState<string[]>(searchParams.getAll('dietary'));
+  const [categories, setCategories] = useState<string[]>(searchParams.getAll('category'));
   const [price, setPrice] = useState([maxPrice]);
   const [rating, setRating] = useState('all');
 
   const filteredExperiences = useMemo(() => {
     return experiences.filter(exp => {
       if (cuisine !== 'all' && exp.menu.cuisine !== cuisine) return false;
+      if (categories.length > 0 && !categories.includes(exp.category)) return false;
       if (dietary.length > 0 && !dietary.every(d => exp.menu.dietary.includes(d))) return false;
       if (exp.pricing.pricePerGuest > price[0]) return false;
       if (rating !== 'all' && exp.rating.average < Number(rating)) return false;
@@ -44,10 +47,16 @@ export default function DiscoverPage() {
       if (searchParams.get('localArea') && exp.location.localArea !== searchParams.get('localArea')) return false;
       return true;
     });
-  }, [cuisine, dietary, price, rating, searchParams]);
+  }, [cuisine, dietary, categories, price, rating, searchParams]);
 
   const handleDietaryChange = (option: string) => {
     setDietary(prev => 
+      prev.includes(option) ? prev.filter(item => item !== option) : [...prev, option]
+    );
+  };
+  
+  const handleCategoryChange = (option: string) => {
+    setCategories(prev => 
       prev.includes(option) ? prev.filter(item => item !== option) : [...prev, option]
     );
   };
@@ -77,6 +86,24 @@ export default function DiscoverPage() {
                     {allCuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Experience Type</label>
+                <div className="space-y-2">
+                  {allCategories.map(option => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${option}`}
+                        checked={categories.includes(option)}
+                        onCheckedChange={() => handleCategoryChange(option)}
+                      />
+                      <label htmlFor={`category-${option}`} className="text-sm">
+                        {option}
+                      </label>
+                    </div>
+                  ))}
+                </div>
               </div>
               
               <div className="space-y-2">
@@ -147,3 +174,5 @@ export default function DiscoverPage() {
     </div>
   );
 }
+
+    

@@ -158,7 +158,14 @@
         },
         "category": {
           "type": "string",
-          "description": "Category of the experience (e.g., Home-cooked meal, Cultural dinner)."
+          "description": "Category of the experience (e.g., Home-cooked meal, Cultural Restaurant, Special Event).",
+          "enum": [
+            "Home-cooked meal",
+            "Cultural dinner",
+            "Cooking + dining",
+            "Cultural Restaurant",
+            "Special Event"
+          ]
         },
         "duration": {
           "type": "string",
@@ -578,3 +585,5 @@
     "reasoning": "The Firestore data structure is designed to support a secure and scalable marketplace for cultural experiences. It prioritizes authorization independence through denormalization, enabling robust security rules and atomic operations. Structural segregation ensures each collection has a homogeneous security posture, simplifying rules and improving debuggability. Access modeling follows consistent patterns, utilizing path-based ownership for user-owned data and membership maps for collaborative data. Data clarity is enhanced through explicit state modeling and predictable schemas. \n\nSpecifically, authorization independence is achieved by denormalizing relevant authorization data (e.g., `hostId` in `experiences`, `experienceId` and `hostId` in `bookings`, reviews, and messages). This eliminates the need for `get()` calls in security rules, preventing hierarchical authorization dependencies and enabling atomic operations. \n\nTo support required QAPs:\n\n*   Secure `list` operations are enabled through structural segregation (e.g., `/users/{userId}/hosts` ensures only the user can list their own hosts) and consistent use of path-based ownership.\n*   Membership maps (not applicable in this design as collaboration is implicit through bookings and reviews, which use denormalized ids for authorization).\n\nThis design ensures clarity of intent, DBAC (roles stored in the database), and invariants (ownership, timestamps) for a secure and maintainable application."
   }
 }
+
+    
