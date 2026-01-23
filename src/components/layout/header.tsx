@@ -44,7 +44,7 @@ export function Header() {
   }, [firestore, user]);
   const { data: userProfile } = useDoc<User>(userDocRef);
   const isHost = userProfile?.role === 'host' || userProfile?.role === 'both';
-  const isAdmin = userProfile?.email === 'admin@go2culture.com'; // Simple admin check
+  const isAdmin = user?.uid === '9vjYTvqyLHSOZj27shGfhgpwgDw1';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
