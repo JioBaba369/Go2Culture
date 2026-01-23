@@ -37,6 +37,7 @@ export type Host = {
   id: string; // hostId
   userId: string;
   name: string; // Denormalized for display
+  level?: 'Superhost';
   profilePhotoId: string; // Denormalized for display
   status: 'draft' | 'under_review' | 'approved' | 'needs_changes' | 'suspended';
   
@@ -45,6 +46,7 @@ export type Host = {
     languages: string[];
     culturalBackground: string;
     hostingStyles: string[];
+    achievements?: string[];
   };
 
   verification: {

@@ -62,10 +62,11 @@ export const mockUsers: User[] = [
 
 export const mockHosts: Host[] = [
   {
-    id: 'host-1', userId: 'user-1', name: 'Maria', profilePhotoId: 'host-1', status: 'approved',
+    id: 'host-1', userId: 'user-1', name: 'Maria', level: 'Superhost', profilePhotoId: 'host-1', status: 'approved',
     profile: {
       bio: 'Passionate Italian home cook from Carlton, sharing my grandmother\'s recipes. I love opera, fresh pasta, and good conversation.',
       languages: ['Italian', 'English'], culturalBackground: 'Italian', hostingStyles: ['Family-style', 'Storytelling'],
+      achievements: ['Certified Sommelier', 'Le Cordon Bleu Pastry Diploma'],
     },
     verification: { idVerified: true, selfieVerified: true, verifiedAt: '2023-01-10T10:00:00Z' },
     location: { country: 'AU', region: 'VIC', suburb: 'MEL', localArea: 'CARLTON', postcode: '3053' },
@@ -77,6 +78,7 @@ export const mockHosts: Host[] = [
     profile: {
       bio: 'I am a designer and a foodie from Sydney. Join me for a quiet, traditional meal where we can appreciate the beauty of simplicity in Japanese cuisine.',
       languages: ['Japanese', 'English'], culturalBackground: 'Japanese', hostingStyles: ['Quiet & traditional'],
+      achievements: ['Published in "Zen Cooking" Magazine'],
     },
     verification: { idVerified: true, selfieVerified: true, verifiedAt: '2023-02-15T10:00:00Z' },
     location: { country: 'AU', region: 'NSW', suburb: 'SYD', localArea: 'SURRY', postcode: '2010' },

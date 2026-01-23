@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, where, limit, addDoc, serverTimestamp } from "firebase/firestore";
@@ -227,7 +227,14 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
         <div className="lg:col-span-2 space-y-8">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-headline text-2xl">Hosted by {host.name}</h2>
+              <h2 className="font-headline text-2xl flex items-center gap-2">
+                Hosted by {host.name}
+                {host.level === 'Superhost' && (
+                  <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 gap-1">
+                    <Award className="h-4 w-4" /> Superhost
+                  </Badge>
+                )}
+              </h2>
               <div className="flex items-center gap-4 text-muted-foreground mt-1">
                 <span>{durationHours} hours</span>
                 <span>·</span>
@@ -242,6 +249,17 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
           <Separator />
           
           <p className="text-lg leading-relaxed">{experience.description}</p>
+          <Separator />
+
+          <div className="space-y-4">
+            <h3 className="font-headline text-2xl">Where you'll be</h3>
+            <div className="text-muted-foreground">{suburbName}, {countryName}</div>
+            <div className="aspect-video w-full rounded-lg bg-muted flex items-center justify-center relative overflow-hidden mt-2">
+                <Image src="https://picsum.photos/seed/map/800/450" layout="fill" objectFit="cover" alt="Map of the area" data-ai-hint="map area" />
+                <MapPin className="h-10 w-10 text-primary drop-shadow-lg" />
+            </div>
+            <p className="text-sm text-muted-foreground">Exact address is provided after booking.</p>
+          </div>
           <Separator />
 
            <div className="space-y-4">
@@ -290,6 +308,24 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
                 {host.homeSetup.accessibility && <div className="flex items-center gap-2"><Accessibility className="h-5 w-5 text-primary" /><span>{host.homeSetup.accessibility}</span></div>}
              </div>
           </div>
+          
+          {host.profile.achievements && host.profile.achievements.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="font-headline text-2xl">Host Achievements</h3>
+                <div className="flex flex-wrap gap-2">
+                  {host.profile.achievements.map((achievement) => (
+                    <Badge key={achievement} variant="outline" className="text-base font-normal py-1">
+                      <Trophy className="h-4 w-4 mr-2 text-amber-500"/>
+                      {achievement}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
           <Separator />
           
           <div>

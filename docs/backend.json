@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -83,6 +84,11 @@
         "id": { "type": "string", "description": "Unique identifier for the Host entity." },
         "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:1 Host)." },
         "name": { "type": "string", "description": "Denormalized host name for display." },
+        "level": {
+          "type": "string",
+          "enum": ["Superhost"],
+          "description": "A special status awarded to top-rated and experienced hosts."
+        },
         "profilePhotoId": { "type": "string", "description": "Denormalized host profile photo ID for display." },
         "status": { "type": "string", "enum": ["draft", "under_review", "approved", "needs_changes", "suspended"] },
         "profile": {
@@ -91,7 +97,12 @@
             "bio": { "type": "string" },
             "languages": { "type": "array", "items": { "type": "string" } },
             "culturalBackground": { "type": "string" },
-            "hostingStyles": { "type": "array", "items": { "type": "string" } }
+            "hostingStyles": { "type": "array", "items": { "type": "string" } },
+            "achievements": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "A list of culinary achievements or certifications."
+            }
           }
         },
         "verification": {
