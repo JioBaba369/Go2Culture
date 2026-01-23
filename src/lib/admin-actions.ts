@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -65,12 +66,12 @@ export async function approveApplication(
 
   // 3. Create the first Experience from the application
   const experienceRef = doc(collection(firestore, 'experiences'));
-  const newExperienceData = {
+  const newExperienceData: Experience = {
     id: experienceRef.id,
     hostId: hostId,
     userId: application.userId,
     title: application.experience.title,
-    category: application.experience.category,
+    category: application.experience.category as any,
     description: application.experience.description,
     durationMinutes: application.experience.durationMinutes,
     menu: {
@@ -88,8 +89,8 @@ export async function approveApplication(
     location: {
        country: application.location.country,
        state: application.location.state || '',
-       suburb: application.location.suburb, // Using name not ID for now
-       localArea: application.location.localArea,
+       suburb: application.location.suburb,
+       localArea: application.location.localArea || '',
     },
     photos: {
       mainImageId: application.experience.photos.mainImageId,

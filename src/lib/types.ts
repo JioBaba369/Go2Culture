@@ -80,7 +80,7 @@ export type Host = {
   createdAt: any; // Allow ServerTimestamp
 };
 
-// This is a denormalized version for display on the experience page
+// This is a denormalized type for display on the experience page
 export type ExperienceReview = {
   id: string;
   author: {
@@ -141,7 +141,7 @@ export type Review = {
   bookingId: string;
   experienceId: string;
   hostId: string;
-  userId: string;
+  guestId: string; // Changed from userId
   rating: number;
   comment: string;
   createdAt: any; // Allow ServerTimestamp

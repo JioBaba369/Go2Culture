@@ -20,9 +20,8 @@ export async function seedDatabase(db: Firestore) {
 
   // Seed Experiences
   mockExperiences.forEach((exp: Experience) => {
-    const { host, reviews, ...experienceData } = exp; // Exclude nested objects not in schema
     const docRef = doc(db, "experiences", exp.id);
-    batch.set(docRef, { ...experienceData, createdAt: new Date(exp.createdAt) });
+    batch.set(docRef, { ...exp, createdAt: new Date(exp.createdAt) });
   });
 
   // Seed Reviews

@@ -127,6 +127,14 @@
         "compliance": {
           "type": "object",
           "properties": {
+            "foodBusinessRegistered": { "type": "boolean" },
+            "councilName": { "type": "string" },
+            "foodSafetyTrainingCompleted": { "type": "boolean" },
+            "foodActClassification": { "type": "boolean" },
+            "foodTraderRegistered": { "type": "boolean" },
+            "foodBusinessLicense": { "type": "boolean" },
+            "foodSafetySupervisor": { "type": "boolean" },
+            "foodBusinessNotification": { "type": "boolean" },
             "guidelinesAccepted": { "type": "boolean" }
           }
         },
@@ -222,6 +230,20 @@
               }
             }
           }
+        },
+        "compliance": {
+          "type": "object",
+          "properties": {
+            "foodBusinessRegistered": { "type": "boolean" },
+            "councilName": { "type": "string" },
+            "foodSafetyTrainingCompleted": { "type": "boolean" },
+            "foodActClassification": { "type": "boolean" },
+            "foodTraderRegistered": { "type": "boolean" },
+            "foodBusinessLicense": { "type": "boolean" },
+            "foodSafetySupervisor": { "type": "boolean" },
+            "foodBusinessNotification": { "type": "boolean" },
+            "guidelinesAccepted": { "type": "boolean" }
+          }
         }
       },
       "required": ["id", "userId", "hostName", "submittedDate", "status"]
@@ -313,7 +335,7 @@
       "description": "Represents a review given by a guest for an experience.",
       "properties": {
         "id": { "type": "string" },
-        "guestId": { "type": "string", "description": "Reference to User." },
+        "guestId": { "type": "string", "description": "Reference to the User who wrote the review." },
         "experienceId": { "type": "string", "description": "Reference to Experience." },
         "hostId": { "type": "string", "description": "Reference to Host." },
         "rating": { "type": "number" },

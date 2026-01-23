@@ -21,8 +21,8 @@ import { Skeleton } from "./ui/skeleton";
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
   const authorRef = useMemoFirebase(
-    () => (firestore && review.userId ? doc(firestore, 'users', review.userId) : null),
-    [firestore, review.userId]
+    () => (firestore && review.guestId ? doc(firestore, 'users', review.guestId) : null),
+    [firestore, review.guestId]
   );
   const { data: author, isLoading } = useDoc<User>(authorRef);
 
