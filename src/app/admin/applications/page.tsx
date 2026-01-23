@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -18,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Eye, AlertTriangle } from "lucide-react";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { HostApplication } from "@/lib/types";
 import { collection } from "firebase/firestore";
 import { format } from "date-fns";
@@ -36,7 +37,15 @@ const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'de
 
 export default function HostApplicationsPage() {
   const firestore = useFirestore();
-  const { data: hostApplications, isLoading, error } = useCollection<HostApplication>(useMemoFirebase(() => firestore ? collection(firestore, 'hostApplications') : null, [firestore]));
+  const { user, isUserLoading: isAuthLoading } = useUser();
+  
+  const applicationsQuery = useMemoFirebase(
+    () => (firestore && user ? collection(firestore, 'hostApplications') : null),
+    [firestore, user]
+  );
+  const { data: hostApplications, isLoading: areAppsLoading, error } = useCollection<HostApplication>(applicationsQuery);
+  const isLoading = isAuthLoading || (!!user && areAppsLoading);
+
 
   const renderTableRows = (apps: HostApplication[]) => {
     return apps.map((app) => (

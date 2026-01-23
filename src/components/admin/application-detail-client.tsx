@@ -1,3 +1,4 @@
+
 'use client';
 import { notFound, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
-import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
+import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { HostApplication } from "@/lib/types";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,11 +41,15 @@ export function ApplicationDetailClient({
   applicationId: string;
 }) {
   const firestore = useFirestore();
+  const { user, isUserLoading: isAuthLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState<null | 'approve' | 'changes' | 'reject'>(null);
 
-  const { data: application, isLoading } = useDoc<HostApplication>(useMemoFirebase(() => firestore ? doc(firestore, 'hostApplications', applicationId) : null, [firestore, applicationId]));
+  const appRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'hostApplications', applicationId) : null, [firestore, user, applicationId]);
+  const { data: application, isLoading: isDocLoading } = useDoc<HostApplication>(appRef);
+
+  const isLoading = isAuthLoading || (!!user && isDocLoading);
 
   const handleApprove = () => {
     if (!application || !firestore) return;
