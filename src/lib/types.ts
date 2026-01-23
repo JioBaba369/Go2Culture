@@ -1,26 +1,4 @@
 
-export type ComplianceFields = {
-  foodBusinessRegistered?: boolean;
-  councilName?: string;
-  foodSafetyTrainingCompleted?: boolean;
-  foodActClassification?: boolean;
-  foodTraderRegistered?: boolean;
-  foodBusinessLicense?: boolean;
-  foodSafetySupervisor?: boolean;
-  foodBusinessNotification?: boolean;
-  [key: string]: any;
-};
-
-export type Host = {
-  id: string;
-  name: string;
-  avatarImageId: string;
-  bio: string;
-  languages: string[];
-  culture: string;
-  hostingStyle: ('Family-style' | 'Storytelling' | 'Quiet & traditional' | 'Festive & social')[];
-};
-
 export type Review = {
   id: string;
   author: {
@@ -32,64 +10,167 @@ export type Review = {
   date: string;
 };
 
-export type Experience = {
-  id: string;
-  title: string;
-  host: Host;
-  country: string;
-  state: string;
-  suburb: string;
-  localArea: string;
-  category: 'Home-cooked meal' | 'Cultural dinner' | 'Cooking + dining';
-  duration: string;
-  maxGuests: number;
-  pricePerGuest: number;
-  mainImageId: string;
-  thumbnailImageIds: string[];
-  description: string;
-  menu: {
-    description: string;
-    cuisine: string;
-    dietary: string[];
-    spiceLevel: 'Mild' | 'Medium' | 'Spicy';
+export type Host = {
+  id: string; // hostId
+  userId: string;
+  name: string; // Denormalized for display
+  avatarImageId: string; // Denormalized for display
+  status: 'draft' | 'under_review' | 'approved' | 'needs_changes' | 'suspended';
+  profile: {
+    bio: string;
+    languages: string[];
+    culturalBackground: string;
+    hostingStyles: string[];
   };
-  rating: number;
-  reviewCount: number;
-  reviews: Review[];
-  availability: string[];
-  houseRules: {
+  verification: {
+    idVerified: boolean;
+    selfieVerified: boolean;
+    verifiedAt?: string;
+  };
+  location: {
+    country: string;
+    state: string;
+    suburb: string;
+    localArea?: string;
+    postcode: string;
+  };
+  homeSetup: {
+    homeType: string;
+    seating: string;
+    maxGuests: number;
     pets: boolean;
     smoking: boolean;
-    seatingType: 'Table' | 'Floor' | 'Mixed';
-    homeType?: string;
-    accessibilityNotes?: string;
+    accessibility: string;
   };
+  compliance: {
+    foodBusinessRegistered?: boolean;
+    councilName?: string;
+    foodSafetyTraining?: boolean;
+    guidelinesAccepted: boolean;
+    foodActClassification?: boolean;
+    foodTraderRegistered?: boolean;
+    foodBusinessLicense?: boolean;
+    foodSafetySupervisor?: boolean;
+    foodBusinessNotification?: boolean;
+    [key: string]: any;
+  };
+  rating: {
+    average: number;
+    count: number;
+  };
+  createdAt: string;
 };
 
+export type Experience = {
+  id: string; // experienceId
+  hostId: string;
+  host: Host; // Denormalized for easy access in UI
+  title: string;
+  category: 'Home-cooked meal' | 'Cultural dinner' | 'Cooking + dining';
+  description: string;
+  durationMinutes: number;
+  menu: {
+    cuisine: string;
+    description: string;
+    dietary: string[];
+    allergens?: string;
+    spiceLevel: 'Mild' | 'Medium' | 'Spicy';
+  };
+  pricing: {
+    pricePerGuest: number;
+    minGuests?: number;
+    maxGuests: number;
+  };
+  availability: {
+    days: string[];
+  };
+  location: {
+    country: string;
+    state: string;
+    suburb: string;
+    localArea?: string;
+  };
+  photos: {
+    mainImageId: string;
+    thumbnailImageIds: string[];
+  };
+  status: 'draft' | 'live' | 'paused';
+  rating: {
+    average: number;
+    count: number;
+  };
+  reviews: Review[];
+  createdAt: string;
+};
+
+
+// A denormalized type for the admin application view
 export type HostApplication = {
   id: string;
   hostName: string;
-  city: string;
-  country: string;
-  state: string;
-  experienceTitle: string;
-  status: 'Pending' | 'Approved' | 'Changes Needed' | 'Rejected';
   submittedDate: string;
+  status: 'Pending' | 'Approved' | 'Changes Needed' | 'Rejected';
   riskFlag: 'Low' | 'Medium' | 'High' | null;
+  
   profile: {
     photoId: string;
     bio: string;
     languages: string[];
-    culture: string;
-    hostingStyle: ('Family-style' | 'Storytelling' | 'Quiet & traditional' | 'Festive & social')[];
+    culturalBackground: string;
+    hostingStyles: string[];
   };
+
   verification: {
     idDocId: string;
     selfieId: string;
     status: 'Verified' | 'Pending' | 'Failed';
   };
-  experience: Omit<Experience, 'id' | 'host' | 'reviews' | 'rating' | 'reviewCount' | 'availability'>;
-  compliance: ComplianceFields;
-};
 
+  location: {
+    country: string;
+    state: string;
+    suburb: string;
+    localArea?: string;
+    postcode: string;
+  };
+  
+  homeSetup: {
+    homeType: string;
+    seating: string;
+    accessibility?: string;
+  };
+
+  experience: {
+    title: string;
+    description: string;
+    duration: string; // Keep as string for mock/display
+    category: string;
     
+    menu: {
+      cuisine: string;
+      description: string;
+      spiceLevel: 'Mild' | 'Medium' | 'Spicy';
+    };
+
+    pricing: {
+      pricePerGuest: number;
+      maxGuests: number;
+    };
+    
+    photos: {
+      mainImageId: string;
+    }
+  };
+
+  compliance: {
+    foodBusinessRegistered?: boolean;
+    councilName?: string;
+    foodSafetyTrainingCompleted?: boolean;
+    guidelinesAccepted: boolean;
+    foodActClassification?: boolean;
+    foodTraderRegistered?: boolean;
+    foodBusinessLicense?: boolean;
+    foodSafetySupervisor?: boolean;
+    foodBusinessNotification?: boolean;
+  };
+};

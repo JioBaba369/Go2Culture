@@ -1,3 +1,4 @@
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { experiences } from "@/lib/data";
@@ -7,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Star, Clock, Users, MapPin, Languages, Utensils, Award, ShieldCheck, Sparkles, Home, Wind, Accessibility } from "lucide-react";
 import { countries, states, suburbs, localAreas } from "@/lib/location-data";
 
@@ -17,12 +19,13 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
     notFound();
   }
 
-  const mainImage = PlaceHolderImages.find(p => p.id === experience.mainImageId);
+  const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
   const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.avatarImageId);
   
-  const countryName = countries.find(c => c.id === experience.country)?.name || experience.country;
-  const suburbName = suburbs.find(s => s.id === experience.suburb)?.name || experience.suburb;
-  const localAreaName = localAreas.find(l => l.id === experience.localArea)?.name || experience.localArea;
+  const countryName = countries.find(c => c.id === experience.location.country)?.name || experience.location.country;
+  const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;
+  const localAreaName = localAreas.find(l => l.id === experience.location.localArea)?.name || experience.location.localArea;
+  const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
 
   return (
     <div className="py-8">
@@ -32,8 +35,8 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
         <div className="flex items-center gap-4 mt-2 text-muted-foreground">
           <div className="flex items-center gap-1">
             <Star className="h-5 w-5 text-accent fill-accent" />
-            <span className="font-bold text-foreground">{experience.rating}</span>
-            <span>({experience.reviewCount} reviews)</span>
+            <span className="font-bold text-foreground">{experience.rating.average}</span>
+            <span>({experience.rating.count} reviews)</span>
           </div>
           <span className="text-muted-foreground">·</span>
           <div className="flex items-center gap-1">
@@ -68,9 +71,9 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
             <div>
               <h2 className="font-headline text-2xl">Hosted by {experience.host.name}</h2>
               <div className="flex items-center gap-4 text-muted-foreground mt-1">
-                <span>{experience.duration}</span>
+                <span>{durationHours} hours</span>
                 <span>·</span>
-                <span>Up to {experience.maxGuests} guests</span>
+                <span>Up to {experience.pricing.maxGuests} guests</span>
               </div>
             </div>
             <Avatar className="h-16 w-16">
@@ -110,10 +113,10 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
           <div className="space-y-4">
             <h3 className="font-headline text-2xl">About your host's home</h3>
              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2"><Home className="h-5 w-5 text-primary" /><span>{experience.houseRules.homeType} with {experience.houseRules.seatingType} seating</span></div>
-                <div className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /><span>Pets live here: {experience.houseRules.pets ? 'Yes' : 'No'}</span></div>
-                <div className="flex items-center gap-2"><Wind className="h-5 w-5 text-primary" /><span>Smoking allowed: {experience.houseRules.smoking ? 'Yes' : 'No'}</span></div>
-                {experience.houseRules.accessibilityNotes && <div className="flex items-center gap-2"><Accessibility className="h-5 w-5 text-primary" /><span>{experience.houseRules.accessibilityNotes}</span></div>}
+                <div className="flex items-center gap-2"><Home className="h-5 w-5 text-primary" /><span>{experience.host.homeSetup.homeType} with {experience.host.homeSetup.seating} seating</span></div>
+                <div className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /><span>Pets live here: {experience.host.homeSetup.pets ? 'Yes' : 'No'}</span></div>
+                <div className="flex items-center gap-2"><Wind className="h-5 w-5 text-primary" /><span>Smoking allowed: {experience.host.homeSetup.smoking ? 'Yes' : 'No'}</span></div>
+                {experience.host.homeSetup.accessibility && <div className="flex items-center gap-2"><Accessibility className="h-5 w-5 text-primary" /><span>{experience.host.homeSetup.accessibility}</span></div>}
              </div>
           </div>
           <Separator />
@@ -122,7 +125,7 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
           <div>
             <h3 className="font-headline text-2xl flex items-center gap-2">
               <Star className="h-6 w-6 text-accent fill-accent" />
-              {experience.rating} ({experience.reviewCount} reviews)
+              {experience.rating.average} ({experience.rating.count} reviews)
             </h3>
             <div className="space-y-6 mt-4">
               {experience.reviews.slice(0, 2).map(review => (
@@ -141,7 +144,7 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
                 </div>
               ))}
             </div>
-             <Button variant="outline" className="mt-6">Show all {experience.reviewCount} reviews</Button>
+             <Button variant="outline" className="mt-6">Show all {experience.rating.count} reviews</Button>
           </div>
         </div>
         
@@ -150,10 +153,10 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
           <Card className="sticky top-24 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span><span className="text-3xl font-bold">${experience.pricePerGuest}</span> / person</span>
+                <span><span className="text-3xl font-bold">${experience.pricing.pricePerGuest}</span> / person</span>
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4"/>
-                  <span>{experience.rating} ({experience.reviewCount})</span>
+                  <span>{experience.rating.average} ({experience.rating.count})</span>
                 </div>
               </CardTitle>
             </CardHeader>

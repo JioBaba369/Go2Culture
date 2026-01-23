@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -14,11 +15,11 @@ interface ExperienceCardProps {
 }
 
 export function ExperienceCard({ experience }: ExperienceCardProps) {
-  const mainImage = PlaceHolderImages.find(p => p.id === experience.mainImageId);
+  const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
   const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.avatarImageId);
 
-  const countryName = countries.find(c => c.id === experience.country)?.name || experience.country;
-  const suburbName = suburbs.find(s => s.id === experience.suburb)?.name || experience.suburb;
+  const countryName = countries.find(c => c.id === experience.location.country)?.name || experience.location.country;
+  const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;
 
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col">
@@ -63,11 +64,11 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
         <div className="mt-4 flex items-center justify-between pt-4 border-t">
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 text-accent fill-accent" />
-            <span className="font-bold text-sm">{experience.rating}</span>
-            <span className="text-sm text-muted-foreground">({experience.reviewCount})</span>
+            <span className="font-bold text-sm">{experience.rating.average}</span>
+            <span className="text-sm text-muted-foreground">({experience.rating.count})</span>
           </div>
           <div className="text-right">
-            <span className="font-bold text-lg">${experience.pricePerGuest}</span>
+            <span className="font-bold text-lg">${experience.pricing.pricePerGuest}</span>
             <span className="text-sm text-muted-foreground"> / person</span>
           </div>
         </div>

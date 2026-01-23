@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -58,8 +59,8 @@ export default function HostApplicationsPage() {
               {hostApplications.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell className="font-medium">{app.hostName}</TableCell>
-                  <TableCell className="hidden md:table-cell">{app.city}, {app.country}</TableCell>
-                  <TableCell>{app.experienceTitle}</TableCell>
+                  <TableCell className="hidden md:table-cell">{app.location.suburb}, {app.location.country}</TableCell>
+                  <TableCell>{app.experience.title}</TableCell>
                   <TableCell className="hidden sm:table-cell">{app.submittedDate}</TableCell>
                   <TableCell>
                     <Badge variant={statusVariantMap[app.status]}>

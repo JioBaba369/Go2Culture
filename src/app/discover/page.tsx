@@ -74,16 +74,16 @@ function DiscoverPageContent() {
     const localArea = searchParams.get('localArea');
 
     if (country) {
-      results = results.filter(e => e.country === country);
+      results = results.filter(e => e.location.country === country);
     }
     if (state) {
-      results = results.filter(e => e.state === state);
+      results = results.filter(e => e.location.state === state);
     }
     if (suburb) {
-      results = results.filter(e => e.suburb === suburb);
+      results = results.filter(e => e.location.suburb === suburb);
     }
     if (localArea) {
-      results = results.filter(e => e.localArea === localArea);
+      results = results.filter(e => e.location.localArea === localArea);
     }
     
     return results;

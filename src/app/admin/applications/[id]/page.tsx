@@ -1,3 +1,4 @@
+
 import { hostApplications } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -41,7 +42,7 @@ export default function ApplicationDetailPage({
   const profilePhoto = PlaceHolderImages.find(p => p.id === application.profile.photoId);
   const idDocPhoto = PlaceHolderImages.find(p => p.id === application.verification.idDocId);
   const selfiePhoto = PlaceHolderImages.find(p => p.id === application.verification.selfieId);
-  const mainImage = PlaceHolderImages.find(p => p.id === application.experience.mainImageId);
+  const mainImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
 
   return (
     <div className="space-y-6">
@@ -82,9 +83,9 @@ export default function ApplicationDetailPage({
               <Separator />
               <div className="grid grid-cols-2 gap-4">
                 <div><p className="font-semibold">Cuisine</p><p>{application.experience.menu.cuisine}</p></div>
-                <div><p className="font-semibold">Price</p><p>${application.experience.pricePerGuest} / person</p></div>
+                <div><p className="font-semibold">Price</p><p>${application.experience.pricing.pricePerGuest} / person</p></div>
                 <div><p className="font-semibold">Duration</p><p>{application.experience.duration}</p></div>
-                <div><p className="font-semibold">Max Guests</p><p>{application.experience.maxGuests}</p></div>
+                <div><p className="font-semibold">Max Guests</p><p>{application.experience.pricing.maxGuests}</p></div>
                 <div><p className="font-semibold">Spice Level</p><p>{application.experience.menu.spiceLevel}</p></div>
               </div>
                <Separator />
@@ -99,16 +100,14 @@ export default function ApplicationDetailPage({
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-2 gap-4">
-                    <div><p className="font-semibold">Home Type</p><p>{application.experience.houseRules.homeType}</p></div>
-                    <div><p className="font-semibold">Seating</p><p>{application.experience.houseRules.seatingType}</p></div>
-                    <div><p className="font-semibold">Has Pets?</p><p>{application.experience.houseRules.pets ? 'Yes' : 'No'}</p></div>
-                    <div><p className="font-semibold">Smoking?</p><p>{application.experience.houseRules.smoking ? 'Yes' : 'No'}</p></div>
+                    <div><p className="font-semibold">Home Type</p><p>{application.homeSetup.homeType}</p></div>
+                    <div><p className="font-semibold">Seating</p><p>{application.homeSetup.seating}</p></div>
                 </div>
-                {application.experience.houseRules.accessibilityNotes && (
+                {application.homeSetup.accessibility && (
                     <>
                      <Separator className="my-4"/>
                      <p className="font-semibold">Accessibility Notes</p>
-                     <p className="text-sm text-muted-foreground">{application.experience.houseRules.accessibilityNotes}</p>
+                     <p className="text-sm text-muted-foreground">{application.homeSetup.accessibility}</p>
                     </>
                 )}
             </CardContent>
@@ -134,7 +133,7 @@ export default function ApplicationDetailPage({
                 {profilePhoto && <Image src={profilePhoto.imageUrl} alt={application.hostName} width={64} height={64} className="rounded-full" data-ai-hint={profilePhoto.imageHint} />}
                 <div>
                     <p className="font-bold text-lg">{application.hostName}</p>
-                    <p className="text-sm text-muted-foreground">{application.city}, {application.country}</p>
+                    <p className="text-sm text-muted-foreground">{application.location.suburb}, {application.location.country}</p>
                 </div>
               </div>
               <p className="text-sm italic text-muted-foreground">"{application.profile.bio}"</p>
@@ -144,12 +143,12 @@ export default function ApplicationDetailPage({
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Info className="h-4 w-4 text-muted-foreground"/>
-                <span>Culture: {application.profile.culture}</span>
+                <span>Culture: {application.profile.culturalBackground}</span>
               </div>
               <Separator />
                <p className="font-semibold">Hosting Style</p>
                <div className="flex flex-wrap gap-2">
-                {application.profile.hostingStyle.map(style => <Badge variant="secondary" key={style}>{style}</Badge>)}
+                {application.profile.hostingStyles.map(style => <Badge variant="secondary" key={style}>{style}</Badge>)}
                </div>
             </CardContent>
           </Card>

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -24,81 +24,94 @@ const hostingStyleOptions = [
   { id: 'festive-social', label: 'Festive & social' },
 ] as const;
 
-
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
   email: z.string().email("Invalid email address."),
   
-  profilePhoto: z.any().optional(),
-  bio: z.string().min(50, "Please tell us a bit more about yourself (min. 50 characters)."),
-  languages: z.string().min(2, "Please list the languages you speak."),
-  culture: z.string().min(2, "What is your cultural background?"),
-  hostingStyle: z.array(z.string()).refine(value => value.some(item => item), {
-    message: "You have to select at least one hosting style.",
+  profile: z.object({
+    profilePhoto: z.any().optional(),
+    bio: z.string().min(50, "Please tell us a bit more about yourself (min. 50 characters)."),
+    languages: z.string().min(2, "Please list the languages you speak."),
+    culturalBackground: z.string().min(2, "What is your cultural background?"),
+    hostingStyles: z.array(z.string()).refine(value => value.some(item => item), {
+      message: "You have to select at least one hosting style.",
+    }),
+  }),
+  
+  experience: z.object({
+    title: z.string().min(5, "Experience title is required."),
+    category: z.string({ required_error: "Please select a category." }),
+    duration: z.string().min(1, "Duration is required."),
+    menu: z.object({
+      description: z.string().min(20, "Please describe the menu (min. 20 characters)."),
+      cuisine: z.string().min(3, "Cuisine type is required."),
+      allergens: z.string().optional(),
+      spiceLevel: z.string({ required_error: "Please select a spice level." }),
+    }),
+    photos: z.object({
+      foodPhotos: z.any().optional(),
+      diningAreaPhoto: z.any().optional(),
+    }),
+    pricing: z.object({
+      pricePerGuest: z.coerce.number().min(10, "Price must be at least $10."),
+    }),
   }),
 
-  experienceTitle: z.string().min(5, "Experience title is required."),
-  category: z.string({ required_error: "Please select a category." }),
-  duration: z.string().min(1, "Duration is required."),
-  
-  menuDescription: z.string().min(20, "Please describe the menu (min. 20 characters)."),
-  cuisineType: z.string().min(3, "Cuisine type is required."),
-  allergens: z.string().optional(),
-  spiceLevel: z.string({ required_error: "Please select a spice level." }),
-  
-  country: z.string({ required_error: "Please select your country." }),
-  state: z.string().optional(),
-  address: z.string().min(5, "Your full address is required."),
-  postcode: z.string().min(3, "Postcode is required."),
-  homeType: z.string({ required_error: "Please select your home type." }),
-  seatingType: z.string({ required_error: "Please select your seating type." }),
-  maxGuests: z.coerce.number().min(1).max(20, "Maximum of 20 guests allowed."),
-  hasPets: z.boolean().default(false),
-  smokingAllowed: z.boolean().default(false),
-  accessibilityNotes: z.string().optional(),
+  location: z.object({
+    country: z.string({ required_error: "Please select your country." }),
+    state: z.string().optional(),
+    address: z.string().min(5, "Your full address is required."),
+    postcode: z.string().min(3, "Postcode is required."),
+  }),
 
-  foodPhotos: z.any().optional(),
-  diningAreaPhoto: z.any().optional(),
-
-  pricePerGuest: z.coerce.number().min(10, "Price must be at least $10."),
+  homeSetup: z.object({
+    homeType: z.string({ required_error: "Please select your home type." }),
+    seating: z.string({ required_error: "Please select your seating type." }),
+    maxGuests: z.coerce.number().min(1).max(20, "Maximum of 20 guests allowed."),
+    pets: z.boolean().default(false),
+    smoking: z.boolean().default(false),
+    accessibility: z.string().optional(),
+  }),
   
-  // Compliance fields are all optional here; refinement logic will enforce requirements
-  foodBusinessRegistered: z.boolean().optional(),
-  councilName: z.string().optional(),
-  foodSafetyTrainingCompleted: z.boolean().optional(),
-  foodActClassification: z.boolean().optional(),
-  foodTraderRegistered: z.boolean().optional(),
-  foodBusinessLicense: z.boolean().optional(),
-  foodSafetySupervisor: z.boolean().optional(),
-  foodBusinessNotification: z.boolean().optional(),
+  compliance: z.object({
+    foodBusinessRegistered: z.boolean().optional(),
+    councilName: z.string().optional(),
+    foodSafetyTrainingCompleted: z.boolean().optional(),
+    foodActClassification: z.boolean().optional(),
+    foodTraderRegistered: z.boolean().optional(),
+    foodBusinessLicense: z.boolean().optional(),
+    foodSafetySupervisor: z.boolean().optional(),
+    foodBusinessNotification: z.boolean().optional(),
+    guidelinesAccepted: z.boolean().refine(val => val === true, "You must agree to the host guidelines."),
+  }),
 
   agreeToFoodSafety: z.boolean().refine(val => val === true, "You must agree to the food safety responsibilities."),
-  agreeToGuidelines: z.boolean().refine(val => val === true, "You must agree to the host guidelines."),
 }).superRefine((data, ctx) => {
-  if (data.country === 'AU' && !data.state) {
+  if (data.location.country === 'AU' && !data.location.state) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'State is required for hosts in Australia.',
-      path: ['state'],
+      path: ['location', 'state'],
     });
   }
 
-  if (data.country === 'AU' && data.state) {
-    const stateCompliance = complianceRequirementsByState[data.state];
+  if (data.location.country === 'AU' && data.location.state) {
+    const stateCompliance = complianceRequirementsByState[data.location.state];
     if (stateCompliance) {
       stateCompliance.requirements.forEach(req => {
-        if (req.required && !data[req.id as keyof typeof data]) {
+        const complianceData = data.compliance as Record<string, any>;
+        if (req.required && !complianceData[req.id]) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "This field is required.",
-            path: [req.id],
+            path: ['compliance', req.id],
           });
         }
-        if (req.condition && data[req.condition as keyof typeof data] && !data[req.id as keyof typeof data]) {
+        if (req.condition && complianceData[req.condition] && !complianceData[req.id]) {
            ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: `Please provide details.`,
-              path: [req.id],
+              path: ['compliance', req.id],
           });
         }
       });
@@ -109,13 +122,13 @@ const formSchema = z.object({
 type OnboardingFormValues = z.infer<typeof formSchema>;
 
 const ComplianceField = ({ control, requirement }: { control: any, requirement: ComplianceRequirement }) => {
-  const watchCondition = requirement.condition ? useForm<OnboardingFormValues>().watch(requirement.condition) : true;
+  const watchCondition = requirement.condition ? useForm<OnboardingFormValues>().watch(`compliance.${requirement.condition}` as any) : true;
   if (!watchCondition) return null;
 
   return (
     <FormField
       control={control}
-      name={requirement.id}
+      name={`compliance.${requirement.id}` as any}
       render={({ field }) => (
         <FormItem>
           {requirement.type === 'checkbox' ? (
@@ -125,14 +138,14 @@ const ComplianceField = ({ control, requirement }: { control: any, requirement: 
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>{requirement.label}</FormLabel>
-                {requirement.description && <FormDescription>{requirement.description}</FormDescription>}
+                {requirement.description && <FormMessage>{requirement.description}</FormMessage>}
               </div>
             </div>
           ) : (
             <>
               <FormLabel>{requirement.label}</FormLabel>
-              {requirement.description && <FormDescription>{requirement.description}</FormDescription>}
-              <FormControl><Input {...field} placeholder={requirement.description} /></FormControl>
+              {requirement.description && <FormMessage>{requirement.description}</FormMessage>}
+              <FormControl><Input {...field} placeholder={requirement.description} value={field.value || ''} /></FormControl>
             </>
           )}
           <FormMessage />
@@ -151,16 +164,24 @@ export default function BecomeAHostPage() {
   const form = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      hasPets: false,
-      smokingAllowed: false,
-      maxGuests: 4,
-      pricePerGuest: 50,
-      hostingStyle: [],
+      homeSetup: {
+        pets: false,
+        smoking: false,
+        maxGuests: 4,
+      },
+      experience: {
+        pricing: {
+          pricePerGuest: 50,
+        },
+      },
+      profile: {
+        hostingStyles: [],
+      }
     },
   });
 
-  const watchCountry = form.watch('country');
-  const watchState = form.watch('state');
+  const watchCountry = form.watch('location.country');
+  const watchState = form.watch('location.state');
   
   const availableStates = states.filter(s => s.countryId === watchCountry);
   const compliance = watchCountry === 'AU' && watchState ? complianceRequirementsByState[watchState] : null;
@@ -231,31 +252,31 @@ export default function BecomeAHostPage() {
               <CardDescription>This is what guests will see. Make it personal and welcoming!</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-               <FormField control={form.control} name="profilePhoto" render={({ field }) => (
+               <FormField control={form.control} name="profile.profilePhoto" render={({ field }) => (
                   <FormItem><FormLabel>Profile Photo</FormLabel><FormControl><Input type="file" /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="bio" render={({ field }) => (
-                <FormItem><FormLabel>Your Bio</FormLabel><FormDescription>Tell guests about you, your passions, and your culture.</FormDescription><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
+              <FormField control={form.control} name="profile.bio" render={({ field }) => (
+                <FormItem><FormLabel>Your Bio</FormLabel><FormMessage>Tell guests about you, your passions, and your culture.</FormMessage><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
               )} />
-               <FormField control={form.control} name="culture" render={({ field }) => (
-                <FormItem><FormLabel>Cultural Background</FormLabel><FormDescription>E.g., "Italian-American", "Cantonese", "Nigerian"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+               <FormField control={form.control} name="profile.culturalBackground" render={({ field }) => (
+                <FormItem><FormLabel>Cultural Background</FormLabel><FormMessage>E.g., "Italian-American", "Cantonese", "Nigerian"</FormMessage><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="languages" render={({ field }) => (
+              <FormField control={form.control} name="profile.languages" render={({ field }) => (
                 <FormItem><FormLabel>Languages Spoken</FormLabel><FormControl><Input {...field} placeholder="e.g., English, Spanish, Italian" /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField
                 control={form.control}
-                name="hostingStyle"
+                name="profile.hostingStyles"
                 render={() => (
                   <FormItem>
                     <FormLabel>Hosting Style</FormLabel>
-                    <FormDescription>How do you like to host?</FormDescription>
+                    <FormMessage>How do you like to host?</FormMessage>
                     <div className="grid grid-cols-2 gap-4">
                       {hostingStyleOptions.map((item) => (
                         <FormField
                           key={item.id}
                           control={form.control}
-                          name="hostingStyle"
+                          name="profile.hostingStyles"
                           render={({ field }) => (
                             <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
                               <FormControl>
@@ -288,14 +309,14 @@ export default function BecomeAHostPage() {
               <CardDescription>Give your experience a name and some basic details.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <FormField control={form.control} name="experienceTitle" render={({ field }) => (
+                <FormField control={form.control} name="experience.title" render={({ field }) => (
                   <FormItem><FormLabel>Experience Title</FormLabel><FormControl><Input {...field} placeholder="e.g., Traditional Kerala Home Feast" /></FormControl><FormMessage /></FormItem>
                 )} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="category" render={({ field }) => (
+                  <FormField control={form.control} name="experience.category" render={({ field }) => (
                     <FormItem><FormLabel>Category</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl><SelectContent><SelectItem value="home-cooked-meal">Home-cooked Meal</SelectItem><SelectItem value="cultural-dinner">Cultural Dinner</SelectItem><SelectItem value="cooking-dining">Cooking + Dining</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
-                   <FormField control={form.control} name="duration" render={({ field }) => (
+                   <FormField control={form.control} name="experience.duration" render={({ field }) => (
                     <FormItem><FormLabel>Duration</FormLabel><FormControl><Input {...field} placeholder="e.g., 3 hours" /></FormControl><FormMessage /></FormItem>
                   )} />
                 </div>
@@ -309,19 +330,19 @@ export default function BecomeAHostPage() {
               <CardDescription>Describe the delicious food you'll be sharing.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField control={form.control} name="menuDescription" render={({ field }) => (
+              <FormField control={form.control} name="experience.menu.description" render={({ field }) => (
                 <FormItem><FormLabel>Menu Description</FormLabel><FormControl><Textarea {...field} rows={4} placeholder="Describe the courses, ingredients, and the story behind the food."/></FormControl><FormMessage /></FormItem>
               )} />
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="cuisineType" render={({ field }) => (
+                  <FormField control={form.control} name="experience.menu.cuisine" render={({ field }) => (
                     <FormItem><FormLabel>Cuisine Type</FormLabel><FormControl><Input {...field} placeholder="e.g., Italian, Mexican, Japanese" /></FormControl><FormMessage /></FormItem>
                   )} />
-                  <FormField control={form.control} name="spiceLevel" render={({ field }) => (
+                  <FormField control={form.control} name="experience.menu.spiceLevel" render={({ field }) => (
                     <FormItem><FormLabel>Spice Level</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select spice level" /></SelectTrigger></FormControl><SelectContent><SelectItem value="mild">Mild</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="spicy">Spicy</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
                </div>
-               <FormField control={form.control} name="allergens" render={({ field }) => (
-                  <FormItem><FormLabel>Allergens</FormLabel><FormDescription>List any potential allergens present in your kitchen (e.g., nuts, shellfish, dairy).</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+               <FormField control={form.control} name="experience.menu.allergens" render={({ field }) => (
+                  <FormItem><FormLabel>Allergens</FormLabel><FormMessage>List any potential allergens present in your kitchen (e.g., nuts, shellfish, dairy).</FormMessage><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
             </CardContent>
           </Card>
@@ -334,40 +355,40 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="country" render={({ field }) => (
+                    <FormField control={form.control} name="location.country" render={({ field }) => (
                         <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                     )} />
                      {watchCountry === 'AU' && (
-                        <FormField control={form.control} name="state" render={({ field }) => (
+                        <FormField control={form.control} name="location.state" render={({ field }) => (
                             <FormItem><FormLabel>State/Territory</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl><SelectContent>{availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                         )} />
                      )}
                 </div>
-               <FormField control={form.control} name="address" render={({ field }) => (
+               <FormField control={form.control} name="location.address" render={({ field }) => (
                 <FormItem><FormLabel>Full Address</FormLabel><FormControl><Input {...field} placeholder="123 Main Street, Sydney" /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="postcode" render={({ field }) => (
+              <FormField control={form.control} name="location.postcode" render={({ field }) => (
                 <FormItem><FormLabel>Postcode</FormLabel><FormControl><Input {...field} placeholder="2000" /></FormControl><FormMessage /></FormItem>
               )} />
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <FormField control={form.control} name="homeType" render={({ field }) => (
+                   <FormField control={form.control} name="homeSetup.homeType" render={({ field }) => (
                     <FormItem><FormLabel>Home Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select home type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Apartment">Apartment</SelectItem><SelectItem value="House">House</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
-                   <FormField control={form.control} name="seatingType" render={({ field }) => (
+                   <FormField control={form.control} name="homeSetup.seating" render={({ field }) => (
                     <FormItem><FormLabel>Seating Type</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select seating type" /></SelectTrigger></FormControl><SelectContent><SelectItem value="Table">Table</SelectItem><SelectItem value="Floor">Floor</SelectItem><SelectItem value="Mixed">Mixed</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                   )} />
                </div>
-                <FormField control={form.control} name="maxGuests" render={({ field }) => (
+                <FormField control={form.control} name="homeSetup.maxGuests" render={({ field }) => (
                     <FormItem><FormLabel>Max Guests</FormLabel><FormControl><Input {...field} type="number" min="1" max="20" /></FormControl><FormMessage /></FormItem>
                   )} />
-                <FormField control={form.control} name="accessibilityNotes" render={({ field }) => (
-                  <FormItem><FormLabel>Accessibility Notes</FormLabel><FormDescription>E.g., "There are 3 steps to enter", "Elevator access available".</FormDescription><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
+                <FormField control={form.control} name="homeSetup.accessibility" render={({ field }) => (
+                  <FormItem><FormLabel>Accessibility Notes</FormLabel><FormMessage>E.g., "There are 3 steps to enter", "Elevator access available".</FormMessage><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
                 )} />
                <div className="flex items-center space-x-8 pt-2">
-                <FormField control={form.control} name="hasPets" render={({ field }) => (
+                <FormField control={form.control} name="homeSetup.pets" render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>I have pets</FormLabel></div></FormItem>
                 )} />
-                <FormField control={form.control} name="smokingAllowed" render={({ field }) => (
+                <FormField control={form.control} name="homeSetup.smoking" render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Smoking is allowed</FormLabel></div></FormItem>
                 )} />
                </div>
@@ -381,10 +402,10 @@ export default function BecomeAHostPage() {
               <CardDescription>Real photos perform better. Show off your food and dining area.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FormField control={form.control} name="foodPhotos" render={({ field }) => (
+              <FormField control={form.control} name="experience.photos.foodPhotos" render={({ field }) => (
                   <FormItem><FormLabel>Food Photos (select up to 5)</FormLabel><FormControl><Input type="file" multiple /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="diningAreaPhoto" render={({ field }) => (
+              <FormField control={form.control} name="experience.photos.diningAreaPhoto" render={({ field }) => (
                   <FormItem><FormLabel>Dining Area Photo</FormLabel><FormControl><Input type="file" /></FormControl><FormMessage /></FormItem>
               )} />
             </CardContent>
@@ -420,7 +441,7 @@ export default function BecomeAHostPage() {
               <CardDescription>Set your price and agree to our guidelines to submit your application.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <FormField control={form.control} name="pricePerGuest" render={({ field }) => (
+                <FormField control={form.control} name="experience.pricing.pricePerGuest" render={({ field }) => (
                   <FormItem><FormLabel>Price per Guest (USD)</FormLabel><FormControl><Input {...field} type="number" min="10" /></FormControl><FormMessage /></FormItem>
                 )} />
 
@@ -429,17 +450,17 @@ export default function BecomeAHostPage() {
                       <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>I acknowledge my food safety responsibilities.</FormLabel>
-                        <FormDescription>I understand that I am responsible for preparing food safely and in accordance with local laws. Go2Culture is a platform, not a food provider.</FormDescription>
+                        <FormMessage>I understand that I am responsible for preparing food safely and in accordance with local laws. Go2Culture is a platform, not a food provider.</FormMessage>
                       </div>
                     </FormItem>
                 )}/>
 
-                <FormField control={form.control} name="agreeToGuidelines" render={({ field }) => (
+                <FormField control={form.control} name="compliance.guidelinesAccepted" render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>I agree to the Go2Culture Host Guidelines.</FormLabel>
-                        <FormDescription>This includes respecting guests, maintaining hygiene, and following all platform rules.</FormDescription>
+                        <FormMessage>This includes respecting guests, maintaining hygiene, and following all platform rules.</FormMessage>
                       </div>
                     </FormItem>
                 )}/>
@@ -464,5 +485,3 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
-
-    
