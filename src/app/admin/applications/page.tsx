@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -18,12 +17,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, AlertTriangle } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { HostApplication } from "@/lib/types";
 import { collection } from "firebase/firestore";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 
 const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
@@ -36,7 +36,7 @@ const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'de
 
 export default function HostApplicationsPage() {
   const firestore = useFirestore();
-  const { data: hostApplications, isLoading } = useCollection<HostApplication>(useMemoFirebase(() => firestore ? collection(firestore, 'hostApplications') : null, [firestore]));
+  const { data: hostApplications, isLoading, error } = useCollection<HostApplication>(useMemoFirebase(() => firestore ? collection(firestore, 'hostApplications') : null, [firestore]));
 
   const renderTableRows = (apps: HostApplication[]) => {
     return apps.map((app) => (
@@ -53,7 +53,7 @@ export default function HostApplicationsPage() {
         <TableCell>
           <Button asChild variant="outline" size="sm">
             <Link href={`/admin/applications/${app.id}`}>
-              <Eye />
+              <Eye className="mr-2 h-4 w-4"/>
               View
             </Link>
           </Button>
@@ -85,6 +85,66 @@ export default function HostApplicationsPage() {
     ));
   }
   
+  const tableBodyContent = () => {
+    if (isLoading) {
+      return Array.from({length: 5}).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell>
+        </TableRow>
+      ));
+    }
+    if (error) {
+      return (
+        <TableRow>
+          <TableCell colSpan={6}>
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                Could not load applications. Please check your permissions or try again later.
+              </AlertDescription>
+            </Alert>
+          </TableCell>
+        </TableRow>
+      );
+    }
+    if (hostApplications && hostApplications.length > 0) {
+      return renderTableRows(hostApplications);
+    }
+    return (
+      <TableRow>
+        <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+          No applications found.
+        </TableCell>
+      </TableRow>
+    );
+  };
+  
+  const mobileContent = () => {
+     if (isLoading) {
+      return Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />);
+    }
+    if (error) {
+       return (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Could not load applications.
+          </AlertDescription>
+        </Alert>
+      );
+    }
+    if (hostApplications && hostApplications.length > 0) {
+      return renderMobileCards(hostApplications);
+    }
+    return (
+      <Card className="flex items-center justify-center h-40">
+        <p className="text-muted-foreground">No applications found.</p>
+      </Card>
+    );
+  };
+  
   return (
     <div className="space-y-8">
        <div>
@@ -95,7 +155,7 @@ export default function HostApplicationsPage() {
       {/* Mobile Card View */}
       <div className="grid gap-4 md:hidden">
         <h2 className="text-xl font-semibold">All Applications</h2>
-        {isLoading ? Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />) : hostApplications && renderMobileCards(hostApplications)}
+        {mobileContent()}
       </div>
       
       {/* Desktop Table View */}
@@ -119,13 +179,7 @@ export default function HostApplicationsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
-                Array.from({length: 5}).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell>
-                  </TableRow>
-                ))
-              ) : hostApplications && renderTableRows(hostApplications)}
+              {tableBodyContent()}
             </TableBody>
           </Table>
         </CardContent>
