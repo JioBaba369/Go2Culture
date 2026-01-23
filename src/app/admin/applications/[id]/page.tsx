@@ -1,6 +1,6 @@
 
 'use client';
-import { notFound, useRouter, useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import {
   Card,
@@ -165,12 +165,30 @@ export default function ApplicationDetailPage() {
                 </pre>
               </AlertDescription>
             </Alert>
+             <Button asChild variant="outline" className="mt-6">
+                <Link href="/admin/applications">Back to All Applications</Link>
+            </Button>
         </div>
     );
   }
 
   if (!application) {
-    notFound();
+    return (
+        <Card className="mt-8">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-6 w-6 text-destructive" />
+                    Application Not Found
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">The application with ID "{applicationId}" could not be found. It may have been deleted or the link may be incorrect.</p>
+                <Button asChild variant="outline" className="mt-6">
+                    <Link href="/admin/applications">Back to All Applications</Link>
+                </Button>
+            </CardContent>
+        </Card>
+    );
   }
 
   const profilePhoto = PlaceHolderImages.find(p => p.id === application.profile.photoId);
@@ -378,3 +396,5 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
+
+    

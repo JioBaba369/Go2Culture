@@ -47,6 +47,13 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    
+    /**
+     * Checks if the user has admin privileges.
+     */
+    function isAdmin() {
+      return request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
+    }
 
     // --------------------------------
     // Collection Rules
@@ -63,10 +70,10 @@ service cloud.firestore {
        * @allow (update) A user can only update their own profile.
        */
       allow get: if true;
-      allow list: if true; // Allow listing for admin UI, but should be secured in production
+      allow list: if isAdmin(); // Allow listing only for admin UI
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isSignedIn(); // Allow updates by owner or by an admin
-      allow delete: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin(); // Allow updates by owner or by an admin
+      allow delete: if isOwner(userId) || isAdmin();
 
       /**
        * @description Secures a user's private host profile. Only the owner can manage their profile.
@@ -75,7 +82,7 @@ service cloud.firestore {
       match /hosts/{hostId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId) || isSignedIn(); // Allow creation by owner or by an admin
+        allow create: if isOwner(userId) || isAdmin(); // Allow creation by owner or by an admin
         allow update: if isOwner(userId);
         allow delete: if isOwner(userId);
       }
@@ -96,107 +103,76 @@ service cloud.firestore {
     match /hostApplications/{applicationId} {
       // Any authenticated user can create an application for themselves.
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      // For now, allow any signed-in user to read/list/update, to support admin functionality.
-      // In a production app, this should be restricted to admin roles.
-      allow get, list, update: if isSignedIn();
-      // Only admins should delete. For now, restricted.
+      // Only admins can read, list, and update applications.
+      allow get, list, update: if isAdmin();
       allow delete: if false; 
     }
 
     /**
-     * @description Manages cultural experiences. Experiences are public to view, but only the host who created it can manage it.
+     * @description Manages cultural experiences. Experiences are public to view, but only the host who created it or an admin can manage it.
      * @path /experiences/{experienceId}
-     * @allow (get) Any user, signed in or not, retrieving a specific experience.
-     * @deny (update) A host trying to modify an experience created by another host.
-     * @principle Implements a "Public Read with Owner-Only Writes" pattern, using a denormalized `hostId` (user's UID) for write authorization.
      */
     match /experiences/{experienceId} {
       allow get: if true;
       allow list: if true;
-      // Allow creation if the hostId matches the user, or if it's an admin (any signed-in user for now)
-      // TODO: Restrict the second part of this OR condition to admins only in production.
       allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource.data.hostId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.hostId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.hostId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.hostId == request.auth.uid || isAdmin());
     }
 
     /**
-     * @description Secures bookings. Only the guest who made the booking and the host of the experience can view or modify the booking.
+     * @description Secures bookings. Only the guest who made the booking, the host of the experience, or an admin can view or modify the booking.
      * @path /bookings/{bookingId}
-     * @allow (create) A signed-in user creating a booking for themselves (guestId matches their UID).
-     * @deny (get) A user trying to view a booking they are not a part of.
-     * @deny (list) Any user trying to list all bookings in the system to prevent data leakage.
-     * @principle Enforces shared access between a fixed set of collaborators (the guest and the host).
      */
     match /bookings/{bookingId} {
-      allow get: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid);
-      // Allow list for admins (any signed-in user for now) or for specific queries by guest/host.
-      allow list: if isSignedIn();
+      allow get: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
       allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
-      allow update: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid);
-      allow delete: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid);
+      allow update: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid || isAdmin());
     }
 
     /**
-     * @description Manages reviews. Reviews are public to read, but only the guest who wrote it can create or delete it.
+     * @description Manages reviews. Reviews are public to read, but only the guest who wrote it or an admin can manage it.
      * @path /reviews/{reviewId}
-     * @allow (list) Any user, signed in or not, listing all reviews for an experience.
-     * @deny (create) A user trying to create a review on behalf of another user.
-     * @deny (update) A user trying to edit a review they did not write.
-     * @principle Implements a "Public Read with Owner-Only Writes" pattern, where the `guestId` determines ownership.
      */
     match /reviews/{reviewId} {
       allow get: if true;
       allow list: if true;
       allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.guestId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.guestId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.guestId == request.auth.uid || isAdmin());
+      allow delete: if isSignedIn() && (resource.data.guestId == request.auth.uid || isAdmin());
     }
 
     /**
      * @description Secures private messages between a sender and a receiver.
      * @path /messages/{messageId}
-     * @allow (get) The sender or the receiver reading a message they are a part of.
-     * @deny (get) A third-party user trying to read a private message.
-     * @deny (list) Any user trying to list all messages in the system.
-     * @principle Enforces shared access between the message sender and receiver.
      */
     match /messages/{messageId} {
       allow get: if isSignedIn() && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
       allow list: if false; // Denied for security. Client must use specific queries to get message threads.
       allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.senderId == request.auth.uid && resource.data.receiverId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.senderId == request.auth.uid;
       allow delete: if isSignedIn() && resource.data.senderId == request.auth.uid;
     }
 
     /**
      * @description Manages user-submitted reports and system flags.
      * @path /reports/{reportId}
-     * @allow (get, list) Any signed-in user (acting as admin) can read reports.
-     * @deny (create, update, delete) For now, these actions are restricted to prevent unauthorized writes.
      */
     match /reports/{reportId} {
-      // For now, allow any signed-in user to read/list, to support admin functionality.
-      // In a production app, this should be restricted to admin roles.
-      allow get, list: if isSignedIn();
-
-      // Client-side report creation is not yet implemented. Disallow writes for now.
-      allow create, update, delete: if false;
+      // Only admins can read/write reports.
+      allow read, write: if isAdmin();
     }
 
     /**
      * @description Locks down administrator logs. No client-side access is permitted.
      * @path /admin_logs/{adminLogId}
-     * @allow (none) No operations are allowed from any client.
-     * @deny (all) Any attempt to read or write to this collection will be rejected.
-     * @principle Secures a collection for exclusive backend (Admin SDK) access by denying all client requests.
      */
     match /admin_logs/{adminLogId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read, write: if false;
     }
   }
 }
+
+    
