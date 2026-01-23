@@ -29,6 +29,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useUser, useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import React from 'react';
+import { ADMIN_UID } from '@/lib/auth';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -44,19 +45,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const isAdmin = user?.uid === ADMIN_UID;
   
   const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/login');
+    if (auth) {
+      await signOut(auth);
+      router.push('/login');
+    }
   };
 
   React.useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login?redirect=/admin');
+    if (!isUserLoading) {
+      if (!user) {
+        router.push(`/login?redirect=${pathname}`);
+      } else if (!isAdmin) {
+        router.push('/');
+      }
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, isAdmin, router, pathname]);
 
-  if (isUserLoading || !user) {
+  if (isUserLoading || !user || !isAdmin) {
     return (
         <div className="flex h-screen w-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />

@@ -31,7 +31,7 @@ import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { HostApplication } from "@/lib/types";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { approveApplication, rejectApplication, requestChangesForApplication } from "@/lib/admin-actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -49,6 +49,12 @@ export function ApplicationDetailClient({
 
   const appRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'hostApplications', applicationId) : null, [firestore, user, applicationId]);
   const { data: application, isLoading: isDocLoading, error } = useDoc<HostApplication>(appRef);
+
+  React.useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push(`/login?redirect=/admin/applications/${applicationId}`);
+    }
+  }, [isAuthLoading, user, router, applicationId]);
 
   const isLoading = isAuthLoading || (!!user && isDocLoading);
 
@@ -115,14 +121,8 @@ export function ApplicationDetailClient({
     }
   }
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return <Skeleton className="h-screen w-full" />;
-  }
-
-  // If auth has loaded but there's no user, they shouldn't be here.
-  if (!isAuthLoading && !user) {
-    router.push('/login?redirect=/admin/applications'); // Redirect to login
-    return <Skeleton className="h-screen w-full" />; // Render skeleton while redirecting
   }
   
   if (error) {

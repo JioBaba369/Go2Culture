@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { doc } from "firebase/firestore";
 import type { User } from "@/lib/types";
+import { ADMIN_UID } from "@/lib/auth";
 
 const navLinks = [
   { href: "/discover", label: "Discover" },
@@ -31,7 +32,9 @@ export function Header() {
   const { user, isUserLoading, firestore, auth } = useFirebase();
 
   const handleLogout = () => {
-    signOut(auth);
+    if (auth) {
+      signOut(auth);
+    }
   };
   
   const userImage = PlaceHolderImages.find(p => p.id === 'guest-1');
@@ -44,7 +47,7 @@ export function Header() {
   }, [firestore, user]);
   const { data: userProfile } = useDoc<User>(userDocRef);
   const isHost = userProfile?.role === 'host' || userProfile?.role === 'both';
-  const isAdmin = user?.uid === '9vjYTvqyLHSOZj27shGfhgpwgDw1';
+  const isAdmin = user?.uid === ADMIN_UID;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
