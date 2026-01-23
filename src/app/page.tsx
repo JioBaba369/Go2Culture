@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Search, Users, Home as HomeIcon, Award } from "lucide-react";
 import { ExperienceCard } from "@/components/experience-card";
 import { experiences } from "@/lib/data";
@@ -91,39 +92,47 @@ export default function Home() {
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-neutral-200 drop-shadow-md">
             Where do you want to experience culture?
           </p>
-          <div className="mt-8 p-4 bg-background/90 backdrop-blur-sm rounded-lg w-full max-w-4xl shadow-lg">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-              <Select onValueChange={setSelectedCountry} value={selectedCountry}>
-                <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
-                <SelectContent>
-                  {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-
-              <Select onValueChange={setSelectedState} value={selectedState} disabled={!availableStates.length}>
-                <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
-                <SelectContent>
-                  {availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              
-              <Select onValueChange={setSelectedSuburb} value={selectedSuburb} disabled={!availableSuburbs.length}>
-                <SelectTrigger><SelectValue placeholder="Suburb/City" /></SelectTrigger>
-                <SelectContent>
-                  {availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-
-              <Select onValueChange={setSelectedLocalArea} value={selectedLocalArea} disabled={!availableLocalAreas.length}>
-                <SelectTrigger><SelectValue placeholder="Local Area" /></SelectTrigger>
-                <SelectContent>
-                  {availableLocalAreas.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-
-              <Button onClick={handleSearch} className="w-full md:w-auto">
-                <Search className="mr-2 h-4 w-4" /> Search
-              </Button>
+          <div className="mt-8 p-2 bg-background/80 backdrop-blur-sm rounded-xl w-full max-w-4xl shadow-lg">
+            <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-0 bg-background rounded-md border p-1">
+                <div className="w-full sm:w-auto flex-1">
+                    <Select onValueChange={setSelectedCountry} value={selectedCountry}>
+                        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="Country" /></SelectTrigger>
+                        <SelectContent>
+                          {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Separator orientation="vertical" className="h-6 hidden sm:block" />
+                <div className="w-full sm:w-auto flex-1">
+                    <Select onValueChange={setSelectedState} value={selectedState} disabled={!availableStates.length}>
+                        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="State" /></SelectTrigger>
+                        <SelectContent>
+                          {availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Separator orientation="vertical" className="h-6 hidden sm:block" />
+                <div className="w-full sm:w-auto flex-1">
+                    <Select onValueChange={setSelectedSuburb} value={selectedSuburb} disabled={!availableSuburbs.length}>
+                        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="Suburb/City" /></SelectTrigger>
+                        <SelectContent>
+                          {availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Separator orientation="vertical" className="h-6 hidden sm:block" />
+                <div className="w-full sm:w-auto flex-1">
+                    <Select onValueChange={setSelectedLocalArea} value={selectedLocalArea} disabled={!availableLocalAreas.length}>
+                        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="Area" /></SelectTrigger>
+                        <SelectContent>
+                          {availableLocalAreas.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Button onClick={handleSearch} size="lg" className="w-full sm:w-auto h-12 rounded-md">
+                    <Search className="h-5 w-5 sm:mr-2" />
+                    <span className="hidden sm:inline">Search</span>
+                </Button>
             </div>
           </div>
         </div>
