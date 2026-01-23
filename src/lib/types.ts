@@ -164,6 +164,11 @@ export type Booking = {
   createdAt: any; // Allow ServerTimestamp
 };
 
+export type WishlistItem = {
+  id: string; // This will be the experienceId
+  createdAt: any; // Allow ServerTimestamp
+};
+
 export type Message = {
   id: string;
   senderId: string;

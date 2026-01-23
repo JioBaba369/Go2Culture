@@ -364,6 +364,18 @@
       },
       "required": ["id", "guestId", "experienceId", "hostId", "rating", "comment", "reviewDate"]
     },
+    "WishlistItem": {
+      "title": "Wishlist Item",
+      "description": "Represents an association between a user and a wishlisted experience. The document ID is the experienceId.",
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["createdAt"]
+    },
     "Message": {
       "title": "Message",
       "type": "object",
@@ -424,6 +436,10 @@
     "/users/{userId}/hosts/{hostId}": {
       "schema": { "$ref": "#/entities/Host" },
       "description": "Stores host profiles. Path-based ownership ensures only the user can access their own host profile. Includes `userId` as a parameter."
+    },
+    "/users/{userId}/wishlist/{experienceId}": {
+      "schema": { "$ref": "#/entities/WishlistItem" },
+      "description": "Stores a user's wishlisted experiences. The document ID is the experience ID for quick lookups."
     },
     "/hostApplications/{applicationId}": {
       "schema": { "$ref": "#/entities/HostApplication" },

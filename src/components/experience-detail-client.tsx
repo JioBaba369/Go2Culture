@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Label } from "./ui/label";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { WishlistButton } from "./wishlist-button";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -191,20 +192,23 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
 
   return (
     <div className="py-8">
-      <div>
-        <h1 className="font-headline text-4xl md:text-5xl font-bold">{experience.title}</h1>
-        <div className="flex items-center gap-4 mt-2 text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Star className="h-5 w-5 text-accent fill-accent" />
-            <span className="font-bold text-foreground">{experience.rating.average}</span>
-            <span>({experience.rating.count} reviews)</span>
-          </div>
-          <span className="text-muted-foreground">·</span>
-          <div className="flex items-center gap-1">
-            <MapPin className="h-5 w-5" />
-            <span>{localAreaName}, {suburbName}, {countryName}</span>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-headline text-4xl md:text-5xl font-bold">{experience.title}</h1>
+          <div className="flex items-center gap-4 mt-2 text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Star className="h-5 w-5 text-accent fill-accent" />
+              <span className="font-bold text-foreground">{experience.rating.average}</span>
+              <span>({experience.rating.count} reviews)</span>
+            </div>
+            <span className="text-muted-foreground">·</span>
+            <div className="flex items-center gap-1">
+              <MapPin className="h-5 w-5" />
+              <span>{localAreaName}, {suburbName}, {countryName}</span>
+            </div>
           </div>
         </div>
+        <WishlistButton experienceId={experience.id} className="h-12 w-12 flex-shrink-0" />
       </div>
       
       <div className="mt-6">

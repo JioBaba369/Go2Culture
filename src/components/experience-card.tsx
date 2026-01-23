@@ -12,6 +12,7 @@ import { countries, suburbs } from "@/lib/location-data";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "./ui/skeleton";
+import { WishlistButton } from "./wishlist-button";
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -34,22 +35,25 @@ function ExperienceCardContent({ experience }: ExperienceCardProps) {
 
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-lg h-full flex flex-col">
-      <Link href={`/experiences/${experience.id}`} className="block">
-        <div className="relative h-48 w-full">
-          {mainImage ? (
-            <Image
-              src={mainImage.imageUrl}
-              alt={experience.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              data-ai-hint={mainImage.imageHint}
-            />
-          ) : (
-            <div className="bg-muted h-full w-full" />
-          )}
-        </div>
-      </Link>
+      <div className="relative">
+        <Link href={`/experiences/${experience.id}`} className="block">
+          <div className="relative h-48 w-full">
+            {mainImage ? (
+              <Image
+                src={mainImage.imageUrl}
+                alt={experience.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                data-ai-hint={mainImage.imageHint}
+              />
+            ) : (
+              <div className="bg-muted h-full w-full" />
+            )}
+          </div>
+        </Link>
+        <WishlistButton experienceId={experience.id} className="absolute top-2 right-2 z-10" />
+      </div>
       <CardContent className="p-4 flex flex-col flex-grow">
         <div className="flex-grow">
           <div className="flex items-start justify-between">
