@@ -10,12 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, CalendarIcon } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
-import { cn } from "@/lib/utils";
 
 export function ExperienceDetailClient({ experience }: { experience: Experience }) {
   const [date, setDate] = useState<Date>();
@@ -182,32 +180,17 @@ export function ExperienceDetailClient({ experience }: { experience: Experience 
                 <div className="grid gap-4">
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Select a date</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date ? format(date, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={setDate}
-                          disabled={[
-                            { before: new Date() },
-                            disabledDays
-                          ]}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      disabled={[
+                        { before: new Date() },
+                        disabledDays
+                      ]}
+                      className="rounded-md border"
+                    />
+                     {date && <p className="text-sm text-center text-muted-foreground mt-2">Selected: <strong>{format(date, "PPP")}</strong></p>}
                   </div>
                 </div>
                  <Button size="lg" className="w-full mt-4" disabled={!date}>Book Now</Button>
