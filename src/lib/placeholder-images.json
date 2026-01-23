@@ -38,15 +38,15 @@
     },
     {
       "id": "exp-3-main",
-      "description": "A traditional Japanese tea ceremony setup",
-      "imageUrl": "https://images.unsplash.com/photo-1519095615130-d36e0fe3bf63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx0ZWElMjBjZXJlbW9ueXxlbnwwfHx8fDE3NjkwMzU1Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "tea ceremony"
+      "description": "A traditional Japanese meal setting",
+      "imageUrl": "https://images.unsplash.com/photo-1588114652288-5178733355ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxqYXBhbmVzZSUyMG1lYWx8ZW58MHx8fHwxNzY5NjYxNDI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "japanese meal"
     },
     {
       "id": "exp-4-main",
-      "description": "A South Indian thali meal on a banana leaf",
-      "imageUrl": "https://images.unsplash.com/photo-1742281258189-3b933879867a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjB0aGFsaXxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "indian thali"
+      "description": "A North Indian thali meal",
+      "imageUrl": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjBjdXJyeXxlbnwwfHx8fDE3Njk2NjE0NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indian curry"
     },
     {
       "id": "exp-5-main",
@@ -62,9 +62,9 @@
     },
     {
       "id": "exp-7-main",
-      "description": "A large pan of Spanish paella",
-      "imageUrl": "https://images.unsplash.com/photo-1575517111478-7f6afd0973db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWVsbGF8ZW58MHx8fHwxNzY5MjIzNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "spanish paella"
+      "description": "A traditional Maori hangi being prepared",
+      "imageUrl": "https://images.unsplash.com/photo-1629894344418-76a087037a34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW9yaSUyMGhhbmdpJTIwZm9vZHxlbnwwfHx8fDE3Njk2NjE1NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "maori hangi"
     },
     {
       "id": "exp-8-main",
@@ -122,9 +122,9 @@
     },
     {
       "id": "host-7",
-      "description": "Portrait of a Spanish woman, Sofia",
-      "imageUrl": "https://images.unsplash.com/photo-1562212213-162c57579c6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzcGFuaXNoJTIwd29tYW58ZW58MHx8fHwxNzY5MjIzNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "spanish woman"
+      "description": "Portrait of a Maori man, Hemi",
+      "imageUrl": "https://images.unsplash.com/photo-1634832599623-2f477353f469?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW9yaSUyMG1hbnxlbnwwfHx8fDE3Njk2NjE4MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "maori man"
     },
     {
       "id": "host-8",
@@ -211,40 +211,16 @@
       "imageHint": "french food"
     },
     {
-      "id": "cuisine-spanish",
-      "description": "A large pan of Spanish paella",
-      "imageUrl": "https://images.unsplash.com/photo-1575517111478-7f6afd0973db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWVsbGF8ZW58MHx8fHwxNzY5MjIzNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "spanish paella"
+      "id": "cuisine-new-zealand",
+      "description": "A traditional Maori hangi",
+      "imageUrl": "https://images.unsplash.com/photo-1629894344418-76a087037a34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW9yaSUyMGhhbmdpJTIwZm9vZHxlbnwwfHx8fDE3Njk2NjE1NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "maori hangi"
     },
     {
       "id": "cuisine-vietnamese",
       "description": "A bowl of Vietnamese pho noodle soup",
       "imageUrl": "https://images.unsplash.com/photo-1555126634-785b6b25c345?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwaG98ZW58MHx8fHwxNzY5MjIzNTQzfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "vietnamese pho"
-    },
-    {
-      "id": "city-rome",
-      "description": "The Colosseum in Rome at sunset",
-      "imageUrl": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxSb21lfGVufDB8fHx8MTc2OTE3MzA0NXww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "colosseum rome"
-    },
-    {
-      "id": "city-mexico-city",
-      "description": "The Angel of Independence monument in Mexico City",
-      "imageUrl": "https://images.unsplash.com/photo-1574482277083-bee33b9c1416?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxNZXhpY28lMjBDaXR5fGVufDB8fHx8MTc2OTE3MzA3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "mexico city"
-    },
-    {
-      "id": "city-kyoto",
-      "description": "Fushimi Inari Shrine in Kyoto",
-      "imageUrl": "https://images.unsplash.com/photo-1526481280643-3b9460cd51b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxLeW90b3xlbnwwfHx8fDE3NjkxNzMwOTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "kyoto shrine"
-    },
-    {
-      "id": "city-bangalore",
-      "description": "Bangalore Palace in India",
-      "imageUrl": "https://images.unsplash.com/photo-1593324992124-76228192087c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxiYW5nYWxvcmV8ZW58MHx8fHwxNzY5MTczMTIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "bangalore palace"
     },
     {
       "id": "city-sydney",
@@ -257,6 +233,18 @@
       "description": "Melbourne skyline with Flinders Street Station",
       "imageUrl": "https://images.unsplash.com/photo-1545044846-351ba102b6d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtZWxib3VybmV8ZW58MHx8fHwxNzY5MTczMTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "melbourne city"
+    },
+    {
+      "id": "city-auckland",
+      "description": "Auckland skyline with the Sky Tower",
+      "imageUrl": "https://images.unsplash.com/photo-1596140482099-a5c9e6f3d258?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhdWNrbGFuZHxlbnwwfHx8fDE3Njk2NTQzMjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "auckland skyline"
+    },
+    {
+      "id": "city-wellington",
+      "description": "Wellington city and harbour from above",
+      "imageUrl": "https://images.unsplash.com/photo-1589255863295-88a8c4c1387d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWxsaW5ndG9uJTIwbmV3JTIwemVhbGFuZHxlbnwwfHx8fDE3Njk2NTQzNTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wellington newzealand"
     }
   ]
 }

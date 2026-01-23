@@ -16,7 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, PartyPopper, User as UserIcon } from "lucide-react";
 import { countries, states } from "@/lib/location-data";
-import { complianceRequirementsByState, type ComplianceRequirement } from "@/lib/compliance-data";
+import { complianceRequirementsByState, countryComplianceRequirements, type ComplianceRequirement } from "@/lib/compliance-data";
 import { useFirestore, useUser } from "@/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import type { HostApplication } from "@/lib/types";
@@ -87,38 +87,48 @@ const formSchema = z.object({
     foodSafetySupervisor: z.boolean().optional(),
     foodBusinessNotification: z.boolean().optional(),
     guidelinesAccepted: z.boolean().refine(val => val === true, "You must agree to the host guidelines."),
+    agreeToFoodSafety: z.boolean().refine(val => val === true, "You must agree to the food safety responsibilities."),
   }),
 
-  agreeToFoodSafety: z.boolean().refine(val => val === true, "You must agree to the food safety responsibilities."),
 }).superRefine((data, ctx) => {
-  if (data.location.country === 'AU' && !data.location.state) {
+  // Common state/region validation for AU and NZ
+  if ((data.location.country === 'AU' || data.location.country === 'NZ') && !data.location.state) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'State is required for hosts in Australia.',
+      message: 'State/Region is required for hosts in Australia and New Zealand.',
       path: ['location', 'state'],
     });
   }
 
+  // Australia-specific state-level compliance
   if (data.location.country === 'AU' && data.location.state) {
     const stateCompliance = complianceRequirementsByState[data.location.state];
     if (stateCompliance) {
       stateCompliance.requirements.forEach(req => {
         const complianceData = data.compliance as Record<string, any>;
         if (req.required && !complianceData[req.id]) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "This field is required.",
-            path: ['compliance', req.id],
-          });
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "This field is required.", path: ['compliance', req.id] });
         }
         if (req.condition && complianceData[req.condition] && !complianceData[req.id]) {
-           ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: `Please provide details.`,
-              path: ['compliance', req.id],
-          });
+           ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Please provide details.`, path: ['compliance', req.id] });
         }
       });
+    }
+  }
+
+  // New Zealand-specific country-level compliance
+  if (data.location.country === 'NZ') {
+    const countryCompliance = countryComplianceRequirements['NZ'];
+    if (countryCompliance) {
+        countryCompliance.requirements.forEach(req => {
+            const complianceData = data.compliance as Record<string, any>;
+            if (req.required && !complianceData[req.id]) {
+                 ctx.addIssue({ code: z.ZodIssueCode.custom, message: "This field is required.", path: ['compliance', req.id] });
+            }
+             if (req.condition && complianceData[req.condition] && !complianceData[req.id]) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Please provide details.`, path: ['compliance', req.id] });
+            }
+        });
     }
   }
 });
@@ -142,13 +152,13 @@ const ComplianceField = ({ control, requirement }: { control: any, requirement: 
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>{requirement.label}</FormLabel>
-                {requirement.description && <FormMessage>{requirement.description}</FormMessage>}
+                {requirement.description && <FormDescription>{requirement.description}</FormDescription>}
               </div>
             </div>
           ) : (
             <>
               <FormLabel>{requirement.label}</FormLabel>
-              {requirement.description && <FormMessage>{requirement.description}</FormMessage>}
+              {requirement.description && <FormDescription>{requirement.description}</FormDescription>}
               <FormControl><Input {...field} placeholder={requirement.description} value={field.value || ''} /></FormControl>
             </>
           )}
@@ -183,6 +193,10 @@ export default function BecomeAHostPage() {
       },
       profile: {
         hostingStyles: [],
+      },
+      compliance: {
+        guidelinesAccepted: false,
+        agreeToFoodSafety: false
       }
     },
   });
@@ -191,8 +205,8 @@ export default function BecomeAHostPage() {
   const watchState = form.watch('location.state');
   
   const availableStates = states.filter(s => s.countryId === watchCountry);
-  const compliance = watchCountry === 'AU' && watchState ? complianceRequirementsByState[watchState] : null;
-
+  const stateCompliance = watchCountry === 'AU' && watchState ? complianceRequirementsByState[watchState] : null;
+  const countryCompliance = watchCountry ? countryComplianceRequirements[watchCountry] : null;
 
   async function onSubmit(values: OnboardingFormValues) {
     if (!firestore || !user) {
@@ -337,7 +351,7 @@ export default function BecomeAHostPage() {
                 <FormItem><FormLabel>Your Bio</FormLabel><FormDescription>Tell guests about you, your passions, and your culture.</FormDescription><FormControl><Textarea {...field} rows={5} /></FormControl><FormMessage /></FormItem>
               )} />
                <FormField control={form.control} name="profile.culturalBackground" render={({ field }) => (
-                <FormItem><FormLabel>Cultural Background</FormLabel><FormDescription>E.g., "Italian-American", "Cantonese", "Nigerian"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Cultural Background</FormLabel><FormDescription>E.g., "Italian-Australian", "Cantonese", "Nigerian", "Māori"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="profile.languages" render={({ field }) => (
                 <FormItem><FormLabel>Languages Spoken</FormLabel><FormControl><Input {...field} placeholder="e.g., English, Spanish, Italian" /></FormControl><FormMessage /></FormItem>
@@ -436,11 +450,9 @@ export default function BecomeAHostPage() {
                     <FormField control={form.control} name="location.country" render={({ field }) => (
                         <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                     )} />
-                     {watchCountry === 'AU' && (
-                        <FormField control={form.control} name="location.state" render={({ field }) => (
-                            <FormItem><FormLabel>State/Territory</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your state" /></SelectTrigger></FormControl><SelectContent>{availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-                        )} />
-                     )}
+                    <FormField control={form.control} name="location.state" render={({ field }) => (
+                        <FormItem><FormLabel>State/Region</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value} disabled={!availableStates.length}><FormControl><SelectTrigger><SelectValue placeholder="Select your state/region" /></SelectTrigger></FormControl><SelectContent>{availableStates.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                    )} />
                 </div>
                <FormField control={form.control} name="location.address" render={({ field }) => (
                 <FormItem><FormLabel>Full Address</FormLabel><FormControl><Input {...field} placeholder="123 Main Street, Sydney" /></FormControl><FormMessage /></FormItem>
@@ -497,17 +509,26 @@ export default function BecomeAHostPage() {
             </CardHeader>
             <CardContent className="space-y-6">
                 {!watchCountry && <p className="text-muted-foreground">Please select your country in the Location section to see relevant compliance requirements.</p>}
-                {watchCountry && watchCountry !== 'AU' && <p className="text-muted-foreground">No specific compliance requirements for your selected country. Please ensure you follow all local laws.</p>}
-                {watchCountry === 'AU' && !watchState && <p className="text-muted-foreground">Please select your state/territory to see compliance requirements.</p>}
                 
-                {compliance && (
-                  <>
-                    <h3 className="font-medium text-foreground">Requirements for {compliance.name}</h3>
-                    {compliance.requirements.map((req) => (
+                {countryCompliance && (
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-foreground">Requirements for {countryCompliance.name}</h3>
+                    {countryCompliance.requirements.map((req) => (
                       <ComplianceField key={req.id} control={form.control} requirement={req} />
                     ))}
-                  </>
+                  </div>
                 )}
+                
+                {stateCompliance && (
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-foreground">Requirements for {stateCompliance.name}</h3>
+                    {stateCompliance.requirements.map((req) => (
+                      <ComplianceField key={req.id} control={form.control} requirement={req} />
+                    ))}
+                  </div>
+                )}
+
+                {watchCountry === 'AU' && !watchState && <p className="text-muted-foreground">Please select your state/territory to see specific compliance requirements.</p>}
             </CardContent>
           </Card>
 
@@ -523,12 +544,12 @@ export default function BecomeAHostPage() {
                   <FormItem><FormLabel>Price per Guest (USD)</FormLabel><FormControl><Input {...field} type="number" min="10" /></FormControl><FormMessage /></FormItem>
                 )} />
 
-                <FormField control={form.control} name="agreeToFoodSafety" render={({ field }) => (
+                <FormField control={form.control} name="compliance.agreeToFoodSafety" render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>I acknowledge my food safety responsibilities.</FormLabel>
-                        <FormMessage>I understand that I am responsible for preparing food safely and in accordance with local laws. Go2Culture is a platform, not a food provider.</FormMessage>
+                        <FormDescription>I understand that I am responsible for preparing food safely and in accordance with local laws. Go2Culture is a platform, not a food provider.</FormDescription>
                       </div>
                     </FormItem>
                 )}/>
@@ -538,7 +559,7 @@ export default function BecomeAHostPage() {
                       <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>I agree to the Go2Culture Host Guidelines.</FormLabel>
-                        <FormMessage>This includes respecting guests, maintaining hygiene, and following all platform rules.</FormMessage>
+                        <FormDescription>This includes respecting guests, maintaining hygiene, and following all platform rules.</FormDescription>
                       </div>
                     </FormItem>
                 )}/>

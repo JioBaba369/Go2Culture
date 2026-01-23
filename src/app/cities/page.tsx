@@ -12,12 +12,10 @@ import { useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const cityImageMap: Record<string, string> = {
-    ROME: 'city-rome',
-    MEXCITY: 'city-mexico-city',
-    KYOTO: 'city-kyoto',
-    BANG: 'city-bangalore',
     SYD: 'city-sydney',
     MEL: 'city-melbourne',
+    AKL: 'city-auckland',
+    WLG: 'city-wellington',
 }
 
 
@@ -45,7 +43,7 @@ export default function CitiesPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-7xl mx-auto">
                 {isLoading ? (
-                    Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)
+                    Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-80 w-full" />)
                 ) : (
                     featuredCities.map((city) => {
                         const imageId = cityImageMap[city.id];
