@@ -77,3 +77,71 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* UN GLOBAL FEEL */
+.un-calendar-card {
+  width: 340px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e6eef3;
+}
+
+/* HEADER */
+.un-header {
+  margin-bottom: 16px;
+}
+
+.un-badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #009edb;
+  font-weight: 700;
+}
+
+.un-header h2 {
+  margin: 6px 0 4px;
+  font-size: 20px;
+  color: #003f5c;
+}
+
+.un-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7c87;
+}
+
+/* CALENDAR CORE */
+.un-calendar {
+  --rdp-accent-color: #009edb;
+  --rdp-background-color: #eaf6fb;
+  --rdp-outline: none;
+  --rdp-selected-color: #ffffff;
+}
+
+/* DAY STYLES */
+.rdp-day {
+  border-radius: 8px;
+}
+
+.rdp-day:hover {
+  background: #eaf6fb;
+}
+
+.rdp-day_selected {
+  background-color: #009edb !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* FOOTER */
+.un-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  font-size: 13px;
+  color: #003f5c;
+  border-top: 1px solid #e6eef3;
+}

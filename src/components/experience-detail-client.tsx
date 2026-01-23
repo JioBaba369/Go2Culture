@@ -6,7 +6,6 @@ import Image from "next/image";
 import { format } from "date-fns";
 import type { Experience, Host, Review, User } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -241,37 +240,40 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
         </div>
         
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span><span className="text-3xl font-bold">${experience.pricing.pricePerGuest}</span> / person</span>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4"/>
-                  <span>{experience.rating.average} ({experience.rating.count})</span>
+          <div className="sticky top-24">
+            <div className="un-calendar-card">
+              <div className="un-header">
+                <h2>Select a date</h2>
+                <p>Choose a valid calendar date</p>
+              </div>
+
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                disabled={[
+                  { before: new Date() },
+                  disabledDays
+                ]}
+                className="un-calendar"
+              />
+              
+              <div className="un-footer">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <strong>Selected:</strong>{' '}
+                        {date ? format(date, "PPP") : "None"}
+                    </div>
+                    <div className="font-bold">
+                        ${experience.pricing.pricePerGuest} / person
+                    </div>
                 </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <label className="text-sm font-medium">Select a date</label>
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      disabled={[
-                        { before: new Date() },
-                        disabledDays
-                      ]}
-                      className="rounded-md border"
-                    />
-                     {date && <p className="text-sm text-center text-muted-foreground mt-2">Selected: <strong>{format(date, "PPP")}</strong></p>}
-                  </div>
-                </div>
-                 <Button size="lg" className="w-full mt-4" disabled={!date}>Book Now</Button>
-                 <p className="text-xs text-center text-muted-foreground mt-2">You won't be charged yet</p>
-            </CardContent>
-          </Card>
+                <Button size="lg" className="w-full mt-4" style={{backgroundColor: '#009EDB', color: 'white'}} disabled={!date}>
+                    Book Now
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
