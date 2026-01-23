@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -43,26 +42,24 @@ export default function ProfilePage() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      fullName: '',
+    // Use the `values` prop to safely handle async default values from Firestore.
+    // This is the recommended pattern from react-hook-form.
+    values: {
+      fullName: userProfile?.fullName || '',
     },
-    disabled: !userProfile,
   });
 
   React.useEffect(() => {
-    if (userProfile) {
-      form.reset({ fullName: userProfile.fullName });
-    }
-  }, [userProfile, form.reset]);
-
-  React.useEffect(() => {
+    // This effect handles redirecting unauthenticated users.
     if (!isUserLoading && !user) {
       router.push('/login?redirect=/profile');
     }
   }, [isUserLoading, user, router]);
 
   async function onSubmit(data: ProfileFormValues) {
-    if (!user || !firestore || !auth.currentUser) return;
+    if (!user || !firestore || !auth.currentUser || form.formState.isSubmitting) {
+      return;
+    }
 
     try {
       // Update Firestore document
@@ -76,9 +73,10 @@ export default function ProfilePage() {
         title: "Profile Updated",
         description: "Your name has been successfully updated.",
       });
-      // Force a reload of the user to get the new displayName in the header
+      
+      // Force a reload of the user object to get the new displayName in the header
       await auth.currentUser.reload();
-      router.refresh();
+      router.refresh(); // Re-render server components with new user data
     } catch (error) {
       toast({
         variant: "destructive",
@@ -114,7 +112,6 @@ export default function ProfilePage() {
   
   const userImage = PlaceHolderImages.find(p => p.id === userProfile?.profilePhotoId);
 
-
   return (
     <div className="space-y-6 py-12">
       <div>
@@ -142,23 +139,25 @@ export default function ProfilePage() {
         
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your full name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
+              <fieldset disabled={form.formState.isSubmitting || !userProfile}>
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your full name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isDirty}>
+                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+              </fieldset>
             </form>
           </Form>
         </CardContent>
