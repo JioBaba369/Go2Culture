@@ -12,6 +12,10 @@ const cuisineImageMap: Record<string, string> = {
     Mexican: 'cuisine-mexican',
     Japanese: 'cuisine-japanese',
     Indian: 'cuisine-indian',
+    Thai: 'cuisine-thai',
+    French: 'cuisine-french',
+    Spanish: 'cuisine-spanish',
+    Vietnamese: 'cuisine-vietnamese',
 }
 
 export default function CuisinesPage() {
@@ -60,3 +64,5 @@ export default function CuisinesPage() {
         </div>
     );
 }
+
+    

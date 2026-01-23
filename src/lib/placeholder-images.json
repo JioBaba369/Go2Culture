@@ -49,6 +49,30 @@
       "imageHint": "indian thali"
     },
     {
+      "id": "exp-5-main",
+      "description": "A bowl of Thai green curry",
+      "imageUrl": "https://images.unsplash.com/photo-1569058242252-623df4609389?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0aGFpJTIwY3Vycnl8ZW58MHx8fHwxNzY5MjIzNDU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "thai curry"
+    },
+    {
+      "id": "exp-6-main",
+      "description": "A classic French dish, coq au vin",
+      "imageUrl": "https://images.unsplash.com/photo-1628045339331-524a2f8938a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmcmVuY2glMjBmb29kfGVufDB8fHx8MTc2OTIyMzQ5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "french food"
+    },
+    {
+      "id": "exp-7-main",
+      "description": "A large pan of Spanish paella",
+      "imageUrl": "https://images.unsplash.com/photo-1575517111478-7f6afd0973db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWVsbGF8ZW58MHx8fHwxNzY5MjIzNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "spanish paella"
+    },
+    {
+      "id": "exp-8-main",
+      "description": "A bowl of Vietnamese pho noodle soup",
+      "imageUrl": "https://images.unsplash.com/photo-1555126634-785b6b25c345?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwaG98ZW58MHx8fHwxNzY5MjIzNTQzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vietnamese pho"
+    },
+    {
       "id": "host-1",
       "description": "Portrait of a smiling woman, Maria",
       "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c21pbGluZyUyMHdvbWFufGVufDB8fHx8MTc2OTA0MzEzN3ww&ixlib=rb-4.1.0&q=80&w=1080",
@@ -71,6 +95,30 @@
       "description": "Portrait of a smiling man, Javier",
       "imageUrl": "https://images.unsplash.com/photo-1624395213043-fa2e123b2656?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjkxMDMyNzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "man portrait"
+    },
+    {
+      "id": "host-5",
+      "description": "Portrait of a smiling Thai woman, Anya",
+      "imageUrl": "https://images.unsplash.com/photo-1599662875955-4ab630d1d639?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0aGFpJTIwd29tYW58ZW58MHx8fHwxNzY5MjIzNzMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "thai woman"
+    },
+    {
+      "id": "host-6",
+      "description": "Portrait of a French man, Antoine",
+      "imageUrl": "https://images.unsplash.com/photo-1590053648011-66522a10c71a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmcmVuY2glMjBtYW58ZW58MHx8fHwxNzY5MjIzNzYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "french man"
+    },
+    {
+      "id": "host-7",
+      "description": "Portrait of a Spanish woman, Sofia",
+      "imageUrl": "https://images.unsplash.com/photo-1562212213-162c57579c6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzcGFuaXNoJTIwd29tYW58ZW58MHx8fHwxNzY5MjIzNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "spanish woman"
+    },
+    {
+      "id": "host-8",
+      "description": "Portrait of a Vietnamese woman, Linh",
+      "imageUrl": "https://images.unsplash.com/photo-1512480742511-3441b8f0eba0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx2aWV0bmFtZXNlJTIwd29tYW58ZW58MHx8fHwxNzY5MjIzODIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vietnamese woman"
     },
     {
       "id": "admin-id",
@@ -113,6 +161,30 @@
       "description": "A South Indian thali meal on a banana leaf",
       "imageUrl": "https://images.unsplash.com/photo-1742281258189-3b933879867a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjB0aGFsaXxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "indian thali"
+    },
+    {
+      "id": "cuisine-thai",
+      "description": "A bowl of Thai green curry",
+      "imageUrl": "https://images.unsplash.com/photo-1569058242252-623df4609389?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0aGFpJTIwY3Vycnl8ZW58MHx8fHwxNzY5MjIzNDU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "thai curry"
+    },
+    {
+      "id": "cuisine-french",
+      "description": "A classic French dish, coq au vin",
+      "imageUrl": "https://images.unsplash.com/photo-1628045339331-524a2f8938a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmcmVuY2glMjBmb29kfGVufDB8fHx8MTc2OTIyMzQ5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "french food"
+    },
+    {
+      "id": "cuisine-spanish",
+      "description": "A large pan of Spanish paella",
+      "imageUrl": "https://images.unsplash.com/photo-1575517111478-7f6afd0973db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWVsbGF8ZW58MHx8fHwxNzY5MjIzNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "spanish paella"
+    },
+    {
+      "id": "cuisine-vietnamese",
+      "description": "A bowl of Vietnamese pho noodle soup",
+      "imageUrl": "https://images.unsplash.com/photo-1555126634-785b6b25c345?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwaG98ZW58MHx8fHwxNzY5MjIzNTQzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vietnamese pho"
     },
     {
       "id": "city-rome",
