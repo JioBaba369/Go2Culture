@@ -1,6 +1,6 @@
 
 'use client';
-import { notFound, useRouter } from "next/navigation";
+import { notFound, useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import {
   Card,
@@ -54,8 +54,9 @@ function DetailItem({ icon: Icon, label, value }: { icon: React.ElementType, lab
     );
 }
 
-export default function ApplicationDetailPage({ params }: { params: { id: string } }) {
-  const applicationId = params.id;
+export default function ApplicationDetailPage() {
+  const params = useParams();
+  const applicationId = params.id as string;
   const firestore = useFirestore();
   const { user, isUserLoading: isAuthLoading } = useUser();
   const router = useRouter();
