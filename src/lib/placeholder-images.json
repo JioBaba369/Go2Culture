@@ -74,15 +74,15 @@
     },
     {
       "id": "exp-9-main",
-      "description": "The interior of a cozy, rustic Italian restaurant",
-      "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxpdGFsaWFuJTIwcmVzdGF1cmFudHxlbnwwfHx8fDE3Njk0MjE4MDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "italian restaurant"
+      "description": "A vibrant Lebanese mezze platter",
+      "imageUrl": "https://images.unsplash.com/photo-1615878343729-113495b18a1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsZWJhbmVzZSUyMGZvb2R8ZW58MHx8fHwxNzcwMTk3NjE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lebanese food"
     },
     {
       "id": "exp-10-main",
-      "description": "A vibrant celebration of the Diwali festival with food and lights",
-      "imageUrl": "https://images.unsplash.com/photo-1667089422040-b63633df1821?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkaXdhbGklMjBjZWxlYnJhdGlvbnxlbnwwfHx8fDE3Njk0MjE4MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "diwali celebration"
+      "description": "A fresh seafood platter by the coast",
+      "imageUrl": "https://images.unsplash.com/photo-1625535345783-c57659a85b9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzZWFmb29kJTIwcGxhdHRlcnxlbnwwfHx8fDE3NzAxOTc2NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "seafood platter"
     },
     {
       "id": "host-1",
@@ -131,6 +131,18 @@
       "description": "Portrait of a Vietnamese woman, Linh",
       "imageUrl": "https://images.unsplash.com/photo-1512480742511-3441b8f0eba0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx2aWV0bmFtZXNlJTIwd29tYW58ZW58MHx8fHwxNzY5MjIzODIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "vietnamese woman"
+    },
+    {
+      "id": "host-9",
+      "description": "Portrait of a Lebanese woman, Fatima",
+      "imageUrl": "https://images.unsplash.com/photo-1605368351543-7a72a0c25a75?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsZWJhbmVzZSUyMHdvbWFufGVufDB8fHx8MTc3MDE5NzgwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lebanese woman"
+    },
+    {
+      "id": "host-10",
+      "description": "Portrait of an Australian man, Liam",
+      "imageUrl": "https://images.unsplash.com/photo-1615486524314-b2c3f8047971?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhdXN0cmFsaWFuJTIwbWFufGVufDB8fHx8MTc3MDE5NzgzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "australian man"
     },
     {
       "id": "guest-1",
@@ -223,6 +235,18 @@
       "imageHint": "vietnamese pho"
     },
     {
+      "id": "cuisine-lebanese",
+      "description": "A vibrant Lebanese mezze platter",
+      "imageUrl": "https://images.unsplash.com/photo-1615878343729-113495b18a1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsZWJhbmVzZSUyMGZvb2R8ZW58MHx8fHwxNzcwMTk3NjE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lebanese food"
+    },
+    {
+      "id": "cuisine-australian",
+      "description": "A modern Australian seafood dish",
+      "imageUrl": "https://images.unsplash.com/photo-1625535345783-c57659a85b9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzZWFmb29kJTIwcGxhdHRlcnxlbnwwfHx8fDE3NzAxOTc2NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "seafood platter"
+    },
+    {
       "id": "city-sydney",
       "description": "Sydney Opera House and Harbour Bridge",
       "imageUrl": "https://images.unsplash.com/photo-1524293581274-7540a2d487b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzeWRuZXl8ZW58MHx8fHwxNzY5MTczMTQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -245,6 +269,60 @@
       "description": "Wellington city and harbour from above",
       "imageUrl": "https://images.unsplash.com/photo-1589255863295-88a8c4c1387d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3ZWxsaW5ndG9uJTIwbmV3JTIwemVhbGFuZHxlbnwwfHx8fDE3Njk2NTQzNTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "wellington newzealand"
+    },
+    {
+      "id": "city-brisbane",
+      "description": "Brisbane city skyline and river",
+      "imageUrl": "https://images.unsplash.com/photo-1608678224213-9a3c1555029e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxicmlzYmFuZXxlbnwwfHx8fDE3NzAyMDM3MDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "brisbane city"
+    },
+    {
+      "id": "city-perth",
+      "description": "Perth city skyline over the Swan River",
+      "imageUrl": "https://images.unsplash.com/photo-1527914194462-84f579133b3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJ0aCUyMGF1c3RyYWxpYXxlbnwwfHx8fDE3NzAyMDM3NDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "perth australia"
+    },
+    {
+      "id": "city-adelaide",
+      "description": "Adelaide cityscape with rolling hills in the background",
+      "imageUrl": "https://images.unsplash.com/photo-1596814234509-30c11f7f9829?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhZGVsYWlkZXxlbnwwfHx8fDE3NzAyMDM3NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "adelaide city"
+    },
+    {
+      "id": "city-canberra",
+      "description": "Parliament House in Canberra",
+      "imageUrl": "https://images.unsplash.com/photo-1596700683057-08d745a76985?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjYW5iZXJyYXxlbnwwfHx8fDE3NzAyMDM3OTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "canberra parliament"
+    },
+    {
+      "id": "city-hobart",
+      "description": "Hobart waterfront with Mount Wellington in the background",
+      "imageUrl": "https://images.unsplash.com/photo-1627931327154-15db53046f8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxob2JhcnR8ZW58MHx8fHwxNzAyMDM4MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hobart tasmania"
+    },
+    {
+      "id": "city-christchurch",
+      "description": "Punting on the Avon River in Christchurch",
+      "imageUrl": "https://images.unsplash.com/photo-1582298539294-046604149b5c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaHJpc3RjaHVyY2glMjBuZXclMjB6ZWFsYW5kfGVufDB8fHx8fDE3NzAyMDM4NTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "christchurch newzealand"
+    },
+    {
+      "id": "city-queenstown",
+      "description": "View of Queenstown and Lake Wakatipu",
+      "imageUrl": "https://images.unsplash.com/photo-1509233682915-d3a7c793a38c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxxdWVlbnN0b3dufGVufDB8fHx8fDE3NzAyMDM4ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "queenstown newzealand"
+    },
+    {
+      "id": "city-hamilton",
+      "description": "Hamilton Gardens in New Zealand",
+      "imageUrl": "https://images.unsplash.com/photo-1590497003437-14a82a8a5c37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxoYW1pbHRvbiUyMG5ldyUyMHplYWxhbmR8ZW58MHx8fHwxNzAyMDM5MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hamilton newzealand"
+    },
+    {
+      "id": "city-tauranga",
+      "description": "View of Mount Maunganui in Tauranga",
+      "imageUrl": "https://images.unsplash.com/photo-1620247690323-8b77053e1634?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YXVyYW5nYSUyMG5ldyUyMHplYWxhbmR8ZW58MHx8fHwxNzAyMDM5NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tauranga newzealand"
     }
   ]
 }

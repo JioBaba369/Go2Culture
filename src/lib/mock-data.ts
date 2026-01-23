@@ -50,6 +50,14 @@ export const mockUsers: User[] = [
     id: 'user-12', role: 'host', fullName: 'Linh', email: 'linh@go2culture.com', status: 'active',
     createdAt: '2023-05-04T09:00:00Z', updatedAt: '2023-05-04T09:00:00Z', profilePhotoId: 'host-8'
   },
+  {
+    id: 'user-13', role: 'host', fullName: 'Fatima', email: 'fatima@go2culture.com', status: 'active',
+    createdAt: '2023-06-01T09:00:00Z', updatedAt: '2023-06-01T09:00:00Z', profilePhotoId: 'host-9'
+  },
+  {
+    id: 'user-14', role: 'host', fullName: 'Liam', email: 'liam@go2culture.com', status: 'active',
+    createdAt: '2023-06-02T09:00:00Z', updatedAt: '2023-06-02T09:00:00Z', profilePhotoId: 'host-10'
+  },
 ];
 
 export const mockHosts: Host[] = [
@@ -140,6 +148,28 @@ export const mockHosts: Host[] = [
     location: { country: 'NZ', state: 'WGN', suburb: 'WLG', localArea: 'TEARO', postcode: '6011' },
     homeSetup: { homeType: 'Apartment', seating: 'Table', maxGuests: 5, pets: false, smoking: false, accessibility: 'None' },
     compliance: { guidelinesAccepted: true }, rating: { average: 4.9, count: 55 }, createdAt: '2023-05-04T09:00:00Z',
+  },
+  {
+    id: 'host-9', userId: 'user-13', name: 'Fatima', profilePhotoId: 'host-9', status: 'approved',
+    profile: {
+      bio: 'From Beirut to Brisbane, I bring the taste of Lebanon. Join me for a mezze feast you won\'t forget!',
+      languages: ['Arabic', 'English'], culturalBackground: 'Lebanese', hostingStyles: ['Festive & social'],
+    },
+    verification: { idVerified: true, selfieVerified: true, verifiedAt: '2023-06-01T10:00:00Z' },
+    location: { country: 'AU', state: 'QLD', suburb: 'BRI', localArea: 'WESTEND', postcode: '4101' },
+    homeSetup: { homeType: 'House', seating: 'Table', maxGuests: 8, pets: false, smoking: false, accessibility: 'Ramp available' },
+    compliance: { guidelinesAccepted: true }, rating: { average: 4.9, count: 62 }, createdAt: '2023-06-01T09:00:00Z',
+  },
+  {
+    id: 'host-10', userId: 'user-14', name: 'Liam', profilePhotoId: 'host-10', status: 'approved',
+    profile: {
+      bio: 'Explore the fresh seafood of Western Australia with a modern Australian twist. I source my ingredients from the local Fremantle markets.',
+      languages: ['English'], culturalBackground: 'Australian', hostingStyles: ['Storytelling'],
+    },
+    verification: { idVerified: true, selfieVerified: true, verifiedAt: '2023-06-02T10:00:00Z' },
+    location: { country: 'AU', state: 'WA', suburb: 'PER', localArea: 'FREMANTLE', postcode: '6160' },
+    homeSetup: { homeType: 'Apartment', seating: 'Table', maxGuests: 6, pets: false, smoking: false, accessibility: 'Elevator access' },
+    compliance: { guidelinesAccepted: true }, rating: { average: 4.8, count: 41 }, createdAt: '2023-06-02T09:00:00Z',
   },
 ];
 
@@ -238,7 +268,25 @@ export const mockExperiences: Experience[] = [
     location: { country: 'NZ', state: 'WGN', suburb: 'WLG', localArea: 'TEARO' },
     photos: { mainImageId: 'exp-8-main', thumbnailImageIds: [] },
     status: 'live', rating: { average: 4.9, count: 55 }, createdAt: '2023-05-08T09:00:00Z',
-  }
+  },
+  {
+    id: '9', hostId: 'host-9', userId: 'user-13', title: 'Lebanese Mezze Feast in Brisbane', category: 'In-Home Dining',
+    description: 'A vibrant selection of classic Lebanese mezze, from hummus and baba ghanoush to freshly baked fatayer. Perfect for sharing.',
+    durationMinutes: 150, menu: { cuisine: 'Lebanese', description: 'An array of small dishes, perfect for sharing.', dietary: ['Vegetarian'], spiceLevel: 'Mild', },
+    pricing: { pricePerGuest: 70, maxGuests: 8 }, availability: { days: ['Friday', 'Saturday'], timeSlots: ['19:30'] },
+    location: { country: 'AU', state: 'QLD', suburb: 'BRI', localArea: 'WESTEND' },
+    photos: { mainImageId: 'exp-9-main', thumbnailImageIds: [] },
+    status: 'live', rating: { average: 4.9, count: 62 }, createdAt: '2023-06-03T09:00:00Z',
+  },
+  {
+    id: '10', hostId: 'host-10', userId: 'user-14', title: 'Fremantle Seafood BBQ', category: 'Special Event',
+    description: 'Enjoy the freshest catch from the Indian Ocean, grilled to perfection on the BBQ. A true taste of West Australian life.',
+    durationMinutes: 180, menu: { cuisine: 'Australian', description: 'Grilled local fish, prawns, and salads.', dietary: [], spiceLevel: 'Mild', },
+    pricing: { pricePerGuest: 90, maxGuests: 6 }, availability: { days: ['Sunday'], timeSlots: ['13:00'] },
+    location: { country: 'AU', state: 'WA', suburb: 'PER', localArea: 'FREMANTLE' },
+    photos: { mainImageId: 'exp-10-main', thumbnailImageIds: [] },
+    status: 'live', rating: { average: 4.8, count: 41 }, createdAt: '2023-06-04T09:00:00Z',
+  },
 ];
 
 export const mockHostApplications: HostApplication[] = [

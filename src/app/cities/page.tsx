@@ -16,6 +16,15 @@ const cityImageMap: Record<string, string> = {
     MEL: 'city-melbourne',
     AKL: 'city-auckland',
     WLG: 'city-wellington',
+    BRI: 'city-brisbane',
+    PER: 'city-perth',
+    ADL: 'city-adelaide',
+    CBR: 'city-canberra',
+    HBA: 'city-hobart',
+    CHC: 'city-christchurch',
+    ZQN: 'city-queenstown',
+    HLZ: 'city-hamilton',
+    TRG: 'city-tauranga',
 }
 
 
