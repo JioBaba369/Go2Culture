@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Report } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,7 +41,16 @@ const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "de
 
 export default function AdminReportsPage() {
   const firestore = useFirestore();
-  const { data: reports, isLoading } = useCollection<Report>(useMemoFirebase(() => firestore ? collection(firestore, 'reports') : null, [firestore]));
+  const { user, isUserLoading: isAuthLoading } = useUser();
+
+  const reportsQuery = useMemoFirebase(
+    () => (firestore && user ? collection(firestore, 'reports') : null),
+    [firestore, user]
+  );
+
+  const { data: reports, isLoading: isReportsLoading } = useCollection<Report>(reportsQuery);
+  
+  const isLoading = isAuthLoading || (!!user && isReportsLoading);
 
   return (
     <div className="space-y-8">
@@ -54,7 +63,7 @@ export default function AdminReportsPage() {
       <div className="grid gap-4 md:hidden">
         <h2 className="text-xl font-semibold">Active Reports</h2>
          {isLoading && Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
-         {reports?.map((report) => (
+         {!isLoading && reports?.map((report) => (
           <Card key={report.id} className="p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
@@ -115,7 +124,7 @@ export default function AdminReportsPage() {
               {isLoading && Array.from({length: 3}).map((_, i) => (
                 <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
               ))}
-              {reports?.map((report) => (
+              {!isLoading && reports?.map((report) => (
                 <TableRow key={report.id}>
                   <TableCell>
                       <div className="font-medium">{report.targetType}</div>
