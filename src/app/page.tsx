@@ -17,7 +17,7 @@ import { collection, limit, query } from "firebase/firestore";
 import { Experience, Review } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TestimonialCard } from "@/components/testimonial-card";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 
 const cityImageMap: Record<string, string> = {
