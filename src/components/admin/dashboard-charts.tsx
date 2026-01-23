@@ -4,14 +4,17 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart"
-import { users, experiences } from '@/lib/data';
 import { useMemo } from 'react';
 import { format } from 'date-fns';
+import { User, Experience } from '@/lib/types';
 
-export function UsersChart() {
+export function UsersChart({ users }: { users: User[] }) {
     const data = useMemo(() => {
+        if (!users) return [];
         const counts = users.reduce((acc, user) => {
-            const month = format(new Date(user.createdAt), 'MMM yyyy');
+            if (!user.createdAt) return acc;
+            const date = user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt);
+            const month = format(date, 'MMM yyyy');
             acc[month] = (acc[month] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
@@ -22,7 +25,7 @@ export function UsersChart() {
             month,
             users: counts[month],
         }));
-    }, []);
+    }, [users]);
 
     const chartConfig = {
         users: {
@@ -58,8 +61,9 @@ export function UsersChart() {
     )
 }
 
-export function ExperiencesChart() {
+export function ExperiencesChart({ experiences }: { experiences: Experience[] }) {
     const data = useMemo(() => {
+        if (!experiences) return [];
         const counts = experiences.reduce((acc, exp) => {
             acc[exp.category] = (acc[exp.category] || 0) + 1;
             return acc;
@@ -69,7 +73,7 @@ export function ExperiencesChart() {
             name,
             value,
         }));
-    }, []);
+    }, [experiences]);
 
     const chartConfig = {
         "In-Home Dining": {

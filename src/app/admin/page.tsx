@@ -1,9 +1,11 @@
+'use client';
 
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import {
   Utensils,
@@ -14,13 +16,20 @@ import {
   Star,
   UserPlus,
   FileText,
+  Database,
+  Loader2,
 } from "lucide-react";
-import { hostApplications, experiences, users, reviews } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import Link from 'next/link';
 import { UsersChart, ExperiencesChart } from "@/components/admin/dashboard-charts";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, doc, query, setDoc } from "firebase/firestore";
+import { HostApplication, Experience, User, Review } from "@/lib/types";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const ActivityIcon = ({ type }: { type: string }) => {
     switch (type) {
@@ -47,8 +56,9 @@ const ActivityItem = ({ activity }: { activity: any }) => {
         case 'experience':
             title = <>New experience created: <span className="font-semibold">{activity.data.title}</span></>;
             href = `/experiences/${activity.data.id}`;
-            imageId = activity.data.host.profilePhotoId;
-            fallbackName = activity.data.host.name;
+            // The host data is not denormalized on the experience for this view, so we can't show image.
+            // imageId = activity.data.host.profilePhotoId;
+            fallbackName = activity.data.title;
             break;
         case 'user':
             title = <><span className="font-semibold">{activity.data.fullName}</span> joined Go2Culture</>;
@@ -57,12 +67,10 @@ const ActivityItem = ({ activity }: { activity: any }) => {
             fallbackName = activity.data.fullName;
             break;
         case 'review':
-            const reviewedUser = users.find(u => u.id === activity.data.userId);
-            const reviewedExperience = experiences.find(e => e.id === activity.data.experienceId);
-            title = <><span className="font-semibold">{reviewedUser?.fullName || 'A guest'}</span> left a review for <span className="font-semibold">{reviewedExperience?.title || 'an experience'}</span></>;
-            href = `/admin/reports`; // Reviews and reports are on the same page
-            imageId = reviewedUser?.profilePhotoId;
-            fallbackName = reviewedUser?.fullName || '?';
+             title = <>A guest left a review</>;
+             href = `/admin/reports`; // Reviews and reports are on the same page
+            // imageId = reviewedUser?.profilePhotoId;
+            fallbackName = '?';
             break;
         default:
             title = 'An unknown activity occurred';
@@ -70,7 +78,7 @@ const ActivityItem = ({ activity }: { activity: any }) => {
             fallbackName = '?';
     }
 
-    const image = PlaceHolderImages.find(p => p.id === imageId);
+    const image = imageId ? PlaceHolderImages.find(p => p.id === imageId) : null;
 
     return (
         <div className="flex items-center gap-4">
@@ -85,56 +93,81 @@ const ActivityItem = ({ activity }: { activity: any }) => {
     );
 }
 
+const toDate = (timestamp: any) => {
+  if (timestamp && timestamp.toDate) {
+    return timestamp.toDate();
+  }
+  return new Date(timestamp);
+}
+
 export default function AdminDashboardPage() {
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  const { data: hostApplications } = useCollection<HostApplication>(useMemoFirebase(() => firestore ? collection(firestore, 'hostApplications') : null, [firestore]));
+  const { data: experiences } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
+  const { data: users } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
+  const { data: reviews } = useCollection<Review>(useMemoFirebase(() => firestore ? collection(firestore, 'reviews') : null, [firestore]));
+
+  const handleSeedDatabase = async () => {
+    setIsSeeding(true);
+    toast({ title: 'Seeding Database...', description: 'This may take a moment.' });
+    try {
+      const { seedDatabase } = await import('@/lib/seed');
+      await seedDatabase(firestore);
+      toast({ title: 'Database Seeded!', description: 'Your database has been populated with mock data.' });
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      toast({ variant: 'destructive', title: 'Seeding Failed', description: 'Could not seed the database.' });
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   const stats = [
     {
       title: "Pending Applications",
-      value: hostApplications.filter(app => app.status === 'Pending').length,
+      value: hostApplications?.filter(app => app.status === 'Pending').length || 0,
       icon: Clock,
       color: "text-blue-500",
     },
     {
       title: "Approved Hosts",
-      value: new Set(experiences.map(exp => exp.hostId)).size,
+      value: experiences ? new Set(experiences.map(exp => exp.hostId)).size : 0,
       icon: CheckCircle,
       color: "text-green-500",
     },
     {
       title: "Live Experiences",
-      value: experiences.filter(exp => exp.status === 'live').length,
+      value: experiences?.filter(exp => exp.status === 'live').length || 0,
       icon: Utensils,
       color: "text-purple-500",
     },
     {
       title: "Total Users",
-      value: users.length,
+      value: users?.length || 0,
       icon: Users,
       color: "text-orange-500",
-    },
-    {
-      title: "Flagged Listings",
-      value: "3", // mock
-      icon: MessageSquareWarning,
-      color: "text-yellow-500",
-    },
-    {
-      title: "Reported Issues",
-      value: "5", // mock
-      icon: MessageSquareWarning,
-      color: "text-red-500",
     },
   ];
 
   const activities = [
-    ...hostApplications.map(app => ({ type: 'application', data: app, date: new Date(app.submittedDate) })),
-    ...experiences.map(exp => ({ type: 'experience', data: exp, date: new Date(exp.createdAt) })),
-    ...users.map(user => ({ type: 'user', data: user, date: new Date(user.createdAt) })),
-    ...reviews.map(review => ({ type: 'review', data: review, date: new Date(review.createdAt) }))
+    ...(hostApplications || []).map(app => ({ type: 'application', data: app, date: toDate(app.submittedDate) })),
+    ...(experiences || []).map(exp => ({ type: 'experience', data: exp, date: toDate(exp.createdAt) })),
+    ...(users || []).map(user => ({ type: 'user', data: user, date: toDate(user.createdAt) })),
+    ...(reviews || []).map(review => ({ type: 'review', data: review, date: toDate(review.createdAt) }))
   ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 7);
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
+      <div className="flex justify-between items-start">
+        <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
+        <Button onClick={handleSeedDatabase} disabled={isSeeding}>
+          {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+          Seed Database
+        </Button>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.title}>
@@ -147,14 +180,24 @@ export default function AdminDashboardPage() {
             </CardContent>
           </Card>
         ))}
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Flagged Items</CardTitle>
+               <MessageSquareWarning className={`h-4 w-4 text-muted-foreground text-yellow-500`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+               <p className="text-xs text-muted-foreground">Reports not yet implemented</p>
+            </CardContent>
+          </Card>
       </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">
-            <UsersChart />
+            <UsersChart users={users || []} />
         </div>
         <div className="lg:col-span-2">
-            <ExperiencesChart />
+            <ExperiencesChart experiences={experiences || []}/>
         </div>
       </div>
 

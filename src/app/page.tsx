@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,13 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Search, Users, Home as HomeIcon, Award } from "lucide-react";
 import { ExperienceCard } from "@/components/experience-card";
-import { experiences } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, states, suburbs, localAreas } from "@/lib/location-data";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, limit, query } from "firebase/firestore";
+import { Experience } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
   const router = useRouter();
+  const firestore = useFirestore();
 
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('');
@@ -25,6 +29,12 @@ export default function Home() {
   const [availableStates, setAvailableStates] = useState<{id: string, name: string}[]>([]);
   const [availableSuburbs, setAvailableSuburbs] = useState<{id: string, name: string}[]>([]);
   const [availableLocalAreas, setAvailableLocalAreas] = useState<{id: string, name: string}[]>([]);
+
+  const experiencesQuery = useMemoFirebase(
+    () => firestore ? query(collection(firestore, 'experiences'), limit(4)) : null,
+    [firestore]
+  );
+  const { data: experiences, isLoading } = useCollection<Experience>(experiencesQuery);
 
   useEffect(() => {
     if (selectedCountry) {
@@ -168,9 +178,19 @@ export default function Home() {
       <section>
         <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Featured Experiences</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-          {experiences.slice(0, 4).map((experience) => (
-              <ExperienceCard key={experience.id} experience={experience} />
-            ))}
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))
+          ) : (
+            experiences?.map((experience) => (
+                <ExperienceCard key={experience.id} experience={experience} />
+              ))
+          )}
         </div>
         <div className="text-center mt-8">
           <Button variant="outline" size="lg" asChild>

@@ -1,8 +1,22 @@
+'use client';
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
+import { useUser, useAuth } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { href: "/discover", label: "Discover" },
@@ -11,6 +25,15 @@ const navLinks = [
 ];
 
 export function Header() {
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
+  
+  const userImage = PlaceHolderImages.find(p => p.id === 'guest-1');
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -27,12 +50,48 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Log In</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Sign Up</Link>
-          </Button>
+          {isUserLoading ? (
+            <div className="h-10 w-24 bg-muted rounded-md animate-pulse" />
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    {user.photoURL ? (
+                      <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
+                    ) : userImage ? (
+                      <AvatarImage src={userImage.imageUrl} alt="User" />
+                    ) : null}
+                    <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.displayName || 'Go2Culture User'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/login">Log In</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
         <div className="md:hidden">
           <Sheet>
@@ -54,12 +113,18 @@ export function Header() {
                   </Link>
                 ))}
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
-                  <Button variant="ghost" className="w-full justify-start" asChild>
-                    <Link href="/login">Log In</Link>
-                  </Button>
-                  <Button className="w-full justify-start" asChild>
-                    <Link href="/signup">Sign Up</Link>
-                  </Button>
+                  {user ? (
+                     <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>Log Out</Button>
+                  ) : (
+                    <>
+                      <Button variant="ghost" className="w-full justify-start" asChild>
+                        <Link href="/login">Log In</Link>
+                      </Button>
+                      <Button className="w-full justify-start" asChild>
+                        <Link href="/signup">Sign Up</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </nav>
             </SheetContent>

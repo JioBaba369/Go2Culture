@@ -3,20 +3,31 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { Experience } from "@/lib/types";
+import type { Experience, Host } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MapPin } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, suburbs } from "@/lib/location-data";
+import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { Skeleton } from "./ui/skeleton";
 
 interface ExperienceCardProps {
   experience: Experience;
 }
 
-export function ExperienceCard({ experience }: ExperienceCardProps) {
+function ExperienceCardContent({ experience }: ExperienceCardProps) {
+  const firestore = useFirestore();
+  const hostRef = useMemoFirebase(
+    () => firestore && experience.userId ? doc(firestore, 'users', experience.userId, 'hosts', experience.hostId) : null,
+    [firestore, experience.userId, experience.hostId]
+  );
+  // Note: This pattern makes a doc read for every card. For production, denormalizing host data into the experience doc would be more performant.
+  const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
+
   const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
-  const hostAvatar = PlaceHolderImages.find(p => p.id === experience.host.profilePhotoId);
+  const hostAvatar = host ? PlaceHolderImages.find(p => p.id === host.profilePhotoId) : null;
 
   const countryName = countries.find(c => c.id === experience.location.country)?.name || experience.location.country;
   const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;
@@ -52,13 +63,15 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
             <MapPin className="h-4 w-4 shrink-0" />
             <span>{suburbName}, {countryName}</span>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <Avatar className="h-6 w-6">
-              {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={experience.host.name} data-ai-hint={hostAvatar.imageHint} />}
-              <AvatarFallback>{experience.host.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-muted-foreground">Hosted by {experience.host.name}</span>
-          </div>
+          {isHostLoading ? <Skeleton className="h-6 w-3/4 mt-2" /> : host && (
+            <div className="flex items-center gap-2 mt-2">
+              <Avatar className="h-6 w-6">
+                {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={host.name} data-ai-hint={hostAvatar.imageHint} />}
+                <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <span className="text-sm text-muted-foreground">Hosted by {host.name}</span>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 flex items-center justify-between pt-4 border-t">
@@ -75,4 +88,12 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
       </CardContent>
     </Card>
   );
+}
+
+
+export function ExperienceCard({ experience }: ExperienceCardProps) {
+  if (!experience || !experience.id) {
+    return null;
+  }
+  return <ExperienceCardContent experience={experience} />
 }

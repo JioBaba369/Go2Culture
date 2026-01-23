@@ -1,4 +1,6 @@
+'use client';
 
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,8 +13,63 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { useAuth, useFirestore, useToast } from '@/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 
 export default function SignupPage() {
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignup = async () => {
+    if (!fullName || !email || !password) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing fields',
+        description: 'Please fill out all fields.',
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Create user document in Firestore
+      const userRef = doc(firestore, 'users', user.uid);
+      await setDoc(userRef, {
+        id: user.uid,
+        role: 'guest',
+        fullName,
+        email: user.email,
+        status: 'active',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        profilePhotoId: 'guest-1', // Default avatar
+      });
+
+      toast({ title: "Account Created", description: "Welcome to Go2Culture!" });
+      router.push('/');
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: error.message || "Could not create your account. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center py-12">
         <Card className="mx-auto max-w-sm">
@@ -27,7 +84,14 @@ export default function SignupPage() {
           <div className="grid gap-4">
             <div className="grid gap-2">
                 <Label htmlFor="full-name">Full Name</Label>
-                <Input id="full-name" placeholder="John Doe" required />
+                <Input 
+                  id="full-name" 
+                  placeholder="John Doe" 
+                  required 
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={isLoading}
+                />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -36,13 +100,23 @@ export default function SignupPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                />
             </div>
-            <Button type="submit" className="w-full">
+            <Button onClick={handleSignup} className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create an account
             </Button>
           </div>

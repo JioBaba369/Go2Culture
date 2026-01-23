@@ -17,8 +17,8 @@ export type User = {
     suburb?: string;
   }
   status: 'active' | 'suspended' | 'deleted';
-  createdAt: string;
-  updatedAt: string;
+  createdAt: any; // Allow ServerTimestamp
+  updatedAt: any; // Allow ServerTimestamp
 };
 
 export type ComplianceFields = {
@@ -77,7 +77,7 @@ export type Host = {
     count: number;
   };
 
-  createdAt: string;
+  createdAt: any; // Allow ServerTimestamp
 };
 
 // This is a denormalized version for display on the experience page
@@ -95,6 +95,7 @@ export type ExperienceReview = {
 export type Experience = {
   id: string; // experienceId
   hostId: string;
+  userId: string; // The user ID of the host
   host: Host; // Denormalized for easy access in UI
   title: string;
   category: 'In-Home Dining' | 'Cooking Class' | 'Restaurant Experience' | 'Special Event';
@@ -132,7 +133,7 @@ export type Experience = {
     count: number;
   };
   reviews: ExperienceReview[];
-  createdAt: string;
+  createdAt: any; // Allow ServerTimestamp
 };
 
 
@@ -145,7 +146,7 @@ export type Review = {
   userId: string;
   rating: number;
   comment: string;
-  createdAt: string; // ISO 8601
+  createdAt: any; // Allow ServerTimestamp
 };
 
 
@@ -153,7 +154,7 @@ export type Review = {
 export type HostApplication = {
   id: string;
   hostName: string;
-  submittedDate: string;
+  submittedDate: any; // Allow ServerTimestamp
   status: 'Pending' | 'Approved' | 'Changes Needed' | 'Rejected';
   riskFlag: 'Low' | 'Medium' | 'High' | null;
   
@@ -224,6 +225,6 @@ export type Report = {
   reason: string;
   reportedBy: string;
   reportedUserLink: string | null;
-  date: string;
+  date: any; // Allow ServerTimestamp
   status: 'Open' | 'In Progress' | 'Resolved';
 };

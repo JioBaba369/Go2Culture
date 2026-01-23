@@ -1,7 +1,7 @@
 
 import type { Host, Review, Experience, HostApplication, User, ExperienceReview, Report } from '@/lib/types';
 
-export const users: User[] = [
+export const mockUsers: User[] = [
   {
     id: 'user-1',
     role: 'host',
@@ -124,7 +124,7 @@ export const users: User[] = [
   },
 ];
 
-export const hosts: Host[] = [
+export const mockHosts: Host[] = [
   {
     id: 'host-1',
     userId: 'user-1',
@@ -279,7 +279,7 @@ export const hosts: Host[] = [
   },
 ];
 
-export const reviews: Review[] = [
+export const mockReviews: Review[] = [
   {
     id: 'review-1',
     bookingId: 'booking-1',
@@ -322,7 +322,7 @@ export const reviews: Review[] = [
   }
 ];
 
-const experienceReviews: Record<string, ExperienceReview[]> = {
+const mockExperienceReviews: Record<string, ExperienceReview[]> = {
   '1': [
     {
       id: 'review-1',
@@ -366,11 +366,14 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   '10': [],
 }
 
-export const experiences: Experience[] = [
+const getHost = (id: string) => mockHosts.find(h => h.id === id)!;
+
+export const mockExperiences: Experience[] = [
   {
     id: '1',
     hostId: 'host-1',
-    host: hosts.find(h => h.id === 'host-1')!,
+    userId: 'user-1',
+    host: getHost('host-1'),
     title: 'Nonna\'s Roman Pasta Feast',
     category: 'In-Home Dining',
     description: 'Join me in my charming Trastevere home for a journey through Roman cuisine. We\'ll start with classic antipasti, then I\'ll teach you the art of making fresh pasta, just like my nonna taught me. We\'ll finish with a delicious homemade tiramisu and stories of old Rome.',
@@ -387,13 +390,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-1-main', thumbnailImageIds: ['exp-1-thumb-1', 'exp-1-thumb-2'] },
     status: 'live',
     rating: { average: 4.9, count: 134 },
-    reviews: experienceReviews['1'],
+    reviews: mockExperienceReviews['1'],
     createdAt: '2023-01-12T09:00:00Z',
   },
   {
     id: '2',
     hostId: 'host-4',
-    host: hosts.find(h => h.id === 'host-4')!,
+    userId: 'user-4',
+    host: getHost('host-4'),
     title: 'Oaxacan Street Taco Fiesta',
     category: 'In-Home Dining',
     description: 'Experience the soul of Oaxacan street food without leaving my cozy kitchen. We\'ll explore different types of masa, craft a variety of fillings from cochinita pibil to fresh fish, and mix up some zesty salsas. Come hungry and ready for a fiesta!',
@@ -410,13 +414,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-2-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.8, count: 98 },
-    reviews: experienceReviews['2'],
+    reviews: mockExperienceReviews['2'],
     createdAt: '2023-04-02T09:00:00Z',
   },
   {
     id: '3',
     hostId: 'host-2',
-    host: hosts.find(h => h.id === 'host-2')!,
+    userId: 'user-2',
+    host: getHost('host-2'),
     title: 'Zen & Simplicity: A Japanese Meal',
     category: 'In-Home Dining',
     description: 'Discover "washoku," the Japanese philosophy of food that emphasizes balance and harmony. In my minimalist home, we will enjoy a simple, elegant meal that highlights the natural flavors of seasonal ingredients. This is a quiet, contemplative experience.',
@@ -433,13 +438,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-3-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.9, count: 72 },
-    reviews: experienceReviews['3'],
+    reviews: mockExperienceReviews['3'],
     createdAt: '2023-02-16T09:00:00Z',
   },
   {
     id: '4',
     hostId: 'host-3',
-    host: hosts.find(h => h.id === 'host-3')!,
+    userId: 'user-3',
+    host: getHost('host-3'),
     title: 'South Indian Family Feast',
     category: 'Cooking Class',
     description: 'Welcome to our home! My mother and I will guide you through the vibrant flavors of our Tamil heritage. You\'ll learn to make crispy dosas, fluffy idlis, and a variety of chutneys and sambar. It\'s a hands-on, joyful, and delicious celebration.',
@@ -456,13 +462,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-4-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.85, count: 150 },
-    reviews: experienceReviews['4'],
+    reviews: mockExperienceReviews['4'],
     createdAt: '2023-03-21T09:00:00Z',
   },
   {
     id: '5',
     hostId: 'host-5',
-    host: hosts.find(h => h.id === 'host-5')!,
+    userId: 'user-9',
+    host: getHost('host-5'),
     title: 'Authentic Bangkok Street Food at Home',
     category: 'In-Home Dining',
     description: 'Taste the flavors of Bangkok\'s bustling streets from the comfort of my home. We\'ll enjoy a selection of classic street food dishes, from Pad Thai to spicy green curry.',
@@ -479,13 +486,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-5-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.9, count: 45 },
-    reviews: experienceReviews['5'],
+    reviews: mockExperienceReviews['5'],
     createdAt: '2023-05-05T09:00:00Z',
   },
   {
     id: '6',
     hostId: 'host-6',
-    host: hosts.find(h => h.id === 'host-6')!,
+    userId: 'user-10',
+    host: getHost('host-6'),
     title: 'Classic French Bistro Dinner',
     category: 'In-Home Dining',
     description: 'Enjoy a taste of Paris with a classic three-course bistro meal. We\'ll have a hearty Coq au Vin, creamy potato gratin, and a decadent chocolate mousse for dessert.',
@@ -502,13 +510,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-6-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.8, count: 32 },
-    reviews: experienceReviews['6'],
+    reviews: mockExperienceReviews['6'],
     createdAt: '2023-05-06T09:00:00Z',
   },
   {
     id: '7',
     hostId: 'host-7',
-    host: hosts.find(h => h.id === 'host-7')!,
+    userId: 'user-11',
+    host: getHost('host-7'),
     title: 'Spanish Tapas & Paella Night',
     category: 'Cooking Class',
     description: 'Learn the secrets to perfect paella and enjoy a variety of delicious tapas. We will cook together, drink sangria, and enjoy a lively Spanish evening.',
@@ -525,13 +534,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-7-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.85, count: 68 },
-    reviews: experienceReviews['7'],
+    reviews: mockExperienceReviews['7'],
     createdAt: '2023-05-07T09:00:00Z',
   },
   {
     id: '8',
     hostId: 'host-8',
-    host: hosts.find(h => h.id === 'host-8')!,
+    userId: 'user-12',
+    host: getHost('host-8'),
     title: 'Aromatic Vietnamese Pho Experience',
     category: 'In-Home Dining',
     description: 'There is nothing more comforting than a bowl of authentic, slow-cooked Pho. I will share my family\'s secret recipe with you in a warm and welcoming setting.',
@@ -548,13 +558,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-8-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.9, count: 55 },
-    reviews: experienceReviews['8'],
+    reviews: mockExperienceReviews['8'],
     createdAt: '2023-05-08T09:00:00Z',
   },
   {
     id: '9',
     hostId: 'host-1',
-    host: hosts.find(h => h.id === 'host-1')!,
+    userId: 'user-1',
+    host: getHost('host-1'),
     title: 'Maria\'s Trattoria Pop-up',
     category: 'Restaurant Experience',
     description: 'For one week only, experience the magic of my family\'s cooking in a cozy restaurant setting. A special menu of regional Italian classics, served in a space we\'ve transformed into a little piece of Rome.',
@@ -571,13 +582,14 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-9-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 5.0, count: 12 },
-    reviews: experienceReviews['9'],
+    reviews: mockExperienceReviews['9'],
     createdAt: '2023-06-01T09:00:00Z',
   },
   {
     id: '10',
     hostId: 'host-3',
-    host: hosts.find(h => h.id === 'host-3')!,
+    userId: 'user-3',
+    host: getHost('host-3'),
     title: 'Diwali Festival of Lights Dinner',
     category: 'Special Event',
     description: 'Celebrate Diwali, the festival of lights, with my family! A special festive menu, traditional sweets (mithai), stories about the festival, and a chance to light sparklers. This is a one-time event to share our most important celebration.',
@@ -594,12 +606,12 @@ export const experiences: Experience[] = [
     photos: { mainImageId: 'exp-10-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.9, count: 25 },
-    reviews: experienceReviews['10'],
+    reviews: mockExperienceReviews['10'],
     createdAt: '2023-06-02T09:00:00Z',
   },
 ];
 
-export const hostApplications: HostApplication[] = [
+export const mockHostApplications: HostApplication[] = [
     {
         id: 'app-1',
         hostName: 'Maria',
@@ -618,7 +630,7 @@ export const hostApplications: HostApplication[] = [
         homeSetup: { homeType: 'Apartment', seating: 'Table', accessibility: 'Elevator access', maxGuests: 6, pets: false, smoking: false },
         experience: {
             title: 'Nonna\'s Roman Pasta Feast',
-            description: experiences[0].description,
+            description: mockExperiences[0].description,
             durationMinutes: 180,
             category: 'In-Home Dining',
             menu: {
@@ -626,8 +638,8 @@ export const hostApplications: HostApplication[] = [
               description: 'A 4-course traditional Roman meal.',
               spiceLevel: 'Mild',
             },
-            pricing: experiences[0].pricing,
-            photos: { mainImageId: experiences[0].photos.mainImageId },
+            pricing: mockExperiences[0].pricing,
+            photos: { mainImageId: mockExperiences[0].photos.mainImageId },
         },
         compliance: { foodBusinessRegistered: true, councilName: 'City of Rome', foodSafetyTrainingCompleted: true, guidelinesAccepted: true, agreeToFoodSafety: true },
     },
@@ -649,7 +661,7 @@ export const hostApplications: HostApplication[] = [
         homeSetup: { homeType: 'Apartment', seating: 'Table', pets: true, smoking: true, maxGuests: 8 },
         experience: {
             title: 'Oaxacan Street Taco Fiesta',
-            description: experiences[1].description,
+            description: mockExperiences[1].description,
             durationMinutes: 150,
             category: 'In-Home Dining',
             menu: {
@@ -657,8 +669,8 @@ export const hostApplications: HostApplication[] = [
               description: 'Taco tasting menu with appetizers and dessert.',
               spiceLevel: 'Medium',
             },
-            pricing: experiences[1].pricing,
-            photos: { mainImageId: experiences[1].photos.mainImageId },
+            pricing: mockExperiences[1].pricing,
+            photos: { mainImageId: mockExperiences[1].photos.mainImageId },
         },
         compliance: { foodBusinessRegistered: false, foodSafetyTrainingCompleted: true, guidelinesAccepted: true, agreeToFoodSafety: true },
     },
@@ -726,7 +738,7 @@ export const hostApplications: HostApplication[] = [
     },
 ];
 
-export const reports: Report[] = [
+export const mockReports: Report[] = [
     {
         id: 'rep-1',
         targetType: 'Review',
