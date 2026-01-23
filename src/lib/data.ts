@@ -1,5 +1,5 @@
 
-import type { Host, Review, Experience, HostApplication, User, ExperienceReview } from '@/lib/types';
+import type { Host, Review, Experience, HostApplication, User, ExperienceReview, Report } from '@/lib/types';
 
 export const users: User[] = [
   {
@@ -50,7 +50,7 @@ export const users: User[] = [
     status: 'active',
     createdAt: '2023-10-01T12:00:00Z',
     updatedAt: '2023-10-01T12:00:00Z',
-    profilePhotoId: 'host-4' // Reusing photo for mock
+    profilePhotoId: 'guest-1'
   },
   {
     id: 'user-6',
@@ -60,7 +60,27 @@ export const users: User[] = [
     status: 'suspended',
     createdAt: '2023-10-02T14:00:00Z',
     updatedAt: '2023-11-01T10:00:00Z',
-    profilePhotoId: 'host-2' // Reusing photo for mock
+    profilePhotoId: 'guest-2'
+  },
+   {
+    id: 'user-7',
+    role: 'both',
+    fullName: 'Chloe',
+    email: 'chloe@go2culture.com',
+    status: 'active',
+    createdAt: '2023-05-18T11:00:00Z',
+    updatedAt: '2023-05-18T11:00:00Z',
+    profilePhotoId: 'host-3'
+  },
+  {
+    id: 'user-8',
+    role: 'guest',
+    fullName: 'Ben',
+    email: 'ben@guest.com',
+    status: 'active',
+    createdAt: '2023-09-05T18:00:00Z',
+    updatedAt: '2023-09-05T18:00:00Z',
+    profilePhotoId: 'guest-3'
   }
 ];
 
@@ -170,14 +190,14 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   '1': [
     {
       id: 'review-1',
-      author: { name: 'Sophie', avatarImageId: 'host-4' },
+      author: { name: 'Sophie', avatarImageId: 'guest-1' },
       rating: 5,
       comment: 'An absolutely unforgettable evening! Maria\'s pasta was the best I\'ve ever had, and her stories made the experience so special. Felt like dinner with family.',
       date: '2023-10-15',
     },
     {
       id: 'review-3',
-      author: { name: 'Alex', avatarImageId: 'host-2' },
+      author: { name: 'Alex', avatarImageId: 'guest-2' },
       rating: 5,
       comment: 'Maria is a gem. So welcoming and warm. The food was divine. A must-do in Rome!',
       date: '2023-09-20',
@@ -195,7 +215,7 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   '3': [
      {
       id: 'review-2',
-      author: { name: 'David', avatarImageId: 'host-2' },
+      author: { name: 'David', avatarImageId: 'guest-2' },
       rating: 5,
       comment: 'The food was incredible, and the atmosphere was so peaceful. A truly authentic and meditative dining experience. Highly recommended.',
       date: '2023-10-12',
@@ -362,4 +382,99 @@ export const hostApplications: HostApplication[] = [
         },
         compliance: { foodBusinessRegistered: false, foodSafetyTrainingCompleted: true, guidelinesAccepted: true, agreeToFoodSafety: true },
     },
+     {
+        id: 'app-3',
+        hostName: 'Siti',
+        submittedDate: '2023-11-05',
+        status: 'Changes Needed',
+        riskFlag: 'Medium',
+        profile: {
+            photoId: 'guest-1', // placeholder
+            bio: 'I love sharing the diverse flavors of Malaysia with new friends.',
+            languages: ['Malay', 'English'],
+            culturalBackground: 'Malaysian',
+            hostingStyles: ['Family-style'],
+        },
+        verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Failed' },
+        location: { country: 'MY', state: 'KUL', suburb: 'Kuala Lumpur', postcode: '50450' },
+        homeSetup: { homeType: 'Apartment', seating: 'Table', pets: false, smoking: false, maxGuests: 4 },
+        experience: {
+            title: 'Malaysian Nasi Lemak Lunch',
+            description: "Learn to make Malaysia's national dish, Nasi Lemak, with all its delicious accompaniments like sambal, fried chicken, and crispy anchovies.",
+            duration: '3 hours',
+            category: 'Cooking + dining',
+            menu: {
+              cuisine: 'Malaysian',
+              description: 'Full Nasi Lemak set with teh tarik.',
+              spiceLevel: 'Spicy',
+            },
+            pricing: { pricePerGuest: 45, maxGuests: 4 },
+            photos: { mainImageId: 'exp-4-main' }, // placeholder
+        },
+        compliance: { guidelinesAccepted: true, agreeToFoodSafety: true },
+    },
+    {
+        id: 'app-4',
+        hostName: 'Ahmad',
+        submittedDate: '2023-11-12',
+        status: 'Rejected',
+        riskFlag: 'High',
+        profile: {
+            photoId: 'guest-3', // placeholder
+            bio: 'Taste of the desert.',
+            languages: ['Arabic'],
+            culturalBackground: 'Bedouin',
+            hostingStyles: ['Quiet & traditional'],
+        },
+        verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Pending' },
+        location: { country: 'JO', suburb: 'Wadi Rum' },
+        homeSetup: { homeType: 'Other', seating: 'Floor', maxGuests: 10 },
+        experience: {
+            title: 'Desert Camp Dinner',
+            description: "Dinner under the stars.",
+            duration: '4 hours',
+            category: 'Cultural dinner',
+            menu: {
+              cuisine: 'Middle Eastern',
+              description: 'Zarb (underground BBQ).',
+              spiceLevel: 'Mild',
+            },
+            pricing: { pricePerGuest: 70, maxGuests: 10 },
+            photos: { mainImageId: 'exp-1-main' }, // placeholder
+        },
+        compliance: { guidelinesAccepted: false, agreeToFoodSafety: false },
+    },
+];
+
+export const reports: Report[] = [
+    {
+        id: 'rep-1',
+        targetType: 'Review',
+        targetId: 'review-1',
+        reason: 'Inappropriate content in review comment.',
+        reportedBy: 'Maria (Host)',
+        reportedUserLink: '/admin/users/user-1',
+        date: '2023-11-10T14:00:00Z',
+        status: 'Open',
+    },
+    {
+        id: 'rep-2',
+        targetType: 'Experience',
+        targetId: '4',
+        reason: 'Host was unresponsive after booking.',
+        reportedBy: 'Sophie (Guest)',
+        reportedUserLink: '/admin/users/user-5',
+        date: '2023-11-08T10:30:00Z',
+        status: 'In Progress',
+    },
+    {
+        id: 'rep-3',
+        targetType: 'User',
+        targetId: 'user-6',
+        reason: 'Suspicious activity on user account.',
+        reportedBy: 'System Flag',
+        reportedUserLink: null,
+        date: '2023-11-05T22:00:00Z',
+        status: 'Resolved',
+    }
 ];

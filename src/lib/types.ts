@@ -216,3 +216,14 @@ export type HostApplication = {
 
   compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean, agreeToFoodSafety: boolean };
 };
+
+export type Report = {
+  id: string;
+  targetType: 'Review' | 'Experience' | 'User';
+  targetId: string;
+  reason: string;
+  reportedBy: string;
+  reportedUserLink: string | null;
+  date: string;
+  status: 'Open' | 'In Progress' | 'Resolved';
+};

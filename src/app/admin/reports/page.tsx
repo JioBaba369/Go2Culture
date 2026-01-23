@@ -27,39 +27,7 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-
-const mockReports = [
-    {
-        id: 'rep-1',
-        targetType: 'Review',
-        targetId: 'review-1',
-        reason: 'Inappropriate content in review comment.',
-        reportedBy: 'Maria (Host)',
-        reportedUserLink: '/admin/users/user-1',
-        date: '2023-11-10T14:00:00Z',
-        status: 'Open',
-    },
-    {
-        id: 'rep-2',
-        targetType: 'Experience',
-        targetId: '4',
-        reason: 'Host was unresponsive after booking.',
-        reportedBy: 'Sophie (Guest)',
-        reportedUserLink: '/admin/users/user-5',
-        date: '2023-11-08T10:30:00Z',
-        status: 'In Progress',
-    },
-    {
-        id: 'rep-3',
-        targetType: 'User',
-        targetId: 'user-6',
-        reason: 'Suspicious activity on user account.',
-        reportedBy: 'System Flag',
-        reportedUserLink: null,
-        date: '2023-11-05T22:00:00Z',
-        status: 'Resolved',
-    }
-]
+import { reports } from "@/lib/data";
 
 const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
   Open: "destructive",
@@ -95,7 +63,7 @@ export default function AdminReportsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockReports.map((report) => (
+              {reports.map((report) => (
                 <TableRow key={report.id}>
                   <TableCell>
                       <div className="font-medium">{report.targetType}</div>
