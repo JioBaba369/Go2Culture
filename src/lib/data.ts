@@ -372,7 +372,7 @@ export const experiences: Experience[] = [
     hostId: 'host-1',
     host: hosts.find(h => h.id === 'host-1')!,
     title: 'Nonna\'s Roman Pasta Feast',
-    category: 'Home-cooked meal',
+    category: 'In-Home Dining',
     description: 'Join me in my charming Trastevere home for a journey through Roman cuisine. We\'ll start with classic antipasti, then I\'ll teach you the art of making fresh pasta, just like my nonna taught me. We\'ll finish with a delicious homemade tiramisu and stories of old Rome.',
     durationMinutes: 180,
     menu: {
@@ -395,7 +395,7 @@ export const experiences: Experience[] = [
     hostId: 'host-4',
     host: hosts.find(h => h.id === 'host-4')!,
     title: 'Oaxacan Street Taco Fiesta',
-    category: 'Cultural dinner',
+    category: 'In-Home Dining',
     description: 'Experience the soul of Oaxacan street food without leaving my cozy kitchen. We\'ll explore different types of masa, craft a variety of fillings from cochinita pibil to fresh fish, and mix up some zesty salsas. Come hungry and ready for a fiesta!',
     durationMinutes: 150,
     menu: {
@@ -418,7 +418,7 @@ export const experiences: Experience[] = [
     hostId: 'host-2',
     host: hosts.find(h => h.id === 'host-2')!,
     title: 'Zen & Simplicity: A Japanese Meal',
-    category: 'Home-cooked meal',
+    category: 'In-Home Dining',
     description: 'Discover "washoku," the Japanese philosophy of food that emphasizes balance and harmony. In my minimalist home, we will enjoy a simple, elegant meal that highlights the natural flavors of seasonal ingredients. This is a quiet, contemplative experience.',
     durationMinutes: 120,
     menu: {
@@ -441,7 +441,7 @@ export const experiences: Experience[] = [
     hostId: 'host-3',
     host: hosts.find(h => h.id === 'host-3')!,
     title: 'South Indian Family Feast',
-    category: 'Cooking + dining',
+    category: 'Cooking Class',
     description: 'Welcome to our home! My mother and I will guide you through the vibrant flavors of our Tamil heritage. You\'ll learn to make crispy dosas, fluffy idlis, and a variety of chutneys and sambar. It\'s a hands-on, joyful, and delicious celebration.',
     durationMinutes: 210,
     menu: {
@@ -464,7 +464,7 @@ export const experiences: Experience[] = [
     hostId: 'host-5',
     host: hosts.find(h => h.id === 'host-5')!,
     title: 'Authentic Bangkok Street Food at Home',
-    category: 'Cultural dinner',
+    category: 'In-Home Dining',
     description: 'Taste the flavors of Bangkok\'s bustling streets from the comfort of my home. We\'ll enjoy a selection of classic street food dishes, from Pad Thai to spicy green curry.',
     durationMinutes: 150,
     menu: {
@@ -487,7 +487,7 @@ export const experiences: Experience[] = [
     hostId: 'host-6',
     host: hosts.find(h => h.id === 'host-6')!,
     title: 'Classic French Bistro Dinner',
-    category: 'Home-cooked meal',
+    category: 'In-Home Dining',
     description: 'Enjoy a taste of Paris with a classic three-course bistro meal. We\'ll have a hearty Coq au Vin, creamy potato gratin, and a decadent chocolate mousse for dessert.',
     durationMinutes: 180,
     menu: {
@@ -510,7 +510,7 @@ export const experiences: Experience[] = [
     hostId: 'host-7',
     host: hosts.find(h => h.id === 'host-7')!,
     title: 'Spanish Tapas & Paella Night',
-    category: 'Cooking + dining',
+    category: 'Cooking Class',
     description: 'Learn the secrets to perfect paella and enjoy a variety of delicious tapas. We will cook together, drink sangria, and enjoy a lively Spanish evening.',
     durationMinutes: 200,
     menu: {
@@ -533,7 +533,7 @@ export const experiences: Experience[] = [
     hostId: 'host-8',
     host: hosts.find(h => h.id === 'host-8')!,
     title: 'Aromatic Vietnamese Pho Experience',
-    category: 'Home-cooked meal',
+    category: 'In-Home Dining',
     description: 'There is nothing more comforting than a bowl of authentic, slow-cooked Pho. I will share my family\'s secret recipe with you in a warm and welcoming setting.',
     durationMinutes: 120,
     menu: {
@@ -556,7 +556,7 @@ export const experiences: Experience[] = [
     hostId: 'host-1',
     host: hosts.find(h => h.id === 'host-1')!,
     title: 'Maria\'s Trattoria Pop-up',
-    category: 'Cultural Restaurant',
+    category: 'Restaurant Experience',
     description: 'For one week only, experience the magic of my family\'s cooking in a cozy restaurant setting. A special menu of regional Italian classics, served in a space we\'ve transformed into a little piece of Rome.',
     durationMinutes: 180,
     menu: {
@@ -620,7 +620,7 @@ export const hostApplications: HostApplication[] = [
             title: 'Nonna\'s Roman Pasta Feast',
             description: experiences[0].description,
             durationMinutes: 180,
-            category: experiences[0].category,
+            category: 'In-Home Dining',
             menu: {
               cuisine: 'Italian',
               description: 'A 4-course traditional Roman meal.',
@@ -651,7 +651,7 @@ export const hostApplications: HostApplication[] = [
             title: 'Oaxacan Street Taco Fiesta',
             description: experiences[1].description,
             durationMinutes: 150,
-            category: experiences[1].category,
+            category: 'In-Home Dining',
             menu: {
               cuisine: 'Mexican',
               description: 'Taco tasting menu with appetizers and dessert.',
@@ -682,7 +682,7 @@ export const hostApplications: HostApplication[] = [
             title: 'Malaysian Nasi Lemak Lunch',
             description: "Learn to make Malaysia's national dish, Nasi Lemak, with all its delicious accompaniments like sambal, fried chicken, and crispy anchovies.",
             durationMinutes: 180,
-            category: 'Cooking + dining',
+            category: 'Cooking Class',
             menu: {
               cuisine: 'Malaysian',
               description: 'Full Nasi Lemak set with teh tarik.',
@@ -713,7 +713,7 @@ export const hostApplications: HostApplication[] = [
             title: 'Desert Camp Dinner',
             description: "Dinner under the stars.",
             durationMinutes: 240,
-            category: 'Cultural dinner',
+            category: 'In-Home Dining',
             menu: {
               cuisine: 'Middle Eastern',
               description: 'Zarb (underground BBQ).',

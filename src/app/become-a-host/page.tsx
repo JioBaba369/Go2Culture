@@ -53,7 +53,7 @@ export default function BecomeAHostLandingPage() {
              {/* What can you host */}
             <section>
                 <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">What Can You Host?</h2>
-                <div className="grid md:grid-cols-3 gap-8 mt-8 max-w-5xl mx-auto">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 max-w-7xl mx-auto">
                     <div className="flex flex-col items-center text-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Home className="h-8 w-8" />
@@ -61,19 +61,26 @@ export default function BecomeAHostLandingPage() {
                         <h3 className="text-xl font-bold font-headline">In-Home Dining</h3>
                         <p className="text-muted-foreground mt-2">The classic Go2Culture experience. Welcome guests to your table for a meal.</p>
                     </div>
+                     <div className="flex flex-col items-center text-center">
+                        <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                            <Utensils className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold font-headline">Cooking Classes</h3>
+                        <p className="text-muted-foreground mt-2">Teach guests how to make your favorite dishes in a hands-on workshop.</p>
+                    </div>
                     <div className="flex flex-col items-center text-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Building className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">Restaurant Experiences</h3>
-                        <p className="text-muted-foreground mt-2">Own a restaurant? Offer a special Go2Culture menu or a unique cultural tasting.</p>
+                        <p className="text-muted-foreground mt-2">Own a restaurant? Offer a special menu or a unique cultural tasting.</p>
                     </div>
                     <div className="flex flex-col items-center text-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Calendar className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">Special Events</h3>
-                        <p className="text-muted-foreground mt-2">Host a one-off event like a festival dinner, a cooking workshop, or a pop-up.</p>
+                        <p className="text-muted-foreground mt-2">Host a one-off event like a festival dinner, market tour, or a pop-up.</p>
                     </div>
                 </div>
             </section>
