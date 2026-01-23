@@ -11,11 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2 } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
-import { useCollection, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, doc, query, where, limit } from "firebase/firestore";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { collection, doc, query, where, limit, addDoc, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "./ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Label } from "./ui/label";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -65,7 +69,13 @@ function ReviewItem({ review }: { review: Review }) {
 
 export function ExperienceDetailClient({ experienceId }: { experienceId: string }) {
   const [date, setDate] = useState<Date>();
+  const [numberOfGuests, setNumberOfGuests] = useState(1);
+  const [isBooking, setIsBooking] = useState(false);
+
   const firestore = useFirestore();
+  const { user } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const experienceRef = useMemoFirebase(
     () => (firestore ? doc(firestore, "experiences", experienceId) : null),
@@ -84,6 +94,51 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
     [firestore, experienceId]
   );
   const { data: reviews, isLoading: areReviewsLoading } = useCollection<Review>(reviewsQuery);
+
+  const handleBooking = async () => {
+    if (!user) {
+      toast({ variant: 'destructive', title: 'Please log in', description: 'You must be logged in to book an experience.' });
+      router.push(`/login?redirect=/experiences/${experienceId}`);
+      return;
+    }
+    if (!date) {
+      toast({ variant: 'destructive', title: 'No date selected', description: 'Please select a date for your experience.' });
+      return;
+    }
+    setIsBooking(true);
+    try {
+      const totalPrice = experience!.pricing.pricePerGuest * numberOfGuests;
+      const bookingData = {
+        guestId: user.uid,
+        experienceId: experience!.id,
+        hostId: experience!.hostId,
+        bookingDate: date,
+        numberOfGuests: numberOfGuests,
+        totalPrice: totalPrice,
+        status: 'Confirmed', // Defaulting to confirmed for simplicity
+        createdAt: serverTimestamp(),
+      };
+      
+      await addDoc(collection(firestore, 'bookings'), bookingData);
+
+      toast({
+        title: '🎉 Booking Confirmed!',
+        description: `Your experience "${experience!.title}" is booked for ${format(date, 'PPP')}.`,
+      });
+      setDate(undefined);
+      setNumberOfGuests(1);
+
+    } catch (error: any) {
+      console.error('Booking failed:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Booking Failed',
+        description: error.message || 'Could not complete your booking. Please try again.',
+      });
+    } finally {
+      setIsBooking(false);
+    }
+  };
 
 
   if (isExperienceLoading || isHostLoading) {
@@ -123,6 +178,7 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
   const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;
   const localAreaName = localAreas.find(l => l.id === experience.location.localArea)?.name || experience.location.localArea;
   const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
+  const totalPrice = experience.pricing.pricePerGuest * numberOfGuests;
 
   const disabledDays = (day: Date) => {
     if (!experience.availability.days || experience.availability.days.length === 0) {
@@ -243,8 +299,8 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
           <div className="sticky top-24">
             <div className="un-calendar-card">
               <div className="un-header">
-                <h2>Select a date</h2>
-                <p>Choose a valid calendar date</p>
+                <h2>Book your experience</h2>
+                <p>Select an available date to book your spot.</p>
               </div>
 
               <Calendar
@@ -259,18 +315,43 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
               />
               
               <div className="un-footer">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <strong>Selected:</strong>{' '}
-                        {date ? format(date, "PPP") : "None"}
+                <div className="space-y-4">
+                    <div className="space-y-1">
+                        <Label htmlFor="guests" className="text-sm font-medium text-foreground">Guests</Label>
+                        <Select
+                            value={String(numberOfGuests)}
+                            onValueChange={(val) => setNumberOfGuests(Number(val))}
+                            disabled={isBooking}
+                        >
+                            <SelectTrigger id="guests" className="w-full">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: experience.pricing.maxGuests }, (_, i) => i + 1).map((num) => (
+                                    <SelectItem key={num} value={String(num)}>
+                                        {num} guest{num > 1 ? 's' : ''}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <div className="font-bold">
-                        ${experience.pricing.pricePerGuest} / person
+
+                    <div className="flex justify-between items-center text-lg">
+                        <span className="font-semibold text-foreground">Total</span>
+                        <span className="font-bold text-foreground">${totalPrice}</span>
                     </div>
+
+                    <Button 
+                      size="lg" 
+                      className="w-full" 
+                      style={{backgroundColor: '#009EDB', color: 'white'}} 
+                      disabled={!date || isBooking}
+                      onClick={handleBooking}
+                    >
+                        {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
+                    </Button>
+                    <p className="text-xs text-center text-muted-foreground">You won't be charged yet</p>
                 </div>
-                <Button size="lg" className="w-full mt-4" style={{backgroundColor: '#009EDB', color: 'white'}} disabled={!date}>
-                    Book Now
-                </Button>
               </div>
             </div>
           </div>

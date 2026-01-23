@@ -147,6 +147,28 @@ export type Review = {
   createdAt: any; // Allow ServerTimestamp
 };
 
+export type Booking = {
+  id: string;
+  guestId: string;
+  experienceId: string;
+  hostId: string;
+  bookingDate: any; // Allow ServerTimestamp
+  numberOfGuests: number;
+  totalPrice: number;
+  status: 'Pending' | 'Confirmed' | 'Cancelled';
+  cancellationReason?: string;
+  createdAt: any; // Allow ServerTimestamp
+};
+
+export type Message = {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  bookingId: string;
+  messageText: string;
+  timestamp: any; // Allow ServerTimestamp
+};
+
 
 // A denormalized type for the admin application view
 export type HostApplication = {
