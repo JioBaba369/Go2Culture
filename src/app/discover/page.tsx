@@ -14,8 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,6 +27,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 function DiscoverPageContent() {
   const searchParams = useSearchParams();
@@ -37,9 +37,9 @@ function DiscoverPageContent() {
     useMemoFirebase(() => (firestore ? collection(firestore, 'experiences') : null), [firestore])
   );
 
-  const allCuisines = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.menu.cuisine))] : [], [allExperiences]);
-  const allDietary = useMemo(() => allExperiences ? [...new Set(allExperiences.flatMap(e => e.menu.dietary || []))] : [], [allExperiences]);
-  const allCategories = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.category))] : [], [allExperiences]);
+  const allCuisines = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.menu.cuisine))].sort() : [], [allExperiences]);
+  const allDietary = useMemo(() => allExperiences ? [...new Set(allExperiences.flatMap(e => e.menu.dietary || []))].sort() : [], [allExperiences]);
+  const allCategories = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.category))].sort() : [], [allExperiences]);
   const maxPrice = useMemo(() => allExperiences && allExperiences.length > 0 ? Math.ceil(Math.max(...allExperiences.map(e => e.pricing.pricePerGuest)) / 5) * 5 : 150, [allExperiences]);
 
   const [cuisine, setCuisine] = useState(searchParams.get('cuisine') || 'all');
@@ -80,81 +80,106 @@ function DiscoverPageContent() {
     );
   };
 
+  const clearFilters = () => {
+    setCuisine('all');
+    setDietary([]);
+    setCategories([]);
+    setPrice([maxPrice]);
+    setRating('all');
+  }
+
   const filtersJsx = (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Cuisine</label>
-        <Select value={cuisine} onValueChange={setCuisine}>
-          <SelectTrigger><SelectValue placeholder="Select Cuisine" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Cuisines</SelectItem>
-            {allCuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-          </SelectContent>
-        </Select>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center pr-2">
+        <h4 className="font-semibold">Filters</h4>
+        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-primary hover:text-primary">Clear all</Button>
       </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Experience Type</label>
-        <div className="space-y-2">
-          {allCategories.map(option => (
-            <div key={option} className="flex items-center space-x-2">
-              <Checkbox
-                id={`category-${option}`}
-                checked={categories.includes(option)}
-                onCheckedChange={() => handleCategoryChange(option)}
-              />
-              <label htmlFor={`category-${option}`} className="text-sm">
-                {option}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Price</label>
-        <p className="text-sm text-muted-foreground">Up to ${price[0]}</p>
-        <Slider
-          min={0}
-          max={maxPrice}
-          step={5}
-          value={price}
-          onValueChange={setPrice}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Dietary Options</label>
-        <div className="space-y-2">
-          {allDietary.map(option => (
-            <div key={option} className="flex items-center space-x-2">
-              <Checkbox
-                id={`dietary-${option}`}
-                checked={dietary.includes(option)}
-                onCheckedChange={() => handleDietaryChange(option)}
-              />
-              <label htmlFor={`dietary-${option}`} className="text-sm">
-                {option}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <Separator />
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Minimum Rating</label>
-         <Select value={rating} onValueChange={setRating}>
-          <SelectTrigger><SelectValue placeholder="Any Rating" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Any Rating</SelectItem>
-            <SelectItem value="4.5">4.5 stars & up</SelectItem>
-            <SelectItem value="4">4 stars & up</SelectItem>
-            <SelectItem value="3.5">3.5 stars & up</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <Accordion type="multiple" defaultValue={['category', 'price']} className="w-full">
+        <AccordionItem value="category">
+            <AccordionTrigger className="font-semibold">Category</AccordionTrigger>
+            <AccordionContent>
+                <div className="space-y-2 pt-2">
+                    {allCategories.map(option => (
+                        <div key={option} className="flex items-center space-x-2">
+                            <Checkbox
+                            id={`category-${option}`}
+                            checked={categories.includes(option)}
+                            onCheckedChange={() => handleCategoryChange(option)}
+                            />
+                            <label htmlFor={`category-${option}`} className="text-sm font-normal cursor-pointer">
+                            {option}
+                            </label>
+                        </div>
+                    ))}
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="price">
+            <AccordionTrigger className="font-semibold">Price</AccordionTrigger>
+            <AccordionContent>
+                <div className="pt-2">
+                    <p className="text-sm text-muted-foreground">Up to ${price[0]}</p>
+                    <Slider
+                        min={0}
+                        max={maxPrice}
+                        step={5}
+                        value={price}
+                        onValueChange={setPrice}
+                        className="mt-4"
+                    />
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+         <AccordionItem value="cuisine">
+            <AccordionTrigger className="font-semibold">Cuisine</AccordionTrigger>
+            <AccordionContent>
+                  <div className="space-y-2 pt-2">
+                    <Select value={cuisine} onValueChange={setCuisine}>
+                        <SelectTrigger><SelectValue placeholder="Select Cuisine" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Cuisines</SelectItem>
+                            {allCuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="dietary">
+            <AccordionTrigger className="font-semibold">Dietary Needs</AccordionTrigger>
+            <AccordionContent>
+                  <div className="space-y-2 pt-2">
+                    {allDietary.map(option => (
+                        <div key={option} className="flex items-center space-x-2">
+                        <Checkbox
+                            id={`dietary-${option}`}
+                            checked={dietary.includes(option)}
+                            onCheckedChange={() => handleDietaryChange(option)}
+                        />
+                        <label htmlFor={`dietary-${option}`} className="text-sm font-normal cursor-pointer">
+                            {option}
+                        </label>
+                        </div>
+                    ))}
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="rating">
+            <AccordionTrigger className="font-semibold">Rating</AccordionTrigger>
+            <AccordionContent>
+                <div className="pt-2">
+                    <Select value={rating} onValueChange={setRating}>
+                        <SelectTrigger><SelectValue placeholder="Any Rating" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Any Rating</SelectItem>
+                            <SelectItem value="4.5">4.5 stars & up</SelectItem>
+                            <SelectItem value="4">4 stars & up</SelectItem>
+                            <SelectItem value="3.5">3.5 stars & up</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 
@@ -170,8 +195,7 @@ function DiscoverPageContent() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-12">
         <aside className="hidden lg:block lg:col-span-1">
           <Card>
-            <CardHeader><CardTitle>Filter Results</CardTitle></CardHeader>
-            <CardContent>{filtersJsx}</CardContent>
+            <CardContent className="p-4">{filtersJsx}</CardContent>
           </Card>
         </aside>
 
@@ -226,3 +250,5 @@ export default function DiscoverPage() {
     </Suspense>
   )
 }
+
+    
