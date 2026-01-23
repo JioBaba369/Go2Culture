@@ -7,7 +7,6 @@ import { Menu } from "lucide-react";
 const navLinks = [
   { href: "/discover", label: "Discover" },
   { href: "/become-a-host", label: "Become a Host" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export function Header() {

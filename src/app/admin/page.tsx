@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -12,47 +13,48 @@ import {
   CheckCircle,
   Clock,
 } from "lucide-react";
-
-const stats = [
-  {
-    title: "Pending Applications",
-    value: "12",
-    icon: Clock,
-    color: "text-blue-500",
-  },
-  {
-    title: "Approved Hosts",
-    value: "234",
-    icon: CheckCircle,
-    color: "text-green-500",
-  },
-  {
-    title: "Live Experiences",
-    value: "189",
-    icon: Utensils,
-    color: "text-purple-500",
-  },
-  {
-    title: "Total Users",
-    value: "1,204",
-    icon: Users,
-    color: "text-orange-500",
-  },
-  {
-    title: "Flagged Listings",
-    value: "3",
-    icon: MessageSquareWarning,
-    color: "text-yellow-500",
-  },
-  {
-    title: "Reported Issues",
-    value: "5",
-    icon: MessageSquareWarning,
-    color: "text-red-500",
-  },
-];
+import { hostApplications, experiences, users } from "@/lib/data";
 
 export default function AdminDashboardPage() {
+  const stats = [
+    {
+      title: "Pending Applications",
+      value: hostApplications.filter(app => app.status === 'Pending').length,
+      icon: Clock,
+      color: "text-blue-500",
+    },
+    {
+      title: "Approved Hosts",
+      value: new Set(experiences.map(exp => exp.hostId)).size,
+      icon: CheckCircle,
+      color: "text-green-500",
+    },
+    {
+      title: "Live Experiences",
+      value: experiences.filter(exp => exp.status === 'live').length,
+      icon: Utensils,
+      color: "text-purple-500",
+    },
+    {
+      title: "Total Users",
+      value: users.length,
+      icon: Users,
+      color: "text-orange-500",
+    },
+    {
+      title: "Flagged Listings",
+      value: "3", // mock
+      icon: MessageSquareWarning,
+      color: "text-yellow-500",
+    },
+    {
+      title: "Reported Issues",
+      value: "5", // mock
+      icon: MessageSquareWarning,
+      color: "text-red-500",
+    },
+  ];
+
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>

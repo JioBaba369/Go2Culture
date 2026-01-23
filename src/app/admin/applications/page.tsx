@@ -20,12 +20,12 @@ import Link from "next/link";
 import { hostApplications } from "@/lib/data";
 import { Eye } from "lucide-react";
 
-const statusVariantMap = {
+const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
   Pending: "secondary",
   Approved: "default",
   'Changes Needed': "outline",
   Rejected: "destructive",
-} as const;
+};
 
 
 export default function HostApplicationsPage() {
