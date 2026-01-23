@@ -300,6 +300,26 @@ export const reviews: Review[] = [
     comment: 'The food was incredible, and the atmosphere was so peaceful. A truly authentic and meditative dining experience. Highly recommended.',
     createdAt: '2023-10-12T20:00:00Z',
   },
+  {
+    id: 'review-3',
+    bookingId: 'booking-3',
+    experienceId: '2',
+    hostId: 'host-4',
+    userId: 'user-7',
+    rating: 5,
+    comment: 'The best tacos of my life. Javier has a real passion for his culture and food that shines through. Fun, vibrant, and delicious.',
+    createdAt: '2023-11-05T20:00:00Z',
+  },
+  {
+    id: 'review-4',
+    bookingId: 'booking-4',
+    experienceId: '1',
+    hostId: 'host-1',
+    userId: 'user-8',
+    rating: 5,
+    comment: 'Maria is a gem. So welcoming and warm. The food was divine. A must-do in Rome!',
+    createdAt: '2023-09-20T21:00:00Z',
+  }
 ];
 
 const experienceReviews: Record<string, ExperienceReview[]> = {
@@ -312,8 +332,8 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
       date: '2023-10-15',
     },
     {
-      id: 'review-3',
-      author: { name: 'Alex', avatarImageId: 'guest-2' },
+      id: 'review-4',
+      author: { name: 'Ben', avatarImageId: 'guest-3' },
       rating: 5,
       comment: 'Maria is a gem. So welcoming and warm. The food was divine. A must-do in Rome!',
       date: '2023-09-20',
@@ -321,7 +341,7 @@ const experienceReviews: Record<string, ExperienceReview[]> = {
   ],
   '2': [
     {
-      id: 'review-4',
+      id: 'review-3',
       author: { name: 'Chloe', avatarImageId: 'host-3' },
       rating: 5,
       comment: 'The best tacos of my life. Javier has a real passion for his culture and food that shines through. Fun, vibrant, and delicious.',
