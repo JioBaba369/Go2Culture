@@ -10,13 +10,18 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import type { HostApplication, Host, Experience } from './types';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 // Function to approve a host application
-export async function approveApplication(
+export function approveApplication(
   firestore: Firestore,
   application: HostApplication
-): Promise<void> {
-  if (!application) throw new Error('Application data is missing.');
+) {
+  if (!application) {
+    console.error('Application data is missing.');
+    return;
+  }
 
   const batch = writeBatch(firestore);
 
@@ -107,23 +112,48 @@ export async function approveApplication(
   batch.update(userRef, { role: 'both' });
 
   // Commit all the changes atomically
-  await batch.commit();
+  batch.commit().catch(serverError => {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: appRef.path, // Use the application ref path for context
+        operation: 'write', // Batch write is a 'write' operation
+        requestResourceData: {
+          applicationUpdate: { status: 'Approved' },
+          newHost,
+          newExperience: newExperienceData,
+          userUpdate: { role: 'both' },
+        }
+     }));
+  });
 }
 
 // Function to reject an application
-export async function rejectApplication(
+export function rejectApplication(
   firestore: Firestore,
   applicationId: string
-): Promise<void> {
+) {
   const appRef = doc(firestore, 'hostApplications', applicationId);
-  await updateDoc(appRef, { status: 'Rejected' });
+  const updatedData = { status: 'Rejected' };
+  updateDoc(appRef, updatedData).catch(serverError => {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: appRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+  });
 }
 
 // Function to request changes for an application
-export async function requestChangesForApplication(
+export function requestChangesForApplication(
   firestore: Firestore,
   applicationId: string
-): Promise<void> {
+) {
   const appRef = doc(firestore, 'hostApplications', applicationId);
-  await updateDoc(appRef, { status: 'Changes Needed' });
+  const updatedData = { status: 'Changes Needed' };
+  updateDoc(appRef, updatedData).catch(serverError => {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: appRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+  });
 }

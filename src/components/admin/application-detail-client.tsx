@@ -46,11 +46,11 @@ export function ApplicationDetailClient({
 
   const { data: application, isLoading } = useDoc<HostApplication>(useMemoFirebase(() => firestore ? doc(firestore, 'hostApplications', applicationId) : null, [firestore, applicationId]));
 
-  const handleApprove = async () => {
+  const handleApprove = () => {
     if (!application || !firestore) return;
     setIsProcessing('approve');
     try {
-      await approveApplication(firestore, application);
+      approveApplication(firestore, application);
       toast({
         title: "Application Approved!",
         description: `${application.hostName} is now a host.`,
@@ -62,17 +62,16 @@ export function ApplicationDetailClient({
         title: "Approval Failed",
         description: error.message || "Could not approve the application.",
       });
-      console.error(error);
     } finally {
       setIsProcessing(null);
     }
   }
 
-  const handleRequestChanges = async () => {
+  const handleRequestChanges = () => {
      if (!application || !firestore) return;
     setIsProcessing('changes');
     try {
-      await requestChangesForApplication(firestore, application.id);
+      requestChangesForApplication(firestore, application.id);
       toast({
         title: "Changes Requested",
         description: `The application status has been updated to 'Changes Needed'.`,
@@ -88,11 +87,11 @@ export function ApplicationDetailClient({
     }
   }
   
-  const handleReject = async () => {
+  const handleReject = () => {
     if (!application || !firestore) return;
     setIsProcessing('reject');
     try {
-      await rejectApplication(firestore, application.id);
+      rejectApplication(firestore, application.id);
       toast({
         title: "Application Rejected",
         description: `The application from ${application.hostName} has been rejected.`,
