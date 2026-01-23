@@ -361,8 +361,7 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
 
                     <Button 
                       size="lg" 
-                      className="w-full" 
-                      style={{backgroundColor: '#009EDB', color: 'white'}} 
+                      className="w-full"
                       disabled={!date || isBooking}
                       onClick={handleBooking}
                     >
