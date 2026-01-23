@@ -256,7 +256,7 @@
         "id": { "type": "string" },
         "hostId": { "type": "string" },
         "title": { "type": "string" },
-        "category": { "type": "string", "enum": ["In-Home Dining", "Cooking Class", "Restaurant Experience", "Special Event"] },
+        "category": { "type": "string", "enum": ["In-Home Dining", "Cooking Class", "Restaurant Experience", "Special Event", "Art & Craft", "Music & Dance", "History & Walks"] },
         "description": { "type": "string" },
         "durationMinutes": { "type": "number" },
         "menu": {

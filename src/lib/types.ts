@@ -97,7 +97,7 @@ export type Experience = {
   hostId: string;
   userId: string; // The user ID of the host
   title: string;
-  category: 'In-Home Dining' | 'Cooking Class' | 'Restaurant Experience' | 'Special Event';
+  category: 'In-Home Dining' | 'Cooking Class' | 'Restaurant Experience' | 'Special Event' | 'Art & Craft' | 'Music & Dance' | 'History & Walks';
   description: string;
   durationMinutes: number;
   menu: {

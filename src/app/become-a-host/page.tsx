@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ShieldCheck, DollarSign, Globe, Heart, Home, User, Utensils, Camera, Building, Calendar } from 'lucide-react';
+import { ShieldCheck, DollarSign, Globe, Heart, Home, User, Utensils, Camera, Brush, Music } from 'lucide-react';
 
 export default function BecomeAHostLandingPage() {
     const heroImage = PlaceHolderImages.find(p => p.id === 'exp-1-thumb-1');
@@ -59,7 +59,7 @@ export default function BecomeAHostLandingPage() {
                             <Home className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">In-Home Dining</h3>
-                        <p className="text-muted-foreground mt-2">The classic Go2Culture experience. Welcome guests to your table for a meal.</p>
+                        <p className="text-muted-foreground mt-2">Welcome guests to your table for an authentic meal cooked from the heart.</p>
                     </div>
                      <div className="flex flex-col items-center text-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
@@ -70,17 +70,17 @@ export default function BecomeAHostLandingPage() {
                     </div>
                     <div className="flex flex-col items-center text-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                            <Building className="h-8 w-8" />
+                            <Brush className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Restaurant Experiences</h3>
-                        <p className="text-muted-foreground mt-2">Own a restaurant? Offer a special menu or a unique cultural tasting.</p>
+                        <h3 className="text-xl font-bold font-headline">Art & Craft Workshops</h3>
+                        <p className="text-muted-foreground mt-2">Share your creative skills, from pottery and painting to weaving and calligraphy.</p>
                     </div>
                     <div className="flex flex-col items-center text-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                            <Calendar className="h-8 w-8" />
+                            <Music className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Special Events</h3>
-                        <p className="text-muted-foreground mt-2">Host a one-off event like a festival dinner, market tour, or a pop-up.</p>
+                        <h3 className="text-xl font-bold font-headline">Music, Dance & Storytelling</h3>
+                        <p className="text-muted-foreground mt-2">Host an intimate concert, a traditional dance lesson, or a captivating history walk.</p>
                     </div>
                 </div>
             </section>
@@ -167,5 +167,3 @@ export default function BecomeAHostLandingPage() {
         </div>
     );
 }
-
-    

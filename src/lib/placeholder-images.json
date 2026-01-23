@@ -85,6 +85,24 @@
       "imageHint": "seafood platter"
     },
     {
+      "id": "exp-11-main",
+      "description": "Hands shaping clay on a pottery wheel",
+      "imageUrl": "https://images.unsplash.com/photo-1558239304-a28f7a61c5c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3R0ZXJ5fGVufDB8fHx8MTc3MDI4NDg3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pottery making"
+    },
+    {
+      "id": "exp-12-main",
+      "description": "A person playing an acoustic guitar in a cozy setting",
+      "imageUrl": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhY291c3RpYyUyMGd1aXRhcnxlbnwwfHx8fDE3NzAyODQ5MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "acoustic guitar"
+    },
+    {
+      "id": "exp-13-main",
+      "description": "An old historic street in a European city",
+      "imageUrl": "https://images.unsplash.com/photo-1504109586047-9f572a1a2434?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxoaXN0b3J5JTIwd2Fsa3xlbnwwfHx8fDE3NzAyODQ5NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "history walk"
+    },
+    {
       "id": "host-1",
       "description": "Portrait of a smiling woman, Maria",
       "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c21pbGluZyUyMHdvbWFufGVufDB8fHx8MTc2OTA0MzEzN3ww&ixlib=rb-4.1.0&q=80&w=1080",
