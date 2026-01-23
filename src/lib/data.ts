@@ -1,5 +1,68 @@
 
-import type { Host, Review, Experience, HostApplication } from '@/lib/types';
+import type { Host, Review, Experience, HostApplication, User, ExperienceReview } from '@/lib/types';
+
+export const users: User[] = [
+  {
+    id: 'user-1',
+    role: 'host',
+    fullName: 'Maria',
+    email: 'maria@go2culture.com',
+    status: 'active',
+    createdAt: '2023-01-10T09:00:00Z',
+    updatedAt: '2023-01-10T09:00:00Z',
+    profilePhotoId: 'host-1'
+  },
+  {
+    id: 'user-2',
+    role: 'host',
+    fullName: 'Kenji',
+    email: 'kenji@go2culture.com',
+    status: 'active',
+    createdAt: '2023-02-15T09:00:00Z',
+    updatedAt: '2023-02-15T09:00:00Z',
+    profilePhotoId: 'host-2'
+  },
+    {
+    id: 'user-3',
+    role: 'host',
+    fullName: 'Priya',
+    email: 'priya@go2culture.com',
+    status: 'active',
+    createdAt: '2023-03-20T09:00:00Z',
+    updatedAt: '2023-03-20T09:00:00Z',
+    profilePhotoId: 'host-3'
+  },
+  {
+    id: 'user-4',
+    role: 'host',
+    fullName: 'Javier',
+    email: 'javier@go2culture.com',
+    status: 'active',
+    createdAt: '2023-04-01T09:00:00Z',
+    updatedAt: '2023-04-01T09:00:00Z',
+    profilePhotoId: 'host-4'
+  },
+  {
+    id: 'user-5',
+    role: 'guest',
+    fullName: 'Sophie',
+    email: 'sophie@guest.com',
+    status: 'active',
+    createdAt: '2023-10-01T12:00:00Z',
+    updatedAt: '2023-10-01T12:00:00Z',
+    profilePhotoId: 'host-4' // Reusing photo for mock
+  },
+  {
+    id: 'user-6',
+    role: 'guest',
+    fullName: 'David',
+    email: 'david@guest.com',
+    status: 'suspended',
+    createdAt: '2023-10-02T14:00:00Z',
+    updatedAt: '2023-11-01T10:00:00Z',
+    profilePhotoId: 'host-2' // Reusing photo for mock
+  }
+];
 
 export const hosts: Host[] = [
   {
@@ -83,25 +146,69 @@ export const hosts: Host[] = [
 export const reviews: Review[] = [
   {
     id: 'review-1',
-    author: { name: 'Sophie', avatarImageId: 'host-4' },
+    bookingId: 'booking-1',
+    experienceId: '1',
+    hostId: 'host-1',
+    userId: 'user-5',
     rating: 5,
     comment: 'An absolutely unforgettable evening! Maria\'s pasta was the best I\'ve ever had, and her stories made the experience so special. Felt like dinner with family.',
-    date: '2023-10-15',
+    createdAt: '2023-10-15T21:00:00Z',
   },
   {
     id: 'review-2',
-    author: { name: 'David', avatarImageId: 'host-2' },
-    rating: 4.5,
+    bookingId: 'booking-2',
+    experienceId: '3',
+    hostId: 'host-2',
+    userId: 'user-6',
+    rating: 5,
     comment: 'The food was incredible, and the atmosphere was so peaceful. A truly authentic and meditative dining experience. Highly recommended.',
-    date: '2023-10-12',
+    createdAt: '2023-10-12T20:00:00Z',
   },
 ];
+
+const experienceReviews: Record<string, ExperienceReview[]> = {
+  '1': [
+    {
+      id: 'review-1',
+      author: { name: 'Sophie', avatarImageId: 'host-4' },
+      rating: 5,
+      comment: 'An absolutely unforgettable evening! Maria\'s pasta was the best I\'ve ever had, and her stories made the experience so special. Felt like dinner with family.',
+      date: '2023-10-15',
+    },
+    {
+      id: 'review-3',
+      author: { name: 'Alex', avatarImageId: 'host-2' },
+      rating: 5,
+      comment: 'Maria is a gem. So welcoming and warm. The food was divine. A must-do in Rome!',
+      date: '2023-09-20',
+    }
+  ],
+  '2': [
+    {
+      id: 'review-4',
+      author: { name: 'Chloe', avatarImageId: 'host-3' },
+      rating: 5,
+      comment: 'The best tacos of my life. Javier has a real passion for his culture and food that shines through. Fun, vibrant, and delicious.',
+      date: '2023-11-05',
+    },
+  ],
+  '3': [
+     {
+      id: 'review-2',
+      author: { name: 'David', avatarImageId: 'host-2' },
+      rating: 5,
+      comment: 'The food was incredible, and the atmosphere was so peaceful. A truly authentic and meditative dining experience. Highly recommended.',
+      date: '2023-10-12',
+    },
+  ],
+  '4': [],
+}
 
 export const experiences: Experience[] = [
   {
     id: '1',
     hostId: 'host-1',
-    host: hosts[0],
+    host: hosts.find(h => h.id === 'host-1')!,
     title: 'Nonna\'s Roman Pasta Feast',
     category: 'Home-cooked meal',
     description: 'Join me in my charming Trastevere home for a journey through Roman cuisine. We\'ll start with classic antipasti, then I\'ll teach you the art of making fresh pasta, just like my nonna taught me. We\'ll finish with a delicious homemade tiramisu and stories of old Rome.',
@@ -113,18 +220,18 @@ export const experiences: Experience[] = [
       spiceLevel: 'Mild',
     },
     pricing: { pricePerGuest: 85, maxGuests: 6 },
-    availability: { days: ['Wednesday', 'Friday', 'Saturday'] },
+    availability: { days: ['Wednesday', 'Friday', 'Saturday'], timeSlots: ['19:00', '20:00'] },
     location: { country: 'IT', state: 'LAZ', suburb: 'ROME', localArea: 'TRA' },
     photos: { mainImageId: 'exp-1-main', thumbnailImageIds: ['exp-1-thumb-1', 'exp-1-thumb-2'] },
     status: 'live',
     rating: { average: 4.9, count: 134 },
-    reviews: [reviews[0]],
+    reviews: experienceReviews['1'],
     createdAt: '2023-01-12T09:00:00Z',
   },
   {
     id: '2',
     hostId: 'host-4',
-    host: hosts[3],
+    host: hosts.find(h => h.id === 'host-4')!,
     title: 'Oaxacan Street Taco Fiesta',
     category: 'Cultural dinner',
     description: 'Experience the soul of Oaxacan street food without leaving my cozy kitchen. We\'ll explore different types of masa, craft a variety of fillings from cochinita pibil to fresh fish, and mix up some zesty salsas. Come hungry and ready for a fiesta!',
@@ -136,18 +243,18 @@ export const experiences: Experience[] = [
       spiceLevel: 'Medium',
     },
     pricing: { pricePerGuest: 60, maxGuests: 8 },
-    availability: { days: ['Tuesday', 'Thursday', 'Saturday'] },
+    availability: { days: ['Tuesday', 'Thursday', 'Saturday'], timeSlots: ['18:00', '19:30'] },
     location: { country: 'MX', state: 'MEX', suburb: 'MEXCITY', localArea: 'CON' },
     photos: { mainImageId: 'exp-2-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.8, count: 98 },
-    reviews: [],
+    reviews: experienceReviews['2'],
     createdAt: '2023-04-02T09:00:00Z',
   },
   {
     id: '3',
     hostId: 'host-2',
-    host: hosts[1],
+    host: hosts.find(h => h.id === 'host-2')!,
     title: 'Zen & Simplicity: A Japanese Meal',
     category: 'Home-cooked meal',
     description: 'Discover "washoku," the Japanese philosophy of food that emphasizes balance and harmony. In my minimalist home, we will enjoy a simple, elegant meal that highlights the natural flavors of seasonal ingredients. This is a quiet, contemplative experience.',
@@ -159,18 +266,18 @@ export const experiences: Experience[] = [
       spiceLevel: 'Mild',
     },
     pricing: { pricePerGuest: 120, maxGuests: 4 },
-    availability: { days: ['Monday', 'Friday'] },
+    availability: { days: ['Monday', 'Friday'], timeSlots: ['19:00'] },
     location: { country: 'JP', state: 'KYO', suburb: 'KYOTO', localArea: 'GION' },
     photos: { mainImageId: 'exp-3-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.9, count: 72 },
-    reviews: [reviews[1]],
+    reviews: experienceReviews['3'],
     createdAt: '2023-02-16T09:00:00Z',
   },
   {
     id: '4',
     hostId: 'host-3',
-    host: hosts[2],
+    host: hosts.find(h => h.id === 'host-3')!,
     title: 'South Indian Family Feast',
     category: 'Cooking + dining',
     description: 'Welcome to our home! My mother and I will guide you through the vibrant flavors of our Tamil heritage. You\'ll learn to make crispy dosas, fluffy idlis, and a variety of chutneys and sambar. It\'s a hands-on, joyful, and delicious celebration.',
@@ -182,12 +289,12 @@ export const experiences: Experience[] = [
       spiceLevel: 'Spicy',
     },
     pricing: { pricePerGuest: 55, maxGuests: 8 },
-    availability: { days: ['Saturday', 'Sunday'] },
+    availability: { days: ['Saturday', 'Sunday'], timeSlots: ['12:00', '19:00'] },
     location: { country: 'IN', state: 'KAR', suburb: 'BANG', localArea: 'MALL' },
     photos: { mainImageId: 'exp-4-main', thumbnailImageIds: [] },
     status: 'live',
     rating: { average: 4.85, count: 150 },
-    reviews: [],
+    reviews: experienceReviews['4'],
     createdAt: '2023-03-21T09:00:00Z',
   },
 ];
@@ -208,17 +315,21 @@ export const hostApplications: HostApplication[] = [
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Verified' },
         location: { country: 'IT', state: 'LAZ', suburb: 'Rome', postcode: '00153' },
-        homeSetup: { homeType: 'Apartment', seating: 'Table', accessibility: 'Elevator available'},
+        homeSetup: { homeType: 'Apartment', seating: 'Table', accessibility: 'Elevator available', maxGuests: 6, pets: false, smoking: false },
         experience: {
             title: 'Nonna\'s Roman Pasta Feast',
             description: experiences[0].description,
             duration: '3 hours',
             category: experiences[0].category,
-            menu: experiences[0].menu,
+            menu: {
+              cuisine: 'Italian',
+              description: 'A 4-course traditional Roman meal.',
+              spiceLevel: 'Mild',
+            },
             pricing: experiences[0].pricing,
             photos: { mainImageId: experiences[0].photos.mainImageId },
         },
-        compliance: { foodBusinessRegistered: true, councilName: 'City of Rome', foodSafetyTrainingCompleted: true, guidelinesAccepted: true },
+        compliance: { foodBusinessRegistered: true, councilName: 'City of Rome', foodSafetyTrainingCompleted: true, guidelinesAccepted: true, agreeToFoodSafety: true },
     },
     {
         id: 'app-2',
@@ -235,16 +346,20 @@ export const hostApplications: HostApplication[] = [
         },
         verification: { idDocId: 'admin-id', selfieId: 'admin-selfie', status: 'Pending' },
         location: { country: 'MX', state: 'MEX', suburb: 'Mexico City', postcode: '06140' },
-        homeSetup: { homeType: 'Apartment', seating: 'Table'},
+        homeSetup: { homeType: 'Apartment', seating: 'Table', pets: true, smoking: true, maxGuests: 8 },
         experience: {
             title: 'Oaxacan Street Taco Fiesta',
             description: experiences[1].description,
             duration: '2.5 hours',
             category: experiences[1].category,
-            menu: experiences[1].menu,
+            menu: {
+              cuisine: 'Mexican',
+              description: 'Taco tasting menu with appetizers and dessert.',
+              spiceLevel: 'Medium',
+            },
             pricing: experiences[1].pricing,
             photos: { mainImageId: experiences[1].photos.mainImageId },
         },
-        compliance: { foodBusinessRegistered: false, foodSafetyTrainingCompleted: true, guidelinesAccepted: true },
+        compliance: { foodBusinessRegistered: false, foodSafetyTrainingCompleted: true, guidelinesAccepted: true, agreeToFoodSafety: true },
     },
 ];

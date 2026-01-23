@@ -1,13 +1,36 @@
 
-export type Review = {
+export type User = {
   id: string;
-  author: {
-    name: string;
-    avatarImageId: string;
+  role: 'guest' | 'host' | 'both';
+  fullName: string;
+  email: string;
+  phone?: string;
+  profilePhotoId?: string; 
+  preferences?: {
+    cuisines?: string[];
+    dietary?: string[];
+    priceRange?: { min: number, max: number };
   };
-  rating: number;
-  comment: string;
-  date: string;
+  location?: {
+    country: string;
+    state?: string;
+    suburb?: string;
+  }
+  status: 'active' | 'suspended' | 'deleted';
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ComplianceFields = {
+  foodBusinessRegistered?: boolean;
+  councilName?: string;
+  foodSafetyTrainingCompleted?: boolean;
+  foodActClassification?: boolean;
+  foodTraderRegistered?: boolean;
+  foodBusinessLicense?: boolean;
+  foodSafetySupervisor?: boolean;
+  foodBusinessNotification?: boolean;
+  guidelinesAccepted: boolean;
 };
 
 export type Host = {
@@ -16,17 +39,20 @@ export type Host = {
   name: string; // Denormalized for display
   avatarImageId: string; // Denormalized for display
   status: 'draft' | 'under_review' | 'approved' | 'needs_changes' | 'suspended';
+  
   profile: {
     bio: string;
     languages: string[];
     culturalBackground: string;
     hostingStyles: string[];
   };
+
   verification: {
     idVerified: boolean;
     selfieVerified: boolean;
     verifiedAt?: string;
   };
+
   location: {
     country: string;
     state: string;
@@ -34,31 +60,36 @@ export type Host = {
     localArea?: string;
     postcode: string;
   };
+
   homeSetup: {
     homeType: string;
     seating: string;
     maxGuests: number;
     pets: boolean;
     smoking: boolean;
-    accessibility: string;
+    accessibility?: string;
   };
-  compliance: {
-    foodBusinessRegistered?: boolean;
-    councilName?: string;
-    foodSafetyTraining?: boolean;
-    guidelinesAccepted: boolean;
-    foodActClassification?: boolean;
-    foodTraderRegistered?: boolean;
-    foodBusinessLicense?: boolean;
-    foodSafetySupervisor?: boolean;
-    foodBusinessNotification?: boolean;
-    [key: string]: any;
-  };
+  
+  compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean };
+
   rating: {
     average: number;
     count: number;
   };
+
   createdAt: string;
+};
+
+// This is a denormalized version for display on the experience page
+export type ExperienceReview = {
+  id: string;
+  author: {
+    name:string;
+    avatarImageId: string;
+  };
+  rating: number;
+  comment: string;
+  date: string;
 };
 
 export type Experience = {
@@ -83,6 +114,7 @@ export type Experience = {
   };
   availability: {
     days: string[];
+    timeSlots?: string[];
   };
   location: {
     country: string;
@@ -99,8 +131,21 @@ export type Experience = {
     average: number;
     count: number;
   };
-  reviews: Review[];
+  reviews: ExperienceReview[];
   createdAt: string;
+};
+
+
+// This represents the Firestore document in /reviews/{reviewId}
+export type Review = {
+  id: string; // reviewId
+  bookingId: string;
+  experienceId: string;
+  hostId: string;
+  userId: string;
+  rating: number;
+  comment: string;
+  createdAt: string; // ISO 8601
 };
 
 
@@ -128,15 +173,19 @@ export type HostApplication = {
 
   location: {
     country: string;
-    state: string;
+    state?: string;
     suburb: string;
     localArea?: string;
     postcode: string;
+    address?: string;
   };
   
   homeSetup: {
     homeType: string;
     seating: string;
+    maxGuests: number;
+    pets: boolean;
+    smoking: boolean;
     accessibility?: string;
   };
 
@@ -150,6 +199,7 @@ export type HostApplication = {
       cuisine: string;
       description: string;
       spiceLevel: 'Mild' | 'Medium' | 'Spicy';
+      allergens?: string;
     };
 
     pricing: {
@@ -159,18 +209,10 @@ export type HostApplication = {
     
     photos: {
       mainImageId: string;
+      foodPhotos?: any;
+      diningAreaPhoto?: any;
     }
   };
 
-  compliance: {
-    foodBusinessRegistered?: boolean;
-    councilName?: string;
-    foodSafetyTrainingCompleted?: boolean;
-    guidelinesAccepted: boolean;
-    foodActClassification?: boolean;
-    foodTraderRegistered?: boolean;
-    foodBusinessLicense?: boolean;
-    foodSafetySupervisor?: boolean;
-    foodBusinessNotification?: boolean;
-  };
+  compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean, agreeToFoodSafety: boolean };
 };
