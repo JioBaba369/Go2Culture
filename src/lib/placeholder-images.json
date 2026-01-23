@@ -89,6 +89,66 @@
       "description": "A photo of a clean and welcoming dining area",
       "imageUrl": "https://images.unsplash.com/photo-1758977403562-1a5fcc5af6b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkaW5pbmclMjBhcmVhfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "dining area"
+    },
+    {
+      "id": "cuisine-italian",
+      "description": "A beautiful plate of handmade pasta",
+      "imageUrl": "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwYXN0YSUyMGRpc2h8ZW58MHx8fHwxNzY5MDE4NDE3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pasta dish"
+    },
+    {
+      "id": "cuisine-mexican",
+      "description": "A colorful array of tacos on a wooden board",
+      "imageUrl": "https://images.unsplash.com/photo-1690874684451-92358e91b14c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx0YWNvJTIwcGxhdHRlcnxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "taco platter"
+    },
+    {
+      "id": "cuisine-japanese",
+      "description": "A platter of assorted sushi",
+      "imageUrl": "https://images.unsplash.com/photo-1553621042-f6e147245754?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdXNoaXxlbnwwfHx8fDE3NjkxNzI5NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sushi platter"
+    },
+    {
+      "id": "cuisine-indian",
+      "description": "A South Indian thali meal on a banana leaf",
+      "imageUrl": "https://images.unsplash.com/photo-1742281258189-3b933879867a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjB0aGFsaXxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "indian thali"
+    },
+    {
+      "id": "city-rome",
+      "description": "The Colosseum in Rome at sunset",
+      "imageUrl": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxSb21lfGVufDB8fHx8MTc2OTE3MzA0NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "colosseum rome"
+    },
+    {
+      "id": "city-mexico-city",
+      "description": "The Angel of Independence monument in Mexico City",
+      "imageUrl": "https://images.unsplash.com/photo-1574482277083-bee33b9c1416?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxNZXhpY28lMjBDaXR5fGVufDB8fHx8MTc2OTE3MzA3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mexico city"
+    },
+    {
+      "id": "city-kyoto",
+      "description": "Fushimi Inari Shrine in Kyoto",
+      "imageUrl": "https://images.unsplash.com/photo-1526481280643-3b9460cd51b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxLeW90b3xlbnwwfHx8fDE3NjkxNzMwOTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kyoto shrine"
+    },
+    {
+      "id": "city-bangalore",
+      "description": "Bangalore Palace in India",
+      "imageUrl": "https://images.unsplash.com/photo-1593324992124-76228192087c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxiYW5nYWxvcmV8ZW58MHx8fHwxNzY5MTczMTIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bangalore palace"
+    },
+    {
+      "id": "city-sydney",
+      "description": "Sydney Opera House and Harbour Bridge",
+      "imageUrl": "https://images.unsplash.com/photo-1524293581274-7540a2d487b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzeWRuZXl8ZW58MHx8fHwxNzY5MTczMTQwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sydney operahouse"
+    },
+    {
+      "id": "city-melbourne",
+      "description": "Melbourne skyline with Flinders Street Station",
+      "imageUrl": "https://images.unsplash.com/photo-1545044846-351ba102b6d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtZWxib3VybmV8ZW58MHx8fHwxNzY5MTczMTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "melbourne city"
     }
   ]
 }
