@@ -8,7 +8,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock, Users, MapPin, Languages, Utensils, Award, ShieldCheck, Sparkles, Home, Wind, Accessibility } from "lucide-react";
@@ -17,7 +17,7 @@ import { countries, states, suburbs, localAreas } from "@/lib/location-data";
 export default function ExperienceDetailPage({ params }: { params: { id: string } }) {
   const experience = experiences.find((exp) => exp.id === params.id);
   
-  const [date, setDate] = useState<Date | undefined>();
+  const [date, setDate] = useState<string>('');
 
   if (!experience) {
     notFound();
@@ -31,17 +31,9 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
   const localAreaName = localAreas.find(l => l.id === experience.location.localArea)?.name || experience.location.localArea;
   const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
 
-  const dayNameToIndex: Record<string, number> = {
-    'Sunday': 0,
-    'Monday': 1,
-    'Tuesday': 2,
-    'Wednesday': 3,
-    'Thursday': 4,
-    'Friday': 5,
-    'Saturday': 6,
-  };
-  const availableDaysOfWeek = experience.availability.days.map(day => dayNameToIndex[day]);
-  const disabledDaysOfWeek = [0, 1, 2, 3, 4, 5, 6].filter(d => !availableDaysOfWeek.includes(d));
+  const getTodayString = () => {
+    return new Date().toISOString().split('T')[0];
+  }
 
   return (
     <div className="py-8">
@@ -184,17 +176,21 @@ export default function ExperienceDetailPage({ params }: { params: { id: string 
               </CardTitle>
             </CardHeader>
             <CardContent>
-                <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={[
-                        { before: new Date() },
-                        { daysOfWeek: disabledDaysOfWeek }
-                    ]}
-                    initialFocus
-                    className="rounded-md border p-0"
-                />
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <label htmlFor="booking-date" className="text-sm font-medium">Select a date</label>
+                    <Input 
+                      id="booking-date"
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      min={getTodayString()}
+                      className="w-full"
+                    />
+                    {/* Note: Disabling specific days of the week based on host availability is not supported by the native date picker. */}
+                  </div>
+                   {date && <p className="text-sm text-muted-foreground">Selected: {new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>}
+                </div>
                  <Button size="lg" className="w-full mt-4" disabled={!date}>Book Now</Button>
                  <p className="text-xs text-center text-muted-foreground mt-2">You won't be charged yet</p>
             </CardContent>
