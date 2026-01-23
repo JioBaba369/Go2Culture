@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -144,6 +143,14 @@
             "average": { "type": "number" },
             "count": { "type": "number" }
           }
+        },
+        "blockedDates": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": "A list of dates the host has marked as unavailable."
         },
         "createdAt": { "type": "string", "format": "date-time" }
       },

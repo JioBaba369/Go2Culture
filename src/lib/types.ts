@@ -76,6 +76,8 @@ export type Host = {
     average: number;
     count: number;
   };
+  
+  blockedDates?: string[]; // yyyy-MM-dd format
 
   createdAt: any; // Allow ServerTimestamp
 };

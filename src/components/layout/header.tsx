@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Menu, User as UserIcon } from "lucide-react";
-import { useUser, useAuth } from "@/firebase";
+import { LogOut, Menu, User as UserIcon, LayoutDashboard } from "lucide-react";
+import { useFirebase, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -19,22 +19,32 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
+import { doc } from "firebase/firestore";
+import type { User } from "@/lib/types";
 
 const navLinks = [
   { href: "/discover", label: "Discover" },
   { href: "/become-a-host", label: "Become a Host" },
-  { href: "/admin", label: "Admin" },
 ];
 
 export function Header() {
-  const { user, isUserLoading } = useUser();
-  const auth = useAuth();
+  const { user, isUserLoading, firestore, auth } = useFirebase();
 
   const handleLogout = () => {
     signOut(auth);
   };
   
   const userImage = PlaceHolderImages.find(p => p.id === 'guest-1');
+
+  const userDocRef = useMemoFirebase(() => {
+    if (firestore && user) {
+      return doc(firestore, "users", user.uid);
+    }
+    return null;
+  }, [firestore, user]);
+  const { data: userProfile } = useDoc<User>(userDocRef);
+  const isHost = userProfile?.role === 'host' || userProfile?.role === 'both';
+  const isAdmin = userProfile?.email === 'admin@go2culture.com'; // Simple admin check
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -50,6 +60,11 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+           {isAdmin && (
+              <Link href="/admin" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                Admin
+              </Link>
+            )}
         </nav>
         <div className="hidden md:flex items-center gap-2">
           {isUserLoading ? (
@@ -85,6 +100,14 @@ export function Header() {
                       <span>My Profile</span>
                     </Link>
                   </DropdownMenuItem>
+                  {isHost && (
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                        <Link href="/host">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Host Dashboard</span>
+                        </Link>
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
@@ -123,12 +146,20 @@ export function Header() {
                     {link.label}
                   </Link>
                 ))}
+                 {isAdmin && (
+                    <Link href="/admin" className="text-lg font-medium">Admin</Link>
+                 )}
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
                   {user ? (
                      <>
                       <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
                         <Link href="/profile">My Profile</Link>
                       </Button>
+                      {isHost && (
+                         <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
+                           <Link href="/host">Host Dashboard</Link>
+                         </Button>
+                      )}
                       <Button variant="ghost" className="w-full justify-start text-lg font-medium" onClick={handleLogout}>Log Out</Button>
                     </>
                   ) : (

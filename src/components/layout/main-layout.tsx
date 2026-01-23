@@ -15,8 +15,9 @@ export function MainLayout({
 }) {
   const pathname = usePathname();
   const isAdminPath = pathname?.startsWith('/admin');
+  const isHostPath = pathname?.startsWith('/host');
 
-  if (isAdminPath) {
+  if (isAdminPath || isHostPath) {
     return <>{children}</>;
   }
 
