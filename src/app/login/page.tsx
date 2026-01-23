@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -35,10 +36,16 @@ export default function LoginPage() {
       router.push('/');
     } catch (error: any) {
       console.error(error);
+      let description = "An unexpected error occurred. Please try again.";
+      if (error.code === 'auth/invalid-credential') {
+        description = "Invalid email or password. Please try again, or sign up if you're a new user.";
+      } else {
+        description = error.message || "Please check your credentials and try again.";
+      }
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message || "Please check your credentials and try again.",
+        description: description,
       });
     } finally {
       setIsLoading(false);
