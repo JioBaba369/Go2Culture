@@ -338,14 +338,16 @@
         "id": { "type": "string" },
         "guestId": { "type": "string", "description": "Reference to User." },
         "experienceId": { "type": "string", "description": "Reference to Experience." },
+        "experienceTitle": { "type": "string", "description": "Denormalized experience title for display." },
         "hostId": { "type": "string", "description": "Reference to Host." },
+        "hostName": { "type": "string", "description": "Denormalized host name for display." },
         "bookingDate": { "type": "string", "format": "date-time" },
         "numberOfGuests": { "type": "number" },
         "totalPrice": { "type": "number" },
         "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled"] },
         "cancellationReason": { "type": "string" }
       },
-      "required": ["id", "guestId", "experienceId", "hostId", "bookingDate", "numberOfGuests", "totalPrice", "status"]
+      "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status"]
     },
     "Review": {
       "title": "Review",

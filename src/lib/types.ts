@@ -155,7 +155,9 @@ export type Booking = {
   id: string;
   guestId: string;
   experienceId: string;
+  experienceTitle: string;
   hostId: string;
+  hostName: string;
   bookingDate: any; // Allow ServerTimestamp
   numberOfGuests: number;
   totalPrice: number;

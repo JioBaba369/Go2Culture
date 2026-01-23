@@ -22,6 +22,7 @@ import {
   MessageSquareWarning,
   LogOut,
   Loader2,
+  CalendarCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -33,6 +34,7 @@ const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/applications', label: 'Host Applications', icon: ClipboardList },
   { href: '/admin/experiences', label: 'Experiences', icon: Utensils },
+  { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/reports', label: 'Reviews & Reports', icon: MessageSquareWarning },
 ];

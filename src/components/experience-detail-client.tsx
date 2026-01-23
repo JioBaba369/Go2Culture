@@ -113,7 +113,9 @@ export function ExperienceDetailClient({ experienceId }: { experienceId: string 
       const bookingData = {
         guestId: user.uid,
         experienceId: experience!.id,
+        experienceTitle: experience!.title,
         hostId: experience!.hostId,
+        hostName: host!.name,
         bookingDate: date,
         numberOfGuests: numberOfGuests,
         totalPrice: totalPrice,
