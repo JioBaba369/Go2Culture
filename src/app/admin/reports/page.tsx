@@ -55,8 +55,8 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-headline font-bold">Reviews & Reports</h1>
-        <p className="text-muted-foreground">Manage user-submitted reports and system flags.</p>
+        <h1 className="text-3xl font-headline font-bold">Reports</h1>
+        <p className="text-muted-foreground">Manage user-submitted reports that require admin attention.</p>
       </div>
       
        {/* Mobile Card View */}
@@ -97,6 +97,11 @@ export default function AdminReportsPage() {
             </div>
           </Card>
         ))}
+         {!isLoading && (!reports || reports.length === 0) && (
+            <Card className="flex items-center justify-center h-40">
+                <p className="text-muted-foreground">No reports found.</p>
+            </Card>
+        )}
       </div>
 
 
@@ -164,6 +169,13 @@ export default function AdminReportsPage() {
                   </TableCell>
                 </TableRow>
               ))}
+               {!isLoading && (!reports || reports.length === 0) && (
+                 <TableRow>
+                   <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                     No reports found.
+                   </TableCell>
+                 </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

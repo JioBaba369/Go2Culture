@@ -37,7 +37,7 @@ const menuItems = [
   { href: '/admin/experiences', label: 'Experiences', icon: Utensils },
   { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
   { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/reports', label: 'Reviews & Reports', icon: MessageSquareWarning },
+  { href: '/admin/reports', label: 'Reports', icon: MessageSquareWarning },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
