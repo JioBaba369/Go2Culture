@@ -138,7 +138,7 @@ function BookingCard({ booking }: { booking: Booking }) {
   return (
     <Card className="flex flex-col md:flex-row overflow-hidden">
       <div className="md:w-1/3 relative h-48 md:h-auto">
-        {image && <Image src={image.imageUrl} alt={experience.title} layout="fill" objectFit="cover" />}
+        {image && <Image src={image.imageUrl} alt={experience.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />}
       </div>
       <div className="md:w-2/3 flex flex-col">
         <CardHeader>

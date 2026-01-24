@@ -23,6 +23,7 @@ export default function AboutPage() {
                         src={heroImage.imageUrl}
                         alt="A vibrant dinner party"
                         fill
+                        sizes="100vw"
                         className="object-cover"
                         data-ai-hint={heroImage.imageHint}
                         priority

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -371,7 +372,7 @@ export default function ExperienceDetailPage() {
             <div className="text-muted-foreground">{localAreaName}, {suburbName}, {countryName}</div>
              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="block group">
                 <div className="aspect-video w-full rounded-lg bg-muted flex items-center justify-center relative overflow-hidden mt-2 transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2">
-                    <Image src="https://picsum.photos/seed/map/800/450" layout="fill" objectFit="cover" alt="Map of the area" data-ai-hint="map area" />
+                    <Image src="https://picsum.photos/seed/map/800/450" fill className="object-cover" sizes="100vw" alt="Map of the area" data-ai-hint="map area" />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
                     <MapPin className="h-10 w-10 text-white drop-shadow-lg" />
                     <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm text-foreground text-xs font-semibold py-1 px-2 rounded-md">View on map</div>

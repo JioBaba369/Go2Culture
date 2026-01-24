@@ -82,6 +82,7 @@ export default function Home() {
               alt={heroImage.description}
               fill
               className="object-cover"
+              sizes="100vw"
               priority
               data-ai-hint={heroImage.imageHint}
             />
@@ -161,6 +162,7 @@ export default function Home() {
               src={PlaceHolderImages.find(p => p.id === 'host-cta')!.imageUrl} 
               alt="A host welcoming guests" 
               fill 
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover" 
               data-ai-hint={PlaceHolderImages.find(p => p.id === 'host-cta')!.imageHint}
             />

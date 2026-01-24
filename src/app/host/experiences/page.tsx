@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -156,7 +157,7 @@ export default function HostExperiencesPage() {
             <CardContent className="p-4">
                  <div className="flex gap-4">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
-                        {mainImage && <Image src={mainImage.imageUrl} alt={experience.title} fill className="object-cover" data-ai-hint={mainImage.imageHint} />}
+                        {mainImage && <Image src={mainImage.imageUrl} alt={experience.title} fill className="object-cover" sizes="96px" data-ai-hint={mainImage.imageHint} />}
                     </div>
                     <div className="flex-grow">
                         <div className="flex justify-between items-start">
