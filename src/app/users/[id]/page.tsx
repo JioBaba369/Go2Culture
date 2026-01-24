@@ -1,0 +1,143 @@
+'use client';
+
+import { useParams } from 'next/navigation';
+import Image from 'next/image';
+import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc, collection, query, where } from 'firebase/firestore';
+import type { User, Host, Experience } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Badge } from '@/components/ui/badge';
+import { Globe, Twitter, Instagram, Facebook } from 'lucide-react';
+import { ExperienceCard } from '@/components/experience-card';
+import { Separator } from '@/components/ui/separator';
+
+function UserProfilePage() {
+  const params = useParams();
+  const userId = params.id as string;
+  const firestore = useFirestore();
+
+  // Fetch User document
+  const userRef = useMemoFirebase(() => (firestore && userId ? doc(firestore, 'users', userId) : null), [firestore, userId]);
+  const { data: user, isLoading: isUserLoading } = useDoc<User>(userRef);
+
+  // Fetch Host document (if the user is a host)
+  const hostRef = useMemoFirebase(() => (firestore && userId ? doc(firestore, 'users', userId, 'hosts', userId) : null), [firestore, userId]);
+  const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
+
+  // Fetch user's experiences
+  const experiencesQuery = useMemoFirebase(
+    () => (firestore && userId ? query(collection(firestore, 'experiences'), where('userId', '==', userId), where('status', '==', 'live')) : null),
+    [firestore, userId]
+  );
+  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
+
+  const isLoading = isUserLoading || isHostLoading;
+
+  if (isLoading) {
+    return (
+      <div className="py-12 space-y-8">
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          <Skeleton className="h-32 w-32 rounded-full" />
+          <div className="space-y-2 text-center sm:text-left">
+            <Skeleton className="h-9 w-48" />
+            <Skeleton className="h-5 w-64" />
+          </div>
+        </div>
+        <Separator />
+        <Skeleton className="h-40 w-full" />
+        <Separator />
+        <div>
+          <Skeleton className="h-8 w-56 mb-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Skeleton className="h-96 w-full" />
+            <Skeleton className="h-96 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="py-20 text-center">
+        <h1 className="text-2xl font-bold">User not found</h1>
+        <p className="text-muted-foreground">The user you are looking for does not exist.</p>
+      </div>
+    );
+  }
+
+  const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
+  const isHost = user.role === 'host' || user.role === 'both';
+
+  return (
+    <div className="py-12 space-y-12">
+      <section className="flex flex-col sm:flex-row items-center gap-6">
+        <Avatar className="h-32 w-32 text-4xl">
+          {userImage && <AvatarImage src={userImage.imageUrl} alt={user.fullName} />}
+          <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className="space-y-2 text-center sm:text-left">
+          <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
+          <Badge variant={isHost ? "secondary" : "outline"} className="capitalize text-lg">{user.role}</Badge>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-8">
+          {isHost && host?.profile.bio && (
+            <div>
+              <h2 className="font-headline text-2xl font-semibold mb-4">About {user.fullName.split(' ')[0]}</h2>
+              <p className="text-muted-foreground leading-relaxed">{host.profile.bio}</p>
+            </div>
+          )}
+
+          {experiences && experiences.length > 0 && (
+            <div>
+              <Separator className="my-8" />
+              <h2 className="font-headline text-2xl font-semibold mb-4">Experiences by {user.fullName.split(' ')[0]}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {experiences.map(exp => <ExperienceCard key={exp.id} experience={exp} />)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <aside className="md:col-span-1 space-y-6">
+          <div className="p-6 border rounded-xl shadow-sm bg-card">
+            <h3 className="font-headline text-xl font-semibold">Contact & Links</h3>
+            <div className="space-y-4 mt-4 text-sm">
+                {user.website && (
+                    <a href={user.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                        <Globe className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        <span className="truncate">{user.website}</span>
+                    </a>
+                )}
+                {user.socialMedia?.twitter && (
+                    <a href={user.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                        <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        <span className="truncate">{user.socialMedia.twitter}</span>
+                    </a>
+                )}
+                 {user.socialMedia?.instagram && (
+                    <a href={user.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                        <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        <span className="truncate">{user.socialMedia.instagram}</span>
+                    </a>
+                )}
+                 {user.socialMedia?.facebook && (
+                    <a href={user.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                        <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        <span className="truncate">{user.socialMedia.facebook}</span>
+                    </a>
+                )}
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+export default UserProfilePage;
