@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -186,17 +187,17 @@ function BookingCalendar() {
             <CardHeader>
                 <CardTitle>Your Booking Calendar</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 sm:p-4">
                 <Calendar
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     modifiers={modifiers}
                     modifiersClassNames={modifiersClassNames}
-                    className="p-0"
+                    className="p-0 sm:border rounded-md"
                     disabled={{ before: new Date() }}
                 />
-                 <div className="flex gap-4 mt-4 text-sm text-muted-foreground">
+                 <div className="flex gap-4 mt-4 text-sm text-muted-foreground p-4 sm:p-0">
                     <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-primary" /> Booked Day</div>
                     <div className="flex items-center gap-2"><span className="h-px w-4 bg-muted-foreground" /> Blocked Day</div>
                 </div>
