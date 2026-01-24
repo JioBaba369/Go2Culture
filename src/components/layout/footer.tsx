@@ -1,8 +1,15 @@
-
+'use client';
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { useState, useEffect } from "react";
 
 export function Footer() {
+  const [year, setYear] = useState(new Date().getFullYear());
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className="mt-auto border-t bg-card">
       <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -36,11 +43,13 @@ export function Footer() {
               <li><Link href="/careers" className="text-muted-foreground hover:text-foreground">Careers</Link></li>
               <li><Link href="/press" className="text-muted-foreground hover:text-foreground">Press</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link></li>
+              <li><Link href="/terms" className="text-muted-foreground hover:text-foreground">Terms & Conditions</Link></li>
+              <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
         <div className="mt-8 border-t pt-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Go2Culture. All rights reserved.</p>
+          <p>&copy; {year} Go2Culture. All rights reserved.</p>
         </div>
       </div>
     </footer>
