@@ -1,0 +1,22 @@
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow public read on all images
+    match /{allPaths=**} {
+      allow read: if true;
+    }
+
+    // Allow authenticated users to write to their own folder
+    match /users/{userId}/{allPaths=**} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow hosts to write to their experience folders
+    match /experiences/{experienceId}/{allPaths=**} {
+      allow write: if request.auth != null && get(/databases/$(database)/documents/experiences/$(experienceId)).data.hostId == request.auth.uid;
+    }
+  }
+}
+
+    

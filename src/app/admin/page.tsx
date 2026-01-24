@@ -20,7 +20,6 @@ import {
   Tag,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { UsersChart, ExperiencesChart } from "@/components/admin/dashboard-charts";
@@ -41,32 +40,32 @@ const ActivityIcon = ({ type }: { type: string }) => {
 const ActivityItem = ({ activity }: { activity: any }) => {
     const timeAgo = formatDistanceToNow(activity.date, { addSuffix: true });
 
-    let title, href, imageId, fallbackName;
+    let title, href, imageURL, fallbackName;
 
     switch (activity.type) {
         case 'application':
             title = <>New application from <span className="font-semibold">{activity.data.hostName}</span></>;
             href = `/admin/applications/${activity.data.id}`;
-            imageId = activity.data.profile.photoId;
+            imageURL = activity.data.profile.photoURL;
             fallbackName = activity.data.hostName;
             break;
         case 'experience':
             title = <>New experience created: <span className="font-semibold">{activity.data.title}</span></>;
             href = `/experiences/${activity.data.id}`;
             // The host data is not denormalized on the experience for this view, so we can't show image.
-            // imageId = activity.data.host.profilePhotoId;
+            // imageURL = activity.data.host.profilePhotoURL;
             fallbackName = activity.data.title;
             break;
         case 'user':
             title = <><span className="font-semibold">{activity.data.fullName}</span> joined Go2Culture</>;
             href = `/admin/users`;
-            imageId = activity.data.profilePhotoId;
+            imageURL = activity.data.profilePhotoURL;
             fallbackName = activity.data.fullName;
             break;
         case 'review':
              title = <>A guest left a review</>;
              href = `/admin/reports`; // Reviews and reports are on the same page
-            // imageId = reviewedUser?.profilePhotoId;
+            // imageURL = reviewedUser?.profilePhotoURL;
             fallbackName = '?';
             break;
         default:
@@ -75,12 +74,10 @@ const ActivityItem = ({ activity }: { activity: any }) => {
             fallbackName = '?';
     }
 
-    const image = imageId ? PlaceHolderImages.find(p => p.id === imageId) : null;
-
     return (
         <div className="flex items-center gap-4">
             <Avatar className="h-9 w-9">
-                {image ? <AvatarImage src={image.imageUrl} alt="User" data-ai-hint={image.imageHint} /> : <AvatarFallback>{fallbackName.charAt(0)}</AvatarFallback>}
+                {imageURL ? <AvatarImage src={imageURL} alt="User" /> : <AvatarFallback>{fallbackName.charAt(0)}</AvatarFallback>}
             </Avatar>
             <div className="flex-1">
                 <p className="text-sm text-foreground hover:underline"><Link href={href}>{title}</Link></p>
@@ -194,3 +191,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    

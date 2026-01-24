@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Search, Award } from "lucide-react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 import { FeaturedExperiencesSection } from "@/components/home/featured-experiences";
 import { HowItWorksSection } from "@/components/home/how-it-works";
@@ -18,7 +17,8 @@ import { TestimonialsSection } from "@/components/home/testimonials";
 
 
 export default function Home() {
-  const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
+  const heroImageURL = "https://images.unsplash.com/photo-1530062845289-9109b2c9c868?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwZGlubmVyfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080";
+  const hostCtaImageURL = "https://images.unsplash.com/photo-1625213035705-f37ae3048266?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3ZWxjb21pbmclMjBob21lfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080";
   const router = useRouter();
 
   const [selectedCountry, setSelectedCountry] = useState<string>('');
@@ -76,15 +76,14 @@ export default function Home() {
     <div className="space-y-16 md:space-y-24">
       <section className="relative -mx-4 sm:-mx-6 lg:-mx-8 -mt-20">
         <div className="w-full h-[60vh] md:h-[70vh] lg:h-[80vh] max-h-[900px]">
-          {heroImage && (
+          {heroImageURL && (
             <Image
-              src={heroImage.imageUrl}
-              alt={heroImage.description}
+              src={heroImageURL}
+              alt="A vibrant outdoor dinner party at dusk"
               fill
               className="object-cover"
               sizes="100vw"
               priority
-              data-ai-hint={heroImage.imageHint}
             />
           )}
           <div className="absolute inset-0 bg-black/50" />
@@ -157,14 +156,13 @@ export default function Home() {
           </Button>
         </div>
         <div className="flex-1 w-full h-64 md:h-80 relative rounded-lg overflow-hidden">
-          {PlaceHolderImages.find(p => p.id === 'host-cta') &&
+          {hostCtaImageURL &&
             <Image 
-              src={PlaceHolderImages.find(p => p.id === 'host-cta')!.imageUrl} 
+              src={hostCtaImageURL} 
               alt="A host welcoming guests" 
               fill 
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover" 
-              data-ai-hint={PlaceHolderImages.find(p => p.id === 'host-cta')!.imageHint}
             />
           }
         </div>
@@ -172,3 +170,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

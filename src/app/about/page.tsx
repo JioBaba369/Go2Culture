@@ -1,12 +1,11 @@
 
 import { Globe, Users, Utensils } from 'lucide-react';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function AboutPage() {
-    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
+    const heroImageURL = "https://images.unsplash.com/photo-1530062845289-9109b2c9c868?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwZGlubmVyfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080";
 
     return (
         <div className="py-12 space-y-16 md:space-y-24">
@@ -17,19 +16,18 @@ export default function AboutPage() {
                 </p>
             </div>
 
-            {heroImage && (
-                <div className="my-12 relative h-[50vh] w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
-                    <Image
-                        src={heroImage.imageUrl}
-                        alt="A vibrant dinner party"
-                        fill
-                        sizes="100vw"
-                        className="object-cover"
-                        data-ai-hint={heroImage.imageHint}
-                        priority
-                    />
-                </div>
-            )}
+            
+            <div className="my-12 relative h-[50vh] w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
+                <Image
+                    src={heroImageURL}
+                    alt="A vibrant dinner party"
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                    priority
+                />
+            </div>
+            
 
             <div className="max-w-4xl mx-auto space-y-16">
                 <div className="text-center">
@@ -92,3 +90,5 @@ export default function AboutPage() {
         </div>
     );
 }
+
+    

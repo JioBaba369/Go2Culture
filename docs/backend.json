@@ -51,9 +51,10 @@
             }
           }
         },
-        "profilePhotoId": {
+        "profilePhotoURL": {
           "type": "string",
-          "description": "ID of the user's profile photo from placeholder images."
+          "format": "uri",
+          "description": "URL of the user's profile photo from Firebase Storage."
         },
         "preferences": {
           "type": "object",
@@ -112,7 +113,7 @@
           "enum": ["Superhost"],
           "description": "A special status awarded to top-rated and experienced hosts."
         },
-        "profilePhotoId": { "type": "string", "description": "Denormalized host profile photo ID for display." },
+        "profilePhotoURL": { "type": "string", "format": "uri", "description": "Denormalized host profile photo URL for display." },
         "status": { "type": "string", "enum": ["draft", "under_review", "approved", "needs_changes", "suspended"] },
         "profile": {
           "type": "object",
@@ -188,7 +189,7 @@
         },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "userId", "name", "profilePhotoId", "status", "profile", "verification", "location", "homeSetup", "compliance", "rating", "createdAt"]
+      "required": ["id", "userId", "name", "profilePhotoURL", "status", "profile", "verification", "location", "homeSetup", "compliance", "rating", "createdAt"]
     },
     "HostApplication": {
       "title": "Host Application",
@@ -205,7 +206,7 @@
         "profile": {
           "type": "object",
           "properties": {
-            "photoId": { "type": "string" },
+            "photoURL": { "type": "string", "format": "uri" },
             "bio": { "type": "string" },
             "languages": { "type": "array", "items": { "type": "string" } },
             "culturalBackground": { "type": "string" },
@@ -215,8 +216,8 @@
         "verification": {
           "type": "object",
           "properties": {
-            "idDocId": { "type": "string" },
-            "selfieId": { "type": "string" },
+            "idDocURL": { "type": "string", "format": "uri" },
+            "selfieURL": { "type": "string", "format": "uri" },
             "status": { "type": "string", "enum": ["Verified", "Pending", "Failed"] }
           }
         },
@@ -268,7 +269,7 @@
             "photos": {
               "type": "object",
               "properties": {
-                "mainImageId": { "type": "string" }
+                "mainImageURL": { "type": "string", "format": "uri" }
               }
             }
           }
@@ -339,8 +340,8 @@
         "photos": {
           "type": "object",
           "properties": {
-            "mainImageId": { "type": "string" },
-            "thumbnailImageIds": { "type": "array", "items": { "type": "string" } }
+            "mainImageURL": { "type": "string", "format": "uri" },
+            "thumbnailImageURLs": { "type": "array", "items": { "type": "string", "format": "uri" } }
           }
         },
         "status": { "type": "string", "enum": ["draft", "live", "paused"] },
@@ -526,3 +527,5 @@
     }
   }
 }
+
+    

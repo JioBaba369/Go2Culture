@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -21,7 +22,6 @@ import { Loader2, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Skeleton } from "../ui/skeleton";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
@@ -40,13 +40,11 @@ interface MessageDialogProps {
 }
 
 function MessageBubble({ msg, isSender, recipient }: { msg: Message, isSender: boolean, recipient: User }) {
-    const senderImage = isSender ? null : PlaceHolderImages.find(p => p.id === recipient.profilePhotoId);
-    
     return (
         <div className={cn("flex items-end gap-2", isSender ? "justify-end" : "justify-start")}>
             {!isSender && (
                 <Avatar className="h-8 w-8">
-                    {senderImage && <AvatarImage src={senderImage.imageUrl} alt={recipient.fullName} />}
+                    {recipient.profilePhotoURL && <AvatarImage src={recipient.profilePhotoURL} alt={recipient.fullName} />}
                     <AvatarFallback>{recipient.fullName.charAt(0)}</AvatarFallback>
                 </Avatar>
             )}
@@ -192,3 +190,5 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
     </Dialog>
   );
 }
+
+    

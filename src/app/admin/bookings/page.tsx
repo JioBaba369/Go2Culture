@@ -22,7 +22,6 @@ import { collection, doc } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useDoc } from '@/firebase/firestore/use-doc';
 
 const statusVariantMap: Record<
@@ -53,8 +52,6 @@ function BookingRow({ booking }: { booking: Booking }) {
     );
   }
 
-  const guestImage = PlaceHolderImages.find(p => p.id === guest.profilePhotoId);
-
   return (
      <TableRow>
       <TableCell className="font-medium">{booking.experienceTitle}</TableCell>
@@ -62,8 +59,8 @@ function BookingRow({ booking }: { booking: Booking }) {
       <TableCell>
         <div className="flex items-center gap-2">
            <Avatar className="h-8 w-8">
-            {guestImage && (
-              <AvatarImage src={guestImage.imageUrl} alt={guest.fullName} />
+            {guest.profilePhotoURL && (
+              <AvatarImage src={guest.profilePhotoURL} alt={guest.fullName} />
             )}
             <AvatarFallback>{guest.fullName.charAt(0)}</AvatarFallback>
           </Avatar>
@@ -94,8 +91,6 @@ function BookingCardMobile({ booking }: { booking: Booking }) {
     return <Skeleton className="h-36 w-full" />;
   }
 
-  const guestImage = PlaceHolderImages.find(p => p.id === guest.profilePhotoId);
-
   return (
     <Card key={booking.id} className="p-4">
       <div className="flex items-start justify-between gap-4">
@@ -104,7 +99,7 @@ function BookingCardMobile({ booking }: { booking: Booking }) {
           <p className="text-sm text-muted-foreground">Host: {booking.hostName}</p>
           <div className="flex items-center gap-2 pt-1">
             <Avatar className="h-6 w-6">
-              {guestImage && <AvatarImage src={guestImage.imageUrl} alt={guest.fullName} />}
+              {guest.profilePhotoURL && <AvatarImage src={guest.profilePhotoURL} alt={guest.fullName} />}
               <AvatarFallback>{guest.fullName.charAt(0)}</AvatarFallback>
             </Avatar>
             <span className="text-sm text-muted-foreground">Guest: {guest.fullName}</span>
@@ -206,3 +201,5 @@ export default function AdminBookingsPage() {
     </div>
   );
 }
+
+    

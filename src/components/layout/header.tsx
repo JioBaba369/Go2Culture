@@ -9,7 +9,6 @@ import { LogOut, Menu, User as UserIcon, LayoutDashboard, Heart, CalendarCheck }
 import { useFirebase, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,8 +36,6 @@ export function Header() {
     }
   };
   
-  const userImage = PlaceHolderImages.find(p => p.id === 'guest-1');
-
   const userDocRef = useMemoFirebase(() => {
     if (firestore && user) {
       return doc(firestore, "users", user.uid);
@@ -79,8 +76,8 @@ export function Header() {
                   <Avatar className="h-10 w-10">
                     {user.photoURL ? (
                       <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-                    ) : userImage ? (
-                      <AvatarImage src={userImage.imageUrl} alt="User" />
+                    ) : userProfile?.profilePhotoURL ? (
+                      <AvatarImage src={userProfile.profilePhotoURL} alt="User" />
                     ) : null}
                     <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
                   </Avatar>
@@ -202,3 +199,5 @@ export function Header() {
     </header>
   );
 }
+
+    

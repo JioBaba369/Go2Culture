@@ -11,7 +11,7 @@ export type User = {
     instagram?: string;
     facebook?: string;
   };
-  profilePhotoId?: string; 
+  profilePhotoURL?: string; 
   preferences?: {
     cuisines?: string[];
     dietary?: string[];
@@ -44,7 +44,7 @@ export type Host = {
   userId: string;
   name: string; // Denormalized for display
   level?: 'Superhost';
-  profilePhotoId: string; // Denormalized for display
+  profilePhotoURL: string; // Denormalized for display
   status: 'draft' | 'under_review' | 'approved' | 'needs_changes' | 'suspended';
   
   profile: {
@@ -95,7 +95,7 @@ export type ExperienceReview = {
   id: string;
   author: {
     name:string;
-    profilePhotoId: string;
+    profilePhotoURL: string;
   };
   rating: number;
   comment: string;
@@ -133,8 +133,8 @@ export type Experience = {
     localArea?: string;
   };
   photos: {
-    mainImageId: string;
-    thumbnailImageIds: string[];
+    mainImageURL: string;
+    thumbnailImageURLs: string[];
   };
   status: 'draft' | 'live' | 'paused';
   rating: {
@@ -203,7 +203,7 @@ export type HostApplication = {
   experienceId?: string;
   
   profile: {
-    photoId: string;
+    photoURL: string;
     bio: string;
     languages: string[];
     culturalBackground: string;
@@ -211,8 +211,8 @@ export type HostApplication = {
   };
 
   verification: {
-    idDocId: string;
-    selfieId: string;
+    idDocURL: string;
+    selfieURL: string;
     status: 'Verified' | 'Pending' | 'Failed';
   };
 
@@ -253,7 +253,7 @@ export type HostApplication = {
     };
     
     photos: {
-      mainImageId: string;
+      mainImageURL: string;
       foodPhotos?: any;
       diningAreaPhoto?: any;
     }
@@ -284,3 +284,5 @@ export type Coupon = {
   usageLimit?: number;
   timesUsed: number;
 };
+
+    

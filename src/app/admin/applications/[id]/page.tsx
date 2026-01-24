@@ -1,3 +1,4 @@
+
 'use client';
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
@@ -38,7 +39,6 @@ import {
   Instagram,
   Facebook,
 } from "lucide-react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { HostApplication, Experience, User as UserType } from "@/lib/types";
@@ -254,11 +254,6 @@ export default function ApplicationDetailPage() {
     );
   }
 
-  const profilePhoto = PlaceHolderImages.find(p => p.id === application.profile.photoId);
-  const idDocPhoto = PlaceHolderImages.find(p => p.id === application.verification.idDocId);
-  const selfiePhoto = PlaceHolderImages.find(p => p.id === application.verification.selfieId);
-  const mainImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
-
   const countryName = countries.find(c => c.id === application.location.country)?.name || application.location.country;
   const regionName = regions.find(r => r.id === application.location.region)?.name || application.location.region;
   const suburbName = suburbs.find(s => s.id === application.location.suburb)?.name || application.location.suburb;
@@ -356,7 +351,7 @@ export default function ApplicationDetailPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
-                        {profilePhoto && <Image src={profilePhoto.imageUrl} alt={application.hostName} width={64} height={64} className="rounded-full" data-ai-hint={profilePhoto.imageHint} />}
+                        {application.profile.photoURL && <Image src={application.profile.photoURL} alt={application.hostName} width={64} height={64} className="rounded-full" />}
                         <div>
                             <p className="font-bold text-lg">{application.hostName}</p>
                             <p className="text-sm text-muted-foreground">{hostLocationDisplay}</p>
@@ -405,7 +400,7 @@ export default function ApplicationDetailPage() {
                         <CardTitle className="flex items-center gap-2"><Camera/> Photos</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {mainImage && <Image src={mainImage.imageUrl} alt="Experience main" width={600} height={400} className="rounded-lg" data-ai-hint={mainImage.imageHint}/>}
+                        {application.experience.photos.mainImageURL && <Image src={application.experience.photos.mainImageURL} alt="Experience main" width={600} height={400} className="rounded-lg" />}
                     </CardContent>
                 </Card>
             </div>
@@ -464,11 +459,11 @@ export default function ApplicationDetailPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="font-semibold text-sm">ID Document</p>
-                                {idDocPhoto && <Image src={idDocPhoto.imageUrl} alt="ID Document" width={200} height={125} className="rounded-md mt-1" data-ai-hint={idDocPhoto.imageHint}/>}
+                                {application.verification.idDocURL && <Image src={application.verification.idDocURL} alt="ID Document" width={200} height={125} className="rounded-md mt-1" />}
                             </div>
                             <div>
                                 <p className="font-semibold text-sm">Selfie</p>
-                                {selfiePhoto && <Image src={selfiePhoto.imageUrl} alt="Selfie" width={125} height={125} className="rounded-full mt-1" data-ai-hint={selfiePhoto.imageHint} />}
+                                {application.verification.selfieURL && <Image src={application.verification.selfieURL} alt="Selfie" width={125} height={125} className="rounded-full mt-1" />}
                             </div>
                         </div>
                     </CardContent>
@@ -503,3 +498,5 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
+
+    

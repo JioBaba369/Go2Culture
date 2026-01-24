@@ -29,7 +29,6 @@ import Link from 'next/link';
 import { Experience, Host } from '@/lib/types';
 import { MoreHorizontal, Eye, Pause, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { format } from 'date-fns';
 import {
   useCollection,
@@ -73,10 +72,6 @@ function ExperienceRow({ experience }: { experience: Experience }) {
     );
   }
 
-  const hostImage = PlaceHolderImages.find(
-    (p) => p.id === host.profilePhotoId
-  );
-
   return (
     <TableRow>
       <TableCell className="font-medium">
@@ -87,11 +82,10 @@ function ExperienceRow({ experience }: { experience: Experience }) {
       <TableCell>
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
-            {hostImage && (
+            {host.profilePhotoURL && (
               <AvatarImage
-                src={hostImage.imageUrl}
+                src={host.profilePhotoURL}
                 alt={host.name}
-                data-ai-hint={hostImage.imageHint}
               />
             )}
             <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
@@ -169,20 +163,15 @@ function ExperienceCardMobile({ experience }: { experience: Experience }) {
     return <Skeleton className="h-40 w-full" />;
   }
 
-  const hostImage = PlaceHolderImages.find(
-    (p) => p.id === host.profilePhotoId
-  );
-
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <Avatar>
-            {hostImage && (
+            {host.profilePhotoURL && (
               <AvatarImage
-                src={hostImage.imageUrl}
+                src={host.profilePhotoURL}
                 alt={host.name}
-                data-ai-hint={hostImage.imageHint}
               />
             )}
             <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
@@ -310,3 +299,5 @@ export default function AdminExperiencesPage() {
     </div>
   );
 }
+
+    

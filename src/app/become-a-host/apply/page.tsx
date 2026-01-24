@@ -214,16 +214,16 @@ export default function BecomeAHostPage() {
         hostName: values.fullName,
         profile: {
           ...profileData,
-          photoId: 'guest-1', // Placeholder
+          photoURL: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2OTA5MjI1NXww&ixlib=rb-4.1.0&q=80&w=1080", // Placeholder
         },
         experience: {
           ...experienceData,
           description: experienceData.description || '',
-          photos: { mainImageId: 'dining-area' }
+          photos: { mainImageURL: "https://images.unsplash.com/photo-1758977403562-1a5fcc5af6b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkaW5pbmclMjBhcmVhfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080" }
         },
         verification: {
-          idDocId: 'admin-id', 
-          selfieId: 'admin-selfie',
+          idDocURL: "https://images.unsplash.com/photo-1614267119077-51bdcbf9f77a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxpZCUyMGNhcmR8ZW58MHx8fHwxNzY5MDgwODc3fDA&ixlib=rb-4.1.0&q=80&w=1080", 
+          selfieURL: "https://images.unsplash.com/photo-1597912744403-e1f1a0488ae4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c2VsZmllJTIwcGhvdG98ZW58MHx8fHwxNzY5MTA4MzEyfDA&ixlib=rb-4.1.0&q=80&w=1080",
           status: 'Pending',
         },
         status: 'Pending',
@@ -327,3 +327,5 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
+
+    

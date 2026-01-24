@@ -3,11 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ShieldCheck, DollarSign, Globe, Heart, Home, User, Utensils, Camera, Brush, Music } from 'lucide-react';
 
 export default function BecomeAHostLandingPage() {
-    const heroImage = PlaceHolderImages.find(p => p.id === 'exp-1-thumb-1');
+    const heroImageURL = "https://images.unsplash.com/photo-1699730148588-42aabafe9c72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkaW5uZXIlMjBwYXJ0eXxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080";
 
     const requirements = [
         { icon: User, title: 'Host Profile', description: 'Your photo, bio, and cultural story.' },
@@ -38,18 +37,17 @@ export default function BecomeAHostLandingPage() {
                 <p className="mt-2 text-sm text-muted-foreground">It takes about 15–25 minutes to apply.</p>
             </section>
             
-            {heroImage && (
-                <div className="relative h-96 w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
-                    <Image
-                        src={heroImage.imageUrl}
-                        alt="A vibrant dinner party"
-                        fill
-                        sizes="100vw"
-                        className="object-cover"
-                        data-ai-hint={heroImage.imageHint}
-                    />
-                </div>
-            )}
+            
+            <div className="relative h-96 w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
+                <Image
+                    src={heroImageURL}
+                    alt="A vibrant dinner party"
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                />
+            </div>
+            
 
              {/* What can you host */}
             <section>
@@ -168,3 +166,5 @@ export default function BecomeAHostLandingPage() {
         </div>
     );
 }
+
+    

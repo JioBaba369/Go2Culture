@@ -4,7 +4,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Review, User } from "@/lib/types";
 import { doc } from "firebase/firestore";
 import { Star } from "lucide-react";
@@ -40,7 +39,6 @@ export function TestimonialCard({ review }: TestimonialCardProps) {
     )
   }
 
-  const authorImage = PlaceHolderImages.find(p => p.id === author.profilePhotoId);
   const stars = Array(5).fill(0).map((_, i) => i < review.rating);
 
   return (
@@ -58,7 +56,7 @@ export function TestimonialCard({ review }: TestimonialCardProps) {
         </div>
         <div className="flex items-center gap-3 mt-6 pt-4 border-t">
           <Avatar>
-            {authorImage && <AvatarImage src={authorImage.imageUrl} alt={author.fullName} data-ai-hint={authorImage.imageHint} />}
+            {author.profilePhotoURL && <AvatarImage src={author.profilePhotoURL} alt={author.fullName} />}
             <AvatarFallback>{author.fullName.charAt(0)}</AvatarFallback>
           </Avatar>
           <p className="font-semibold">{author.fullName}</p>
@@ -67,3 +65,5 @@ export function TestimonialCard({ review }: TestimonialCardProps) {
     </Card>
   );
 }
+
+    
