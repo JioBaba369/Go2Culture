@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, where, limit, runTransaction, getDoc, serverTimestamp, increment } from "firebase/firestore";
@@ -24,6 +24,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { WishlistButton } from "@/components/wishlist-button";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -75,14 +79,16 @@ export default function ExperienceDetailPage() {
   const params = useParams();
   const experienceId = params.id as string;
 
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | undefined>();
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [couponError, setCouponError] = useState('');
+  const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 
+  const isMobile = useIsMobile();
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
@@ -302,6 +308,38 @@ export default function ExperienceDetailPage() {
   const mapQuery = encodeURIComponent(`${localAreaName}, ${suburbName}, ${countryName}`);
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
+  const DatePickerTrigger = (
+    <Button
+      variant={"outline"}
+      className={cn(
+        "w-full justify-start text-left font-normal h-12 sm:h-10",
+        !date && "text-muted-foreground"
+      )}
+    >
+      <CalendarIcon className="mr-2 h-4 w-4" />
+      {date ? format(date, "PPP") : <span>Pick a date</span>}
+    </Button>
+  );
+
+  const CalendarComponent = (
+     <Calendar
+        mode="single"
+        selected={date}
+        onSelect={(d) => {
+            setDate(d);
+            if (!isMobile) {
+                setDatePickerOpen(false);
+            }
+        }}
+        disabled={[
+            { before: new Date() },
+            disabledDays,
+        ]}
+        className="flex justify-center"
+      />
+  );
+
+
   return (
     <div className="py-8">
       <div className="flex items-start justify-between gap-4">
@@ -371,7 +409,7 @@ export default function ExperienceDetailPage() {
             <h3 className="font-headline text-2xl">Where you'll be</h3>
             <div className="text-muted-foreground">{localAreaName}, {suburbName}, {countryName}</div>
              <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="block group">
-                <div className="aspect-video w-full rounded-lg bg-muted flex items-center justify-center relative overflow-hidden mt-2 transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2">
+                <div className="relative aspect-video w-full rounded-lg bg-muted flex items-center justify-center relative overflow-hidden mt-2 transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2">
                     <Image src="https://picsum.photos/seed/map/800/450" fill className="object-cover" sizes="100vw" alt="Map of the area" data-ai-hint="map area" />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
                     <MapPin className="h-10 w-10 text-white drop-shadow-lg" />
@@ -486,17 +524,24 @@ export default function ExperienceDetailPage() {
                 <Separator />
                 
                 <div className="flex flex-col space-y-4">
-                    <div className="rounded-md border">
-                        <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            disabled={[
-                                { before: new Date() },
-                                disabledDays,
-                            ]}
-                            className="w-full"
-                        />
+                    <div className="space-y-2">
+                        <Label>Date</Label>
+                        {!isMobile ? (
+                            <Popover open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
+                                <PopoverTrigger asChild>{DatePickerTrigger}</PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">{CalendarComponent}</PopoverContent>
+                            </Popover>
+                        ) : (
+                            <Drawer open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
+                                <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
+                                <DrawerContent>
+                                    <div className="mx-auto w-full max-w-sm">
+                                        {CalendarComponent}
+                                        <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
+                                    </div>
+                                </DrawerContent>
+                            </Drawer>
+                        )}
                     </div>
 
                     <div className="space-y-2">
