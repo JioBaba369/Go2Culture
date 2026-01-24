@@ -289,11 +289,11 @@ export default function ProfilePage() {
                         name="socialMedia.twitter"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Twitter</FormLabel>
+                            <FormLabel>X</FormLabel>
                             <div className="relative flex items-center">
                                 <Twitter className="absolute left-3 h-5 w-5 text-muted-foreground" />
                                 <FormControl>
-                                    <Input placeholder="https://twitter.com/your-profile" {...field} className="pl-10" />
+                                    <Input placeholder="https://x.com/your-profile" {...field} className="pl-10" />
                                 </FormControl>
                             </div>
                             <FormMessage />

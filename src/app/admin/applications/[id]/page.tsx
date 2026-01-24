@@ -1,4 +1,3 @@
-
 'use client';
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
@@ -447,7 +446,7 @@ export default function ApplicationDetailPage() {
                             <DetailItem icon={Globe} label="Website" value={applicantUser.website} isLink={true} />
                             {applicantUser.socialMedia?.instagram && <DetailItem icon={Instagram} label="Instagram" value={applicantUser.socialMedia.instagram} isLink={true} />}
                             {applicantUser.socialMedia?.facebook && <DetailItem icon={Facebook} label="Facebook" value={applicantUser.socialMedia.facebook} isLink={true} />}
-                            {applicantUser.socialMedia?.twitter && <DetailItem icon={Twitter} label="Twitter" value={applicantUser.socialMedia.twitter} isLink={true} />}
+                            {applicantUser.socialMedia?.twitter && <DetailItem icon={Twitter} label="X" value={applicantUser.socialMedia.twitter} isLink={true} />}
                         </CardContent>
                     </Card>
                 )}
