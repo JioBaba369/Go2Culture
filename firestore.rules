@@ -149,20 +149,34 @@ service cloud.firestore {
      * @path /messages/{messageId}
      */
     match /messages/{messageId} {
-      // Admins have full read access for moderation. This rule is checked first.
+       /**
+       * Checks if the user is a participant in the booking associated with the message query.
+       * This function is used to secure list operations on messages.
+       */
+      function isBookingParticipant() {
+        let bookingId = request.query.where.bookingId;
+        // Ensure the client query is filtering by bookingId
+        if (bookingId == null) {
+          return false;
+        }
+        let booking = get(/databases/$(database)/documents/bookings/$(bookingId)).data;
+        return request.auth.uid == booking.guestId || request.auth.uid == booking.hostId;
+      }
+      
+      // Admins have full read access for moderation purposes.
       allow get, list: if isAdmin();
 
-      // For non-admins, these rules apply.
       // Users can get a single message if they are a participant.
       allow get: if isSignedIn() && request.auth.uid in resource.data.participants;
-      // Users can query for messages they are a part of. This requires the client to include the `where('participants', 'array-contains', ...)` clause.
-      allow list: if isSignedIn() && request.auth.uid in resource.data.participants;
+      
+      // Users can query for messages if they are a participant of the booking being queried.
+      allow list: if isSignedIn() && isBookingParticipant();
 
       // A user can create a message if they are the sender and included in the `participants` array.
       allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid && request.auth.uid in request.resource.data.participants;
 
-      // Only the sender (or an admin, covered by the rule above) can update or delete messages.
-      allow update, delete: if isSignedIn() && resource.data.senderId == request.auth.uid;
+      // Only the sender can update or delete messages (Admins are covered by the rule above).
+      allow update, delete: if isSignedIn() && (resource.data.senderId == request.auth.uid || isAdmin());
     }
 
     /**
