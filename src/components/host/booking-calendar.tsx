@@ -8,12 +8,16 @@ import { Booking, Host, User } from '@/lib/types';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { format, isSameDay, parseISO } from 'date-fns';
+import { format, isSameDay, parseISO, eachDayOfInterval } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, MessageSquare } from 'lucide-react';
+import { Loader2, MessageSquare, Calendar as CalendarIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DateRange } from 'react-day-picker';
+import { cn } from '@/lib/utils';
+
 
 function GuestListItem({ booking }: { booking: Booking }) {
     const { firestore } = useFirebase();
@@ -51,6 +55,7 @@ function BookingCalendar() {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [isUpdating, setIsUpdating] = useState(false);
+  const [range, setRange] = useState<DateRange | undefined>();
 
   // 1. Fetch Host profile to get blocked dates
   const hostRef = useMemoFirebase(
@@ -115,6 +120,36 @@ function BookingCalendar() {
       setIsUpdating(false);
     }
   };
+
+  const handleBlockRange = async () => {
+    if (!range?.from || !host || !user) {
+      toast({ variant: 'destructive', title: 'No date range selected', description: 'Please select a start and end date.' });
+      return;
+    }
+    setIsUpdating(true);
+
+    const datesToBlock = eachDayOfInterval({
+      start: range.from,
+      end: range.to || range.from,
+    }).map(d => format(d, 'yyyy-MM-dd'));
+
+    try {
+      const hostDocRef = doc(firestore, 'users', user.uid, 'hosts', user.uid);
+      await updateDoc(hostDocRef, {
+        blockedDates: arrayUnion(...datesToBlock)
+      });
+      toast({
+        title: "Dates Blocked",
+        description: `${datesToBlock.length} date(s) have been blocked successfully.`,
+      });
+      setRange(undefined);
+    } catch (error) {
+      console.error('Failed to block date range', error);
+      toast({ variant: 'destructive', title: 'Update Failed', description: 'Could not block the selected date range.' });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
   
   const isLoading = isUserLoading || isHostLoading || areBookingsLoading;
   
@@ -170,21 +205,67 @@ function BookingCalendar() {
         <div className="space-y-4">
             <Card>
                 <CardHeader>
-                    <CardTitle>
-                        {selectedDate ? format(selectedDate, 'PPP') : 'Select a date'}
-                    </CardTitle>
+                    <CardTitle>Manage Availability</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Select a single date on the calendar to block or unblock it.</p>
                     <Button onClick={handleBlockDate} disabled={!selectedDate || isUpdating} className="w-full">
                         {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isSelectedDateBlocked ? 'Unblock Date' : 'Block Date'}
                     </Button>
+                    <div className="relative py-2">
+                        <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or</span></div>
+                    </div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                id="date"
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !range && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {range?.from ? (
+                                    range.to ? (
+                                        <>
+                                            {format(range.from, "LLL dd, y")} -{" "}
+                                            {format(range.to, "LLL dd, y")}
+                                        </>
+                                    ) : (
+                                        format(range.from, "LLL dd, y")
+                                    )
+                                ) : (
+                                    <span>Block a date range</span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="end">
+                            <Calendar
+                                initialFocus
+                                mode="range"
+                                defaultMonth={range?.from}
+                                selected={range}
+                                onSelect={setRange}
+                                numberOfMonths={2}
+                                disabled={{ before: new Date() }}
+                            />
+                            <div className="p-4 border-t">
+                                <Button onClick={handleBlockRange} disabled={!range || isUpdating} className="w-full">
+                                    {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Block Selected Dates
+                                </Button>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                 </CardContent>
             </Card>
 
              <Card>
                 <CardHeader>
-                    <CardTitle>Bookings for Date</CardTitle>
+                    <CardTitle>Bookings for {selectedDate ? format(selectedDate, 'PPP') : '...'}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 max-h-[60vh] overflow-y-auto p-0">
                     {selectedDate && Object.keys(bookingsForSelectedDay).length > 0 ? (
