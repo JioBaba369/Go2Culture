@@ -173,6 +173,16 @@ export default function ExperienceDetailPage() {
       router.push(`/login?redirect=/experiences/${experienceId}`);
       return;
     }
+
+    if (experience && user.uid === experience.userId) {
+        toast({
+            variant: "destructive",
+            title: "Action Not Allowed",
+            description: "You cannot book your own experience.",
+        });
+        return;
+    }
+
     if (!date) {
       toast({ variant: 'destructive', title: 'No date selected', description: 'Please select a date for your experience.' });
       return;
@@ -181,7 +191,6 @@ export default function ExperienceDetailPage() {
     try {
       await runTransaction(firestore, async (transaction) => {
         const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
-        let finalPrice = basePrice - discountAmount;
         
         // Re-validate coupon inside transaction to prevent race conditions
         if (appliedCoupon) {
@@ -201,7 +210,7 @@ export default function ExperienceDetailPage() {
         
         const newBookingRef = doc(collection(firestore, 'bookings'));
         
-        const bookingData: Omit<Booking, 'id'> = {
+        const bookingData: Partial<Booking> = {
           guestId: user.uid,
           experienceId: experience!.id,
           experienceTitle: experience!.title,
@@ -209,7 +218,7 @@ export default function ExperienceDetailPage() {
           hostName: host!.name,
           bookingDate: date,
           numberOfGuests: numberOfGuests,
-          totalPrice: finalPrice,
+          totalPrice: basePrice - discountAmount,
           status: 'Pending',
           createdAt: serverTimestamp(),
         };
@@ -527,94 +536,100 @@ export default function ExperienceDetailPage() {
                 
                 <Separator />
                 
-                <div className="flex flex-col space-y-4">
-                    <div className="space-y-2">
-                        <Label>Date</Label>
-                        {!isMobile ? (
-                            <Popover open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
-                                <PopoverTrigger asChild>{DatePickerTrigger}</PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">{CalendarComponent}</PopoverContent>
-                            </Popover>
-                        ) : (
-                            <Drawer open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
-                                <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
-                                <DrawerContent>
-                                    <DrawerHeader className="sr-only">
-                                      <DrawerTitle>Select a date</DrawerTitle>
-                                      <DrawerDescription>Choose a date for your experience.</DrawerDescription>
-                                    </DrawerHeader>
-                                    <div className="p-4">{CalendarComponent}</div>
-                                    <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
-                                </DrawerContent>
-                            </Drawer>
-                        )}
+                {user?.uid === experience.userId ? (
+                    <div className="text-center text-sm text-muted-foreground p-4 bg-muted rounded-md">
+                        This is your experience. You cannot book it.
                     </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="guests">Guests</Label>
-                        <Select
-                            value={String(numberOfGuests)}
-                            onValueChange={(val) => setNumberOfGuests(Number(val))}
-                            disabled={isBooking}
-                        >
-                            <SelectTrigger id="guests" className="w-full">
-                                <div className="flex items-center gap-2">
-                                  <Users className="h-4 w-4 opacity-50" />
-                                  <SelectValue />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Array.from({ length: experience.pricing.maxGuests }, (_, i) => i + 1).map((num) => (
-                                    <SelectItem key={num} value={String(num)}>
-                                        {num} guest{num > 1 ? 's' : ''}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="coupon">Have a coupon?</Label>
-                        <div className="flex gap-2">
-                            <Input id="coupon" placeholder="Enter code" value={couponCode} onChange={e => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
-                            <Button variant="outline" onClick={handleApplyCoupon} disabled={!!appliedCoupon}>
-                                {appliedCoupon ? <CheckCircle className="h-5 w-5 text-green-600" /> : 'Apply'}
-                            </Button>
+                ) : (
+                    <div className="flex flex-col space-y-4">
+                        <div className="space-y-2">
+                            <Label>Date</Label>
+                            {!isMobile ? (
+                                <Popover open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
+                                    <PopoverTrigger asChild>{DatePickerTrigger}</PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">{CalendarComponent}</PopoverContent>
+                                </Popover>
+                            ) : (
+                                <Drawer open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
+                                    <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
+                                    <DrawerContent>
+                                        <DrawerHeader className="sr-only">
+                                          <DrawerTitle>Select a date</DrawerTitle>
+                                          <DrawerDescription>Choose a date for your experience.</DrawerDescription>
+                                        </DrawerHeader>
+                                        <div className="p-4">{CalendarComponent}</div>
+                                        <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
+                                    </DrawerContent>
+                                </Drawer>
+                            )}
                         </div>
-                        {couponError && <p className="text-xs text-destructive">{couponError}</p>}
-                        {appliedCoupon && <p className="text-xs text-green-600 font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
-                    </div>
 
-                    <div className="space-y-1 text-sm pt-2">
-                        <div className="flex justify-between">
-                            <span>${experience.pricing.pricePerGuest} x {numberOfGuests} guests</span>
-                            <span>${basePrice.toFixed(2)}</span>
+                        <div className="space-y-2">
+                            <Label htmlFor="guests">Guests</Label>
+                            <Select
+                                value={String(numberOfGuests)}
+                                onValueChange={(val) => setNumberOfGuests(Number(val))}
+                                disabled={isBooking}
+                            >
+                                <SelectTrigger id="guests" className="w-full">
+                                    <div className="flex items-center gap-2">
+                                      <Users className="h-4 w-4 opacity-50" />
+                                      <SelectValue />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: experience.pricing.maxGuests }, (_, i) => i + 1).map((num) => (
+                                        <SelectItem key={num} value={String(num)}>
+                                            {num} guest{num > 1 ? 's' : ''}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        {discountAmount > 0 && (
-                            <div className="flex justify-between text-green-600">
-                                <span>Coupon Discount</span>
-                                <span>-${discountAmount.toFixed(2)}</span>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="coupon">Have a coupon?</Label>
+                            <div className="flex gap-2">
+                                <Input id="coupon" placeholder="Enter code" value={couponCode} onChange={e => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
+                                <Button variant="outline" onClick={handleApplyCoupon} disabled={!!appliedCoupon}>
+                                    {appliedCoupon ? <CheckCircle className="h-5 w-5 text-green-600" /> : 'Apply'}
+                                </Button>
                             </div>
-                        )}
-                    </div>
+                            {couponError && <p className="text-xs text-destructive">{couponError}</p>}
+                            {appliedCoupon && <p className="text-xs text-green-600 font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
+                        </div>
 
-                    <Separator/>
+                        <div className="space-y-1 text-sm pt-2">
+                            <div className="flex justify-between">
+                                <span>${experience.pricing.pricePerGuest} x {numberOfGuests} guests</span>
+                                <span>${basePrice.toFixed(2)}</span>
+                            </div>
+                            {discountAmount > 0 && (
+                                <div className="flex justify-between text-green-600">
+                                    <span>Coupon Discount</span>
+                                    <span>-${discountAmount.toFixed(2)}</span>
+                                </div>
+                            )}
+                        </div>
 
-                    <Button 
-                        size="lg" 
-                        className="w-full"
-                        disabled={!date || isBooking}
-                        onClick={handleBooking}
-                    >
-                        {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
-                    </Button>
-                    
-                    <div className="flex justify-between items-center text-lg font-semibold">
-                        <span>Total</span>
-                        <span>${totalPrice.toFixed(2)}</span>
+                        <Separator/>
+
+                        <Button 
+                            size="lg" 
+                            className="w-full"
+                            disabled={!date || isBooking}
+                            onClick={handleBooking}
+                        >
+                            {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
+                        </Button>
+                        
+                        <div className="flex justify-between items-center text-lg font-semibold">
+                            <span>Total</span>
+                            <span>${totalPrice.toFixed(2)}</span>
+                        </div>
+                        <p className="text-xs text-center text-muted-foreground">You won't be charged until the host confirms</p>
                     </div>
-                    <p className="text-xs text-center text-muted-foreground">You won't be charged until the host confirms</p>
-                </div>
+                )}
              </div>
           </div>
         </div>
