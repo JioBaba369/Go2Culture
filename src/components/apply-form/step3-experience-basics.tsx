@@ -3,9 +3,10 @@
 
 import { useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from '@/components/ui/textarea';
 
 export function Step3ExperienceBasics() {
   const { control } = useFormContext();
@@ -24,6 +25,18 @@ export function Step3ExperienceBasics() {
             <FormItem>
               <FormLabel>Experience Title</FormLabel>
               <FormControl><Input {...field} placeholder="e.g., Traditional Kerala Home Feast" /></FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="experience.description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Experience Description</FormLabel>
+              <FormDescription>Describe the experience for your guests in a few sentences. What makes it unique and memorable?</FormDescription>
+              <FormControl><Textarea {...field} rows={4} placeholder="e.g., Join me for an authentic journey into the heart of Italian cooking, where we'll..." /></FormControl>
               <FormMessage />
             </FormItem>
           )}

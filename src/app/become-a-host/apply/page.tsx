@@ -47,6 +47,7 @@ const formSchema = z.object({
   
   experience: z.object({
     title: z.string().min(5, "Experience title is required."),
+    description: z.string().min(50, "A compelling description is required (min. 50 characters)."),
     category: z.string({ required_error: "Please select a category." }),
     durationMinutes: z.coerce.number().min(30, "Duration must be at least 30 minutes."),
     menu: z.object({
@@ -159,6 +160,7 @@ export default function BecomeAHostPage() {
       },
       experience: {
         title: '',
+        description: '',
         menu: {
           cuisine: '',
           description: '',
