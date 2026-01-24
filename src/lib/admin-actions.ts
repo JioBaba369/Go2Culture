@@ -8,6 +8,7 @@ import {
   collection,
   serverTimestamp,
   updateDoc,
+  deleteDoc,
 } from 'firebase/firestore';
 import type { HostApplication, Host, Experience } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -201,6 +202,23 @@ export async function startExperience(
       path: expRef.path,
       operation: 'update',
       requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
+// Function to delete a coupon
+export async function deleteCoupon(
+  firestore: Firestore,
+  couponId: string
+) {
+  const couponRef = doc(firestore, 'coupons', couponId);
+  try {
+    await deleteDoc(couponRef);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: couponRef.path,
+      operation: 'delete',
     }));
     throw serverError;
   }

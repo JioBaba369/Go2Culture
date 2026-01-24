@@ -17,21 +17,16 @@ import {
   Star,
   UserPlus,
   FileText,
-  Database,
-  Loader2,
   Tag,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { UsersChart, ExperiencesChart } from "@/components/admin/dashboard-charts";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, doc, query, setDoc } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { HostApplication, Experience, User, Review, Coupon } from "@/lib/types";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 
 const ActivityIcon = ({ type }: { type: string }) => {
     switch (type) {
@@ -104,30 +99,12 @@ const toDate = (timestamp: any) => {
 
 export default function AdminDashboardPage() {
   const firestore = useFirestore();
-  const { toast } = useToast();
-  const [isSeeding, setIsSeeding] = useState(false);
 
   const { data: hostApplications } = useCollection<HostApplication>(useMemoFirebase(() => firestore ? collection(firestore, 'hostApplications') : null, [firestore]));
   const { data: experiences } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
   const { data: users } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
   const { data: reviews } = useCollection<Review>(useMemoFirebase(() => firestore ? collection(firestore, 'reviews') : null, [firestore]));
   const { data: coupons } = useCollection<Coupon>(useMemoFirebase(() => firestore ? collection(firestore, 'coupons') : null, [firestore]));
-
-
-  const handleSeedDatabase = async () => {
-    setIsSeeding(true);
-    toast({ title: 'Seeding Database...', description: 'This may take a moment.' });
-    try {
-      const { seedDatabase } = await import('@/lib/seed');
-      await seedDatabase(firestore);
-      toast({ title: 'Database Seeded!', description: 'Your database has been populated with mock data.' });
-    } catch (error) {
-      console.error("Error seeding database:", error);
-      toast({ variant: 'destructive', title: 'Seeding Failed', description: 'Could not seed the database.' });
-    } finally {
-      setIsSeeding(false);
-    }
-  };
 
   const stats = [
     {
@@ -167,10 +144,6 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-start">
         <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
-        <Button onClick={handleSeedDatabase} disabled={isSeeding}>
-          {isSeeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
-          Seed Database
-        </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (

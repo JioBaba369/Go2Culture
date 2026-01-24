@@ -33,10 +33,20 @@ import {
   DialogFooter,
   DialogClose
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { Coupon } from "@/lib/types";
 import { format } from 'date-fns';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -55,6 +65,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { deleteCoupon } from "@/lib/admin-actions";
 
 const couponSchema = z.object({
     id: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
@@ -198,11 +209,28 @@ export default function AdminCouponsPage() {
   const { data: coupons, isLoading } = useCollection<Coupon>(couponsQuery);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | undefined>(undefined);
+  const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
 
   const openForm = (coupon?: Coupon) => {
     setSelectedCoupon(coupon);
     setIsFormOpen(true);
   }
+
+  const handleDelete = async () => {
+    if (!couponToDelete || !firestore) return;
+    setIsDeleting(true);
+    try {
+      await deleteCoupon(firestore, couponToDelete.id);
+      toast({ title: "Coupon Deleted", description: `Coupon "${couponToDelete.id}" has been removed.` });
+      setCouponToDelete(null);
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Deletion Failed", description: error.message });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -263,7 +291,9 @@ export default function AdminCouponsPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => openForm(coupon)}><Edit className="mr-2 h-4 w-4"/>Edit</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => setCouponToDelete(coupon)}>
+                            <Trash2 className="mr-2 h-4 w-4"/>Delete
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                   </TableCell>
@@ -276,6 +306,24 @@ export default function AdminCouponsPage() {
           </Table>
         </CardContent>
       </Card>
+
+       <AlertDialog open={!!couponToDelete} onOpenChange={(open) => !open && setCouponToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the coupon <span className="font-mono font-semibold p-1 bg-muted rounded-sm mx-1">{couponToDelete?.id}</span>.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className={cn(buttonVariants({ variant: "destructive" }))}>
+                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                Delete Coupon
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 }
