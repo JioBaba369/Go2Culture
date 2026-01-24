@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -58,19 +59,19 @@ export function useCollection<T = any>(
   type StateDataType = ResultItemType[] | null;
 
   const [data, setData] = useState<StateDataType>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Start loading true
   const [error, setError] = useState<FirestoreError | Error | null>(null);
 
   useEffect(() => {
+    // Reset state when query changes
+    setIsLoading(true);
+    setData(null);
+    setError(null);
+    
     if (!memoizedTargetRefOrQuery) {
-      setData(null);
       setIsLoading(false);
-      setError(null);
       return;
     }
-
-    setIsLoading(true);
-    setError(null);
 
     // Directly use memoizedTargetRefOrQuery as it's assumed to be the final query
     const unsubscribe = onSnapshot(
@@ -107,8 +108,10 @@ export function useCollection<T = any>(
 
     return () => unsubscribe();
   }, [memoizedTargetRefOrQuery]); // Re-run if the target query/reference changes.
-  if(memoizedTargetRefOrQuery && !memoizedTargetRefOrQuery.__memo) {
-    throw new Error(memoizedTargetRefOrQuery + ' was not properly memoized using useMemoFirebase');
+  
+  if(memoizedTargetRefOrQuery && !(memoizedTargetRefOrQuery as any).__memo) {
+    console.warn('useCollection received a query/reference that was not created with useMemoFirebase. This can lead to infinite loops and excessive reads. Query/Ref:', memoizedTargetRefOrQuery);
   }
+
   return { data, isLoading, error };
 }

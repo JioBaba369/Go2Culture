@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Menu, User as UserIcon, LayoutDashboard, Heart } from "lucide-react";
+import { LogOut, Menu, User as UserIcon, LayoutDashboard, Heart, CalendarCheck } from "lucide-react";
 import { useFirebase, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -97,6 +97,12 @@ export function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/profile/bookings">
+                      <CalendarCheck className="mr-2 h-4 w-4" />
+                      <span>My Bookings</span>
+                    </Link>
+                  </DropdownMenuItem>
                    <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/profile/wishlist">
                       <Heart className="mr-2 h-4 w-4" />
@@ -161,6 +167,9 @@ export function Header() {
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
                   {user ? (
                      <>
+                       <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
+                        <Link href="/profile/bookings">My Bookings</Link>
+                      </Button>
                        <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
                         <Link href="/profile/wishlist">My Wishlist</Link>
                       </Button>
