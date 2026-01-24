@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from "react";
@@ -22,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { WishlistButton } from "@/components/wishlist-button";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -380,62 +380,66 @@ export default function ExperienceDetailPage() {
         
         <div className="lg:col-span-1">
           <div className="sticky top-24">
-            <div className="un-calendar-card">
-              <div className="un-header">
-                <h2>Book your experience</h2>
-                <p>Select an available date to book your spot.</p>
-              </div>
-
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                disabled={[
-                  { before: new Date() },
-                  disabledDays,
-                ]}
-                className="un-calendar"
-              />
-              
-              <div className="un-footer">
-                <div className="space-y-4">
-                    <div className="space-y-1">
-                        <Label htmlFor="guests" className="text-sm font-medium text-foreground">Guests</Label>
-                        <Select
-                            value={String(numberOfGuests)}
-                            onValueChange={(val) => setNumberOfGuests(Number(val))}
-                            disabled={isBooking}
-                        >
-                            <SelectTrigger id="guests" className="w-full">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Array.from({ length: experience.pricing.maxGuests }, (_, i) => i + 1).map((num) => (
-                                    <SelectItem key={num} value={String(num)}>
-                                        {num} guest{num > 1 ? 's' : ''}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="flex justify-between items-center text-lg">
-                        <span className="font-semibold text-foreground">Total</span>
-                        <span className="font-bold text-foreground">${totalPrice}</span>
-                    </div>
-
-                    <Button 
-                      size="lg" 
-                      className="w-full"
-                      disabled={!date || isBooking}
-                      onClick={handleBooking}
-                    >
-                        {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
-                    </Button>
-                    <p className="text-xs text-center text-muted-foreground">You won't be charged yet</p>
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <span className="text-2xl font-bold">${experience.pricing.pricePerGuest}</span>
+                    <span className="text-muted-foreground"> / person</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm">
+                    <Star className="h-4 w-4" /> 
+                    <span>{experience.rating.average} ({experience.rating.count})</span>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    disabled={[
+                      { before: new Date() },
+                      disabledDays,
+                    ]}
+                    className="rounded-md border"
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="guests">Guests</Label>
+                    <Select
+                        value={String(numberOfGuests)}
+                        onValueChange={(val) => setNumberOfGuests(Number(val))}
+                        disabled={isBooking}
+                    >
+                        <SelectTrigger id="guests" className="w-full">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Array.from({ length: experience.pricing.maxGuests }, (_, i) => i + 1).map((num) => (
+                                <SelectItem key={num} value={String(num)}>
+                                    {num} guest{num > 1 ? 's' : ''}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                  </div>
+              </CardContent>
+              <CardFooter className="flex-col items-stretch gap-2">
+                <Button 
+                  size="lg" 
+                  className="w-full"
+                  disabled={!date || isBooking}
+                  onClick={handleBooking}
+                >
+                    {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
+                </Button>
+                <div className="flex justify-between items-center text-lg font-semibold">
+                    <span>Total</span>
+                    <span>${totalPrice}</span>
+                </div>
+                 <p className="text-xs text-center text-muted-foreground">You won't be charged yet</p>
+              </CardFooter>
+            </Card>
           </div>
         </div>
       </div>
