@@ -31,12 +31,15 @@ import {
   ClockIcon,
   PlayCircle,
   PauseCircle,
-  Users,
+  Users as UsersIcon,
+  Mail,
+  Phone,
+  Globe,
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { HostApplication, Experience } from "@/lib/types";
+import { HostApplication, Experience, User as UserType } from "@/lib/types";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useState } from "react";
@@ -45,14 +48,20 @@ import { approveApplication, rejectApplication, requestChangesForApplication, pa
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 
-function DetailItem({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) {
+function DetailItem({ icon: Icon, label, value, isLink = false }: { icon: React.ElementType, label: string, value: React.ReactNode, isLink?: boolean }) {
     if (!value) return null;
     return (
         <div className="flex items-start gap-3">
             <Icon className="h-5 w-5 text-muted-foreground mt-1 flex-shrink-0" />
             <div>
                 <p className="font-semibold text-sm">{label}</p>
-                <p className="text-muted-foreground">{value}</p>
+                {isLink && typeof value === 'string' ? (
+                    <a href={value.startsWith('http') ? value : `mailto:${value}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:underline break-all">
+                        {value}
+                    </a>
+                ) : (
+                    <p className="text-muted-foreground break-all">{value}</p>
+                )}
             </div>
         </div>
     );
@@ -70,6 +79,9 @@ export default function ApplicationDetailPage() {
   const appRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'hostApplications', applicationId) : null, [firestore, user, applicationId]);
   const { data: application, isLoading: isDocLoading, error } = useDoc<HostApplication>(appRef);
 
+  const applicantUserRef = useMemoFirebase(() => (firestore && application) ? doc(firestore, 'users', application.userId) : null, [firestore, application]);
+  const { data: applicantUser, isLoading: isApplicantUserLoading } = useDoc<UserType>(applicantUserRef);
+  
   const experienceRef = useMemoFirebase(() => (firestore && application?.status === 'Approved' && application.experienceId) ? doc(firestore, 'experiences', application.experienceId) : null, [firestore, application]);
   const { data: experience, isLoading: isExperienceLoading } = useDoc<Experience>(experienceRef);
 
@@ -79,7 +91,7 @@ export default function ApplicationDetailPage() {
     }
   }, [isAuthLoading, user, router, applicationId]);
 
-  const isLoading = isAuthLoading || (!!user && isDocLoading);
+  const isLoading = isAuthLoading || (!!user && isDocLoading) || (!!application && isApplicantUserLoading);
 
   const handleApprove = async () => {
     if (!application || !firestore) return;
@@ -253,6 +265,8 @@ export default function ApplicationDetailPage() {
   const hostLocationDisplay = [suburbName, countryName].filter(Boolean).join(', ');
   const fullLocationDisplay = [application.location.address, localAreaName, suburbName, regionName, countryName].filter(Boolean).join(', ');
 
+  const isFinalStatus = application.status === 'Approved' || application.status === 'Rejected';
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -265,7 +279,7 @@ export default function ApplicationDetailPage() {
             <span className="font-semibold text-foreground">
               {application.hostName}
             </span>
-             - <Badge>{application.status}</Badge>
+            - <Badge>{application.status}</Badge>
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -296,7 +310,7 @@ export default function ApplicationDetailPage() {
               )}
             </>
           ) : application.status === 'Rejected' ? (
-            <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={isProcessing !== null}>
+             <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={isProcessing !== null}>
               {isProcessing === 'approve' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />} Re-Approve
             </Button>
           ) : null}
@@ -326,7 +340,7 @@ export default function ApplicationDetailPage() {
                             <DetailItem icon={FileText} label="Category" value={application.experience.category} />
                             <DetailItem icon={DollarSign} label="Price" value={`$${application.experience.pricing.pricePerGuest} / person`} />
                             <DetailItem icon={ClockIcon} label="Duration" value={`${application.experience.durationMinutes} minutes`} />
-                            <DetailItem icon={Users} label="Max Guests" value={application.homeSetup.maxGuests} />
+                            <DetailItem icon={UsersIcon} label="Max Guests" value={application.experience.pricing.maxGuests} />
                             <DetailItem icon={Info} label="Cuisine" value={application.experience.menu.cuisine} />
                             <DetailItem icon={AlertTriangle} label="Spice Level" value={application.experience.menu.spiceLevel} />
                         </div>
@@ -412,13 +426,28 @@ export default function ApplicationDetailPage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <DetailItem icon={Home} label="Home Type" value={application.homeSetup.homeType} />
-                        <DetailItem icon={Users} label="Seating" value={application.homeSetup.seating} />
-                        <DetailItem icon={Users} label="Max Guests" value={application.homeSetup.maxGuests} />
+                        <DetailItem icon={UsersIcon} label="Seating" value={application.homeSetup.seating} />
+                        <DetailItem icon={UsersIcon} label="Max Guests" value={application.homeSetup.maxGuests} />
                         <DetailItem icon={Info} label="Pets" value={application.homeSetup.pets ? 'Yes' : 'No'} />
                         <DetailItem icon={Info} label="Smoking" value={application.homeSetup.smoking ? 'Yes' : 'No'} />
                         <DetailItem icon={Info} label="Accessibility" value={application.homeSetup.accessibility || 'Not specified'} />
                     </CardContent>
                 </Card>
+                {applicantUser && (
+                    <Card className="lg:col-span-2">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Phone /> Contact Information</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid sm:grid-cols-2 gap-4">
+                            <DetailItem icon={Mail} label="Email" value={applicantUser.email} isLink={true} />
+                            <DetailItem icon={Phone} label="Phone" value={applicantUser.phone} />
+                            <DetailItem icon={Globe} label="Website" value={applicantUser.website} isLink={true} />
+                            {applicantUser.socialMedia?.instagram && <DetailItem icon={Globe} label="Instagram" value={applicantUser.socialMedia.instagram} isLink={true} />}
+                            {applicantUser.socialMedia?.facebook && <DetailItem icon={Globe} label="Facebook" value={applicantUser.socialMedia.facebook} isLink={true} />}
+                            {applicantUser.socialMedia?.twitter && <DetailItem icon={Globe} label="Twitter" value={applicantUser.socialMedia.twitter} isLink={true} />}
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </TabsContent>
 

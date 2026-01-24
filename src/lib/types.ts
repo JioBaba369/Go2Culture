@@ -5,6 +5,12 @@ export type User = {
   fullName: string;
   email: string;
   phone?: string;
+  website?: string;
+  socialMedia?: {
+    twitter?: string;
+    instagram?: string;
+    facebook?: string;
+  };
   profilePhotoId?: string; 
   preferences?: {
     cuisines?: string[];

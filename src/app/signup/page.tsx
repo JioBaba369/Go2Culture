@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -28,6 +29,7 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async () => {
@@ -54,6 +56,7 @@ export default function SignupPage() {
         role: 'guest',
         fullName,
         email: user.email,
+        phone,
         status: 'active',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -108,6 +111,17 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
               />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="e.g. +1 415 555 2671"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={isLoading}
+                />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>

@@ -3,59 +3,60 @@ import type { Host, Review, Experience, HostApplication, User, ExperienceReview,
 
 export const mockUsers: User[] = [
   {
-    id: 'user-1', role: 'host', fullName: 'Maria', email: 'maria@go2culture.com', status: 'active',
-    createdAt: '2023-01-10T09:00:00Z', updatedAt: '2023-01-10T09:00:00Z', profilePhotoId: 'host-1'
+    id: 'user-1', role: 'host', fullName: 'Maria', email: 'maria@go2culture.com', phone: '111-222-3333', status: 'active',
+    createdAt: '2023-01-10T09:00:00Z', updatedAt: '2023-01-10T09:00:00Z', profilePhotoId: 'host-1',
+    website: 'https://www.mariaspastapalace.com', socialMedia: { instagram: 'https://instagram.com/mariapasta' }
   },
   {
-    id: 'user-2', role: 'host', fullName: 'Kenji', email: 'kenji@go2culture.com', status: 'active',
+    id: 'user-2', role: 'host', fullName: 'Kenji', email: 'kenji@go2culture.com', phone: '222-333-4444', status: 'active',
     createdAt: '2023-02-15T09:00:00Z', updatedAt: '2023-02-15T09:00:00Z', profilePhotoId: 'host-2'
   },
   {
-    id: 'user-3', role: 'host', fullName: 'Priya', email: 'priya@go2culture.com', status: 'active',
+    id: 'user-3', role: 'host', fullName: 'Priya', email: 'priya@go2culture.com', phone: '333-444-5555', status: 'active',
     createdAt: '2023-03-20T09:00:00Z', updatedAt: '2023-03-20T09:00:00Z', profilePhotoId: 'host-3'
   },
   {
-    id: 'user-4', role: 'host', fullName: 'Javier', email: 'javier@go2culture.com', status: 'active',
+    id: 'user-4', role: 'host', fullName: 'Javier', email: 'javier@go2culture.com', phone: '444-555-6666', status: 'active',
     createdAt: '2023-04-01T09:00:00Z', updatedAt: '2023-04-01T09:00:00Z', profilePhotoId: 'host-4'
   },
   {
-    id: 'user-5', role: 'guest', fullName: 'Sophie', email: 'sophie@guest.com', status: 'active',
+    id: 'user-5', role: 'guest', fullName: 'Sophie', email: 'sophie@guest.com', phone: '555-666-7777', status: 'active',
     createdAt: '2023-10-01T12:00:00Z', updatedAt: '2023-10-01T12:00:00Z', profilePhotoId: 'guest-1'
   },
   {
-    id: 'user-6', role: 'guest', fullName: 'David', email: 'david@guest.com', status: 'suspended',
+    id: 'user-6', role: 'guest', fullName: 'David', email: 'david@guest.com', phone: '666-777-8888', status: 'suspended',
     createdAt: '2023-10-02T14:00:00Z', updatedAt: '2023-11-01T10:00:00Z', profilePhotoId: 'guest-2'
   },
   {
-    id: 'user-7', role: 'both', fullName: 'Chloe', email: 'chloe@go2culture.com', status: 'active',
+    id: 'user-7', role: 'both', fullName: 'Chloe', email: 'chloe@go2culture.com', phone: '777-888-9999', status: 'active',
     createdAt: '2023-05-18T11:00:00Z', updatedAt: '2023-05-18T11:00:00Z', profilePhotoId: 'host-3'
   },
   {
-    id: 'user-8', role: 'guest', fullName: 'Ben', email: 'ben@guest.com', status: 'active',
+    id: 'user-8', role: 'guest', fullName: 'Ben', email: 'ben@guest.com', phone: '888-999-0000', status: 'active',
     createdAt: '2023-09-05T18:00:00Z', updatedAt: '2023-09-05T18:00:00Z', profilePhotoId: 'guest-3'
   },
   {
-    id: 'user-9', role: 'host', fullName: 'Anya', email: 'anya@go2culture.com', status: 'active',
+    id: 'user-9', role: 'host', fullName: 'Anya', email: 'anya@go2culture.com', phone: '123-456-7890', status: 'active',
     createdAt: '2023-05-01T09:00:00Z', updatedAt: '2023-05-01T09:00:00Z', profilePhotoId: 'host-5'
   },
   {
-    id: 'user-10', role: 'host', fullName: 'Antoine', email: 'antoine@go2culture.com', status: 'active',
+    id: 'user-10', role: 'host', fullName: 'Antoine', email: 'antoine@go2culture.com', phone: '234-567-8901', status: 'active',
     createdAt: '2023-05-02T09:00:00Z', updatedAt: '2023-05-02T09:00:00Z', profilePhotoId: 'host-6'
   },
   {
-    id: 'user-11', role: 'host', fullName: 'Hemi', email: 'hemi@go2culture.com', status: 'active',
+    id: 'user-11', role: 'host', fullName: 'Hemi', email: 'hemi@go2culture.com', phone: '345-678-9012', status: 'active',
     createdAt: '2023-05-03T09:00:00Z', updatedAt: '2023-05-03T09:00:00Z', profilePhotoId: 'host-7'
   },
   {
-    id: 'user-12', role: 'host', fullName: 'Linh', email: 'linh@go2culture.com', status: 'active',
+    id: 'user-12', role: 'host', fullName: 'Linh', email: 'linh@go2culture.com', phone: '456-789-0123', status: 'active',
     createdAt: '2023-05-04T09:00:00Z', updatedAt: '2023-05-04T09:00:00Z', profilePhotoId: 'host-8'
   },
   {
-    id: 'user-13', role: 'host', fullName: 'Fatima', email: 'fatima@go2culture.com', status: 'active',
+    id: 'user-13', role: 'host', fullName: 'Fatima', email: 'fatima@go2culture.com', phone: '567-890-1234', status: 'active',
     createdAt: '2023-06-01T09:00:00Z', updatedAt: '2023-06-01T09:00:00Z', profilePhotoId: 'host-9'
   },
   {
-    id: 'user-14', role: 'host', fullName: 'Liam', email: 'liam@go2culture.com', status: 'active',
+    id: 'user-14', role: 'host', fullName: 'Liam', email: 'liam@go2culture.com', phone: '678-901-2345', status: 'active',
     createdAt: '2023-06-02T09:00:00Z', updatedAt: '2023-06-02T09:00:00Z', profilePhotoId: 'host-10'
   },
 ];

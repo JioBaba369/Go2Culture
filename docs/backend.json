@@ -28,6 +28,29 @@
           "type": "string",
           "description": "The user's phone number."
         },
+        "website": {
+          "type": "string",
+          "format": "uri",
+          "description": "The user's personal or professional website."
+        },
+        "socialMedia": {
+          "type": "object",
+          "description": "Links to the user's social media profiles.",
+          "properties": {
+            "twitter": {
+              "type": "string",
+              "format": "uri"
+            },
+            "instagram": {
+              "type": "string",
+              "format": "uri"
+            },
+            "facebook": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
         "profilePhotoId": {
           "type": "string",
           "description": "ID of the user's profile photo from placeholder images."

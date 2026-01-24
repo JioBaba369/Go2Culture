@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
       {/* Mobile Card View */}
        <div className="grid gap-4 md:hidden">
         <h2 className="text-xl font-semibold">All Users</h2>
-        {isLoading && Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
+        {isLoading && Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-36 w-full" />)}
         {users?.map((user) => {
             const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
             return (
@@ -77,6 +77,7 @@ export default function AdminUsersPage() {
                             <div className="space-y-1">
                                 <p className="font-semibold">{user.fullName}</p>
                                 <p className="text-sm text-muted-foreground">{user.email}</p>
+                                <p className="text-sm text-muted-foreground">{user.phone}</p>
                             </div>
                         </div>
                         <DropdownMenu>
@@ -120,6 +121,7 @@ export default function AdminUsersPage() {
               <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Joined</TableHead>
@@ -128,7 +130,7 @@ export default function AdminUsersPage() {
             </TableHeader>
             <TableBody>
               {isLoading && Array.from({length: 5}).map((_, i) => (
-                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-10 w-full"/></TableCell></TableRow>
+                <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-10 w-full"/></TableCell></TableRow>
               ))}
               {users?.map((user) => {
                 const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
@@ -146,6 +148,7 @@ export default function AdminUsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.phone}</TableCell>
                     <TableCell>
                       <Badge variant={roleVariantMap[user.role]} className="capitalize">
                         {user.role}

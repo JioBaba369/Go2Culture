@@ -1,9 +1,10 @@
+
 'use client';
 
 import React from 'react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +26,15 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
+  phone: z.string().optional(),
+  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  socialMedia: z.object({
+    twitter: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+    instagram: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+    facebook: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  }).optional(),
 });
+
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
@@ -47,6 +56,13 @@ export default function ProfilePage() {
     resolver: zodResolver(profileFormSchema),
     values: {
       fullName: userProfile?.fullName || '',
+      phone: userProfile?.phone || '',
+      website: userProfile?.website || '',
+      socialMedia: {
+        twitter: userProfile?.socialMedia?.twitter || '',
+        instagram: userProfile?.socialMedia?.instagram || '',
+        facebook: userProfile?.socialMedia?.facebook || '',
+      },
     },
   });
 
@@ -63,17 +79,26 @@ export default function ProfilePage() {
 
     try {
       const userRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userRef, { fullName: data.fullName });
+      const { fullName, ...contactData } = data;
 
-      await updateProfile(auth.currentUser, { displayName: data.fullName });
+      await updateDoc(userRef, { 
+        fullName,
+        ...contactData,
+        updatedAt: serverTimestamp() 
+      });
+
+      if (auth.currentUser.displayName !== fullName) {
+        await updateProfile(auth.currentUser, { displayName: fullName });
+      }
       
       toast({
         title: "Profile Updated",
-        description: "Your name has been successfully updated.",
+        description: "Your profile has been successfully updated.",
       });
       
       await auth.currentUser.reload();
       router.refresh(); 
+      form.reset(data); // Resets the dirty state
     } catch (error) {
       toast({
         variant: "destructive",
@@ -150,37 +175,112 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
-          <CardDescription>Update your public name. This will be visible to hosts and guests.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-sm">
-              <fieldset disabled={form.formState.isSubmitting || !userProfile}>
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your full name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isDirty} className="mt-4">
-                  {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Changes
+       <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <Card>
+                <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Update your public name and contact details.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="fullName"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Your full name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Your phone number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="website"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Website</FormLabel>
+                            <FormControl>
+                                <Input placeholder="https://your-website.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+
+             <Card>
+                <CardHeader>
+                <CardTitle>Social Media</CardTitle>
+                <CardDescription>Link your social media profiles.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <FormField
+                        control={form.control}
+                        name="socialMedia.twitter"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Twitter</FormLabel>
+                            <FormControl>
+                                <Input placeholder="https://twitter.com/your-profile" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="socialMedia.instagram"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Instagram</FormLabel>
+                            <FormControl>
+                                <Input placeholder="https://instagram.com/your-profile" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="socialMedia.facebook"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Facebook</FormLabel>
+                            <FormControl>
+                                <Input placeholder="https://facebook.com/your-profile" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+            
+            <div className="flex justify-end">
+                <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isDirty}>
+                    {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
                 </Button>
-              </fieldset>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </div>
+        </form>
+       </Form>
       
       <Card>
         <CardHeader>
