@@ -15,7 +15,8 @@ export async function submitReview(
     throw new Error('Booking is missing necessary information.');
   }
 
-  const reviewData: Omit<Review, 'id'|'bookingId'> & { bookingId?: string } = {
+  const reviewData: Omit<Review, 'id'> = {
+    bookingId: booking.id,
     guestId: booking.guestId,
     experienceId: booking.experienceId,
     hostId: booking.hostId,
@@ -23,12 +24,6 @@ export async function submitReview(
     comment,
     createdAt: serverTimestamp(),
   };
-
-  // The bookingId property was removed from the Review entity.
-  // This property can be re-added if you need to associate a review
-  // with a booking.
-  //
-  // reviewData.bookingId = booking.id;
 
   const reviewsColRef = collection(firestore, 'reviews');
   try {
