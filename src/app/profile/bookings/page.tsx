@@ -201,7 +201,7 @@ export default function MyBookingsPage() {
   
   if (isLoading) {
     return (
-      <div className="py-12">
+      <div>
         <h1 className="text-3xl font-headline font-bold">My Bookings</h1>
         <p className="text-muted-foreground">Your journey with Go2Culture.</p>
         <div className="mt-8 space-y-6">
@@ -213,7 +213,7 @@ export default function MyBookingsPage() {
   }
   
   return (
-    <div className="py-12">
+    <div>
       <h1 className="text-3xl font-headline font-bold">My Bookings</h1>
       <p className="text-muted-foreground">Your journey with Go2Culture.</p>
 

@@ -164,7 +164,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8 py-12">
+      <div className="space-y-8">
         <div className="flex items-center gap-4">
           <Skeleton className="h-20 w-20 rounded-full" />
           <div className="space-y-2">
@@ -214,7 +214,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="space-y-8 py-12">
+    <div className="space-y-8">
       <div className="flex items-center gap-6">
         <Avatar className="h-20 w-20">
             {user.photoURL ? <AvatarImage src={user.photoURL} alt={userProfile?.fullName || 'User'} /> :

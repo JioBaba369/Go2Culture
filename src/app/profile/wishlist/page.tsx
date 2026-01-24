@@ -97,7 +97,7 @@ function WishlistPageContent() {
 
 export default function WishlistPage() {
     return (
-        <div className="py-12">
+        <div>
             <WishlistPageContent />
         </div>
     );
