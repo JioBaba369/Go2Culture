@@ -1,13 +1,13 @@
+diff --git a/node_modules/vaul/package.json b/node_modules/vaul/package.json
+index 13a304f..54d89a7 100644
 --- a/node_modules/vaul/package.json
 +++ b/node_modules/vaul/package.json
-@@ -33,8 +33,8 @@
-     "semantic-release": "semantic-release"
+@@ -37,7 +37,7 @@
+     "build-storybook": "storybook build"
    },
    "peerDependencies": {
 -    "react": "^16.8 || ^17.0 || ^18.0",
--    "react-dom": "^16.8 || ^17.0 || ^18.0"
-+    "react": "^16.8 || ^17.0 || ^18.0 || ^19.0",
-+    "react-dom": "^16.8 || ^17.0 || ^18.0 || ^19.0"
++    "react": "^16.8 || ^17.0 || ^18.0 || ^19.0.0",
+     "react-dom": "^16.8 || ^17.0 || ^18.0"
    },
    "dependencies": {
-     "@radix-ui/react-dialog": "^1.0.5"

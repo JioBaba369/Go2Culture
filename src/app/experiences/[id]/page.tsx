@@ -24,7 +24,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { WishlistButton } from "@/components/wishlist-button";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
@@ -88,7 +88,7 @@ export default function ExperienceDetailPage() {
   const [couponError, setCouponError] = useState('');
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 
-  const isMobile = useIsMobile();
+  const isMobile = !useMediaQuery("(min-width: 768px)");
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
