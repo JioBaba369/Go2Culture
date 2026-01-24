@@ -13,6 +13,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow } from "date-fns";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BookingsChart, EarningsChart } from "@/components/host/dashboard-charts";
 
 function ActivityItem({ activity }: { activity: any }) {
     const { firestore } = useFirebase();
@@ -110,6 +111,20 @@ export default function HostDashboardPage() {
                     </CardContent>
                 </Card>
                 ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {isLoading ? (
+                    <>
+                        <Skeleton className="h-80" />
+                        <Skeleton className="h-80" />
+                    </>
+                ) : (
+                    <>
+                        <BookingsChart bookings={bookings || []} />
+                        <EarningsChart bookings={bookings || []} />
+                    </>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

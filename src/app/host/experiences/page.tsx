@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -92,8 +91,15 @@ export default function HostExperiencesPage() {
 
   const renderRow = (experience: Experience) => {
     const isTogglingThis = isToggling === experience.id;
+    const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
+
     return (
       <TableRow key={experience.id}>
+        <TableCell>
+            <div className="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-md">
+                {mainImage && <Image src={mainImage.imageUrl} alt={experience.title} fill className="object-cover" sizes="96px" data-ai-hint={mainImage.imageHint} />}
+            </div>
+        </TableCell>
         <TableCell className="font-medium">{experience.title}</TableCell>
         <TableCell>${experience.pricing.pricePerGuest}</TableCell>
         <TableCell>
@@ -249,6 +255,7 @@ export default function HostExperiencesPage() {
                 <Table>
                     <TableHeader>
                     <TableRow>
+                        <TableHead className="w-32"><span className="sr-only">Image</span></TableHead>
                         <TableHead>Title</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Created</TableHead>
@@ -260,14 +267,14 @@ export default function HostExperiencesPage() {
                     {isLoading &&
                         Array.from({ length: 3 }).map((_, i) => (
                         <TableRow key={i}>
-                            <TableCell colSpan={5}>
-                            <Skeleton className="h-10 w-full" />
+                            <TableCell colSpan={6}>
+                            <Skeleton className="h-16 w-full" />
                             </TableCell>
                         </TableRow>
                         ))}
                     {experiences && experiences.length > 0 ? experiences.map(renderRow) : !isLoading && (
                         <TableRow>
-                            <TableCell colSpan={5} className="py-10">
+                            <TableCell colSpan={6} className="py-10">
                               {emptyState}
                             </TableCell>
                         </TableRow>
