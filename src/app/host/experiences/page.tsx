@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -27,7 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Experience } from '@/lib/types';
-import { MoreHorizontal, Eye, Pause, Play, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Pause, Play, Edit, Trash2, PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   useCollection,
@@ -157,7 +156,7 @@ export default function HostExperiencesPage() {
             <CardContent className="p-4">
                  <div className="flex gap-4">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
-                        {mainImage && <Image src={mainImage.imageUrl} alt={experience.title} fill className="object-cover" />}
+                        {mainImage && <Image src={mainImage.imageUrl} alt={experience.title} fill className="object-cover" data-ai-hint={mainImage.imageHint} />}
                     </div>
                     <div className="flex-grow">
                         <div className="flex justify-between items-start">
@@ -170,20 +169,29 @@ export default function HostExperiencesPage() {
                                 </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem asChild>
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem asChild>
                                     <Link href={`/experiences/${experience.id}`} className="cursor-pointer">
-                                    <Eye className="mr-2 h-4 w-4" /> View
+                                      <Eye className="mr-2 h-4 w-4" /> View as Guest
                                     </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
                                     <Link href={`/host/experiences/${experience.id}/edit`} className="cursor-pointer">
-                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                      <Edit className="mr-2 h-4 w-4" /> Edit
                                     </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleToggleStatus(experience)} className="cursor-pointer">
-                                    {experience.status === 'live' ? 'Pause' : 'Make Live'}
-                                </DropdownMenuItem>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleToggleStatus(experience)} className="cursor-pointer">
+                                    {experience.status === 'live' ? (
+                                      <><Pause className="mr-2 h-4 w-4" /> Pause</>
+                                    ) : (
+                                      <><Play className="mr-2 h-4 w-4" /> Make Live</>
+                                    )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-destructive cursor-pointer">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
@@ -200,22 +208,39 @@ export default function HostExperiencesPage() {
       );
   }
 
+  const emptyState = (
+    <div className="text-center text-muted-foreground py-10 px-4 border-2 border-dashed rounded-lg">
+      <h3 className="text-lg font-semibold text-foreground">No experiences yet</h3>
+      <p className="mt-1 mb-4">It looks like you haven't created any experiences. Let's create your first one!</p>
+      <Button asChild>
+          <Link href="/become-a-host/apply">
+              <PlusCircle className="mr-2 h-4 w-4" /> Create Your First Experience
+          </Link>
+      </Button>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       <Card>
-        <CardHeader>
-          <CardTitle>Your Experiences</CardTitle>
-          <CardDescription>
-            Manage your current listings and create new ones.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <div>
+            <CardTitle>Your Experiences</CardTitle>
+            <CardDescription>
+              Manage your current listings and create new ones.
+            </CardDescription>
+          </div>
+           <Button asChild>
+                <Link href="/become-a-host/apply">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Create Experience
+                </Link>
+            </Button>
         </CardHeader>
         <CardContent>
             {/* Mobile View */}
             <div className="grid gap-4 md:hidden">
                 {isLoading && Array.from({length: 2}).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
-                {experiences && experiences.length > 0 ? experiences.map(renderCard) : !isLoading && (
-                    <div className="text-center text-muted-foreground py-10">You haven't created any experiences yet.</div>
-                )}
+                {experiences && experiences.length > 0 ? experiences.map(renderCard) : !isLoading && emptyState}
             </div>
             
             {/* Desktop View */}
@@ -241,8 +266,8 @@ export default function HostExperiencesPage() {
                         ))}
                     {experiences && experiences.length > 0 ? experiences.map(renderRow) : !isLoading && (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
-                                You haven't created any experiences yet.
+                            <TableCell colSpan={5} className="py-10">
+                              {emptyState}
                             </TableCell>
                         </TableRow>
                     )}
