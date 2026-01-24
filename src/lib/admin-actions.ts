@@ -44,7 +44,7 @@ export async function approveApplication(
     status: 'approved',
     profile: {
       bio: application.profile.bio,
-      languages: application.profile.languages,
+      languages: Array.isArray(application.profile.languages) ? application.profile.languages : [application.profile.languages],
       culturalBackground: application.profile.culturalBackground,
       hostingStyles: application.profile.hostingStyles,
     },
@@ -78,7 +78,7 @@ export async function approveApplication(
     userId: application.userId,
     title: application.experience.title,
     category: application.experience.category as any,
-    description: application.experience.description,
+    description: application.experience.description || '',
     durationMinutes: application.experience.durationMinutes,
     menu: {
       ...application.experience.menu,
