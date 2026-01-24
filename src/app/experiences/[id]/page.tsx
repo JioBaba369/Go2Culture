@@ -147,6 +147,27 @@ export default function ExperienceDetailPage() {
     }
   };
 
+  const disabledDays = (day: Date): boolean => {
+    // Check against weekly availability
+    if (experience.availability.days && experience.availability.days.length > 0) {
+      const dayOfWeek = format(day, 'EEEE');
+      if (!experience.availability.days.includes(dayOfWeek)) {
+        return true;
+      }
+    }
+
+    // Check against specific blocked dates by the host
+    if (host?.blockedDates) {
+      const dateString = format(day, 'yyyy-MM-dd');
+      // The blocked dates are stored as 'yyyy-MM-dd' strings
+      if (host.blockedDates.includes(dateString)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
 
   if (isExperienceLoading || isHostLoading) {
      return (
@@ -187,14 +208,6 @@ export default function ExperienceDetailPage() {
   const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
   const totalPrice = experience.pricing.pricePerGuest * numberOfGuests;
 
-  const disabledDays = (day: Date) => {
-    if (!experience.availability.days || experience.availability.days.length === 0) {
-      return false;
-    }
-    const dayOfWeek = format(day, 'EEEE');
-    return !experience.availability.days.includes(dayOfWeek);
-  };
-  
   const mapQuery = encodeURIComponent(`${localAreaName}, ${suburbName}, ${countryName}`);
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
@@ -379,7 +392,7 @@ export default function ExperienceDetailPage() {
                 onSelect={setDate}
                 disabled={[
                   { before: new Date() },
-                  disabledDays
+                  disabledDays,
                 ]}
                 className="un-calendar"
               />
