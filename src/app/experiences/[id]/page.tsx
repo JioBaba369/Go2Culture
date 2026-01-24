@@ -182,8 +182,6 @@ export default function ExperienceDetailPage() {
       await runTransaction(firestore, async (transaction) => {
         const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
         let finalPrice = basePrice - discountAmount;
-        let finalDiscountAmount = discountAmount;
-        let finalAppliedCouponId = appliedCoupon?.id;
         
         // Re-validate coupon inside transaction to prevent race conditions
         if (appliedCoupon) {
@@ -194,10 +192,7 @@ export default function ExperienceDetailPage() {
           const coupon = { id: couponSnap.id, ...couponSnap.data() } as Coupon;
           if (!coupon.isActive || (coupon.usageLimit && coupon.timesUsed >= coupon.usageLimit)) {
             // Coupon became invalid between applying and booking, proceed without discount
-            finalPrice = basePrice;
-            finalDiscountAmount = 0;
-            finalAppliedCouponId = undefined;
-            // Optionally notify user in the success toast
+            toast({ variant: 'destructive', title: 'Coupon Invalid', description: `Coupon "${appliedCoupon.id}" could not be applied.` });
           } else {
             // Increment usage count
             transaction.update(couponRef, { timesUsed: increment(1) });
@@ -215,24 +210,24 @@ export default function ExperienceDetailPage() {
           bookingDate: date,
           numberOfGuests: numberOfGuests,
           totalPrice: finalPrice,
-          status: 'Confirmed',
+          status: 'Pending',
           createdAt: serverTimestamp(),
         };
 
-        if (finalAppliedCouponId) {
-            bookingData.couponId = finalAppliedCouponId;
+        if (appliedCoupon) {
+            bookingData.couponId = appliedCoupon.id;
         }
 
-        if (finalDiscountAmount > 0) {
-            bookingData.discountAmount = finalDiscountAmount;
+        if (discountAmount > 0) {
+            bookingData.discountAmount = discountAmount;
         }
 
         transaction.set(newBookingRef, bookingData);
       });
 
       toast({
-        title: '🎉 Booking Confirmed!',
-        description: `Your experience "${experience!.title}" is booked for ${format(date, 'PPP')}.`,
+        title: 'Booking Requested!',
+        description: `Your request for "${experience!.title}" has been sent to the host. You'll be notified upon confirmation.`,
       });
       setDate(undefined);
       setNumberOfGuests(1);
@@ -245,7 +240,7 @@ export default function ExperienceDetailPage() {
       toast({
         variant: 'destructive',
         title: 'Booking Failed',
-        description: error.message || 'Could not complete your booking. Please try again.',
+        description: error.message || 'Could not complete your booking request. Please try again.',
       });
     } finally {
       setIsBooking(false);
@@ -344,7 +339,7 @@ export default function ExperienceDetailPage() {
             { before: new Date() },
             disabledDays,
         ]}
-        className="flex justify-center"
+        className="p-0 sm:border-none"
       />
   );
 
@@ -611,14 +606,14 @@ export default function ExperienceDetailPage() {
                         disabled={!date || isBooking}
                         onClick={handleBooking}
                     >
-                        {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Reserve Now'}
+                        {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
                     </Button>
                     
                     <div className="flex justify-between items-center text-lg font-semibold">
                         <span>Total</span>
                         <span>${totalPrice.toFixed(2)}</span>
                     </div>
-                    <p className="text-xs text-center text-muted-foreground">You won't be charged yet</p>
+                    <p className="text-xs text-center text-muted-foreground">You won't be charged until the host confirms</p>
                 </div>
              </div>
           </div>
@@ -627,5 +622,3 @@ export default function ExperienceDetailPage() {
     </div>
   );
 }
-
-    

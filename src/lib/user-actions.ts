@@ -1,6 +1,6 @@
 
 'use client';
-import { Firestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Firestore, collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import type { Booking, Review } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -37,6 +37,25 @@ export async function submitReview(
       path: reviewsColRef.path,
       operation: 'create',
       requestResourceData: reviewData,
+    }));
+    throw serverError;
+  }
+}
+
+// Function for a guest to cancel their own booking
+export async function cancelBookingByGuest(
+  firestore: Firestore,
+  bookingId: string
+) {
+  const bookingRef = doc(firestore, 'bookings', bookingId);
+  const updatedData = { status: 'Cancelled' };
+  try {
+    await updateDoc(bookingRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: bookingRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
     }));
     throw serverError;
   }

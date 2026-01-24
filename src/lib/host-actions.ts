@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -10,6 +11,45 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { Experience } from './types';
 
 export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'userId' | 'createdAt' | 'rating'>>;
+
+// Function to confirm a booking
+export async function confirmBooking(
+  firestore: Firestore,
+  bookingId: string
+) {
+  const bookingRef = doc(firestore, 'bookings', bookingId);
+  const updatedData = { status: 'Confirmed' };
+  try {
+    await updateDoc(bookingRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: bookingRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
+// Function for a host to cancel a booking
+export async function cancelBookingByHost(
+  firestore: Firestore,
+  bookingId: string
+) {
+  const bookingRef = doc(firestore, 'bookings', bookingId);
+  const updatedData = { status: 'Cancelled' };
+  try {
+    await updateDoc(bookingRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: bookingRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
 
 // Function to pause an experience
 export async function pauseExperienceForHost(
