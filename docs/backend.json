@@ -284,7 +284,8 @@
             "foodBusinessLicense": { "type": "boolean" },
             "foodSafetySupervisor": { "type": "boolean" },
             "foodBusinessNotification": { "type": "boolean" },
-            "guidelinesAccepted": { "type": "boolean" }
+            "guidelinesAccepted": { "type": "boolean" },
+            "agreeToFoodSafety": { "type": "boolean" }
           }
         }
       },
@@ -386,11 +387,11 @@
         "hostId": { "type": "string", "description": "Reference to Host." },
         "rating": { "type": "number" },
         "comment": { "type": "string" },
-        "reviewDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
         "hostResponse": { "type": "string" },
         "flags": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["id", "guestId", "experienceId", "hostId", "rating", "comment", "reviewDate"]
+      "required": ["id", "guestId", "experienceId", "hostId", "rating", "comment", "createdAt"]
     },
     "WishlistItem": {
       "title": "Wishlist Item",
