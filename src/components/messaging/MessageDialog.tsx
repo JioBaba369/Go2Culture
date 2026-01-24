@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -6,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,14 +16,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from 'zod';
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Loader2, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Skeleton } from "../ui/skeleton";
-import { ADMIN_UID } from "@/lib/auth";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { useToast } from "@/hooks/use-toast";
 
 const messageSchema = z.object({
   messageText: z.string().min(1, "Message cannot be empty."),
@@ -39,35 +39,45 @@ interface MessageDialogProps {
   children: React.ReactNode;
 }
 
+function MessageBubble({ msg, isSender, recipient }: { msg: Message, isSender: boolean, recipient: User }) {
+    const senderImage = isSender ? null : PlaceHolderImages.find(p => p.id === recipient.profilePhotoId);
+    
+    return (
+        <div className={cn("flex items-end gap-2", isSender ? "justify-end" : "justify-start")}>
+            {!isSender && (
+                <Avatar className="h-8 w-8">
+                    {senderImage && <AvatarImage src={senderImage.imageUrl} alt={recipient.fullName} />}
+                    <AvatarFallback>{recipient.fullName.charAt(0)}</AvatarFallback>
+                </Avatar>
+            )}
+            <div className={cn("max-w-xs md:max-w-sm rounded-lg px-3 py-2 text-sm", 
+                isSender ? "bg-primary text-primary-foreground" : "bg-muted"
+            )}>
+                {msg.messageText}
+                <div className={cn("text-xs opacity-70 mt-1", isSender ? "text-right" : "text-left")}>
+                    {msg.timestamp?.toDate ? msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export function MessageDialog({ booking, recipient, children }: MessageDialogProps) {
   const { firestore, user } = useFirebase();
   const [isOpen, setOpen] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const isAdmin = user?.uid === ADMIN_UID;
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const messagesQuery = useMemoFirebase(
     () => {
-      if (!firestore || !isOpen || !user) return null;
-      const baseQuery = collection(firestore, 'messages');
-
-      if (isAdmin) {
-        // Admins can query by bookingId directly, as they can read all messages.
-        return query(
-          baseQuery,
-          where('bookingId', '==', booking.id),
-          orderBy('timestamp', 'asc')
-        );
-      }
-      // For regular users, the query must check if they are a participant.
-      // This is crucial for the security rules to pass.
+      if (!firestore || !isOpen) return null;
       return query(
-        baseQuery,
+        collection(firestore, 'messages'),
         where('bookingId', '==', booking.id),
-        where('participants', 'array-contains', user.uid),
         orderBy('timestamp', 'asc')
       );
     },
-    [firestore, isOpen, booking.id, user, isAdmin]
+    [firestore, isOpen, booking.id]
   );
   const { data: messages, isLoading } = useCollection<Message>(messagesQuery);
   
@@ -77,7 +87,9 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
   });
 
   async function onSubmit(data: MessageFormValues) {
-    if (!firestore || !user) return;
+    if (!firestore || !user || !data.messageText.trim()) return;
+    
+    const messagesColRef = collection(firestore, 'messages');
     const messageData = {
       bookingId: booking.id,
       senderId: user.uid,
@@ -86,20 +98,31 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
       messageText: data.messageText,
       timestamp: serverTimestamp(),
     };
-    try {
-      await addDoc(collection(firestore, 'messages'), messageData);
-      form.reset();
-    } catch (e) {
-      console.error("Failed to send message", e);
-    }
+    
+    addDoc(messagesColRef, messageData)
+      .then(() => {
+        form.reset();
+      })
+      .catch(serverError => {
+        console.error("Failed to send message", serverError);
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: messagesColRef.path,
+            operation: 'create',
+            requestResourceData: messageData
+        }));
+        toast({
+            variant: "destructive",
+            title: "Message Not Sent",
+            description: "Could not send your message. Please try again."
+        });
+      });
   }
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-        // A slight delay to allow the new message to render
+    if (scrollViewportRef.current) {
         setTimeout(() => {
-            if(scrollAreaRef.current) {
-                scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+            if(scrollViewportRef.current) {
+                scrollViewportRef.current.scrollTo({ top: scrollViewportRef.current.scrollHeight, behavior: 'smooth' });
             }
         }, 100);
     }
@@ -109,40 +132,23 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       {children}
-      <DialogContent className="sm:max-w-[425px] md:max-w-lg grid-rows-[auto_1fr_auto] p-0 max-h-[90vh]">
+      <DialogContent className="sm:max-w-[425px] md:max-w-lg grid-rows-[auto_1fr_auto] p-0 max-h-[90vh] flex flex-col">
         <DialogHeader className="p-4 border-b">
           <DialogTitle>Chat with {recipient.fullName}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-96" ref={scrollAreaRef}>
+        
+        <ScrollArea className="flex-1" viewportRef={scrollViewportRef}>
           <div className="p-4 space-y-4">
              {isLoading ? (
                 <div className="space-y-4">
-                    <Skeleton className="h-10 w-3/4" />
-                    <Skeleton className="h-10 w-3/4 ml-auto" />
-                    <Skeleton className="h-10 w-3/4" />
+                    <Skeleton className="h-12 w-3/4 rounded-lg" />
+                    <Skeleton className="h-16 w-3/4 rounded-lg ml-auto" />
+                    <Skeleton className="h-10 w-2/4 rounded-lg" />
                 </div>
             ) : messages && messages.length > 0 ? (
-              messages.map(msg => {
-                const isSender = msg.senderId === user?.uid;
-                const senderImage = PlaceHolderImages.find(p => p.id === (isSender ? user?.photoURL : recipient?.profilePhotoId));
-                const senderName = isSender ? user?.displayName : recipient.fullName;
-
-                return (
-                  <div key={msg.id} className={cn("flex items-end gap-2", isSender ? "justify-end" : "justify-start")}>
-                     {!isSender && (
-                        <Avatar className="h-8 w-8">
-                            {senderImage && <AvatarImage src={senderImage.imageUrl} />}
-                            <AvatarFallback>{senderName?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                     )}
-                     <div className={cn("max-w-xs md:max-w-sm rounded-lg px-3 py-2 text-sm", 
-                        isSender ? "bg-primary text-primary-foreground" : "bg-muted"
-                     )}>
-                        {msg.messageText}
-                     </div>
-                  </div>
-                )
-              })
+              messages.map(msg => (
+                 <MessageBubble key={msg.id} msg={msg} isSender={msg.senderId === user?.uid} recipient={recipient} />
+              ))
             ) : (
               <div className="text-center text-muted-foreground pt-16">
                   <p>No messages yet.</p>
@@ -151,18 +157,28 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
             )}
           </div>
         </ScrollArea>
-        <DialogFooter className="p-4 border-t">
+        
+        <DialogFooter className="p-4 border-t bg-background">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex items-center gap-2">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex items-start gap-2">
               <FormField
                 control={form.control}
                 name="messageText"
                 render={({ field }) => (
                   <FormItem className="flex-grow">
                     <FormControl>
-                      <Textarea placeholder="Type a message..." {...field} className="min-h-0 h-10 resize-none" />
+                      <Textarea 
+                        placeholder="Type a message..." 
+                        {...field} 
+                        className="min-h-0 h-10 resize-none"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                form.handleSubmit(onSubmit)();
+                            }
+                        }}
+                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
