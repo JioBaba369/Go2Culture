@@ -24,11 +24,14 @@ export async function approveApplication(
 
   const batch = writeBatch(firestore);
 
-  // 1. Update the HostApplication status to 'Approved'
+  // 1. Create the new Experience from the application
+  const experienceRef = doc(collection(firestore, 'experiences'));
+  
+  // 2. Update the HostApplication status and link experienceId
   const appRef = doc(firestore, 'hostApplications', application.id);
-  batch.update(appRef, { status: 'Approved' });
+  batch.update(appRef, { status: 'Approved', experienceId: experienceRef.id });
 
-  // 2. Create the new Host profile
+  // 3. Create the new Host profile
   const hostId = application.userId; // Use userId as the hostId for a 1:1 relationship
   const hostRef = doc(firestore, 'users', application.userId, 'hosts', hostId);
   
@@ -68,8 +71,7 @@ export async function approveApplication(
   
   batch.set(hostRef, newHost);
 
-  // 3. Create the first Experience from the application
-  const experienceRef = doc(collection(firestore, 'experiences'));
+  
   const newExperienceData: Experience = {
     id: experienceRef.id,
     hostId: hostId,
@@ -159,6 +161,44 @@ export async function requestChangesForApplication(
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: appRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
+// Function to pause an experience
+export async function pauseExperience(
+  firestore: Firestore,
+  experienceId: string
+) {
+  const expRef = doc(firestore, 'experiences', experienceId);
+  const updatedData = { status: 'paused' };
+  try {
+    await updateDoc(expRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: expRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
+// Function to start (make live) an experience
+export async function startExperience(
+  firestore: Firestore,
+  experienceId: string
+) {
+  const expRef = doc(firestore, 'experiences', experienceId);
+  const updatedData = { status: 'live' };
+  try {
+    await updateDoc(expRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: expRef.path,
       operation: 'update',
       requestResourceData: updatedData,
     }));

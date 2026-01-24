@@ -30,16 +30,18 @@ import {
   MapPin,
   DollarSign,
   ClockIcon,
+  PlayCircle,
+  PauseCircle,
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { HostApplication } from "@/lib/types";
+import { HostApplication, Experience } from "@/lib/types";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { approveApplication, rejectApplication, requestChangesForApplication } from "@/lib/admin-actions";
+import { approveApplication, rejectApplication, requestChangesForApplication, pauseExperience, startExperience } from "@/lib/admin-actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 function DetailItem({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) {
@@ -62,10 +64,13 @@ export default function ApplicationDetailPage() {
   const { user, isUserLoading: isAuthLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState<null | 'approve' | 'changes' | 'reject'>(null);
+  const [isProcessing, setIsProcessing] = useState<null | 'approve' | 'changes' | 'reject' | 'pause' | 'start'>(null);
 
   const appRef = useMemoFirebase(() => (firestore && user) ? doc(firestore, 'hostApplications', applicationId) : null, [firestore, user, applicationId]);
   const { data: application, isLoading: isDocLoading, error } = useDoc<HostApplication>(appRef);
+
+  const experienceRef = useMemoFirebase(() => (firestore && application?.status === 'Approved' && application.experienceId) ? doc(firestore, 'experiences', application.experienceId) : null, [firestore, application]);
+  const { data: experience, isLoading: isExperienceLoading } = useDoc<Experience>(experienceRef);
 
   React.useEffect(() => {
     if (!isAuthLoading && !user) {
@@ -84,7 +89,7 @@ export default function ApplicationDetailPage() {
         title: "Application Approved!",
         description: `${application.hostName} is now a host.`,
       });
-      router.push('/admin/applications');
+      router.refresh();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -132,6 +137,48 @@ export default function ApplicationDetailPage() {
         variant: "destructive",
         title: "Update Failed",
         description: "Could not reject the application. Check permissions.",
+      });
+    } finally {
+      setIsProcessing(null);
+    }
+  }
+  
+  const handlePauseExperience = async () => {
+    if (!experience || !firestore) return;
+    setIsProcessing('pause');
+    try {
+      await pauseExperience(firestore, experience.id);
+      toast({
+        title: "Experience Paused",
+        description: `The experience "${experience.title}" is no longer live.`,
+      });
+      router.refresh(); // To refetch the experience data
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not pause the experience.",
+      });
+    } finally {
+      setIsProcessing(null);
+    }
+  }
+
+  const handleStartExperience = async () => {
+    if (!experience || !firestore) return;
+    setIsProcessing('start');
+    try {
+      await startExperience(firestore, experience.id);
+      toast({
+        title: "Experience Live",
+        description: `The experience "${experience.title}" is now live.`,
+      });
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Could not start the experience.",
       });
     } finally {
       setIsProcessing(null);
@@ -196,8 +243,6 @@ export default function ApplicationDetailPage() {
   const idDocPhoto = PlaceHolderImages.find(p => p.id === application.verification.idDocId);
   const selfiePhoto = PlaceHolderImages.find(p => p.id === application.verification.selfieId);
   const mainImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
-  
-  const areActionsDisabled = isProcessing !== null || application.status === 'Approved' || application.status === 'Rejected';
 
   return (
     <div className="space-y-6">
@@ -215,15 +260,37 @@ export default function ApplicationDetailPage() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={areActionsDisabled}>
-            {isProcessing === 'approve' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />} Approve
-          </Button>
-          <Button variant="outline" onClick={handleRequestChanges} disabled={areActionsDisabled}>
-            {isProcessing === 'changes' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Edit className="mr-2 h-4 w-4" />} Request Changes
-          </Button>
-          <Button variant="destructive" onClick={handleReject} disabled={areActionsDisabled}>
-            {isProcessing === 'reject' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <X className="mr-2 h-4 w-4" />} Reject
-          </Button>
+          {application.status === 'Pending' || application.status === 'Changes Needed' ? (
+            <>
+              <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={isProcessing !== null}>
+                {isProcessing === 'approve' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />} Approve
+              </Button>
+              <Button variant="outline" onClick={handleRequestChanges} disabled={isProcessing !== null}>
+                {isProcessing === 'changes' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Edit className="mr-2 h-4 w-4" />} Request Changes
+              </Button>
+              <Button variant="destructive" onClick={handleReject} disabled={isProcessing !== null}>
+                {isProcessing === 'reject' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <X className="mr-2 h-4 w-4" />} Reject
+              </Button>
+            </>
+          ) : application.status === 'Approved' ? (
+            <>
+              {isExperienceLoading ? (
+                <Skeleton className="h-10 w-48" />
+              ) : experience?.status === 'live' ? (
+                <Button variant="outline" onClick={handlePauseExperience} disabled={isProcessing !== null}>
+                  {isProcessing === 'pause' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <PauseCircle className="mr-2 h-4 w-4" />} Pause Experience
+                </Button>
+              ) : (
+                <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleStartExperience} disabled={isProcessing !== null}>
+                  {isProcessing === 'start' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <PlayCircle className="mr-2 h-4 w-4" />} Make Experience Live
+                </Button>
+              )}
+            </>
+          ) : application.status === 'Rejected' ? (
+            <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={isProcessing !== null}>
+              {isProcessing === 'approve' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />} Re-Approve
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -397,5 +464,3 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
-
-    

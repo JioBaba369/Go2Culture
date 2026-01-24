@@ -189,6 +189,7 @@ export type HostApplication = {
   submittedDate: any; // Allow ServerTimestamp
   status: 'Pending' | 'Approved' | 'Changes Needed' | 'Rejected';
   riskFlag: 'Low' | 'Medium' | 'High' | null;
+  experienceId?: string;
   
   profile: {
     photoId: string;

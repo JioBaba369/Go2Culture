@@ -178,6 +178,7 @@
         "submittedDate": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["Pending", "Approved", "Changes Needed", "Rejected"] },
         "riskFlag": { "type": "string", "enum": ["Low", "Medium", "High", "null"] },
+        "experienceId": { "type": "string", "description": "The ID of the Experience document created when this application is approved." },
         "profile": {
           "type": "object",
           "properties": {
