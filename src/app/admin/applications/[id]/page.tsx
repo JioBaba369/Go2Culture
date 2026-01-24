@@ -35,6 +35,9 @@ import {
   Mail,
   Phone,
   Globe,
+  Twitter,
+  Instagram,
+  Facebook,
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
@@ -442,9 +445,9 @@ export default function ApplicationDetailPage() {
                             <DetailItem icon={Mail} label="Email" value={applicantUser.email} isLink={true} />
                             <DetailItem icon={Phone} label="Phone" value={applicantUser.phone} />
                             <DetailItem icon={Globe} label="Website" value={applicantUser.website} isLink={true} />
-                            {applicantUser.socialMedia?.instagram && <DetailItem icon={Globe} label="Instagram" value={applicantUser.socialMedia.instagram} isLink={true} />}
-                            {applicantUser.socialMedia?.facebook && <DetailItem icon={Globe} label="Facebook" value={applicantUser.socialMedia.facebook} isLink={true} />}
-                            {applicantUser.socialMedia?.twitter && <DetailItem icon={Globe} label="Twitter" value={applicantUser.socialMedia.twitter} isLink={true} />}
+                            {applicantUser.socialMedia?.instagram && <DetailItem icon={Instagram} label="Instagram" value={applicantUser.socialMedia.instagram} isLink={true} />}
+                            {applicantUser.socialMedia?.facebook && <DetailItem icon={Facebook} label="Facebook" value={applicantUser.socialMedia.facebook} isLink={true} />}
+                            {applicantUser.socialMedia?.twitter && <DetailItem icon={Twitter} label="Twitter" value={applicantUser.socialMedia.twitter} isLink={true} />}
                         </CardContent>
                     </Card>
                 )}

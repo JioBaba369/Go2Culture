@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -17,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Twitter, Instagram, Facebook } from 'lucide-react';
 import { User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -277,7 +278,7 @@ export default function ProfilePage() {
                 </CardContent>
             </Card>
 
-             <Card>
+            <Card>
                 <CardHeader>
                 <CardTitle>Social Media</CardTitle>
                 <CardDescription>Link your social media profiles.</CardDescription>
@@ -289,9 +290,12 @@ export default function ProfilePage() {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Twitter</FormLabel>
-                            <FormControl>
-                                <Input placeholder="https://twitter.com/your-profile" {...field} />
-                            </FormControl>
+                            <div className="relative flex items-center">
+                                <Twitter className="absolute left-3 h-5 w-5 text-muted-foreground" />
+                                <FormControl>
+                                    <Input placeholder="https://twitter.com/your-profile" {...field} className="pl-10" />
+                                </FormControl>
+                            </div>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -302,9 +306,12 @@ export default function ProfilePage() {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Instagram</FormLabel>
-                            <FormControl>
-                                <Input placeholder="https://instagram.com/your-profile" {...field} />
-                            </FormControl>
+                             <div className="relative flex items-center">
+                                <Instagram className="absolute left-3 h-5 w-5 text-muted-foreground" />
+                                <FormControl>
+                                    <Input placeholder="https://instagram.com/your-profile" {...field} className="pl-10" />
+                                </FormControl>
+                            </div>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -315,9 +322,12 @@ export default function ProfilePage() {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Facebook</FormLabel>
-                            <FormControl>
-                                <Input placeholder="https://facebook.com/your-profile" {...field} />
-                            </FormControl>
+                            <div className="relative flex items-center">
+                                <Facebook className="absolute left-3 h-5 w-5 text-muted-foreground" />
+                                <FormControl>
+                                    <Input placeholder="https://facebook.com/your-profile" {...field} className="pl-10" />
+                                </FormControl>
+                            </div>
                             <FormMessage />
                             </FormItem>
                         )}
