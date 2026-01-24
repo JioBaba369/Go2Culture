@@ -26,7 +26,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerClose, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 
 function ReviewItem({ review }: { review: Review }) {
@@ -536,6 +536,10 @@ export default function ExperienceDetailPage() {
                                 <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
                                 <DrawerContent>
                                     <div className="mx-auto w-full max-w-sm">
+                                        <DrawerHeader className="sr-only">
+                                          <DrawerTitle>Select a date</DrawerTitle>
+                                          <DrawerDescription>Choose a date for your experience.</DrawerDescription>
+                                        </DrawerHeader>
                                         {CalendarComponent}
                                         <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
                                     </div>
@@ -616,3 +620,5 @@ export default function ExperienceDetailPage() {
     </div>
   );
 }
+
+    
