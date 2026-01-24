@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -17,6 +16,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 
 function GuestListItem({ booking }: { booking: Booking }) {
