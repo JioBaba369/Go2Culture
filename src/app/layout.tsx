@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MainLayout } from '@/components/layout/main-layout';
 import { FirebaseClientProvider } from '@/firebase';
+import { CookieConsentBanner } from '@/components/cookie-consent-banner';
 
 export const metadata: Metadata = {
   title: 'Go2Culture - Go where culture lives.',
@@ -30,6 +31,7 @@ export default function RootLayout({
             {children}
           </MainLayout>
           <Toaster />
+          <CookieConsentBanner />
         </FirebaseClientProvider>
       </body>
     </html>
