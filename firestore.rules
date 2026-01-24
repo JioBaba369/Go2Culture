@@ -80,7 +80,7 @@ service cloud.firestore {
        * @path /users/{userId}/hosts/{hostId}
        */
       match /hosts/{hostId} {
-        allow get: if isOwner(userId);
+        allow get: if true;
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) || isAdmin(); // Allow creation by owner or by an admin
         allow update: if isOwner(userId);
@@ -174,5 +174,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
