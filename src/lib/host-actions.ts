@@ -5,6 +5,7 @@ import {
   Firestore,
   doc,
   updateDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -96,13 +97,14 @@ export async function updateExperience(
   data: ExperienceUpdateData
 ) {
     const expRef = doc(firestore, 'experiences', experienceId);
+    const dataWithTimestamp = { ...data, updatedAt: serverTimestamp() };
     try {
-        await updateDoc(expRef, data);
+        await updateDoc(expRef, dataWithTimestamp);
     } catch(serverError) {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: expRef.path,
             operation: 'update',
-            requestResourceData: data,
+            requestResourceData: dataWithTimestamp,
         }));
         throw serverError;
     }

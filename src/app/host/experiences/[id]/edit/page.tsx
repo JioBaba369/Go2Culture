@@ -8,7 +8,7 @@ import * as z from 'zod';
 import { useDoc, useFirebase, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Experience } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
@@ -20,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { updateExperience } from '@/lib/host-actions';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const experienceSchema = z.object({
   title: z.string().min(5, "Experience title is required."),
@@ -54,6 +55,7 @@ export default function EditExperiencePage() {
   const { firestore } = useFirebase();
   const { toast } = useToast();
   const experienceId = params.id as string;
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const experienceRef = useMemoFirebase(
     () => (firestore && experienceId ? doc(firestore, 'experiences', experienceId) : null),
@@ -90,6 +92,7 @@ export default function EditExperiencePage() {
 
   const onSubmit = async (data: ExperienceFormValues) => {
     if (!firestore) return;
+    setSaveState('saving');
     try {
         const updateData = {
             ...data,
@@ -104,13 +107,16 @@ export default function EditExperiencePage() {
             title: "Experience Updated!",
             description: "Your changes have been saved successfully.",
         });
-        router.push('/host/experiences');
+        setSaveState('saved');
+        methods.reset(data);
+        setTimeout(() => router.push('/host/experiences'), 1500);
     } catch(error: any) {
         toast({
             variant: "destructive",
             title: "Update Failed",
             description: error.message || "Could not save your changes.",
         });
+        setSaveState('idle');
     }
   };
 
@@ -133,9 +139,10 @@ export default function EditExperiencePage() {
             <h1 className="text-3xl font-headline font-bold">Edit Experience</h1>
             <div className="flex gap-2">
                 <Button variant="outline" asChild><Link href="/host/experiences">Cancel</Link></Button>
-                <Button type="submit" disabled={methods.formState.isSubmitting}>
-                    {methods.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
+                <Button type="submit" disabled={saveState !== 'idle' || !methods.formState.isDirty}>
+                    {saveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {saveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                    {saveState === 'saved' ? 'Saved!' : 'Save Changes'}
                 </Button>
             </div>
         </div>
@@ -218,9 +225,10 @@ export default function EditExperiencePage() {
         </Card>
         
         <div className="flex justify-end">
-             <Button type="submit" disabled={methods.formState.isSubmitting}>
-                {methods.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+             <Button type="submit" disabled={saveState !== 'idle' || !methods.formState.isDirty}>
+                {saveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {saveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                {saveState === 'saved' ? 'Saved!' : 'Save Changes'}
             </Button>
         </div>
       </form>

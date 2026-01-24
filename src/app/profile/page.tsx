@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Twitter, Instagram, Facebook } from 'lucide-react';
+import { Loader2, Check, Twitter, Instagram, Facebook } from 'lucide-react';
 import { User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -52,6 +52,8 @@ export default function ProfilePage() {
   const { user, isUserLoading, auth, firestore } = useFirebase();
   const router = useRouter();
   const { toast } = useToast();
+  const [profileSaveState, setProfileSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [passwordSaveState, setPasswordSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const userDocRef = useMemoFirebase(() => {
     if (firestore && user) {
@@ -93,10 +95,10 @@ export default function ProfilePage() {
   }, [isUserLoading, user, router]);
 
   async function onSubmit(data: ProfileFormValues) {
-    if (!user || !firestore || !auth.currentUser || form.formState.isSubmitting) {
+    if (!user || !firestore || !auth.currentUser || profileSaveState === 'saving') {
       return;
     }
-
+    setProfileSaveState('saving');
     try {
       const userRef = doc(firestore, 'users', user.uid);
       const { fullName, ...contactData } = data;
@@ -116,15 +118,18 @@ export default function ProfilePage() {
         description: "Your profile has been successfully updated.",
       });
       
+      setProfileSaveState('saved');
       await auth.currentUser.reload();
       router.refresh(); 
       form.reset(data); // Resets the dirty state
+      setTimeout(() => setProfileSaveState('idle'), 3000);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Update Failed",
         description: "Could not update your profile. Please try again.",
       });
+      setProfileSaveState('idle');
     }
   }
 
@@ -133,9 +138,7 @@ export default function ProfilePage() {
         toast({ variant: 'destructive', title: 'Error', description: 'User not found.'});
         return;
     }
-
-    const { setIsSubmitting } = passwordForm.formState;
-    setIsSubmitting(true);
+    setPasswordSaveState('saving');
 
     try {
         const credential = EmailAuthProvider.credential(user.email, data.currentPassword);
@@ -147,7 +150,9 @@ export default function ProfilePage() {
             title: "Password Changed",
             description: "Your password has been updated successfully.",
         });
+        setPasswordSaveState('saved');
         passwordForm.reset();
+        setTimeout(() => setPasswordSaveState('idle'), 3000);
 
     } catch (error: any) {
         console.error(error);
@@ -156,8 +161,7 @@ export default function ProfilePage() {
             title: "Password Change Failed",
             description: error.code === 'auth/invalid-credential' ? 'Your current password is incorrect.' : 'An error occurred. Please try again.'
         });
-    } finally {
-        setIsSubmitting(false);
+         setPasswordSaveState('idle');
     }
   }
 
@@ -336,9 +340,10 @@ export default function ProfilePage() {
             </Card>
             
             <div className="flex justify-end">
-                <Button type="submit" disabled={form.formState.isSubmitting || !form.formState.isDirty}>
-                    {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
+                <Button type="submit" disabled={profileSaveState === 'saving' || !form.formState.isDirty}>
+                    {profileSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {profileSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                    {profileSaveState === 'saved' ? 'Saved!' : 'Save Changes'}
                 </Button>
             </div>
         </form>
@@ -412,9 +417,10 @@ export default function ProfilePage() {
                     />
                 </CardContent>
                 <CardFooter>
-                    <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
-                        {passwordForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Change Password
+                    <Button type="submit" disabled={passwordSaveState !== 'idle' || !passwordForm.formState.isDirty}>
+                        {passwordSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {passwordSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                        {passwordSaveState === 'saved' ? 'Saved!' : 'Change Password'}
                     </Button>
                 </CardFooter>
             </form>

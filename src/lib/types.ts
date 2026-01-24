@@ -142,6 +142,7 @@ export type Experience = {
     count: number;
   };
   createdAt: any; // Allow ServerTimestamp
+  updatedAt?: any;
 };
 
 
