@@ -55,6 +55,7 @@ function DiscoverPageContent() {
   const filteredExperiences = useMemo(() => {
     if (!allExperiences) return [];
     return allExperiences.filter(exp => {
+      if (exp.status !== 'live') return false; // Only show live experiences
       if (cuisine !== 'all' && exp.menu.cuisine !== cuisine) return false;
       if (categories.length > 0 && !categories.includes(exp.category)) return false;
       if (dietary.length > 0 && !dietary.every(d => exp.menu.dietary?.includes(d))) return false;
@@ -214,7 +215,7 @@ function DiscoverPageContent() {
             </Sheet>
           </div>
 
-          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {allExperiences?.length || 0} experiences.</p>
+          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {allExperiences?.filter(e => e.status === 'live').length || 0} experiences.</p>
           {areExperiencesLoading ? (
              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
