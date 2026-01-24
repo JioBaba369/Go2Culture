@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { useState } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
-import type { Experience, Host, Review, User, Coupon } from "@/lib/types";
+import type { Experience, Host, Review, User, Coupon, Booking } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -88,7 +89,7 @@ export default function ExperienceDetailPage() {
   const [couponError, setCouponError] = useState('');
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
 
-  const isMobile = !useMediaQuery("(min-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
@@ -204,7 +205,8 @@ export default function ExperienceDetailPage() {
         }
         
         const newBookingRef = doc(collection(firestore, 'bookings'));
-        const bookingData = {
+        
+        const bookingData: Omit<Booking, 'id'> = {
           guestId: user.uid,
           experienceId: experience!.id,
           experienceTitle: experience!.title,
@@ -215,9 +217,16 @@ export default function ExperienceDetailPage() {
           totalPrice: finalPrice,
           status: 'Confirmed',
           createdAt: serverTimestamp(),
-          couponId: finalAppliedCouponId,
-          discountAmount: finalDiscountAmount,
         };
+
+        if (finalAppliedCouponId) {
+            bookingData.couponId = finalAppliedCouponId;
+        }
+
+        if (finalDiscountAmount > 0) {
+            bookingData.discountAmount = finalDiscountAmount;
+        }
+
         transaction.set(newBookingRef, bookingData);
       });
 
@@ -535,14 +544,12 @@ export default function ExperienceDetailPage() {
                             <Drawer open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
                                 <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
                                 <DrawerContent>
-                                    <div className="mx-auto w-full max-w-sm">
-                                        <DrawerHeader className="sr-only">
-                                          <DrawerTitle>Select a date</DrawerTitle>
-                                          <DrawerDescription>Choose a date for your experience.</DrawerDescription>
-                                        </DrawerHeader>
-                                        {CalendarComponent}
-                                        <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
-                                    </div>
+                                    <DrawerHeader className="sr-only">
+                                      <DrawerTitle>Select a date</DrawerTitle>
+                                      <DrawerDescription>Choose a date for your experience.</DrawerDescription>
+                                    </DrawerHeader>
+                                    <div className="p-4">{CalendarComponent}</div>
+                                    <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
                                 </DrawerContent>
                             </Drawer>
                         )}
