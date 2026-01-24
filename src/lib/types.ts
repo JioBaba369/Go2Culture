@@ -187,6 +187,7 @@ export type Message = {
   bookingId: string;
   messageText: string;
   timestamp: any; // Allow ServerTimestamp
+  participants: string[];
 };
 
 

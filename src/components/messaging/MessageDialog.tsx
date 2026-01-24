@@ -25,6 +25,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Skeleton } from "../ui/skeleton";
+import { ADMIN_UID } from "@/lib/auth";
 
 const messageSchema = z.object({
   messageText: z.string().min(1, "Message cannot be empty."),
@@ -42,14 +43,31 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
   const { firestore, user } = useFirebase();
   const [isOpen, setOpen] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const isAdmin = user?.uid === ADMIN_UID;
 
   const messagesQuery = useMemoFirebase(
-    () => (firestore && isOpen ? query(
-      collection(firestore, 'messages'),
-      where('bookingId', '==', booking.id),
-      orderBy('timestamp', 'asc')
-    ) : null),
-    [firestore, isOpen, booking.id]
+    () => {
+      if (!firestore || !isOpen || !user) return null;
+      const baseQuery = collection(firestore, 'messages');
+
+      if (isAdmin) {
+        // Admins can query by bookingId directly, as they can read all messages.
+        return query(
+          baseQuery,
+          where('bookingId', '==', booking.id),
+          orderBy('timestamp', 'asc')
+        );
+      }
+      // For regular users, the query must check if they are a participant.
+      // This is crucial for the security rules to pass.
+      return query(
+        baseQuery,
+        where('bookingId', '==', booking.id),
+        where('participants', 'array-contains', user.uid),
+        orderBy('timestamp', 'asc')
+      );
+    },
+    [firestore, isOpen, booking.id, user, isAdmin]
   );
   const { data: messages, isLoading } = useCollection<Message>(messagesQuery);
   
@@ -64,6 +82,7 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
       bookingId: booking.id,
       senderId: user.uid,
       receiverId: recipient.id,
+      participants: [user.uid, recipient.id],
       messageText: data.messageText,
       timestamp: serverTimestamp(),
     };
