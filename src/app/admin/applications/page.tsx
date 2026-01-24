@@ -32,6 +32,7 @@ import { collection } from "firebase/firestore";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { countries, suburbs } from "@/lib/location-data";
 
 
 const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
@@ -58,7 +59,12 @@ export default function HostApplicationsPage() {
     return apps.map((app) => (
       <TableRow key={app.id}>
         <TableCell className="font-medium">{app.hostName}</TableCell>
-        <TableCell>{app.location.suburb}, {app.location.country}</TableCell>
+        <TableCell>
+          {[
+            suburbs.find(s => s.id === app.location.suburb)?.name,
+            countries.find(c => c.id === app.location.country)?.name
+          ].filter(Boolean).join(', ')}
+        </TableCell>
         <TableCell>{app.experience.title}</TableCell>
         <TableCell>{app.submittedDate?.toDate ? format(app.submittedDate.toDate(), 'PP') : 'N/A'}</TableCell>
         <TableCell>
@@ -96,7 +102,12 @@ export default function HostApplicationsPage() {
           <div className="space-y-1">
             <p className="font-semibold">{app.hostName}</p>
             <p className="text-sm text-muted-foreground">{app.experience.title}</p>
-            <p className="text-xs text-muted-foreground">{app.location.suburb}, {app.location.country}</p>
+            <p className="text-xs text-muted-foreground">
+               {[
+                suburbs.find(s => s.id === app.location.suburb)?.name,
+                countries.find(c => c.id === app.location.country)?.name
+              ].filter(Boolean).join(', ')}
+            </p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -38,6 +39,7 @@ import {
 } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { countries, suburbs } from '@/lib/location-data';
 
 const statusVariantMap: Record<
   string,
@@ -98,7 +100,10 @@ function ExperienceRow({ experience }: { experience: Experience }) {
         </div>
       </TableCell>
       <TableCell>
-        {experience.location.suburb}, {experience.location.country}
+        {[
+          suburbs.find(s => s.id === experience.location.suburb)?.name,
+          countries.find(c => c.id === experience.location.country)?.name,
+        ].filter(Boolean).join(', ')}
       </TableCell>
       <TableCell>${experience.pricing.pricePerGuest}</TableCell>
       <TableCell>
@@ -186,7 +191,10 @@ function ExperienceCardMobile({ experience }: { experience: Experience }) {
             <p className="font-semibold">{experience.title}</p>
             <p className="text-sm text-muted-foreground">by {host.name}</p>
             <p className="text-xs text-muted-foreground">
-              {experience.location.suburb}, {experience.location.country}
+              {[
+                suburbs.find(s => s.id === experience.location.suburb)?.name,
+                countries.find(c => c.id === experience.location.country)?.name,
+              ].filter(Boolean).join(', ')}
             </p>
           </div>
         </div>
