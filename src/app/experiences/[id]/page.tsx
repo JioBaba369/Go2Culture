@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from "react";
@@ -471,92 +470,100 @@ export default function ExperienceDetailPage() {
         
         <div className="lg:col-span-1">
           <div className="sticky top-24">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-baseline">
-                  <div>
-                    <span className="text-2xl font-bold">${experience.pricing.pricePerGuest}</span>
-                    <span className="text-muted-foreground"> / person</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="h-4 w-4" /> 
-                    <span>{experience.rating.average} ({experience.rating.count})</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={[
-                      { before: new Date() },
-                      disabledDays,
-                    ]}
-                    className="rounded-md border w-full"
-                  />
-                  <div className="space-y-1">
-                    <Label htmlFor="guests">Guests</Label>
-                    <Select
-                        value={String(numberOfGuests)}
-                        onValueChange={(val) => setNumberOfGuests(Number(val))}
-                        disabled={isBooking}
-                    >
-                        <SelectTrigger id="guests" className="w-full">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Array.from({ length: experience.pricing.maxGuests }, (_, i) => i + 1).map((num) => (
-                                <SelectItem key={num} value={String(num)}>
-                                    {num} guest{num > 1 ? 's' : ''}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                  </div>
-              </CardContent>
-              <Separator className="my-2" />
-                <CardContent className="space-y-2 pt-4">
-                  <Label htmlFor="coupon">Have a coupon?</Label>
-                  <div className="flex gap-2">
-                    <Input id="coupon" placeholder="Enter code" value={couponCode} onChange={e => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
-                    <Button variant="outline" onClick={handleApplyCoupon} disabled={!!appliedCoupon}>
-                        {appliedCoupon ? <CheckCircle className="h-5 w-5 text-green-600" /> : 'Apply'}
-                    </Button>
-                  </div>
-                  {couponError && <p className="text-xs text-destructive">{couponError}</p>}
-                  {appliedCoupon && <p className="text-xs text-green-600 font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
-                </CardContent>
-
-              <CardFooter className="flex-col items-stretch gap-2">
-                <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                        <span>${experience.pricing.pricePerGuest} x {numberOfGuests} guests</span>
-                        <span>${basePrice.toFixed(2)}</span>
+             <div className="p-6 space-y-4 border rounded-xl shadow-lg bg-card">
+                 <div className="flex justify-between items-baseline">
+                    <div>
+                        <span className="text-2xl font-bold">${experience.pricing.pricePerGuest}</span>
+                        <span className="text-muted-foreground"> / person</span>
                     </div>
-                    {discountAmount > 0 && (
-                        <div className="flex justify-between text-green-600">
-                            <span>Coupon Discount</span>
-                            <span>-${discountAmount.toFixed(2)}</span>
+                    <div className="flex items-center gap-1 text-sm">
+                        <Star className="h-4 w-4" /> 
+                        <span>{experience.rating.average} ({experience.rating.count})</span>
+                    </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="flex flex-col space-y-4">
+                    <div className="rounded-md border">
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            disabled={[
+                                { before: new Date() },
+                                disabledDays,
+                            ]}
+                            className="w-full"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="guests">Guests</Label>
+                        <Select
+                            value={String(numberOfGuests)}
+                            onValueChange={(val) => setNumberOfGuests(Number(val))}
+                            disabled={isBooking}
+                        >
+                            <SelectTrigger id="guests" className="w-full">
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 opacity-50" />
+                                  <SelectValue />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: experience.pricing.maxGuests }, (_, i) => i + 1).map((num) => (
+                                    <SelectItem key={num} value={String(num)}>
+                                        {num} guest{num > 1 ? 's' : ''}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="coupon">Have a coupon?</Label>
+                        <div className="flex gap-2">
+                            <Input id="coupon" placeholder="Enter code" value={couponCode} onChange={e => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
+                            <Button variant="outline" onClick={handleApplyCoupon} disabled={!!appliedCoupon}>
+                                {appliedCoupon ? <CheckCircle className="h-5 w-5 text-green-600" /> : 'Apply'}
+                            </Button>
                         </div>
-                    )}
+                        {couponError && <p className="text-xs text-destructive">{couponError}</p>}
+                        {appliedCoupon && <p className="text-xs text-green-600 font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
+                    </div>
+
+                    <div className="space-y-1 text-sm pt-2">
+                        <div className="flex justify-between">
+                            <span>${experience.pricing.pricePerGuest} x {numberOfGuests} guests</span>
+                            <span>${basePrice.toFixed(2)}</span>
+                        </div>
+                        {discountAmount > 0 && (
+                            <div className="flex justify-between text-green-600">
+                                <span>Coupon Discount</span>
+                                <span>-${discountAmount.toFixed(2)}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <Separator/>
+
+                    <Button 
+                        size="lg" 
+                        className="w-full"
+                        disabled={!date || isBooking}
+                        onClick={handleBooking}
+                    >
+                        {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Reserve Now'}
+                    </Button>
+                    
+                    <div className="flex justify-between items-center text-lg font-semibold">
+                        <span>Total</span>
+                        <span>${totalPrice.toFixed(2)}</span>
+                    </div>
+                    <p className="text-xs text-center text-muted-foreground">You won't be charged yet</p>
                 </div>
-                <Separator/>
-                <Button 
-                  size="lg" 
-                  className="w-full"
-                  disabled={!date || isBooking}
-                  onClick={handleBooking}
-                >
-                    {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
-                </Button>
-                <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Total</span>
-                    <span>${totalPrice.toFixed(2)}</span>
-                </div>
-                 <p className="text-xs text-center text-muted-foreground">You won't be charged yet</p>
-              </CardFooter>
-            </Card>
+             </div>
           </div>
         </div>
       </div>
