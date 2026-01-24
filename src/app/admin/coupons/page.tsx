@@ -104,11 +104,17 @@ function CouponForm({ coupon, onFinished }: { coupon?: Coupon, onFinished: () =>
 
         try {
             const couponRef = doc(firestore, 'coupons', data.id);
-            const couponData = { 
-                ...data,
+            // Firestore doesn't support `undefined`, so we need to handle optional fields.
+            const { expiresAt, ...restOfData } = data;
+            const couponData: Record<string, any> = { 
+                ...restOfData,
                 minSpend: data.minSpend || 0,
                 usageLimit: data.usageLimit || 0,
             };
+
+            if (expiresAt) {
+                couponData.expiresAt = expiresAt;
+            }
 
             if (coupon) {
                 // Update existing coupon
@@ -121,7 +127,11 @@ function CouponForm({ coupon, onFinished }: { coupon?: Coupon, onFinished: () =>
             }
             onFinished();
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Operation Failed", description: error.message });
+            toast({
+                variant: "destructive",
+                title: "Operation Failed",
+                description: error.message || 'An unknown error occurred while saving the coupon.'
+            });
         } finally {
             setIsLoading(false);
         }
