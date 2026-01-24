@@ -176,7 +176,7 @@ export type Booking = {
 };
 
 export type WishlistItem = {
-  id: string; // This will be the experienceId
+  // The document ID is the experienceId. This type represents the data within the document.
   createdAt: any; // Allow ServerTimestamp
 };
 
