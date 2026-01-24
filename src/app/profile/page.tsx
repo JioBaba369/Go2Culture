@@ -1,11 +1,10 @@
-
 'use client';
 
 import React from 'react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
+import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,7 +12,7 @@ import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -35,8 +34,18 @@ const profileFormSchema = z.object({
   }).optional(),
 });
 
+const passwordFormSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required."),
+  newPassword: z.string().min(6, "New password must be at least 6 characters long."),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
+});
+
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 export default function ProfilePage() {
   const { user, isUserLoading, auth, firestore } = useFirebase();
@@ -65,6 +74,16 @@ export default function ProfilePage() {
       },
     },
   });
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    },
+  });
+
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
@@ -105,6 +124,39 @@ export default function ProfilePage() {
         title: "Update Failed",
         description: "Could not update your profile. Please try again.",
       });
+    }
+  }
+
+  async function onPasswordChangeSubmit(data: PasswordFormValues) {
+    if (!user || !user.email) {
+        toast({ variant: 'destructive', title: 'Error', description: 'User not found.'});
+        return;
+    }
+
+    const { setIsSubmitting } = passwordForm.formState;
+    setIsSubmitting(true);
+
+    try {
+        const credential = EmailAuthProvider.credential(user.email, data.currentPassword);
+        await reauthenticateWithCredential(user, credential);
+        
+        await updatePassword(user, data.newPassword);
+
+        toast({
+            title: "Password Changed",
+            description: "Your password has been updated successfully.",
+        });
+        passwordForm.reset();
+
+    } catch (error: any) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Password Change Failed",
+            description: error.code === 'auth/invalid-credential' ? 'Your current password is incorrect.' : 'An error occurred. Please try again.'
+        });
+    } finally {
+        setIsSubmitting(false);
     }
   }
 
@@ -305,6 +357,58 @@ export default function ProfilePage() {
                 </div>
             </div>
         </CardContent>
+      </Card>
+
+      <Card>
+        <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(onPasswordChangeSubmit)}>
+                <CardHeader>
+                    <CardTitle>Change Password</CardTitle>
+                    <CardDescription>Update your password. Make sure it's at least 6 characters long.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <FormField
+                        control={passwordForm.control}
+                        name="currentPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Current Password</FormLabel>
+                                <FormControl><Input type="password" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={passwordForm.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>New Password</FormLabel>
+                                <FormControl><Input type="password" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={passwordForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Confirm New Password</FormLabel>
+                                <FormControl><Input type="password" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+                <CardFooter>
+                    <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
+                        {passwordForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Change Password
+                    </Button>
+                </CardFooter>
+            </form>
+        </Form>
       </Card>
 
     </div>
