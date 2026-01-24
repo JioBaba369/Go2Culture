@@ -19,24 +19,21 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      // FIXED: Forces 6 rows so the calendar height never changes
-      fixedWeeks 
+      fixedWeeks // Prevents height changes between months
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
-        // FIXED: Relative anchor for absolute arrows
-        caption: "flex justify-center pt-1 relative items-center h-9", 
+        caption: "flex justify-center pt-1 relative items-center h-9",
         caption_label: "text-sm font-medium",
         nav: "flex items-center",
-        // FIXED: Absolute positioning with top-1 keeps them away from dates
         nav_button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1 top-1"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1 top-1 z-10"
         ),
         nav_button_next: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1 top-1"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1 top-1 z-10"
         ),
         table: "w-full border-collapse space-y-1",
         head_row: "flex justify-between",
@@ -49,7 +46,8 @@ function Calendar({
           "h-10 w-10 sm:h-9 sm:w-9 p-0 font-normal transition-all active:scale-95 sm:active:scale-100",
           "aria-selected:bg-primary aria-selected:text-primary-foreground aria-selected:opacity-100"
         ),
-        day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        day_selected:
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground font-bold",
         day_outside: "day-outside text-muted-foreground/30 opacity-50",
         day_disabled: "text-muted-foreground opacity-20 cursor-not-allowed",
@@ -57,8 +55,8 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+        IconLeft: ({ ...props }) => <ChevronLeft {...props} className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <ChevronRight {...props} className="h-4 w-4" />,
       }}
       {...props}
     />
