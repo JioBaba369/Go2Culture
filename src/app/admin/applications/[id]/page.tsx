@@ -17,7 +17,6 @@ import {
   X,
   Edit,
   User,
-  Users,
   ShieldCheck,
   Utensils,
   Camera,
@@ -32,6 +31,7 @@ import {
   ClockIcon,
   PlayCircle,
   PauseCircle,
+  Users,
 } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
@@ -43,6 +43,7 @@ import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { approveApplication, rejectApplication, requestChangesForApplication, pauseExperience, startExperience } from "@/lib/admin-actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 
 function DetailItem({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: React.ReactNode }) {
     if (!value) return null;
@@ -244,6 +245,14 @@ export default function ApplicationDetailPage() {
   const selfiePhoto = PlaceHolderImages.find(p => p.id === application.verification.selfieId);
   const mainImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
 
+  const countryName = countries.find(c => c.id === application.location.country)?.name || application.location.country;
+  const regionName = regions.find(r => r.id === application.location.region)?.name || application.location.region;
+  const suburbName = suburbs.find(s => s.id === application.location.suburb)?.name || application.location.suburb;
+  const localAreaName = localAreas.find(l => l.id === application.location.localArea)?.name || application.location.localArea;
+
+  const hostLocationDisplay = [suburbName, countryName].filter(Boolean).join(', ');
+  const fullLocationDisplay = [application.location.address, localAreaName, suburbName, regionName, countryName].filter(Boolean).join(', ');
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -317,7 +326,7 @@ export default function ApplicationDetailPage() {
                             <DetailItem icon={FileText} label="Category" value={application.experience.category} />
                             <DetailItem icon={DollarSign} label="Price" value={`$${application.experience.pricing.pricePerGuest} / person`} />
                             <DetailItem icon={ClockIcon} label="Duration" value={`${application.experience.durationMinutes} minutes`} />
-                            <DetailItem icon={Users} label="Max Guests" value={application.experience.pricing.maxGuests} />
+                            <DetailItem icon={Users} label="Max Guests" value={application.homeSetup.maxGuests} />
                             <DetailItem icon={Info} label="Cuisine" value={application.experience.menu.cuisine} />
                             <DetailItem icon={AlertTriangle} label="Spice Level" value={application.experience.menu.spiceLevel} />
                         </div>
@@ -334,7 +343,7 @@ export default function ApplicationDetailPage() {
                         {profilePhoto && <Image src={profilePhoto.imageUrl} alt={application.hostName} width={64} height={64} className="rounded-full" data-ai-hint={profilePhoto.imageHint} />}
                         <div>
                             <p className="font-bold text-lg">{application.hostName}</p>
-                            <p className="text-sm text-muted-foreground">{application.location.suburb}, {application.location.country}</p>
+                            <p className="text-sm text-muted-foreground">{hostLocationDisplay}</p>
                         </div>
                     </div>
                     <p className="text-sm italic text-muted-foreground">"{application.profile.bio}"</p>
@@ -393,9 +402,8 @@ export default function ApplicationDetailPage() {
                         <CardTitle className="flex items-center gap-2"><MapPin /> Location</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                       <DetailItem icon={MapPin} label="Address" value={application.location.address} />
+                       <DetailItem icon={MapPin} label="Address" value={fullLocationDisplay} />
                        <DetailItem icon={MapPin} label="Postcode" value={application.location.postcode} />
-                       <DetailItem icon={MapPin} label="Suburb / Region / Country" value={`${application.location.suburb}, ${application.location.region}, ${application.location.country}`} />
                     </CardContent>
                 </Card>
                 <Card>

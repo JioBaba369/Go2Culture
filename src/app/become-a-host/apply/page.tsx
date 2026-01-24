@@ -68,6 +68,8 @@ const formSchema = z.object({
   location: z.object({
     country: z.string({ required_error: "Please select your country." }),
     region: z.string().optional(),
+    suburb: z.string({ required_error: "Please select your suburb/city."}),
+    localArea: z.string().optional(),
     address: z.string().min(5, "Your full address is required."),
     postcode: z.string().min(3, "Postcode is required."),
   }),
@@ -171,6 +173,8 @@ export default function BecomeAHostPage() {
       location: {
         address: '',
         postcode: '',
+        suburb: '',
+        localArea: '',
       },
       homeSetup: {
         pets: false,

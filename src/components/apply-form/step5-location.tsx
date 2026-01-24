@@ -8,12 +8,42 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { countries, regions } from "@/lib/location-data";
+import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
+import { useEffect } from 'react';
 
 export function Step5Location() {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
+  
   const watchCountry = watch('location.country');
+  const watchRegion = watch('location.region');
+  const watchSuburb = watch('location.suburb');
+
   const availableRegions = regions.filter(s => s.countryId === watchCountry);
+  const availableSuburbs = suburbs.filter(s => s.regionId === watchRegion);
+  const availableLocalAreas = localAreas.filter(l => l.suburbId === watchSuburb);
+
+  // Reset dependent fields when parent changes
+  useEffect(() => {
+    if (watchCountry) {
+        setValue('location.region', undefined);
+        setValue('location.suburb', undefined);
+        setValue('location.localArea', undefined);
+    }
+  }, [watchCountry, setValue]);
+
+  useEffect(() => {
+    if (watchRegion) {
+        setValue('location.suburb', undefined);
+        setValue('location.localArea', undefined);
+    }
+  }, [watchRegion, setValue]);
+  
+  useEffect(() => {
+    if (watchSuburb) {
+        setValue('location.localArea', undefined);
+    }
+  }, [watchSuburb, setValue]);
+
 
   return (
     <Card>
@@ -29,7 +59,7 @@ export function Step5Location() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Country</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl>
                   <SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
@@ -43,7 +73,7 @@ export function Step5Location() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!availableRegions.length}>
+                <Select onValueChange={field.onChange} value={field.value} disabled={!availableRegions.length}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} />
@@ -56,13 +86,43 @@ export function Step5Location() {
             )}
           />
         </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+                control={control}
+                name="location.suburb"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Suburb/City</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableSuburbs.length}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select your suburb/city" /></SelectTrigger></FormControl>
+                    <SelectContent>{availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={control}
+                name="location.localArea"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Local Area</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableLocalAreas.length}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select your local area" /></SelectTrigger></FormControl>
+                    <SelectContent>{availableLocalAreas.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
         <FormField
           control={control}
           name="location.address"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Full Address</FormLabel>
-              <FormControl><Input {...field} placeholder="123 Main Street, Sydney" /></FormControl>
+              <FormControl><Input {...field} placeholder="123 Main Street" /></FormControl>
               <FormMessage />
             </FormItem>
           )}
