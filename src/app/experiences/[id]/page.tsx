@@ -493,7 +493,7 @@ export default function ExperienceDetailPage() {
                       { before: new Date() },
                       disabledDays,
                     ]}
-                    className="rounded-md border"
+                    className="rounded-md border w-full"
                   />
                   <div className="space-y-1">
                     <Label htmlFor="guests">Guests</Label>
