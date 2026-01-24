@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -9,9 +10,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Twitter, Instagram, Facebook } from 'lucide-react';
+import { Globe, X, Instagram, Facebook } from 'lucide-react';
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
+
+const getUsername = (url?: string) => {
+  if (!url) return '';
+  try {
+    const path = new URL(url).pathname;
+    return path.substring(1).replace(/\/$/, ''); // remove leading/trailing slashes
+  } catch (e) {
+    return url; // fallback to showing the raw value if it's not a valid URL
+  }
+};
+
 
 function UserProfilePage() {
   const params = useParams();
@@ -111,25 +123,25 @@ function UserProfilePage() {
                 {user.website && (
                     <a href={user.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                         <Globe className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">{user.website}</span>
+                        <span className="truncate">{user.website.replace(/^https?:\/\//, '')}</span>
                     </a>
                 )}
                 {user.socialMedia?.twitter && (
                     <a href={user.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                        <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">{user.socialMedia.twitter}</span>
+                        <X className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        <span className="truncate">@{getUsername(user.socialMedia.twitter)}</span>
                     </a>
                 )}
                  {user.socialMedia?.instagram && (
                     <a href={user.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                         <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">{user.socialMedia.instagram}</span>
+                        <span className="truncate">@{getUsername(user.socialMedia.instagram)}</span>
                     </a>
                 )}
                  {user.socialMedia?.facebook && (
                     <a href={user.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                         <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">{user.socialMedia.facebook}</span>
+                        <span className="truncate">{getUsername(user.socialMedia.facebook)}</span>
                     </a>
                 )}
             </div>
