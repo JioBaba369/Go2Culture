@@ -369,7 +369,9 @@
         "numberOfGuests": { "type": "number" },
         "totalPrice": { "type": "number" },
         "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled"] },
-        "cancellationReason": { "type": "string" }
+        "cancellationReason": { "type": "string" },
+        "couponId": { "type": "string" },
+        "discountAmount": { "type": "number" }
       },
       "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status"]
     },
@@ -446,6 +448,23 @@
         "details": { "type": "string" }
       },
       "required": ["id", "adminId", "action", "affectedEntity", "affectedEntityId", "timestamp"]
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "type": "object",
+      "description": "Represents a discount coupon.",
+      "properties": {
+        "id": { "type": "string", "description": "The unique coupon code." },
+        "description": { "type": "string" },
+        "discountType": { "type": "string", "enum": ["percentage", "fixed"] },
+        "discountValue": { "type": "number" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" },
+        "minSpend": { "type": "number" },
+        "usageLimit": { "type": "number" },
+        "timesUsed": { "type": "number" }
+      },
+      "required": ["id", "discountType", "discountValue", "isActive", "timesUsed"]
     }
   },
   "auth": {
@@ -494,6 +513,10 @@
     "/admin_logs/{adminLogId}": {
       "schema": { "$ref": "#/entities/AdminLog" },
       "description": "Stores logs of actions performed by administrators."
+    },
+    "/coupons/{couponId}": {
+      "schema": { "$ref": "#/entities/Coupon" },
+      "description": "Stores discount coupons that can be applied to bookings."
     }
   }
 }

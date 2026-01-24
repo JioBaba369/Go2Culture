@@ -19,6 +19,7 @@ import {
   FileText,
   Database,
   Loader2,
+  Tag,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -27,7 +28,7 @@ import Link from 'next/link';
 import { UsersChart, ExperiencesChart } from "@/components/admin/dashboard-charts";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, doc, query, setDoc } from "firebase/firestore";
-import { HostApplication, Experience, User, Review } from "@/lib/types";
+import { HostApplication, Experience, User, Review, Coupon } from "@/lib/types";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -110,6 +111,8 @@ export default function AdminDashboardPage() {
   const { data: experiences } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
   const { data: users } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
   const { data: reviews } = useCollection<Review>(useMemoFirebase(() => firestore ? collection(firestore, 'reviews') : null, [firestore]));
+  const { data: coupons } = useCollection<Coupon>(useMemoFirebase(() => firestore ? collection(firestore, 'coupons') : null, [firestore]));
+
 
   const handleSeedDatabase = async () => {
     setIsSeeding(true);
@@ -169,7 +172,7 @@ export default function AdminDashboardPage() {
           Seed Database
         </Button>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -183,12 +186,11 @@ export default function AdminDashboardPage() {
         ))}
          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Flagged Items</CardTitle>
-               <MessageSquareWarning className={`h-4 w-4 text-muted-foreground text-yellow-500`} />
+              <CardTitle className="text-sm font-medium">Active Coupons</CardTitle>
+               <Tag className={`h-4 w-4 text-muted-foreground text-pink-500`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
-               <p className="text-xs text-muted-foreground">Reports not yet implemented</p>
+              <div className="text-2xl font-bold">{coupons?.filter(c => c.isActive).length || 0}</div>
             </CardContent>
           </Card>
       </div>

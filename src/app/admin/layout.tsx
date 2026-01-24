@@ -23,6 +23,7 @@ import {
   LogOut,
   Loader2,
   CalendarCheck,
+  Tag,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -38,6 +39,7 @@ const menuItems = [
   { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/reports', label: 'Reports', icon: MessageSquareWarning },
+  { href: '/admin/coupons', label: 'Coupons', icon: Tag },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -1,19 +1,20 @@
+
 'use client';
 
 import { useState } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
-import type { Experience, Host, Review, User } from "@/lib/types";
+import type { Experience, Host, Review, User, Coupon } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { collection, doc, query, where, limit, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, query, where, limit, runTransaction, getDoc, serverTimestamp, increment } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useParams, useRouter } from "next/navigation";
@@ -22,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { WishlistButton } from "@/components/wishlist-button";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -76,6 +78,10 @@ export default function ExperienceDetailPage() {
   const [date, setDate] = useState<Date>();
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponError, setCouponError] = useState('');
 
   const firestore = useFirestore();
   const { user } = useUser();
@@ -99,6 +105,60 @@ export default function ExperienceDetailPage() {
     [firestore, experienceId]
   );
   const { data: reviews, isLoading: areReviewsLoading } = useCollection<Review>(reviewsQuery);
+  
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+        setCouponError("Please enter a coupon code.");
+        return;
+    }
+    if (!firestore) return;
+
+    setCouponError('');
+    setDiscountAmount(0);
+    setAppliedCoupon(null);
+
+    const couponRef = doc(firestore, 'coupons', couponCode.trim());
+    try {
+        const couponSnap = await getDoc(couponRef);
+        if (!couponSnap.exists()) {
+            setCouponError("This coupon code is not valid.");
+            return;
+        }
+
+        const coupon = { id: couponSnap.id, ...couponSnap.data() } as Coupon;
+        const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
+
+        // Validate coupon
+        if (!coupon.isActive) {
+            setCouponError("This coupon is no longer active."); return;
+        }
+        if (coupon.expiresAt && coupon.expiresAt.toDate() < new Date()) {
+            setCouponError("This coupon has expired."); return;
+        }
+        if (coupon.usageLimit && coupon.timesUsed >= coupon.usageLimit) {
+            setCouponError("This coupon has reached its usage limit."); return;
+        }
+        if (coupon.minSpend && basePrice < coupon.minSpend) {
+            setCouponError(`You must spend at least $${coupon.minSpend} to use this coupon.`); return;
+        }
+
+        // Calculate discount
+        let discount = 0;
+        if (coupon.discountType === 'fixed') {
+            discount = coupon.discountValue;
+        } else if (coupon.discountType === 'percentage') {
+            discount = basePrice * (coupon.discountValue / 100);
+        }
+
+        setDiscountAmount(discount);
+        setAppliedCoupon(coupon);
+        toast({ title: "Coupon Applied!", description: `You saved $${discount.toFixed(2)}.` });
+
+    } catch (error) {
+        setCouponError("Could not validate coupon. Please try again.");
+    }
+  };
+
 
   const handleBooking = async () => {
     if (!user) {
@@ -112,21 +172,48 @@ export default function ExperienceDetailPage() {
     }
     setIsBooking(true);
     try {
-      const totalPrice = experience!.pricing.pricePerGuest * numberOfGuests;
-      const bookingData = {
-        guestId: user.uid,
-        experienceId: experience!.id,
-        experienceTitle: experience!.title,
-        hostId: experience!.hostId,
-        hostName: host!.name,
-        bookingDate: date,
-        numberOfGuests: numberOfGuests,
-        totalPrice: totalPrice,
-        status: 'Confirmed', // Defaulting to confirmed for simplicity
-        createdAt: serverTimestamp(),
-      };
-      
-      await addDoc(collection(firestore, 'bookings'), bookingData);
+      await runTransaction(firestore, async (transaction) => {
+        const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
+        let finalPrice = basePrice - discountAmount;
+        let finalDiscountAmount = discountAmount;
+        let finalAppliedCouponId = appliedCoupon?.id;
+        
+        // Re-validate coupon inside transaction to prevent race conditions
+        if (appliedCoupon) {
+          const couponRef = doc(firestore, 'coupons', appliedCoupon.id);
+          const couponSnap = await transaction.get(couponRef);
+          if (!couponSnap.exists()) throw new Error("Coupon no longer exists.");
+          
+          const coupon = { id: couponSnap.id, ...couponSnap.data() } as Coupon;
+          if (!coupon.isActive || (coupon.usageLimit && coupon.timesUsed >= coupon.usageLimit)) {
+            // Coupon became invalid between applying and booking, proceed without discount
+            finalPrice = basePrice;
+            finalDiscountAmount = 0;
+            finalAppliedCouponId = undefined;
+            // Optionally notify user in the success toast
+          } else {
+            // Increment usage count
+            transaction.update(couponRef, { timesUsed: increment(1) });
+          }
+        }
+        
+        const newBookingRef = doc(collection(firestore, 'bookings'));
+        const bookingData = {
+          guestId: user.uid,
+          experienceId: experience!.id,
+          experienceTitle: experience!.title,
+          hostId: experience!.hostId,
+          hostName: host!.name,
+          bookingDate: date,
+          numberOfGuests: numberOfGuests,
+          totalPrice: finalPrice,
+          status: 'Confirmed',
+          createdAt: serverTimestamp(),
+          couponId: finalAppliedCouponId,
+          discountAmount: finalDiscountAmount,
+        };
+        transaction.set(newBookingRef, bookingData);
+      });
 
       toast({
         title: '🎉 Booking Confirmed!',
@@ -134,6 +221,9 @@ export default function ExperienceDetailPage() {
       });
       setDate(undefined);
       setNumberOfGuests(1);
+      setCouponCode('');
+      setAppliedCoupon(null);
+      setDiscountAmount(0);
 
     } catch (error: any) {
       console.error('Booking failed:', error);
@@ -206,7 +296,8 @@ export default function ExperienceDetailPage() {
   const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;
   const localAreaName = localAreas.find(l => l.id === experience.location.localArea)?.name || experience.location.localArea;
   const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
-  const totalPrice = experience.pricing.pricePerGuest * numberOfGuests;
+  const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
+  const totalPrice = basePrice - discountAmount;
 
   const mapQuery = encodeURIComponent(`${localAreaName}, ${suburbName}, ${countryName}`);
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
@@ -424,7 +515,33 @@ export default function ExperienceDetailPage() {
                     </Select>
                   </div>
               </CardContent>
+              <Separator className="my-2" />
+                <CardContent className="space-y-2 pt-4">
+                  <Label htmlFor="coupon">Have a coupon?</Label>
+                  <div className="flex gap-2">
+                    <Input id="coupon" placeholder="Enter code" value={couponCode} onChange={e => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
+                    <Button variant="outline" onClick={handleApplyCoupon} disabled={!!appliedCoupon}>
+                        {appliedCoupon ? <CheckCircle className="h-5 w-5 text-green-600" /> : 'Apply'}
+                    </Button>
+                  </div>
+                  {couponError && <p className="text-xs text-destructive">{couponError}</p>}
+                  {appliedCoupon && <p className="text-xs text-green-600 font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
+                </CardContent>
+
               <CardFooter className="flex-col items-stretch gap-2">
+                <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                        <span>${experience.pricing.pricePerGuest} x {numberOfGuests} guests</span>
+                        <span>${basePrice.toFixed(2)}</span>
+                    </div>
+                    {discountAmount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                            <span>Coupon Discount</span>
+                            <span>-${discountAmount.toFixed(2)}</span>
+                        </div>
+                    )}
+                </div>
+                <Separator/>
                 <Button 
                   size="lg" 
                   className="w-full"
@@ -435,7 +552,7 @@ export default function ExperienceDetailPage() {
                 </Button>
                 <div className="flex justify-between items-center text-lg font-semibold">
                     <span>Total</span>
-                    <span>${totalPrice}</span>
+                    <span>${totalPrice.toFixed(2)}</span>
                 </div>
                  <p className="text-xs text-center text-muted-foreground">You won't be charged yet</p>
               </CardFooter>

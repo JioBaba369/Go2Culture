@@ -172,5 +172,22 @@ service cloud.firestore {
     match /admin_logs/{adminLogId} {
       allow read, write: if false;
     }
+
+    /**
+     * @description Manages discount coupons.
+     * @path /coupons/{couponId}
+     */
+    match /coupons/{couponId} {
+      // Any signed-in user can read a coupon to validate it.
+      allow get: if isSignedIn();
+      // Only admins can see the full list of coupons, create, or delete them.
+      allow list, create, delete: if isAdmin();
+      // Admins can update any field.
+      // Users can only update the timesUsed field as part of a transaction.
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        request.writeFields.size() == 1 && 'timesUsed' in request.writeFields
+      );
+    }
   }
 }

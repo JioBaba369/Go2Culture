@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   role: 'guest' | 'host' | 'both';
@@ -170,6 +171,8 @@ export type Booking = {
   status: 'Pending' | 'Confirmed' | 'Cancelled';
   cancellationReason?: string;
   createdAt: any; // Allow ServerTimestamp
+  couponId?: string;
+  discountAmount?: number;
 };
 
 export type WishlistItem = {
@@ -266,4 +269,16 @@ export type Report = {
   reportedUserLink: string | null;
   date: any; // Allow ServerTimestamp
   status: 'Open' | 'In Progress' | 'Resolved';
+};
+
+export type Coupon = {
+  id: string; // The code itself
+  description: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  expiresAt?: any; // Allow ServerTimestamp
+  isActive: boolean;
+  minSpend?: number;
+  usageLimit?: number;
+  timesUsed: number;
 };
