@@ -29,9 +29,9 @@ const profileFormSchema = z.object({
   phone: z.string().optional(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   socialMedia: z.object({
-    twitter: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
-    instagram: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
-    facebook: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+    twitter: z.string().optional(),
+    instagram: z.string().optional(),
+    facebook: z.string().optional(),
   }).optional(),
 });
 
@@ -47,6 +47,19 @@ const passwordFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+
+const getUsernameFromUrl = (url: string | undefined): string => {
+  if (!url) return '';
+  try {
+    const urlObject = new URL(url);
+    const pathParts = urlObject.pathname.split('/').filter(Boolean);
+    return pathParts[0] || '';
+  } catch {
+    // If it's not a valid URL, it might be a username already.
+    return url;
+  }
+};
+
 
 export default function ProfilePage() {
   const { user, isUserLoading, auth, firestore } = useFirebase();
@@ -71,9 +84,9 @@ export default function ProfilePage() {
       phone: userProfile?.phone || '',
       website: userProfile?.website || '',
       socialMedia: {
-        twitter: userProfile?.socialMedia?.twitter || '',
-        instagram: userProfile?.socialMedia?.instagram || '',
-        facebook: userProfile?.socialMedia?.facebook || '',
+        twitter: getUsernameFromUrl(userProfile?.socialMedia?.twitter),
+        instagram: getUsernameFromUrl(userProfile?.socialMedia?.instagram),
+        facebook: getUsernameFromUrl(userProfile?.socialMedia?.facebook),
       },
     },
   });
@@ -101,16 +114,23 @@ export default function ProfilePage() {
     setProfileSaveState('saving');
     try {
       const userRef = doc(firestore, 'users', user.uid);
-      const { fullName, ...contactData } = data;
+      
+      const dataToSave = {
+        fullName: data.fullName,
+        phone: data.phone,
+        website: data.website,
+        socialMedia: {
+          twitter: data.socialMedia?.twitter ? `https://x.com/${data.socialMedia.twitter.replace('@', '')}` : '',
+          instagram: data.socialMedia?.instagram ? `https://instagram.com/${data.socialMedia.instagram.replace('@', '')}` : '',
+          facebook: data.socialMedia?.facebook ? `https://facebook.com/${data.socialMedia.facebook.replace('@', '')}` : '',
+        },
+        updatedAt: serverTimestamp()
+      };
 
-      await updateDoc(userRef, { 
-        fullName,
-        ...contactData,
-        updatedAt: serverTimestamp() 
-      });
+      await updateDoc(userRef, dataToSave as any);
 
-      if (auth.currentUser.displayName !== fullName) {
-        await updateProfile(auth.currentUser, { displayName: fullName });
+      if (auth.currentUser.displayName !== data.fullName) {
+        await updateProfile(auth.currentUser, { displayName: data.fullName });
       }
       
       toast({
@@ -288,16 +308,23 @@ export default function ProfilePage() {
                 <CardDescription>Link your social media profiles.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                     <FormField
+                    <FormField
                         control={form.control}
                         name="socialMedia.twitter"
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>X</FormLabel>
-                            <div className="relative flex items-center">
-                                <Twitter className="absolute left-3 h-5 w-5 text-muted-foreground" />
+                             <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                    <Twitter className="h-5 w-5" />
+                                </div>
+                                <span className="shrink-0 text-muted-foreground">https://x.com/</span>
                                 <FormControl>
-                                    <Input placeholder="https://x.com/your-profile" {...field} className="pl-10" />
+                                    <Input
+                                    placeholder="your_handle"
+                                    {...field}
+                                    className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                    />
                                 </FormControl>
                             </div>
                             <FormMessage />
@@ -310,10 +337,17 @@ export default function ProfilePage() {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Instagram</FormLabel>
-                             <div className="relative flex items-center">
-                                <Instagram className="absolute left-3 h-5 w-5 text-muted-foreground" />
+                             <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                    <Instagram className="h-5 w-5" />
+                                </div>
+                                <span className="shrink-0 text-muted-foreground">https://instagram.com/</span>
                                 <FormControl>
-                                    <Input placeholder="https://instagram.com/your-profile" {...field} className="pl-10" />
+                                    <Input
+                                    placeholder="your_handle"
+                                    {...field}
+                                    className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                    />
                                 </FormControl>
                             </div>
                             <FormMessage />
@@ -326,10 +360,17 @@ export default function ProfilePage() {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Facebook</FormLabel>
-                            <div className="relative flex items-center">
-                                <Facebook className="absolute left-3 h-5 w-5 text-muted-foreground" />
+                            <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                    <Facebook className="h-5 w-5" />
+                                </div>
+                                <span className="shrink-0 text-muted-foreground">https://facebook.com/</span>
                                 <FormControl>
-                                    <Input placeholder="https://facebook.com/your-profile" {...field} className="pl-10" />
+                                    <Input
+                                    placeholder="your_handle"
+                                    {...field}
+                                    className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                    />
                                 </FormControl>
                             </div>
                             <FormMessage />
