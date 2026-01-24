@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,20 +62,30 @@ export default function EditExperiencePage() {
   
   const methods = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
+    values: {
+      title: experience?.title || '',
+      description: experience?.description || '',
+      category: experience?.category || 'In-Home Dining',
+      durationMinutes: experience?.durationMinutes || 0,
+      menu: {
+        cuisine: experience?.menu?.cuisine || '',
+        description: experience?.menu?.description || '',
+        dietary: experience?.menu?.dietary || [],
+        allergens: experience?.menu?.allergens || '',
+        spiceLevel: experience?.menu?.spiceLevel || 'Mild',
+      },
+      pricing: {
+        pricePerGuest: experience?.pricing?.pricePerGuest || 0,
+        maxGuests: experience?.pricing?.maxGuests || 0,
+      },
+      availability: {
+        days: experience?.availability?.days || [],
+        timeSlots: Array.isArray(experience?.availability?.timeSlots)
+          ? experience.availability.timeSlots.join(', ')
+          : experience?.availability?.timeSlots || '',
+      },
+    },
   });
-  
-  useEffect(() => {
-    if (experience) {
-      methods.reset({
-        ...experience,
-        // The form expects timeSlots to be a single string, but Firestore might store it as an array.
-        availability: {
-            ...experience.availability,
-            timeSlots: Array.isArray(experience.availability.timeSlots) ? experience.availability.timeSlots.join(', ') : experience.availability.timeSlots || '',
-        },
-      });
-    }
-  }, [experience, methods]);
 
   const onSubmit = async (data: ExperienceFormValues) => {
     if (!firestore) return;
