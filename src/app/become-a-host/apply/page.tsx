@@ -218,6 +218,7 @@ export default function BecomeAHostPage() {
         },
         experience: {
           ...experienceData,
+          description: experienceData.description || '',
           photos: { mainImageId: 'dining-area' }
         },
         verification: {
