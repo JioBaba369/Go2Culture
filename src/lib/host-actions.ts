@@ -1,0 +1,69 @@
+'use client';
+
+import {
+  Firestore,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { Experience } from './types';
+
+export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'userId' | 'createdAt' | 'rating'>>;
+
+// Function to pause an experience
+export async function pauseExperienceForHost(
+  firestore: Firestore,
+  experienceId: string
+) {
+  const expRef = doc(firestore, 'experiences', experienceId);
+  const updatedData = { status: 'paused' };
+  try {
+    await updateDoc(expRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: expRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
+// Function to start (make live) an experience
+export async function startExperienceForHost(
+  firestore: Firestore,
+  experienceId: string
+) {
+  const expRef = doc(firestore, 'experiences', experienceId);
+  const updatedData = { status: 'live' };
+  try {
+    await updateDoc(expRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: expRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
+// Function to update an experience
+export async function updateExperience(
+  firestore: Firestore,
+  experienceId: string,
+  data: ExperienceUpdateData
+) {
+    const expRef = doc(firestore, 'experiences', experienceId);
+    try {
+        await updateDoc(expRef, data);
+    } catch(serverError) {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: expRef.path,
+            operation: 'update',
+            requestResourceData: data,
+        }));
+        throw serverError;
+    }
+}
