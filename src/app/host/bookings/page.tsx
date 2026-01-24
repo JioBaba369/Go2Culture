@@ -36,6 +36,7 @@ import { cancelBookingByHost, confirmBooking } from '@/lib/host-actions';
 import { useToast } from '@/hooks/use-toast';
 import { Check, Loader2, MessageSquare, MoreHorizontal, X } from 'lucide-react';
 import { MessageDialog } from '@/components/messaging/MessageDialog';
+import { DialogTrigger } from '@/components/ui/dialog';
 
 const statusVariantMap: Record<
   string,
@@ -54,7 +55,6 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
     [firestore, booking.guestId]
   );
   const { data: guest, isLoading } = useDoc<User>(guestRef);
-  const [isChatOpen, setChatOpen] = useState(false);
   const [isProcessing, setProcessing] = useState<null | 'confirm' | 'cancel'>(null);
   const { toast } = useToast();
 
@@ -137,9 +137,11 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
                     </DropdownMenuItem>
                   </>
                 )}
-                 <DropdownMenuItem onClick={() => setChatOpen(true)}>
-                    <MessageSquare className="mr-2 h-4 w-4"/> Chat with Guest
-                </DropdownMenuItem>
+                 <DialogTrigger asChild>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <MessageSquare className="mr-2 h-4 w-4"/> Chat with Guest
+                    </DropdownMenuItem>
+                 </DialogTrigger>
               </DropdownMenuContent>
             </DropdownMenu>
           </MessageDialog>
