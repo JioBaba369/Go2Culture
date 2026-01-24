@@ -18,11 +18,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Twitter, Instagram, Facebook } from 'lucide-react';
+import { Loader2, Check, Twitter, Instagram, Facebook, Eye } from 'lucide-react';
 import { User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import Link from 'next/link';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -255,9 +256,17 @@ export default function ProfilePage() {
        <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card>
-                <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>Update your public name and contact details.</CardDescription>
+                <CardHeader className="flex flex-row items-start justify-between">
+                    <div>
+                        <CardTitle>Personal Information</CardTitle>
+                        <CardDescription>Update your public name and contact details.</CardDescription>
+                    </div>
+                    <Button asChild variant="outline">
+                        <Link href={`/users/${user.uid}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Public Profile
+                        </Link>
+                    </Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <FormField
