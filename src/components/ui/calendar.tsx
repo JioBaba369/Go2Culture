@@ -38,7 +38,7 @@ function Calendar({
         weekday:
           "text-muted-foreground rounded-md w-10 sm:w-9 font-normal text-[0.8rem] text-center",
         week: "flex w-full mt-2",
-        day: "h-10 w-10 sm:h-9 sm:w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
+        day: "h-10 w-10 sm:h-9 sm:w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20 align-top",
         day_button: cn(
           buttonVariants({ variant: "ghost" }),
           "h-10 w-10 sm:h-9 sm:w-9 p-0 font-normal aria-selected:opacity-100 transition-none active:scale-95 sm:active:scale-100"
@@ -53,8 +53,8 @@ function Calendar({
       }}
       components={{
         Chevron: ({ ...props }) => {
-          if (props.orientation === "left") return <ChevronLeft className="h-4 w-4" />;
-          return <ChevronRight className="h-4 w-4" />;
+          if (props.orientation === "left") return <ChevronLeft className="h-4 w-4" />
+          return <ChevronRight className="h-4 w-4" />
         },
       }}
       {...props}
