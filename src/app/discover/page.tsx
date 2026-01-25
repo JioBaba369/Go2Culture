@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import type { Experience } from '@/lib/types';
 import { ExperienceCard } from '@/components/experience-card';
@@ -37,10 +36,15 @@ function DiscoverPageContent() {
     useMemoFirebase(() => (firestore ? collection(firestore, 'experiences') : null), [firestore])
   );
 
-  const allCuisines = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.menu.cuisine))].sort() : [], [allExperiences]);
-  const allDietary = useMemo(() => allExperiences ? [...new Set(allExperiences.flatMap(e => e.menu.dietary || []))].sort() : [], [allExperiences]);
-  const allCategories = useMemo(() => allExperiences ? [...new Set(allExperiences.map(e => e.category))].sort() : [], [allExperiences]);
-  const maxPrice = useMemo(() => allExperiences && allExperiences.length > 0 ? Math.ceil(Math.max(...allExperiences.map(e => e.pricing.pricePerGuest)) / 5) * 5 : 150, [allExperiences]);
+  const liveExperiences = useMemo(() => {
+    if (!allExperiences) return [];
+    return allExperiences.filter(exp => exp.status === 'live');
+  }, [allExperiences]);
+
+  const allCuisines = useMemo(() => [...new Set(liveExperiences.map(e => e.menu.cuisine))].sort(), [liveExperiences]);
+  const allDietary = useMemo(() => [...new Set(liveExperiences.flatMap(e => e.menu.dietary || []))].sort(), [liveExperiences]);
+  const allCategories = useMemo(() => [...new Set(liveExperiences.map(e => e.category))].sort(), [liveExperiences]);
+  const maxPrice = useMemo(() => liveExperiences.length > 0 ? Math.ceil(Math.max(...liveExperiences.map(e => e.pricing.pricePerGuest)) / 5) * 5 : 150, [liveExperiences]);
 
   const [cuisine, setCuisine] = useState(searchParams.get('cuisine') || 'all');
   const [dietary, setDietary] = useState<string[]>(searchParams.getAll('dietary'));
@@ -48,14 +52,13 @@ function DiscoverPageContent() {
   const [price, setPrice] = useState([maxPrice]);
   const [rating, setRating] = useState('all');
 
-  useMemo(() => {
+  useEffect(() => {
     if(maxPrice > 0) setPrice([maxPrice]);
   }, [maxPrice]);
   
   const filteredExperiences = useMemo(() => {
-    if (!allExperiences) return [];
-    return allExperiences.filter(exp => {
-      if (exp.status !== 'live') return false; // Only show live experiences
+    if (!liveExperiences) return [];
+    return liveExperiences.filter(exp => {
       if (cuisine !== 'all' && exp.menu.cuisine !== cuisine) return false;
       if (categories.length > 0 && !categories.includes(exp.category)) return false;
       if (dietary.length > 0 && !dietary.every(d => exp.menu.dietary?.includes(d))) return false;
@@ -67,7 +70,7 @@ function DiscoverPageContent() {
       if (searchParams.get('localArea') && exp.location.localArea !== searchParams.get('localArea')) return false;
       return true;
     });
-  }, [cuisine, dietary, categories, price, rating, searchParams, allExperiences]);
+  }, [cuisine, dietary, categories, price, rating, searchParams, liveExperiences]);
 
   const handleDietaryChange = (option: string) => {
     setDietary(prev => 
@@ -215,7 +218,7 @@ function DiscoverPageContent() {
             </Sheet>
           </div>
 
-          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {allExperiences?.filter(e => e.status === 'live').length || 0} experiences.</p>
+          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {liveExperiences.length || 0} experiences.</p>
           {areExperiencesLoading ? (
              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -251,5 +254,3 @@ export default function DiscoverPage() {
     </Suspense>
   )
 }
-
-    
