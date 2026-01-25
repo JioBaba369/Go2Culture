@@ -357,8 +357,7 @@ export default function ExperienceDetailPage() {
     <div className="py-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-headline text-4xl md:text-5xl font-bold">{experience.title}</h1>
-          <div className="flex items-center gap-4 mt-2 text-muted-foreground">
+           <div className="flex items-center gap-4 mb-2 text-muted-foreground">
             <div className="flex items-center gap-1">
               <Star className="h-5 w-5 text-accent fill-accent" />
               <span className="font-bold text-foreground">{experience.rating.average}</span>
@@ -370,6 +369,7 @@ export default function ExperienceDetailPage() {
               <span>{localAreaName}, {suburbName}, {countryName}</span>
             </div>
           </div>
+          <h1 className="font-headline text-4xl md:text-5xl font-bold">{experience.title}</h1>
         </div>
         <WishlistButton experienceId={experience.id} className="h-12 w-12 flex-shrink-0" />
       </div>
