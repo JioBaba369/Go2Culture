@@ -45,12 +45,12 @@ function Calendar({
 
         // Table & grid
         table: "w-full border-collapse",
-        head_row: "flex justify-between",
+        head_row: "flex",
         head_cell:
-          "text-muted-foreground font-medium text-sm w-10 h-10 flex items-center justify-center",
+          "text-muted-foreground font-medium text-sm flex-1 flex items-center justify-center p-2",
 
         // Rows & cells
-        row: "flex w-full mt-1 justify-between",
+        row: "flex w-full mt-1",
         cell: cn(
           "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
           "flex-1",
