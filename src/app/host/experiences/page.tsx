@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -6,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Table,
@@ -116,40 +116,43 @@ export default function HostExperiencesPage() {
             {experience.status}
           </Badge>
         </TableCell>
-        <TableCell>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={isTogglingThis}>
-                {isTogglingThis ? <Skeleton className="h-4 w-4 rounded-full" /> : <MoreHorizontal className="h-4 w-4" />}
-                <span className="sr-only">Actions</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <Link href={`/experiences/${experience.id}`} className="cursor-pointer">
-                  <Eye className="mr-2 h-4 w-4" /> View as Guest
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/host/experiences/${experience.id}/edit`} className="cursor-pointer">
-                  <Edit className="mr-2 h-4 w-4" /> Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleToggleStatus(experience)} className="cursor-pointer">
-                {experience.status === 'live' ? (
-                  <><Pause className="mr-2 h-4 w-4" /> Pause</>
-                ) : (
-                  <><Play className="mr-2 h-4 w-4" /> Make Live</>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive cursor-pointer">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <TableCell className="text-right">
+            <div className="flex items-center justify-end gap-2">
+                <Button asChild variant="outline" size="sm">
+                    <Link href={`/host/experiences/${experience.id}/edit`}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                    </Link>
+                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-9 w-9" disabled={isTogglingThis}>
+                            {isTogglingThis ? <Skeleton className="h-4 w-4 rounded-full" /> : <MoreHorizontal className="h-4 w-4" />}
+                            <span className="sr-only">Actions</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                            <Link href={`/experiences/${experience.id}`} className="cursor-pointer">
+                            <Eye className="mr-2 h-4 w-4" /> View as Guest
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleToggleStatus(experience)} className="cursor-pointer">
+                            {experience.status === 'live' ? (
+                            <><Pause className="mr-2 h-4 w-4" /> Pause</>
+                            ) : (
+                            <><Play className="mr-2 h-4 w-4" /> Make Live</>
+                            )}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive cursor-pointer">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
         </TableCell>
       </TableRow>
     );
@@ -160,49 +163,14 @@ export default function HostExperiencesPage() {
       const isTogglingThis = isToggling === experience.id;
 
       return (
-        <Card key={experience.id}>
-            <CardContent className="p-4">
+        <Card key={experience.id} className="flex flex-col">
+            <CardContent className="p-4 flex-grow">
                  <div className="flex gap-4">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
                         {mainImage && <Image src={mainImage.imageUrl} alt={experience.title} fill className="object-cover" sizes="96px" data-ai-hint={mainImage.imageHint} />}
                     </div>
                     <div className="flex-grow">
-                        <div className="flex justify-between items-start">
-                            <h3 className="font-semibold leading-tight">{experience.title}</h3>
-                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" disabled={isTogglingThis}>
-                                    {isTogglingThis ? <Skeleton className="h-4 w-4 rounded-full" /> : <MoreHorizontal className="h-4 w-4" />}
-                                    <span className="sr-only">Actions</span>
-                                </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/experiences/${experience.id}`} className="cursor-pointer">
-                                      <Eye className="mr-2 h-4 w-4" /> View as Guest
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/host/experiences/${experience.id}/edit`} className="cursor-pointer">
-                                      <Edit className="mr-2 h-4 w-4" /> Edit
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleToggleStatus(experience)} className="cursor-pointer">
-                                    {experience.status === 'live' ? (
-                                      <><Pause className="mr-2 h-4 w-4" /> Pause</>
-                                    ) : (
-                                      <><Play className="mr-2 h-4 w-4" /> Make Live</>
-                                    )}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive cursor-pointer">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                        <h3 className="font-semibold leading-tight">{experience.title}</h3>
                         <p className="text-sm text-muted-foreground mt-1">${experience.pricing.pricePerGuest} / person</p>
                         <div className="mt-2">
                             <Badge variant={statusVariantMap[experience.status]} className="capitalize">
@@ -212,6 +180,42 @@ export default function HostExperiencesPage() {
                     </div>
                  </div>
             </CardContent>
+            <CardFooter className="p-2 border-t bg-muted/50 flex gap-2">
+                <Button asChild variant="outline" size="sm" className="flex-1">
+                    <Link href={`/host/experiences/${experience.id}/edit`}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                    </Link>
+                </Button>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-9 w-9" disabled={isTogglingThis}>
+                        {isTogglingThis ? <Skeleton className="h-4 w-4 rounded-full" /> : <MoreHorizontal className="h-4 w-4" />}
+                        <span className="sr-only">Actions</span>
+                    </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/experiences/${experience.id}`} className="cursor-pointer">
+                          <Eye className="mr-2 h-4 w-4" /> View as Guest
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleStatus(experience)} className="cursor-pointer">
+                        {experience.status === 'live' ? (
+                          <><Pause className="mr-2 h-4 w-4" /> Pause</>
+                        ) : (
+                          <><Play className="mr-2 h-4 w-4" /> Make Live</>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive cursor-pointer">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </CardFooter>
         </Card>
       );
   }
@@ -247,7 +251,7 @@ export default function HostExperiencesPage() {
         <CardContent>
             {/* Mobile View */}
             <div className="grid gap-4 md:hidden">
-                {isLoading && Array.from({length: 2}).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
+                {isLoading && Array.from({length: 2}).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
                 {experiences && experiences.length > 0 ? experiences.map(renderCard) : !isLoading && emptyState}
             </div>
             
@@ -261,7 +265,7 @@ export default function HostExperiencesPage() {
                         <TableHead>Price</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                     </TableHeader>
                     <TableBody>
