@@ -78,28 +78,3 @@
     @apply bg-background text-foreground font-sans;
   }
 }
-
-.rdp-day_selected {
-  outline: 2px solid hsl(var(--destructive));
-  outline-offset: -2px;
-  border-radius: 50%;
-  background-color: transparent !important;
-  color: hsl(var(--foreground)) !important;
-  font-weight: 600;
-}
-.rdp-day_today:not(.rdp-day_selected) {
-    background-color: hsl(var(--accent) / 0.2);
-}
-
-/* Hide the default arrow in selects for a cleaner look */
-.rdp-dropdown::-ms-expand {
-  display: none;
-}
-.rdp-dropdown {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border: none;
-  background: transparent;
-  padding: 0 4px;
-}
