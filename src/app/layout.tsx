@@ -1,6 +1,6 @@
 
 import type { Metadata } from 'next';
-import { Inter, Lora } from 'next/font/google';
+import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
@@ -16,10 +16,11 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-const lora = Lora({
+const poppins = Poppins({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-lora',
+  weight: ['600', '700'],
+  variable: '--font-headline',
 });
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
       </head>
-      <body className={cn('antialiased', inter.variable, lora.variable)}>
+      <body className={cn('antialiased', inter.variable, poppins.variable)}>
         <FirebaseClientProvider>
           <MainLayout header={<Header />} footer={<Footer />}>
             {children}
