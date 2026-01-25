@@ -285,4 +285,11 @@ export type Coupon = {
   timesUsed: number;
 };
 
-    
+export type Sponsor = {
+  id: string;
+  name: string;
+  logoUrl: string;
+  website?: string;
+  isActive: boolean;
+  createdAt: any;
+};

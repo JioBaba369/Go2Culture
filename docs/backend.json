@@ -472,6 +472,20 @@
         "timesUsed": { "type": "number" }
       },
       "required": ["id", "discountType", "discountValue", "isActive", "timesUsed"]
+    },
+    "Sponsor": {
+      "title": "Sponsor",
+      "type": "object",
+      "description": "Represents a sponsor or partner of Go2Culture.",
+      "properties": {
+        "id": { "type": "string", "description": "The unique ID of the sponsor." },
+        "name": { "type": "string", "description": "The name of the sponsor company." },
+        "logoUrl": { "type": "string", "format": "uri", "description": "URL of the sponsor's logo." },
+        "website": { "type": "string", "format": "uri", "description": "The sponsor's website URL." },
+        "isActive": { "type": "boolean", "description": "Whether the sponsor is currently active and should be displayed." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "logoUrl", "isActive", "createdAt"]
     }
   },
   "auth": {
@@ -524,8 +538,10 @@
     "/coupons/{couponId}": {
       "schema": { "$ref": "#/entities/Coupon" },
       "description": "Stores discount coupons that can be applied to bookings."
+    },
+    "/sponsors/{sponsorId}": {
+      "schema": { "$ref": "#/entities/Sponsor" },
+      "description": "Stores information about sponsors and partners."
     }
   }
 }
-
-    

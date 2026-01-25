@@ -14,6 +14,7 @@ import { FeaturedExperiencesSection } from "@/components/home/featured-experienc
 import { HowItWorksSection } from "@/components/home/how-it-works";
 import { FeaturedCitiesSection } from "@/components/home/featured-cities";
 import { TestimonialsSection } from "@/components/home/testimonials";
+import { FeaturedSponsorsSection } from "@/components/home/featured-sponsors";
 
 
 export default function Home() {
@@ -145,6 +146,7 @@ export default function Home() {
       <FeaturedExperiencesSection />
       <FeaturedCitiesSection />
       <TestimonialsSection />
+      <FeaturedSponsorsSection />
 
       <section className="bg-card rounded-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
         <div className="flex-1">
@@ -170,5 +172,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

@@ -1,4 +1,3 @@
-
 'use client';
 import {
   SidebarProvider,
@@ -24,6 +23,7 @@ import {
   Loader2,
   CalendarCheck,
   Tag,
+  Handshake,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -40,6 +40,7 @@ const menuItems = [
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/reports', label: 'Reports', icon: MessageSquareWarning },
   { href: '/admin/coupons', label: 'Coupons', icon: Tag },
+  { href: '/admin/sponsors', label: 'Sponsors', icon: Handshake },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

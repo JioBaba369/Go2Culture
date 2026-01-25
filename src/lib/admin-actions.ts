@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -41,7 +40,7 @@ export async function approveApplication(
     id: hostId,
     userId: application.userId,
     name: application.hostName,
-    profilePhotoId: application.profile.photoId,
+    profilePhotoURL: application.profile.photoURL,
     status: 'approved',
     profile: {
       bio: application.profile.bio,
@@ -100,8 +99,8 @@ export async function approveApplication(
        localArea: application.location.localArea || '',
     },
     photos: {
-      mainImageId: application.experience.photos.mainImageId,
-      thumbnailImageIds: [],
+      mainImageURL: application.experience.photos.mainImageURL,
+      thumbnailImageURLs: [],
     },
     status: 'live',
     rating: { average: 0, count: 0 },
@@ -218,6 +217,23 @@ export async function deleteCoupon(
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: couponRef.path,
+      operation: 'delete',
+    }));
+    throw serverError;
+  }
+}
+
+// Function to delete a sponsor
+export async function deleteSponsor(
+  firestore: Firestore,
+  sponsorId: string
+) {
+  const sponsorRef = doc(firestore, 'sponsors', sponsorId);
+  try {
+    await deleteDoc(sponsorRef);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: sponsorRef.path,
       operation: 'delete',
     }));
     throw serverError;

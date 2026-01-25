@@ -212,5 +212,16 @@ service cloud.firestore {
         request.writeFields.size() == 1 && 'timesUsed' in request.writeFields
       );
     }
+    
+    /**
+     * @description Manages sponsors. Sponsors are public to read if active.
+     * @path /sponsors/{sponsorId}
+     */
+    match /sponsors/{sponsorId} {
+      allow get: if resource.data.isActive == true;
+      allow list: if true;
+      // Only admins can create, update, or delete sponsors.
+      allow write: if isAdmin();
+    }
   }
 }
