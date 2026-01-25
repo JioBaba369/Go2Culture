@@ -20,7 +20,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { updateExperience } from '@/lib/host-actions';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 
 const experienceSchema = z.object({
   title: z.string().min(5, "Experience title is required."),
@@ -34,6 +35,12 @@ const experienceSchema = z.object({
     allergens: z.string().optional(),
     spiceLevel: z.string({ required_error: "Please select a spice level." }),
   }),
+  location: z.object({
+    country: z.string({ required_error: "Please select your country." }),
+    region: z.string().optional(),
+    suburb: z.string({ required_error: "Please select your suburb/city." }),
+    localArea: z.string().optional(),
+  }),
   pricing: z.object({
     pricePerGuest: z.coerce.number().min(10, "Price must be at least $10."),
     maxGuests: z.coerce.number().min(1).max(20, "Max guests must be between 1 and 20."),
@@ -44,6 +51,14 @@ const experienceSchema = z.object({
     }),
     timeSlots: z.string().min(3, "Please enter at least one time slot (e.g., 19:00)."),
   }),
+}).superRefine((data, ctx) => {
+  if ((data.location.country === 'AU' || data.location.country === 'NZ') && !data.location.region) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'State/Region is required for hosts in Australia and New Zealand.',
+      path: ['location', 'region'],
+    });
+  }
 });
 
 type ExperienceFormValues = z.infer<typeof experienceSchema>;
@@ -77,6 +92,12 @@ export default function EditExperiencePage() {
         allergens: experience?.menu?.allergens || '',
         spiceLevel: experience?.menu?.spiceLevel || 'Mild',
       },
+      location: {
+        country: experience?.location?.country || '',
+        region: experience?.location?.region || '',
+        suburb: experience?.location?.suburb || '',
+        localArea: experience?.location?.localArea || '',
+      },
       pricing: {
         pricePerGuest: experience?.pricing?.pricePerGuest || 0,
         maxGuests: experience?.pricing?.maxGuests || 0,
@@ -89,6 +110,37 @@ export default function EditExperiencePage() {
       },
     },
   });
+
+  const { watch, setValue } = methods;
+  const watchCountry = watch('location.country');
+  const watchRegion = watch('location.region');
+  const watchSuburb = watch('location.suburb');
+
+  const availableRegions = regions.filter(s => s.countryId === watchCountry);
+  const availableSuburbs = suburbs.filter(s => s.regionId === watchRegion);
+  const availableLocalAreas = localAreas.filter(l => l.suburbId === watchSuburb);
+
+  useEffect(() => {
+    if (watchCountry) {
+        setValue('location.region', undefined);
+        setValue('location.suburb', undefined);
+        setValue('location.localArea', undefined);
+    }
+  }, [watchCountry, setValue]);
+
+  useEffect(() => {
+    if (watchRegion) {
+        setValue('location.suburb', undefined);
+        setValue('location.localArea', undefined);
+    }
+  }, [watchRegion, setValue]);
+  
+  useEffect(() => {
+    if (watchSuburb) {
+        setValue('location.localArea', undefined);
+    }
+  }, [watchSuburb, setValue]);
+
 
   const onSubmit = async (data: ExperienceFormValues) => {
     if (!firestore) return;
@@ -189,6 +241,60 @@ export default function EditExperiencePage() {
                     )} />
                 </div>
                 {/* Add Dietary options if needed */}
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader><CardTitle>Location</CardTitle><CardDescription>The area where your experience will take place.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={methods.control} name="location.country" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl>
+                        <SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={methods.control} name="location.region" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={!availableRegions.length}>
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>{availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={methods.control} name="location.suburb" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Suburb/City</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={!availableSuburbs.length}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select your suburb/city" /></SelectTrigger></FormControl>
+                            <SelectContent>{availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField control={methods.control} name="location.localArea" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Local Area</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={!availableLocalAreas.length}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select your local area" /></SelectTrigger></FormControl>
+                            <SelectContent>{availableLocalAreas.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
             </CardContent>
         </Card>
         
