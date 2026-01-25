@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { useFirebase, useCollection, useMemoFirebase } from "@/firebase";
 import { collection, query, where, doc } from "firebase/firestore";
 import type { Booking, Experience, Review, User } from "@/lib/types";
-import { Clock, Star, Utensils, CalendarCheck, Users, DollarSign } from "lucide-react";
+import { Clock, Star, Utensils, CalendarCheck, Users, DollarSign, Hourglass } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow, isFuture, isPast } from "date-fns";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
@@ -86,21 +85,30 @@ export default function HostDashboardPage() {
 
     const isLoading = isUserLoading || experiencesLoading || bookingsLoading || reviewsLoading;
 
-    const upcomingBookings = bookings?.filter(b => b.bookingDate.toDate() > new Date()) || [];
-    const totalEarnings = bookings?.filter(b => b.status === 'Confirmed').reduce((acc, b) => acc + b.totalPrice, 0) || 0;
-    const averageRating = experiences && experiences.length > 0
+    const confirmedBookings = bookings?.filter(b => b.status === 'Confirmed') || [];
+    const upcomingConfirmed = confirmedBookings.filter(b => isFuture(b.bookingDate.toDate()));
+    const pastConfirmed = confirmedBookings.filter(b => isPast(b.bookingDate.toDate()));
+    const pendingBookings = bookings?.filter(b => b.status === 'Pending' && isFuture(b.bookingDate.toDate())) || [];
+
+    const totalPayouts = pastConfirmed.reduce((sum, b) => sum + b.totalPrice, 0);
+    const upcomingEarnings = upcomingConfirmed.reduce((sum, b) => sum + b.totalPrice, 0);
+    const potentialEarnings = pendingBookings.reduce((sum, b) => sum + b.totalPrice, 0);
+
+    const averageRating = experiences && experiences.length > 0 && experiences.reduce((acc, exp) => acc + exp.rating.count, 0) > 0
         ? experiences.reduce((acc, exp) => acc + exp.rating.average * exp.rating.count, 0) / experiences.reduce((acc, exp) => acc + exp.rating.count, 0)
         : 0;
 
+    const totalReviews = experiences?.reduce((sum, e) => sum + e.rating.count, 0) || 0;
+
     const stats = [
-        { title: "Upcoming Bookings", value: upcomingBookings.length, icon: Clock },
-        { title: "Live Experiences", value: experiences?.filter(e => e.status === 'live').length || 0, icon: Utensils },
-        { title: "Average Rating", value: isNaN(averageRating) ? 'N/A' : averageRating.toFixed(2), icon: Star },
-        { title: "Total Payouts", value: `$${totalEarnings.toFixed(2)}`, icon: DollarSign },
+        { title: "Total Payouts", value: `$${totalPayouts.toFixed(2)}`, icon: DollarSign, description: `From ${pastConfirmed.length} completed bookings.` },
+        { title: "Upcoming Earnings", value: `$${upcomingEarnings.toFixed(2)}`, icon: CalendarCheck, description: `From ${upcomingConfirmed.length} future bookings.` },
+        { title: "Pending Requests", value: pendingBookings.length, icon: Hourglass, description: `Worth $${potentialEarnings.toFixed(2)}` },
+        { title: "Average Rating", value: isNaN(averageRating) ? 'N/A' : averageRating.toFixed(2), icon: Star, description: `Across ${totalReviews} reviews.` },
     ];
     
     const recentActivities = [
-        ...(bookings || []).map(b => ({ type: 'booking', ...b, date: toDate(b.createdAt) })),
+        ...(bookings || []).map(b => ({ type: 'booking', ...b, date: toDate(b.createdAt || b.bookingDate) })),
         ...(reviews || []).map(r => ({ type: 'review', ...r, date: toDate(r.createdAt) }))
     ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
     
@@ -118,6 +126,7 @@ export default function HostDashboardPage() {
                     </CardHeader>
                     <CardContent>
                     <div className="text-2xl font-bold">{stat.value}</div>
+                    {stat.description && <p className="text-xs text-muted-foreground">{stat.description}</p>}
                     </CardContent>
                 </Card>
                 ))}

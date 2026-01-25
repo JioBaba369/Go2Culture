@@ -24,6 +24,7 @@ import {
   CalendarCheck,
   Tag,
   Handshake,
+  DollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -37,6 +38,7 @@ const menuItems = [
   { href: '/admin/applications', label: 'Host Applications', icon: ClipboardList },
   { href: '/admin/experiences', label: 'Experiences', icon: Utensils },
   { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
+  { href: '/admin/payouts', label: 'Payouts', icon: DollarSign },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/reports', label: 'Reports', icon: MessageSquareWarning },
   { href: '/admin/coupons', label: 'Coupons', icon: Tag },
