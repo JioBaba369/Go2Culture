@@ -1,3 +1,4 @@
+
 'use client';
 import Link from "next/link";
 import { Logo } from "@/components/logo";
@@ -33,7 +34,7 @@ export function Footer() {
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="/become-a-host" className="text-muted-foreground hover:text-foreground">Become a Host</Link></li>
               <li><Link href="/host-guidelines" className="text-muted-foreground hover:text-foreground">Host Guidelines</Link></li>
-              <li><Link href="/trust-and-safety" className="text-muted-foreground hover:text-foreground">Trust & Safety</Link></li>
+              <li><Link href="/trust-and-safety" className="text-muted-foreground hover:text-foreground">Trust &amp; Safety</Link></li>
             </ul>
           </div>
           <div>
@@ -42,8 +43,9 @@ export function Footer() {
               <li><Link href="/about" className="text-muted-foreground hover:text-foreground">About Us</Link></li>
               <li><Link href="/careers" className="text-muted-foreground hover:text-foreground">Careers</Link></li>
               <li><Link href="/press" className="text-muted-foreground hover:text-foreground">Press</Link></li>
+              <li><Link href="/sponsors" className="text-muted-foreground hover:text-foreground">Sponsors &amp; Partners</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link></li>
-              <li><Link href="/terms" className="text-muted-foreground hover:text-foreground">Terms & Conditions</Link></li>
+              <li><Link href="/terms" className="text-muted-foreground hover:text-foreground">Terms &amp; Conditions</Link></li>
               <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
               <li><Link href="/cookies" className="text-muted-foreground hover:text-foreground">Cookie Policy</Link></li>
             </ul>
