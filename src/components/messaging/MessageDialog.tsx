@@ -26,6 +26,7 @@ import { Skeleton } from "../ui/skeleton";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { useToast } from "@/hooks/use-toast";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const messageSchema = z.object({
   messageText: z.string().min(1, "Message cannot be empty."),
@@ -40,11 +41,12 @@ interface MessageDialogProps {
 }
 
 function MessageBubble({ msg, isSender, recipient }: { msg: Message, isSender: boolean, recipient: User }) {
+    const recipientImage = PlaceHolderImages.find(p => p.id === recipient.profilePhotoId);
     return (
         <div className={cn("flex items-end gap-2", isSender ? "justify-end" : "justify-start")}>
             {!isSender && (
                 <Avatar className="h-8 w-8">
-                    {recipient.profilePhotoURL && <AvatarImage src={recipient.profilePhotoURL} alt={recipient.fullName} />}
+                    {recipientImage && <AvatarImage src={recipientImage.imageUrl} alt={recipient.fullName} />}
                     <AvatarFallback>{recipient.fullName.charAt(0)}</AvatarFallback>
                 </Avatar>
             )}
@@ -190,5 +192,3 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
     </Dialog>
   );
 }
-
-    

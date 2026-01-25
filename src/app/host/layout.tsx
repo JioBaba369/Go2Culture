@@ -1,3 +1,4 @@
+
 'use client';
 import { ReactNode } from 'react';
 import Link from 'next/link';
@@ -113,8 +114,7 @@ export default function HostLayout({ children }: { children: ReactNode }) {
                         <SidebarMenuItem>
                             <Link href="/profile" className="flex items-center gap-2 p-2 rounded-md hover:bg-sidebar-accent">
                                 <Avatar className="h-8 w-8">
-                                    {user.photoURL ? <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} /> :
-                                    userImage ? <AvatarImage src={userImage.imageUrl} alt={userProfile.fullName} /> : null}
+                                    {userImage ? <AvatarImage src={userImage.imageUrl} alt={userProfile.fullName} /> : null}
                                     <AvatarFallback>{userProfile.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div className="overflow-hidden whitespace-nowrap group-data-[collapsible=icon]:hidden">

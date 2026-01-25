@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -19,6 +20,7 @@ import {
 import { doc } from "firebase/firestore";
 import type { User } from "@/lib/types";
 import { ADMIN_UID } from "@/lib/auth";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const navLinks = [
   { href: "/discover", label: "Discover" },
@@ -43,6 +45,7 @@ export function Header() {
   const { data: userProfile } = useDoc<User>(userDocRef);
   const isHost = userProfile?.role === 'host' || userProfile?.role === 'both';
   const isAdmin = user?.uid === ADMIN_UID;
+  const userImage = userProfile ? PlaceHolderImages.find(p => p.id === userProfile.profilePhotoId) : null;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-primary">
@@ -72,10 +75,8 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary-foreground/10">
                   <Avatar className="h-10 w-10">
-                    {user.photoURL ? (
-                      <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-                    ) : userProfile?.profilePhotoURL ? (
-                      <AvatarImage src={userProfile.profilePhotoURL} alt="User" />
+                    {userImage ? (
+                      <AvatarImage src={userImage.imageUrl} alt={user.displayName || 'User'} />
                     ) : null}
                     <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
                   </Avatar>

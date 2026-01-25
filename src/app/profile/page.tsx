@@ -243,8 +243,7 @@ export default function ProfilePage() {
     <div className="space-y-8">
       <div className="flex items-center gap-6">
         <Avatar className="h-20 w-20">
-            {user.photoURL ? <AvatarImage src={user.photoURL} alt={userProfile?.fullName || 'User'} /> :
-            userImage ? <AvatarImage src={userImage.imageUrl} alt={userProfile?.fullName || 'User'} /> : null}
+            {userImage ? <AvatarImage src={userImage.imageUrl} alt={userProfile?.fullName || 'User'} /> : null}
             <AvatarFallback className="text-3xl">{userProfile?.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
         </Avatar>
         <div>

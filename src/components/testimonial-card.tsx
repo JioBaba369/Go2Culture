@@ -8,6 +8,7 @@ import { Review, User } from "@/lib/types";
 import { doc } from "firebase/firestore";
 import { Star } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface TestimonialCardProps {
   review: Review;
@@ -40,6 +41,7 @@ export function TestimonialCard({ review }: TestimonialCardProps) {
   }
 
   const stars = Array(5).fill(0).map((_, i) => i < review.rating);
+  const authorImage = PlaceHolderImages.find(p => p.id === author.profilePhotoId);
 
   return (
     <Card className="h-full flex flex-col">
@@ -56,7 +58,7 @@ export function TestimonialCard({ review }: TestimonialCardProps) {
         </div>
         <div className="flex items-center gap-3 mt-6 pt-4 border-t">
           <Avatar>
-            {author.profilePhotoURL && <AvatarImage src={author.profilePhotoURL} alt={author.fullName} />}
+            {authorImage && <AvatarImage src={authorImage.imageUrl} alt={author.fullName} />}
             <AvatarFallback>{author.fullName.charAt(0)}</AvatarFallback>
           </Avatar>
           <p className="font-semibold">{author.fullName}</p>
@@ -65,5 +67,3 @@ export function TestimonialCard({ review }: TestimonialCardProps) {
     </Card>
   );
 }
-
-    

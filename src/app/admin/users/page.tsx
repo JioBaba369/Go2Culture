@@ -33,6 +33,7 @@ import { format } from 'date-fns';
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 
 const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
@@ -64,12 +65,13 @@ export default function AdminUsersPage() {
         <h2 className="text-xl font-semibold">All Users</h2>
         {isLoading && Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-36 w-full" />)}
         {users?.map((user) => {
+            const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
             return (
                 <Card key={user.id} className="p-4">
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <Avatar className="h-10 w-10">
-                                {user.profilePhotoURL && <AvatarImage src={user.profilePhotoURL} alt={user.fullName} />}
+                                {userImage && <AvatarImage src={userImage.imageUrl} alt={user.fullName} />}
                                 <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="space-y-1">
@@ -132,12 +134,13 @@ export default function AdminUsersPage() {
                 <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-10 w-full"/></TableCell></TableRow>
               ))}
               {users?.map((user) => {
+                const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
                 return (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
-                          {user.profilePhotoURL && <AvatarImage src={user.profilePhotoURL} alt={user.fullName} />}
+                          {userImage && <AvatarImage src={userImage.imageUrl} alt={user.fullName} />}
                           <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="grid gap-0.5">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -40,7 +41,7 @@ export async function approveApplication(
     id: hostId,
     userId: application.userId,
     name: application.hostName,
-    profilePhotoURL: application.profile.photoURL,
+    profilePhotoId: application.profile.profilePhotoId,
     status: 'approved',
     profile: {
       bio: application.profile.bio,
@@ -99,8 +100,8 @@ export async function approveApplication(
        localArea: application.location.localArea || '',
     },
     photos: {
-      mainImageURL: application.experience.photos.mainImageURL,
-      thumbnailImageURLs: [],
+      mainImageId: application.experience.photos.mainImageId,
+      thumbnailImageIds: [],
     },
     status: 'live',
     rating: { average: 0, count: 0 },

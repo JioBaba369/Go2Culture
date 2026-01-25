@@ -39,6 +39,7 @@ import {
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries, suburbs } from '@/lib/location-data';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const statusVariantMap: Record<
   string,
@@ -71,6 +72,8 @@ function ExperienceRow({ experience }: { experience: Experience }) {
       </TableRow>
     );
   }
+  
+  const hostImage = PlaceHolderImages.find(p => p.id === host.profilePhotoId);
 
   return (
     <TableRow>
@@ -82,9 +85,9 @@ function ExperienceRow({ experience }: { experience: Experience }) {
       <TableCell>
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
-            {host.profilePhotoURL && (
+            {hostImage && (
               <AvatarImage
-                src={host.profilePhotoURL}
+                src={hostImage.imageUrl}
                 alt={host.name}
               />
             )}
@@ -162,15 +165,17 @@ function ExperienceCardMobile({ experience }: { experience: Experience }) {
   if (isHostLoading || !host) {
     return <Skeleton className="h-40 w-full" />;
   }
+  
+  const hostImage = PlaceHolderImages.find(p => p.id === host.profilePhotoId);
 
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <Avatar>
-            {host.profilePhotoURL && (
+            {hostImage && (
               <AvatarImage
-                src={host.profilePhotoURL}
+                src={hostImage.imageUrl}
                 alt={host.name}
               />
             )}

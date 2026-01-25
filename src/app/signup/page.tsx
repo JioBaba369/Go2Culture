@@ -60,7 +60,7 @@ export default function SignupPage() {
         status: 'active',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        profilePhotoURL: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2OTA5MjI1NXww&ixlib=rb-4.1.0&q=80&w=1080", // Default avatar
+        profilePhotoId: 'guest-1', // Default avatar
       });
 
       toast({ title: "Account Created", description: "Welcome to Go2Culture!" });

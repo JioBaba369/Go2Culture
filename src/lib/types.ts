@@ -11,7 +11,7 @@ export type User = {
     instagram?: string;
     facebook?: string;
   };
-  profilePhotoURL?: string; 
+  profilePhotoId?: string; 
   preferences?: {
     cuisines?: string[];
     dietary?: string[];
@@ -44,7 +44,7 @@ export type Host = {
   userId: string;
   name: string; // Denormalized for display
   level?: 'Superhost';
-  profilePhotoURL: string; // Denormalized for display
+  profilePhotoId: string; // Denormalized for display
   status: 'draft' | 'under_review' | 'approved' | 'needs_changes' | 'suspended';
   
   profile: {
@@ -133,8 +133,8 @@ export type Experience = {
     localArea?: string;
   };
   photos: {
-    mainImageURL: string;
-    thumbnailImageURLs: string[];
+    mainImageId: string;
+    thumbnailImageIds?: string[];
   };
   status: 'draft' | 'live' | 'paused';
   rating: {
@@ -203,7 +203,7 @@ export type HostApplication = {
   experienceId?: string;
   
   profile: {
-    photoURL: string;
+    profilePhotoId: string;
     bio: string;
     languages: string[];
     culturalBackground: string;
@@ -211,8 +211,8 @@ export type HostApplication = {
   };
 
   verification: {
-    idDocURL: string;
-    selfieURL: string;
+    idDocId: string;
+    selfieId: string;
     status: 'Verified' | 'Pending' | 'Failed';
   };
 
@@ -253,7 +253,7 @@ export type HostApplication = {
     };
     
     photos: {
-      mainImageURL: string;
+      mainImageId: string;
       foodPhotos?: any;
       diningAreaPhoto?: any;
     }

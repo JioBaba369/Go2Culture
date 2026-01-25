@@ -49,6 +49,7 @@ import { useToast } from "@/hooks/use-toast";
 import { approveApplication, rejectApplication, requestChangesForApplication, pauseExperience, startExperience } from "@/lib/admin-actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 function DetailItem({ icon: Icon, label, value, isLink = false }: { icon: React.ElementType, label: string, value: React.ReactNode, isLink?: boolean }) {
     if (!value) return null;
@@ -264,6 +265,11 @@ export default function ApplicationDetailPage() {
 
   const isFinalStatus = application.status === 'Approved' || application.status === 'Rejected';
 
+  const applicantImage = PlaceHolderImages.find(p => p.id === application.profile.profilePhotoId);
+  const experienceImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
+  const idDocImage = PlaceHolderImages.find(p => p.id === application.verification.idDocId);
+  const selfieImage = PlaceHolderImages.find(p => p.id === application.verification.selfieId);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -337,7 +343,7 @@ export default function ApplicationDetailPage() {
                             <DetailItem icon={FileText} label="Category" value={application.experience.category} />
                             <DetailItem icon={DollarSign} label="Price" value={`$${application.experience.pricing.pricePerGuest} / person`} />
                             <DetailItem icon={ClockIcon} label="Duration" value={`${application.experience.durationMinutes} minutes`} />
-                            <DetailItem icon={UsersIcon} label="Max Guests" value={application.experience.pricing.maxGuests} />
+                            <DetailItem icon={UsersIcon} label="Max Guests" value={application.homeSetup.maxGuests} />
                             <DetailItem icon={Info} label="Cuisine" value={application.experience.menu.cuisine} />
                             <DetailItem icon={AlertTriangle} label="Spice Level" value={application.experience.menu.spiceLevel} />
                         </div>
@@ -351,7 +357,7 @@ export default function ApplicationDetailPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
-                        {application.profile.photoURL && <Image src={application.profile.photoURL} alt={application.hostName} width={64} height={64} className="rounded-full" />}
+                        {applicantImage && <Image src={applicantImage.imageUrl} alt={application.hostName} width={64} height={64} className="rounded-full" />}
                         <div>
                             <p className="font-bold text-lg">{application.hostName}</p>
                             <p className="text-sm text-muted-foreground">{hostLocationDisplay}</p>
@@ -400,7 +406,7 @@ export default function ApplicationDetailPage() {
                         <CardTitle className="flex items-center gap-2"><Camera/> Photos</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {application.experience.photos.mainImageURL && <Image src={application.experience.photos.mainImageURL} alt="Experience main" width={600} height={400} className="rounded-lg" />}
+                        {experienceImage && <Image src={experienceImage.imageUrl} alt="Experience main" width={600} height={400} className="rounded-lg" />}
                     </CardContent>
                 </Card>
             </div>
@@ -459,11 +465,11 @@ export default function ApplicationDetailPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="font-semibold text-sm">ID Document</p>
-                                {application.verification.idDocURL && <Image src={application.verification.idDocURL} alt="ID Document" width={200} height={125} className="rounded-md mt-1" />}
+                                {idDocImage && <Image src={idDocImage.imageUrl} alt="ID Document" width={200} height={125} className="rounded-md mt-1" />}
                             </div>
                             <div>
                                 <p className="font-semibold text-sm">Selfie</p>
-                                {application.verification.selfieURL && <Image src={application.verification.selfieURL} alt="Selfie" width={125} height={125} className="rounded-full mt-1" />}
+                                {selfieImage && <Image src={selfieImage.imageUrl} alt="Selfie" width={125} height={125} className="rounded-full mt-1" />}
                             </div>
                         </div>
                     </CardContent>
