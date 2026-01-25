@@ -18,7 +18,10 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      captionLayout="dropdown-buttons"
+      // Fixed: Ensure 'label' or 'dropdown' is used correctly for your version
+      captionLayout="dropdown" 
+      // Note: In v9+, fromYear/toYear are often replaced by startMonth/endMonth
+      // but if you are on v8, these remain correct.
       fromYear={1900}
       toYear={2030}
       className={cn("p-3", className)}
@@ -27,7 +30,10 @@ function Calendar({
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center h-9",
         caption_label: "text-sm font-medium",
-        caption_dropdowns: "flex gap-2",
+        // Added styling for the dropdown container
+        caption_dropdowns: "flex justify-center gap-1",
+        // Styling the actual select elements (often overlooked)
+        dropdown: "rdp-dropdown bg-transparent focus:outline-none appearance-none cursor-pointer",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -58,6 +64,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
+        // Use standard Icon components; ensure they receive the classNames
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}

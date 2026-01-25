@@ -76,7 +76,7 @@ export default function Home() {
   return (
     <div className="space-y-16 md:space-y-24">
       <section className="relative -mx-4 sm:-mx-6 lg:-mx-8 -mt-20">
-        <div className="w-full h-[60vh] md:h-[70vh] lg:h-[80vh] max-h-[900px]">
+        <div className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] max-h-[900px]">
           {heroImageURL && (
             <Image
               src={heroImageURL}
@@ -149,7 +149,7 @@ export default function Home() {
       <FeaturedSponsorsSection />
 
       <section className="bg-card rounded-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-        <div className="flex-1">
+        <div className="md:w-1/2">
           <Award className="h-12 w-12 text-accent mb-4"/>
           <h2 className="font-headline text-3xl md:text-4xl font-semibold">Share Your Culture. Become a Host.</h2>
           <p className="mt-4 text-muted-foreground max-w-xl">Open your home to travelers and locals, share your passion for food and culture, and earn on your own schedule. Join our global community of hosts today.</p>
@@ -157,7 +157,7 @@ export default function Home() {
             <Link href="/become-a-host">Learn More & Apply</Link>
           </Button>
         </div>
-        <div className="flex-1 w-full h-64 md:h-80 relative rounded-lg overflow-hidden">
+        <div className="w-full md:w-1/2 h-64 md:h-80 relative rounded-lg overflow-hidden">
           {hostCtaImageURL &&
             <Image 
               src={hostCtaImageURL} 
