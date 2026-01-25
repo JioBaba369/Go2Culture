@@ -1,53 +1,24 @@
-
 "use client"
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, DateRange } from "react-day-picker"
-import { format, startOfDay } from "date-fns"
-import { zonedTimeToUtc } from "date-fns-tz"
+import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = {
-  value?: DateRange | undefined
-  onChange?: (range: DateRange | undefined) => void
-  disabledDates?: Date[]
-  timezone?: string
-}
+export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
-export function Calendar({
-  value,
-  onChange,
-  disabledDates = [],
-  timezone = "Australia/Sydney",
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
   ...props
-}: React.ComponentProps<typeof DayPicker>) {
-  const disabled = [
-    { before: new Date() }, // disable past
-    ...disabledDates,
-  ]
-
-  function normalize(date?: Date) {
-    if (!date) return undefined
-    return zonedTimeToUtc(startOfDay(date), timezone)
-  }
-
+}: CalendarProps) {
   return (
     <DayPicker
-      selected={value}
-      onSelect={(range) =>
-        onChange?.({
-          from: normalize(range?.from),
-          to: normalize(range?.to),
-        })
-      }
-      disabled={disabled}
-      numberOfMonths={1}
-      showOutsideDays
-      fixedWeeks
-      className="p-3 w-full max-w-sm mx-auto"
+      showOutsideDays={showOutsideDays}
+      className={cn("p-3 w-full max-w-sm mx-auto", className)}
       classNames={{
         months: "flex flex-col",
         month: "space-y-4",
@@ -76,9 +47,11 @@ export function Calendar({
         day_range_start: "rounded-l-full",
         day_range_end: "rounded-r-full",
         day_range_middle: "bg-primary/20 !rounded-none",
-        day_today: "bg-accent/20",
+        day_today: "bg-accent/20 text-accent-foreground",
         day_disabled: "opacity-30 cursor-not-allowed",
         day_outside: "opacity-30",
+        day_selected: "bg-primary text-primary-foreground hover:bg-primary/90",
+        ...classNames,
       }}
       components={{
         IconLeft: () => <ChevronLeft className="h-5 w-5" />,
@@ -88,3 +61,6 @@ export function Calendar({
     />
   )
 }
+Calendar.displayName = "Calendar"
+
+export { Calendar }
