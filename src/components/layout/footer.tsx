@@ -1,4 +1,3 @@
-
 'use client';
 import Link from "next/link";
 import { Logo } from "@/components/logo";
@@ -41,6 +40,7 @@ export function Footer() {
             <h3 className="font-semibold font-headline">Company</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="/about" className="text-muted-foreground hover:text-foreground">About Us</Link></li>
+              <li><Link href="/impact" className="text-muted-foreground hover:text-foreground">Our Impact</Link></li>
               <li><Link href="/careers" className="text-muted-foreground hover:text-foreground">Careers</Link></li>
               <li><Link href="/press" className="text-muted-foreground hover:text-foreground">Press</Link></li>
               <li><Link href="/sponsors" className="text-muted-foreground hover:text-foreground">Sponsors &amp; Partners</Link></li>
@@ -52,7 +52,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t pt-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {year} Go2Culture. All rights reserved.</p>
+          <p>&copy; {year} Go2Culture.com. All rights reserved.</p>
         </div>
       </div>
     </footer>
