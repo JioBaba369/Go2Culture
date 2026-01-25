@@ -116,35 +116,26 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
           {booking.status}
         </Badge>
       </TableCell>
-      <TableCell>
-          <MessageDialog booking={booking} recipient={guest}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
+      <TableCell className="text-right">
+        <MessageDialog booking={booking} recipient={guest}>
+            <div className="flex items-center justify-end gap-2">
+            {booking.status === 'Pending' && isFuture(booking.bookingDate.toDate()) ? (
+                <>
+                    <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50" onClick={handleConfirm} disabled={!!isProcessing} aria-label="Confirm">
+                        {isProcessing === 'confirm' ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4" />}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-red-50" onClick={handleCancel} disabled={!!isProcessing} aria-label="Cancel">
+                        {isProcessing === 'cancel' ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4" />}
+                    </Button>
+                </>
+            ) : null }
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Chat with guest">
+                  <MessageSquare className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {booking.status === 'Pending' && (
-                  <>
-                    <DropdownMenuItem onClick={handleConfirm} disabled={!!isProcessing}>
-                       {isProcessing === 'confirm' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />}
-                       Confirm
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleCancel} disabled={!!isProcessing} className="text-destructive">
-                       {isProcessing === 'cancel' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <X className="mr-2 h-4 w-4" />}
-                       Cancel
-                    </DropdownMenuItem>
-                  </>
-                )}
-                 <DialogTrigger asChild>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <MessageSquare className="mr-2 h-4 w-4"/> Chat with Guest
-                    </DropdownMenuItem>
-                 </DialogTrigger>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </MessageDialog>
+              </DialogTrigger>
+            </div>
+        </MessageDialog>
       </TableCell>
     </TableRow>
   )
@@ -291,7 +282,7 @@ export default function HostBookingsPage() {
                 <TableHead className="text-center">Guests</TableHead>
                 <TableHead>Payout</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
