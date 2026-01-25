@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -7,6 +6,9 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { suburbs } from '@/lib/location-data';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { Experience } from '@/lib/types';
 
 const cityImageMap: Record<string, string> = {
     SYD: 'https://images.unsplash.com/photo-1524293581274-7540a2d487b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzeWRuZXl8ZW58MHx8fHwxNzY5MTczMTQwfDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -25,13 +27,37 @@ const cityImageMap: Record<string, string> = {
 }
 
 export function FeaturedCitiesSection() {
-    const featuredCities = useMemo(() => {
-        const cityIds = ['SYD', 'MEL', 'AKL', 'WLG'];
-        return suburbs.filter(s => cityIds.includes(s.id));
-    }, []);
+    const firestore = useFirestore();
+    const experiencesQuery = useMemoFirebase(
+        () => firestore ? query(collection(firestore, 'experiences'), where('status', '==', 'live')) : null,
+        [firestore]
+    );
+    const { data: experiences, isLoading } = useCollection<Experience>(experiencesQuery);
+    
+    const featuredCitiesData = useMemo(() => {
+        if (!experiences) return { cities: [], counts: {} };
 
-    // Assuming a loading state would be passed as a prop if this data were dynamic
-    const isLoading = false; 
+        const cityCounts = experiences.reduce((acc, exp) => {
+            const suburbId = exp.location.suburb;
+            if (suburbId) {
+                acc[suburbId] = (acc[suburbId] || 0) + 1;
+            }
+            return acc;
+        }, {} as Record<string, number>);
+
+        const topCityIds = Object.entries(cityCounts)
+            .sort((a, b) => b[1] - a[1])
+            .map(entry => entry[0]);
+        
+        const defaultIds = ['SYD', 'MEL', 'AKL', 'WLG'];
+        const combinedIds = [...new Set([...topCityIds, ...defaultIds])].slice(0, 4);
+
+        const cities = suburbs.filter(s => combinedIds.includes(s.id))
+            .sort((a, b) => combinedIds.indexOf(a.id) - combinedIds.indexOf(b.id));
+        
+        return { cities, counts: cityCounts };
+
+    }, [experiences]);
 
     return (
         <section>
@@ -41,32 +67,34 @@ export function FeaturedCitiesSection() {
             {isLoading ? (
                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-lg" />)
             ) : (
-                featuredCities.map(city => {
-                const cityImageURL = cityImageMap[city.id];
-                return (
-                    <Link key={city.id} href={`/discover?suburb=${city.id}`} className="group block">
-                    <Card className="overflow-hidden relative h-80 rounded-lg">
-                        {cityImageURL && (
-                        <Image
-                            src={cityImageURL}
-                            alt={city.name}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <h3 className="font-headline absolute bottom-4 left-4 text-2xl font-bold text-white">
-                        {city.name}
-                        </h3>
-                    </Card>
-                    </Link>
-                )
+                featuredCitiesData.cities.map(city => {
+                    const cityImageURL = cityImageMap[city.id];
+                    const count = featuredCitiesData.counts[city.id] || 0;
+                    return (
+                        <Link key={city.id} href={`/discover?suburb=${city.id}`} className="group block">
+                        <Card className="overflow-hidden relative h-80 rounded-lg">
+                            {cityImageURL && (
+                            <Image
+                                src={cityImageURL}
+                                alt={city.name}
+                                fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            <div className="absolute bottom-4 left-4 text-white">
+                                <h3 className="font-headline text-2xl font-bold">
+                                {city.name}
+                                </h3>
+                                {count > 0 && <p className="text-sm font-medium">{count} {count > 1 ? 'experiences' : 'experience'}</p>}
+                            </div>
+                        </Card>
+                        </Link>
+                    )
                 })
             )}
             </div>
         </section>
     );
 }
-
-    
