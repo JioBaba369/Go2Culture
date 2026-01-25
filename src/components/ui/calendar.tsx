@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -21,8 +20,8 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       fixedWeeks // Prevents height changes between months
       captionLayout="dropdown-buttons"
-      fromYear={new Date().getFullYear() - 100}
-      toYear={new Date().getFullYear() + 10}
+      fromYear={1900}
+      toYear={2030}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
