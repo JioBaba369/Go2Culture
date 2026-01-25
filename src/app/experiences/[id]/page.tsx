@@ -353,7 +353,6 @@ export default function ExperienceDetailPage() {
             { before: new Date() },
             disabledDays,
         ]}
-        className="p-0 sm:border-none"
       />
   );
 
