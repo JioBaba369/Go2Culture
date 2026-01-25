@@ -362,22 +362,42 @@ export default function ExperienceDetailPage() {
     <div className="py-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-           <div className="flex items-center gap-4 mb-2 text-muted-foreground">
+            <div className="flex items-center gap-3 mb-4">
+            <Avatar className="h-12 w-12">
+                {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={host.name} data-ai-hint={hostAvatar.imageHint}/>}
+                <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+                <h2 className="font-headline text-xl">Hosted by {host.name}</h2>
+                {host.level === 'Superhost' && (
+                    <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 gap-1 mt-1">
+                        <Award className="h-4 w-4" /> Superhost
+                    </Badge>
+                )}
+            </div>
+            </div>
+
+            <h1 className="font-headline text-4xl md:text-5xl font-bold">{experience.title}</h1>
+            
+            <div className="flex items-center gap-4 mt-4 text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Star className="h-5 w-5 text-accent fill-accent" />
-              <span className="font-bold text-foreground">{experience.rating.average}</span>
-              <span>({experience.rating.count} reviews)</span>
+                <Star className="h-5 w-5 text-accent fill-accent" />
+                <span className="font-bold text-foreground">{experience.rating.average}</span>
+                <span>({experience.rating.count} reviews)</span>
             </div>
             <span className="text-muted-foreground">·</span>
             <div className="flex items-center gap-1">
-              <MapPin className="h-5 w-5" />
-              <span>{localAreaName}, {suburbName}, {countryName}</span>
+                <MapPin className="h-5 w-5" />
+                <span>{localAreaName}, {suburbName}, {countryName}</span>
             </div>
-          </div>
-          <h1 className="font-headline text-4xl md:text-5xl font-bold">{experience.title}</h1>
+            <span className="text-muted-foreground">·</span>
+                <span>{durationHours} hours</span>
+                <span className="text-muted-foreground">·</span>
+                <span>Up to {experience.pricing.maxGuests} guests</span>
+            </div>
         </div>
         <WishlistButton experienceId={experience.id} className="h-12 w-12 flex-shrink-0" />
-      </div>
+    </div>
       
       <div className="mt-6">
         <div className="relative h-96 w-full overflow-hidden rounded-lg">
@@ -397,29 +417,6 @@ export default function ExperienceDetailPage() {
       
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
         <div className="lg:col-span-2 space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-headline text-2xl flex items-center gap-2">
-                Hosted by {host.name}
-                {host.level === 'Superhost' && (
-                  <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 gap-1">
-                    <Award className="h-4 w-4" /> Superhost
-                  </Badge>
-                )}
-              </h2>
-              <div className="flex items-center gap-4 text-muted-foreground mt-1">
-                <span>{durationHours} hours</span>
-                <span>·</span>
-                <span>Up to {experience.pricing.maxGuests} guests</span>
-              </div>
-            </div>
-            <Avatar className="h-16 w-16">
-              {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={host.name} data-ai-hint={hostAvatar.imageHint}/>}
-              <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-          </div>
-          <Separator />
-          
           <p className="text-lg leading-relaxed">{experience.description}</p>
           <Separator />
 
