@@ -89,6 +89,8 @@ function SponsorForm({ sponsor, onFinished }: { sponsor?: Sponsor, onFinished: (
         },
     });
     
+    const logoUrlValue = methods.watch("logoUrl");
+
     async function onSubmit(data: SponsorFormValues) {
         if (!firestore) return;
         setIsLoading(true);
@@ -130,6 +132,14 @@ function SponsorForm({ sponsor, onFinished }: { sponsor?: Sponsor, onFinished: (
                 <FormField control={methods.control} name="logoUrl" render={({ field }) => (
                     <FormItem><FormLabel>Logo URL</FormLabel><FormControl><Input {...field} placeholder="https://example.com/logo.png" /></FormControl><FormMessage /></FormItem>
                 )} />
+                 {logoUrlValue && (
+                    <div className="mt-2">
+                        <FormLabel>Logo Preview</FormLabel>
+                        <div className="mt-2 relative h-24 w-full rounded-md border p-2 flex items-center justify-center">
+                            <Image src={logoUrlValue} alt="Logo preview" width={96} height={96} className="object-contain" />
+                        </div>
+                    </div>
+                 )}
                 <FormField control={methods.control} name="website" render={({ field }) => (
                     <FormItem><FormLabel>Website URL</FormLabel><FormControl><Input {...field} placeholder="https://example.com" /></FormControl><FormMessage /></FormItem>
                 )} />
@@ -181,6 +191,13 @@ export default function AdminSponsorsPage() {
     }
   };
 
+  const emptyState = (
+    <div className="text-center py-10">
+        <h3 className="text-lg font-semibold">No sponsors added yet.</h3>
+        <p className="text-sm text-muted-foreground mt-1">Click the button to add your first sponsor.</p>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -204,7 +221,38 @@ export default function AdminSponsorsPage() {
         </Dialog>
       </div>
       
-      <Card>
+       {/* Mobile View */}
+       <div className="grid gap-4 md:hidden">
+            {isLoading && Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
+            {!isLoading && sponsors?.map(sponsor => (
+                <Card key={sponsor.id}>
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <Image src={sponsor.logoUrl} alt={sponsor.name} width={64} height={64} className="rounded-md object-contain border p-1" />
+                        <div className="flex-grow space-y-1">
+                            <h3 className="font-semibold">{sponsor.name}</h3>
+                            <div className="flex items-center gap-2">
+                                <Badge variant={sponsor.isActive ? 'default' : 'outline'}>{sponsor.isActive ? 'Active' : 'Inactive'}</Badge>
+                                {sponsor.website && <Link href={sponsor.website} target="_blank" className="text-xs hover:underline flex items-center gap-1 text-muted-foreground"><Globe className="h-3 w-3" /> Website</Link>}
+                            </div>
+                        </div>
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => openForm(sponsor)}><Edit className="mr-2 h-4 w-4"/>Edit</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => setSponsorToDelete(sponsor)}><Trash2 className="mr-2 h-4 w-4"/>Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </CardContent>
+                </Card>
+            ))}
+            {!isLoading && (!sponsors || sponsors.length === 0) && (
+                <Card className="flex flex-col items-center justify-center p-6">{emptyState}</Card>
+            )}
+       </div>
+
+      {/* Desktop View */}
+      <Card className="hidden md:block">
         <CardHeader>
           <CardTitle>All Sponsors</CardTitle>
           <CardDescription>A list of all sponsors and partners.</CardDescription>
@@ -254,7 +302,7 @@ export default function AdminSponsorsPage() {
                 </TableRow>
               ))}
               {!isLoading && (!sponsors || sponsors.length === 0) && (
-                 <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">No sponsors added yet.</TableCell></TableRow>
+                 <TableRow><TableCell colSpan={5}>{emptyState}</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
