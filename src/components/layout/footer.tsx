@@ -16,7 +16,7 @@ export function Footer() {
       <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <Logo />
+            <Logo className="text-primary" />
             <p className="text-sm text-muted-foreground">
               Experience culture the way locals live it — around the table, at home, together.
             </p>
