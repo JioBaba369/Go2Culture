@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-import { Globe, X, Instagram, Facebook } from 'lucide-react';
+import { Globe, Twitter, Instagram, Facebook } from 'lucide-react';
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 
@@ -128,7 +128,7 @@ function UserProfilePage() {
                 )}
                 {user.socialMedia?.twitter && (
                     <a href={user.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                        <X className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                         <span className="truncate">@{getUsername(user.socialMedia.twitter)}</span>
                     </a>
                 )}
