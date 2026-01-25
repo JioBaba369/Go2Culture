@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -24,9 +25,9 @@ export function ResponsiveDatePicker() {
 
   const TriggerButton = (
     <Button
-      variant="outline"
+      variant={"outline"}
       className={cn(
-        "w-full justify-start text-left font-normal h-12 sm:h-10",
+        "w-full justify-start text-left font-normal h-12 rounded-xl border-zinc-200 shadow-sm transition-all hover:border-zinc-400",
         !date && "text-muted-foreground"
       )}
     >
@@ -39,12 +40,13 @@ export function ResponsiveDatePicker() {
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>{TriggerButton}</PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 rounded-2xl border-none shadow-2xl" align="start">
           <Calendar
             mode="single"
             selected={date}
             onSelect={handleSelect}
             initialFocus
+            className="rounded-2xl border border-zinc-100"
           />
         </PopoverContent>
       </Popover>

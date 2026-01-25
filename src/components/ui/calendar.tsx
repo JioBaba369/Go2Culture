@@ -20,12 +20,16 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       fixedWeeks // Prevents height changes between months
+      captionLayout="dropdown-buttons"
+      fromYear={new Date().getFullYear() - 100}
+      toYear={new Date().getFullYear() + 10}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center h-9",
         caption_label: "text-sm font-medium",
+        caption_dropdowns: "flex gap-2",
         nav: "flex items-center",
         nav_button_previous: cn(
           buttonVariants({ variant: "outline" }),
