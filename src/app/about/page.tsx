@@ -1,5 +1,5 @@
 
-import { Globe, Users, Utensils } from 'lucide-react';
+import { Globe, Users, Utensils, Heart, PiggyBank, Handshake } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -38,6 +38,44 @@ export default function AboutPage() {
                     <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
                         From a bustling kitchen in Mumbai learning the secret to a perfect chai, to a loud, joyful family dinner in a Naples apartment, these were the moments of true connection. We built Go2Culture to make these authentic experiences accessible to everyone, bridging the gap between curious travelers and proud locals eager to share their world.
                     </p>
+                </div>
+                
+                <div className="text-center">
+                    <h2 className="font-headline text-3xl font-bold">Our Mission</h2>
+                    <h3 className="mt-2 text-2xl font-semibold text-primary">Connecting the World, One Table at a Time</h3>
+                    <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
+                        At Go2Culture, our mission is to foster World Peace through Taste and Sharing by bridging the gap between curious travelers and the heartbeat of our global community.
+                    </p>
+                    <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
+                        We recognize that we live in a truly multicultural society. Especially in the West, where most countries are now home to people from over 150 different nations, we see an unparalleled opportunity to experience, indulge, and learn from one another. We believe that when we go beyond the restaurant and into the heart of the home, we replace "tourism" with true human connection.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 className="font-headline text-2xl font-bold text-center mb-8">Our Commitment</h3>
+                    <div className="grid md:grid-cols-3 gap-8 text-center">
+                        <div className="flex flex-col items-center">
+                            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                                <Handshake className="h-8 w-8" />
+                            </div>
+                            <h4 className="text-xl font-bold font-headline">Cultural Immersion</h4>
+                            <p className="text-muted-foreground mt-2">To provide authentic experiences that celebrate the diverse heritage, stories, and flavors of the 150+ cultures that make up our modern world.</p>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                                <PiggyBank className="h-8 w-8" />
+                            </div>
+                            <h4 className="text-xl font-bold font-headline">Economic Impact</h4>
+                            <p className="text-muted-foreground mt-2">To directly boost the local household economy by empowering families to turn their kitchens into gateways of cultural exchange.</p>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                                <Heart className="h-8 w-8" />
+                            </div>
+                            <h4 className="text-xl font-bold font-headline">Global Unity</h4>
+                            <p className="text-muted-foreground mt-2">To prove that sharing a meal is the most powerful way to build a world defined by understanding, respect, and peace.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="text-center">
@@ -90,5 +128,3 @@ export default function AboutPage() {
         </div>
     );
 }
-
-    
