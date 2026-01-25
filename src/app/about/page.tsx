@@ -1,5 +1,5 @@
 
-import { Globe, Users, Utensils, Heart, PiggyBank, Handshake } from 'lucide-react';
+import { Users, Utensils, PiggyBank } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -10,9 +10,12 @@ export default function AboutPage() {
     return (
         <div className="py-12 space-y-16 md:space-y-24">
             <div className="text-center">
-                <h1 className="font-headline text-4xl md:text-5xl font-bold">Beyond the restaurant, into the heart of culture.</h1>
+                <h1 className="font-headline text-4xl md:text-5xl font-bold">Go2Culture: Beyond the Restaurant, Into the Heart of Our Global Community</h1>
                 <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                    We believe the most memorable travel experiences don't happen in packed tourist spots. They happen around a dinner table, in a local's home, sharing stories over a meal cooked with love. That's why we created Go2Culture.
+                    We believe that the most meaningful connections don’t happen in commercial spaces. They happen around a kitchen table, in a local home, sharing stories over a meal cooked with love.
+                </p>
+                <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+                    Our world has transformed into a vibrant multicultural society, especially across the West, where most countries now represent over 150 different nations. Within these borders live millions of migrants who carry the rich heritage, flavors, and traditions of their homelands. Go2Culture was created to unlock these hidden treasures, allowing everyone to experience, indulge, and learn from our newest neighbors.
                 </p>
             </div>
 
@@ -33,55 +36,18 @@ export default function AboutPage() {
                 <div className="text-center">
                     <h2 className="font-headline text-3xl font-bold">Our Story</h2>
                     <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        Go2Culture was born from a simple realization: the best souvenirs are memories. Our founders, a small group of avid travelers, noticed that their most cherished moments weren't from visiting monuments, but from the spontaneous invitations to share meals with local families.
+                        Go2Culture was born from a simple realization: the most authentic way to welcome someone into a community is to sit at their table. Our founders realized that while our cities are diverse, we often live side-by-side without truly knowing one another.
                     </p>
                     <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        From a bustling kitchen in Mumbai learning the secret to a perfect chai, to a loud, joyful family dinner in a Naples apartment, these were the moments of true connection. We built Go2Culture to make these authentic experiences accessible to everyone, bridging the gap between curious travelers and proud locals eager to share their world.
+                        They saw an opportunity to bridge the gap between long-time residents and migrants eager to share their culture. From a kitchen in London where a Syrian mother shares the secret to perfect kibbeh, to a home in Berlin where a Venezuelan family hosts a joyful dinner, these are the moments of true human connection. We built Go2Culture to turn these stories into shared experiences, moving beyond the "immigrant" label to celebrate the cultural ambassador in everyone.
                     </p>
                 </div>
                 
-                <div className="text-center">
-                    <h2 className="font-headline text-3xl font-bold">Our Mission</h2>
-                    <h3 className="mt-2 text-2xl font-semibold text-primary">Building Bridges Through the Power of Food</h3>
-                    <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        At Go2Culture, our mission is to foster World Peace through Taste and Sharing by celebrating the incredible diversity of our modern multicultural society.
-                    </p>
-                    <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        We recognize that the West has become a tapestry of over 150 different nations. We move beyond the restaurant and into the heart of the home to highlight the stories of migrants who carry the soul of their homelands in their recipes. Our platform is dedicated to turning the act of sharing a meal into a meaningful experience where neighbors can indulge in new flavors and learn from the heritage of those who have journeyed to join our communities.
-                    </p>
-                </div>
                 
-                <div>
-                    <h3 className="font-headline text-2xl font-bold text-center mb-8">Our Commitment</h3>
-                    <div className="grid md:grid-cols-3 gap-8 text-center">
-                        <div className="flex flex-col items-center">
-                            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                                <Handshake className="h-8 w-8" />
-                            </div>
-                            <h4 className="text-xl font-bold font-headline">Empowering Migrants</h4>
-                            <p className="text-muted-foreground mt-2">To provide a dignified platform where migrants can share their culture and pride, moving from being "newcomers" to being cultural ambassadors.</p>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                                <PiggyBank className="h-8 w-8" />
-                            </div>
-                            <h4 className="text-xl font-bold font-headline">Boosting the Household Economy</h4>
-                            <p className="text-muted-foreground mt-2">To provide a direct path for families to boost their local household economy, ensuring that the financial benefits of cultural exchange go straight into the hands of the people cooking the food.</p>
-                        </div>
-                        <div className="flex flex-col items-center">
-                            <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                                <Heart className="h-8 w-8" />
-                            </div>
-                            <h4 className="text-xl font-bold font-headline">Social Integration</h4>
-                            <p className="text-muted-foreground mt-2">To use food as a universal language that dissolves barriers, creating genuine human connections between locals and migrants to foster a more inclusive and peaceful world.</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div className="text-center">
                      <h2 className="font-headline text-3xl font-bold">Our Philosophy</h2>
                      <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        We are guided by three core principles.
+                        We are guided by three core principles that turn a simple meal into a movement for World Peace through Taste and Sharing.
                     </p>
                 </div>
 
@@ -91,29 +57,29 @@ export default function AboutPage() {
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Utensils className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Real Food, Not Restaurant Food</h3>
-                        <p className="text-muted-foreground mt-2">Experience the authentic taste of a place through recipes passed down through generations. This is food cooked from the heart.</p>
+                        <h3 className="text-xl font-bold font-headline">Authentic Heritage, Not Commercial Food</h3>
+                        <p className="text-muted-foreground mt-2">Experience the soul of a nation through recipes passed down through generations. This is food cooked from the heart, offering tastes and stories you won't find in any restaurant.</p>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Users className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">Genuine Connection, Not a Transaction</h3>
-                        <p className="text-muted-foreground mt-2">Go beyond being a customer. Share stories, ask questions, and form lasting memories with your local hosts.</p>
+                        <p className="text-muted-foreground mt-2">By entering a home, you participate in a global exchange that dissolves barriers. It’s a two-way street where guests gain a new perspective and migrants share their pride and history.</p>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                            <Globe className="h-8 w-8" />
+                            <PiggyBank className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Cultural Exchange, Not Tourism</h3>
-                        <p className="text-muted-foreground mt-2">We facilitate a two-way street where guests learn about new cultures and hosts share their heritage with the world.</p>
+                        <h3 className="text-xl font-bold font-headline">Boosting the Local Household Economy</h3>
+                        <p className="text-muted-foreground mt-2">We are committed to social impact. Every experience directly boosts the household economy of migrant families, providing them with a dignified way to support their lives while enriching the local community.</p>
                     </div>
                 </div>
 
                  <div className="text-center pt-8 bg-card p-8 md:p-12 rounded-lg">
                     <h2 className="font-headline text-3xl font-bold">Join Our Community</h2>
                     <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        Whether you're a traveler seeking a real taste of culture or a passionate cook wanting to share your heritage, there's a seat at the table for you.
+                        The world is a tapestry of over 150 cultures living right next door. Whether you are looking to discover the true taste of a new culture or you are a migrant ready to share your heritage with your new home, there is a seat at the table for you.
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
                         <Button size="lg" asChild>
