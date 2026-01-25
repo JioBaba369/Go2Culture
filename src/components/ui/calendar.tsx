@@ -21,12 +21,13 @@ function Calendar({
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        caption: "flex justify-between items-center pt-1 mb-4",
-        caption_label: "text-lg font-semibold",
+        month: "space-y-4",
+        caption: "flex justify-between pt-1 relative items-center",
+        caption_label: "text-sm font-medium",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-8 w-8 bg-transparent p-0 rounded-full hover:bg-accent"
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
         ),
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
@@ -38,12 +39,10 @@ function Calendar({
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
         ),
-        day_range_end: "day-range-end",
         day_selected:
-          "bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground rounded-full border-2 border-destructive",
-        day_today: "bg-accent text-accent-foreground rounded-md",
-        day_outside:
-          "day-outside text-muted-foreground opacity-20",
+          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+        day_today: "bg-accent text-accent-foreground",
+        day_outside: "text-muted-foreground opacity-50",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
