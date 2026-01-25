@@ -214,12 +214,16 @@ service cloud.firestore {
     }
     
     /**
-     * @description Manages sponsors. Sponsors are public to read if active.
+     * @description Manages sponsors.
      * @path /sponsors/{sponsorId}
      */
     match /sponsors/{sponsorId} {
-      allow get: if resource.data.isActive == true;
-      allow list: if true;
+      // Public can GET single active sponsors. Admins can get any sponsor.
+      allow get: if (resource.data.isActive == true) || isAdmin();
+      
+      // Public can LIST active sponsors. Admins can list all sponsors.
+      allow list: if (request.query.where.isActive == true) || isAdmin();
+
       // Only admins can create, update, or delete sponsors.
       allow write: if isAdmin();
     }
