@@ -1,0 +1,18 @@
+# See https://www.robotstxt.org/robotstxt.html for syntax and directives
+
+# Allow all reputable crawlers
+User-agent: *
+Allow: /
+
+# Disallow crawling of private, user-specific, or non-content pages
+Disallow: /api/
+Disallow: /admin/
+Disallow: /host/
+Disallow: /profile/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /become-a-host/apply
+
+# Point crawlers to the sitemap for better indexing
+Sitemap: https://www.go2culture.com/sitemap.xml
