@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -21,7 +22,8 @@ export function Calendar({
   onChange,
   disabledDates = [],
   timezone = "Australia/Sydney",
-}: CalendarProps) {
+  ...props
+}: React.ComponentProps<typeof DayPicker>) {
   const disabled = [
     { before: new Date() }, // disable past
     ...disabledDates,
@@ -34,7 +36,6 @@ export function Calendar({
 
   return (
     <DayPicker
-      mode="range"
       selected={value}
       onSelect={(range) =>
         onChange?.({
@@ -51,18 +52,16 @@ export function Calendar({
         months: "flex flex-col",
         month: "space-y-4",
 
-        caption: "relative flex justify-center items-center",
-        caption_label: "text-sm font-semibold",
-
+        caption: "relative flex justify-between items-center",
+        caption_label: "text-base font-semibold",
+        
         nav: "flex items-center gap-1",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
-          "h-10 w-10 p-0"
+          "h-8 w-8 p-0"
         ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-
-        table: "w-full border-collapse",
+        
+        table: "w-full border-collapse mt-4",
         head_row: "flex",
         head_cell:
           "flex-1 text-center text-xs font-medium text-muted-foreground",
@@ -72,21 +71,20 @@ export function Calendar({
 
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-12 w-full p-0 font-normal rounded-lg"
+          "h-12 w-full p-0 font-normal rounded-full"
         ),
-
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary",
-        day_range_start: "rounded-l-lg",
-        day_range_end: "rounded-r-lg",
-        day_range_middle: "bg-primary/20",
-        day_today: "border border-primary",
+        day_range_start: "rounded-l-full",
+        day_range_end: "rounded-r-full",
+        day_range_middle: "bg-primary/20 !rounded-none",
+        day_today: "bg-accent/20",
         day_disabled: "opacity-30 cursor-not-allowed",
+        day_outside: "opacity-30",
       }}
       components={{
         IconLeft: () => <ChevronLeft className="h-5 w-5" />,
         IconRight: () => <ChevronRight className="h-5 w-5" />,
       }}
+      {...props}
     />
   )
 }
