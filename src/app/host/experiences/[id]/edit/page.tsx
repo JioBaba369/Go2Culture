@@ -8,7 +8,7 @@ import * as z from 'zod';
 import { useDoc, useFirebase, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Experience } from '@/lib/types';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
@@ -18,10 +18,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { updateExperience } from '@/lib/host-actions';
+import { updateExperience, deleteExperienceForHost } from '@/lib/host-actions';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const experienceSchema = z.object({
   title: z.string().min(5, "Experience title is required."),
@@ -71,6 +72,7 @@ export default function EditExperiencePage() {
   const { toast } = useToast();
   const experienceId = params.id as string;
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const experienceRef = useMemoFirebase(
     () => (firestore && experienceId ? doc(firestore, 'experiences', experienceId) : null),
@@ -161,7 +163,7 @@ export default function EditExperiencePage() {
         });
         setSaveState('saved');
         methods.reset(data);
-        setTimeout(() => router.push('/host/experiences'), 1500);
+        setTimeout(() => setSaveState('idle'), 2000);
     } catch(error: any) {
         toast({
             variant: "destructive",
@@ -169,6 +171,26 @@ export default function EditExperiencePage() {
             description: error.message || "Could not save your changes.",
         });
         setSaveState('idle');
+    }
+  };
+  
+  const onDelete = async () => {
+    if (!firestore) return;
+    setIsDeleting(true);
+    try {
+      await deleteExperienceForHost(firestore, experienceId);
+      toast({
+        title: "Experience Deleted",
+        description: `"${experience?.title}" has been permanently removed.`,
+      });
+      router.push('/host/experiences');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: error.message || "Could not delete the experience.",
+      });
+      setIsDeleting(false);
     }
   };
 
@@ -330,14 +352,38 @@ export default function EditExperiencePage() {
             </CardContent>
         </Card>
         
-        <div className="flex justify-end">
-             <Button type="submit" disabled={saveState !== 'idle' || !methods.formState.isDirty}>
-                {saveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {saveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
-                {saveState === 'saved' ? 'Saved!' : 'Save Changes'}
-            </Button>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                <CardDescription>These actions are permanent and cannot be undone.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-start">
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive">
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete Experience
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete your experience "{experience.title}". All associated data, including bookings and reviews, will be lost. This action cannot be undone.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={onDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                Delete Permanently
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </CardContent>
+        </Card>
       </form>
     </FormProvider>
   );
 }
+

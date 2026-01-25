@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -23,11 +24,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Experience } from '@/lib/types';
-import { MoreHorizontal, Eye, Pause, Play, Edit, Trash2, PlusCircle } from 'lucide-react';
+import { MoreHorizontal, Eye, Pause, Play, Edit, Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   useCollection,
@@ -39,7 +50,7 @@ import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { pauseExperienceForHost, startExperienceForHost } from '@/lib/host-actions';
+import { pauseExperienceForHost, startExperienceForHost, deleteExperienceForHost } from '@/lib/host-actions';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
@@ -57,6 +68,8 @@ export default function HostExperiencesPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isToggling, setIsToggling] = useState<string | null>(null);
+  const [experienceToDelete, setExperienceToDelete] = useState<Experience | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const experiencesQuery = useMemoFirebase(
     () =>
@@ -87,6 +100,24 @@ export default function HostExperiencesPage() {
       });
     } finally {
       setIsToggling(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!experienceToDelete || !firestore) return;
+    setIsDeleting(true);
+    try {
+        await deleteExperienceForHost(firestore, experienceToDelete.id);
+        toast({ title: 'Experience Deleted', description: `"${experienceToDelete.title}" has been removed.`});
+        setExperienceToDelete(null);
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Delete Failed',
+            description: error.message || 'Could not delete the experience.',
+        });
+    } finally {
+        setIsDeleting(false);
     }
   };
 
@@ -146,7 +177,7 @@ export default function HostExperiencesPage() {
                             )}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive cursor-pointer">
+                        <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => setExperienceToDelete(experience)}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                         </DropdownMenuItem>
@@ -209,7 +240,7 @@ export default function HostExperiencesPage() {
                         )}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive cursor-pointer">
+                      <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => setExperienceToDelete(experience)}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
@@ -289,6 +320,24 @@ export default function HostExperiencesPage() {
             </div>
         </CardContent>
       </Card>
+      
+      <AlertDialog open={!!experienceToDelete} onOpenChange={(open) => !open && setExperienceToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the experience <span className="font-medium">"{experienceToDelete?.title}"</span>.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                Delete Permanently
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

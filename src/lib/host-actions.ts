@@ -6,6 +6,7 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
+  deleteDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -108,4 +109,21 @@ export async function updateExperience(
         }));
         throw serverError;
     }
+}
+
+// Function to delete an experience
+export async function deleteExperienceForHost(
+  firestore: Firestore,
+  experienceId: string
+) {
+  const expRef = doc(firestore, 'experiences', experienceId);
+  try {
+    await deleteDoc(expRef);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: expRef.path,
+      operation: 'delete',
+    }));
+    throw serverError;
+  }
 }
