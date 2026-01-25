@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -18,22 +19,12 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      // Fixed: Ensure 'label' or 'dropdown' is used correctly for your version
-      captionLayout="dropdown" 
-      // Note: In v9+, fromYear/toYear are often replaced by startMonth/endMonth
-      // but if you are on v8, these remain correct.
-      fromYear={1900}
-      toYear={2030}
       className={cn("p-3", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center h-9",
+        caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
-        // Added styling for the dropdown container
-        caption_dropdowns: "flex justify-center gap-1",
-        // Styling the actual select elements (often overlooked)
-        dropdown: "rdp-dropdown bg-transparent focus:outline-none appearance-none cursor-pointer",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -61,13 +52,16 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
+        caption_dropdowns: "flex gap-1",
         ...classNames,
       }}
       components={{
-        // Use standard Icon components; ensure they receive the classNames
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}
+      captionLayout="dropdown-buttons"
+      fromYear={1960}
+      toYear={2030}
       {...props}
     />
   )
