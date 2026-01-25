@@ -12,10 +12,10 @@ export default function AboutPage() {
             <div className="text-center">
                 <h1 className="font-headline text-4xl md:text-5xl font-bold">Go2Culture: Beyond the Restaurant, Into the Heart of Our Global Community</h1>
                 <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                    We believe that the most meaningful connections don’t happen in commercial spaces. They happen around a kitchen table, in a local home, sharing stories over a meal cooked with love.
+                    We believe that the most meaningful travel and cultural connections don’t happen in commercial spaces. They happen around a kitchen table, in a local home, sharing stories over a meal cooked with love.
                 </p>
                 <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                    Our world has transformed into a vibrant multicultural society, especially across the West, where most countries now represent over 150 different nations. Within these borders live millions of migrants who carry the rich heritage, flavors, and traditions of their homelands. Go2Culture was created to unlock these hidden treasures, allowing everyone to experience, indulge, and learn from our newest neighbors.
+                    Go2Culture was created to unlock these hidden treasures, transforming tourism into true human connection. Whether you're a traveler in a new country or a curious local, we invite you to step off the beaten path and into the heart of a culture.
                 </p>
             </div>
 
@@ -36,10 +36,10 @@ export default function AboutPage() {
                 <div className="text-center">
                     <h2 className="font-headline text-3xl font-bold">Our Story</h2>
                     <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        Go2Culture was born from a simple realization: the most authentic way to welcome someone into a community is to sit at their table. Our founders realized that while our cities are diverse, we often live side-by-side without truly knowing one another.
+                        Go2Culture was born from a simple realization: the most authentic way to experience a place is to share a meal with the people who call it home. Our founders, avid travelers themselves, grew tired of the transactional nature of tourism. They saw an opportunity to bridge the gap between curious visitors and the local experts who hold the keys to a culture's soul.
                     </p>
                     <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        They saw an opportunity to bridge the gap between long-time residents and migrants eager to share their culture. From a kitchen in London where a Syrian mother shares the secret to perfect kibbeh, to a home in Berlin where a Venezuelan family hosts a joyful dinner, these are the moments of true human connection. We built Go2Culture to turn these stories into shared experiences, moving beyond the "immigrant" label to celebrate the cultural ambassador in everyone.
+                        Imagine learning to cook Pad Thai in a Bangkok home, a family in Mumbai sharing their secret chai recipe, or a Syrian mother in London teaching you the art of perfect kibbeh. These are the moments of true connection we live for. We built Go2Culture to turn these stories into shared experiences, moving beyond being a 'tourist' to becoming an honored guest.
                     </p>
                 </div>
                 
@@ -65,21 +65,21 @@ export default function AboutPage() {
                             <Users className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">Genuine Connection, Not a Transaction</h3>
-                        <p className="text-muted-foreground mt-2">By entering a home, you participate in a global exchange that dissolves barriers. It’s a two-way street where guests gain a new perspective and migrants share their pride and history.</p>
+                        <p className="text-muted-foreground mt-2">By entering a home, you participate in a global exchange that dissolves barriers. It’s a two-way street where guests gain a new perspective and hosts share their pride and history.</p>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <PiggyBank className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">Boosting the Local Household Economy</h3>
-                        <p className="text-muted-foreground mt-2">We are committed to social impact. Every experience directly boosts the household economy of migrant families, providing them with a dignified way to support their lives while enriching the local community.</p>
+                        <p className="text-muted-foreground mt-2">We are committed to social impact. Every experience directly boosts the household economy of local families, providing them with a dignified way to support their lives while enriching their community.</p>
                     </div>
                 </div>
 
                  <div className="text-center pt-8 bg-card p-8 md:p-12 rounded-lg">
                     <h2 className="font-headline text-3xl font-bold">Join Our Community</h2>
                     <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        The world is a tapestry of over 150 cultures living right next door. Whether you are looking to discover the true taste of a new culture or you are a migrant ready to share your heritage with your new home, there is a seat at the table for you.
+                        The world is a tapestry of vibrant cultures waiting to be explored. Whether you are looking to discover the true taste of a new place or you are a passionate local ready to share your heritage, there is a seat at the table for you.
                     </p>
                     <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
                         <Button size="lg" asChild>
