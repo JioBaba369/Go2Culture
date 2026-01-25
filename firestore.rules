@@ -74,29 +74,16 @@ service cloud.firestore {
     }
 
     match /messages/{messageId} {
-      function isBookingParticipant() {
-        let bookingId = request.query.where.bookingId;
-        // NOTE: Client MUST filter by bookingId or the 'list' will fail
-        return bookingId != null && 
-               get(/databases/$(database)/documents/bookings/$(bookingId)).data.guestId == request.auth.uid ||
-               get(/databases/$(database)/documents/bookings/$(bookingId)).data.hostId == request.auth.uid;
-      }
-      
       allow get: if isAdmin() || (isSignedIn() && request.auth.uid in resource.data.participants);
-      allow list: if isAdmin() || (isSignedIn() && (request.auth.uid in resource.data.participants || isBookingParticipant()));
+      allow list: if isAdmin() || (isSignedIn() && (request.auth.uid in resource.data.participants));
       allow create: if isSignedIn() && (request.resource.data.senderId == request.auth.uid);
       allow update: if isSignedIn() && (resource.data.senderId == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
     }
 
     match /sponsors/{sponsorId} {
-      // FIX: Added 'true' check to get, and made list more flexible
-      allow get: if (resource.data.isActive == true) || isAdmin() || !exists(resource);
-      
-      // FIX: This now allows listing if the user filters for active sponsors
-      // or if they are an admin.
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.isActive == true);
-
+      // Allow public read for everyone, but only admins can write.
+      allow read: if true;
       allow write: if isAdmin();
     }
 
