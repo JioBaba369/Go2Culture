@@ -84,3 +84,16 @@
   color: hsl(var(--primary-foreground)) !important;
   font-weight: 600;
 }
+
+/* Hide the default arrow in selects for a cleaner look */
+.rdp-dropdown::-ms-expand {
+  display: none;
+}
+.rdp-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0 4px;
+}
