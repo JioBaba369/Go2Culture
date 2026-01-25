@@ -45,7 +45,7 @@ export function Header() {
   const isAdmin = user?.uid === ADMIN_UID;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-[#DF0000]">
+    <header className="sticky top-0 z-50 w-full border-b bg-primary">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
         <nav className="hidden md:flex items-center gap-6">
@@ -53,13 +53,13 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+              className="text-sm font-medium text-primary-foreground/80 transition-colors hover:text-primary-foreground"
             >
               {link.label}
             </Link>
           ))}
            {isAdmin && (
-              <Link href="/admin" className="text-sm font-medium text-white/80 transition-colors hover:text-white">
+              <Link href="/admin" className="text-sm font-medium text-primary-foreground/80 transition-colors hover:text-primary-foreground">
                 Admin
               </Link>
             )}
@@ -70,7 +70,7 @@ export function Header() {
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-white/10">
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary-foreground/10">
                   <Avatar className="h-10 w-10">
                     {user.photoURL ? (
                       <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
@@ -128,10 +128,10 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white" asChild>
+              <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" asChild>
                 <Link href="/login">Log In</Link>
               </Button>
-              <Button asChild className="bg-white text-[#DF0000] hover:bg-white/90">
+              <Button asChild className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </>
@@ -140,7 +140,7 @@ export function Header() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white">
+              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
