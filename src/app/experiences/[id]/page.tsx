@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import type { Experience, Host, Review, User, Coupon, Booking } from "@/lib/types";
@@ -88,6 +88,11 @@ export default function ExperienceDetailPage() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [couponError, setCouponError] = useState('');
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const isMobile = useMediaQuery("(max-width: 767px)");
   const firestore = useFirestore();
@@ -544,23 +549,34 @@ export default function ExperienceDetailPage() {
                     <div className="flex flex-col space-y-4">
                         <div className="space-y-2">
                             <Label>Date</Label>
-                            {!isMobile ? (
-                                <Popover open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
-                                    <PopoverTrigger asChild>{DatePickerTrigger}</PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">{CalendarComponent}</PopoverContent>
-                                </Popover>
+                             {isMounted ? (
+                                !isMobile ? (
+                                    <Popover open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
+                                        <PopoverTrigger asChild>{DatePickerTrigger}</PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">{CalendarComponent}</PopoverContent>
+                                    </Popover>
+                                ) : (
+                                    <Drawer open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
+                                        <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
+                                        <DrawerContent>
+                                            <DrawerHeader className="sr-only">
+                                            <DrawerTitle>Select a date</DrawerTitle>
+                                            <DrawerDescription>Choose a date for your experience.</DrawerDescription>
+                                            </DrawerHeader>
+                                            <div className="p-4">{CalendarComponent}</div>
+                                            <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
+                                        </DrawerContent>
+                                    </Drawer>
+                                )
                             ) : (
-                                <Drawer open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
-                                    <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
-                                    <DrawerContent>
-                                        <DrawerHeader className="sr-only">
-                                          <DrawerTitle>Select a date</DrawerTitle>
-                                          <DrawerDescription>Choose a date for your experience.</DrawerDescription>
-                                        </DrawerHeader>
-                                        <div className="p-4">{CalendarComponent}</div>
-                                        <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
-                                    </DrawerContent>
-                                </Drawer>
+                                 <Button
+                                    variant={"outline"}
+                                    className="w-full justify-start text-left font-normal h-12 sm:h-10 text-muted-foreground"
+                                    disabled
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    <span>Pick a date</span>
+                                </Button>
                             )}
                         </div>
 
