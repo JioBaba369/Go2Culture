@@ -13,7 +13,17 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow } from "date-fns";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookingsChart, EarningsChart } from "@/components/host/dashboard-charts";
+import dynamic from "next/dynamic";
+
+const BookingsChart = dynamic(() => import('@/components/host/dashboard-charts').then(mod => mod.BookingsChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-80" />
+});
+const EarningsChart = dynamic(() => import('@/components/host/dashboard-charts').then(mod => mod.EarningsChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-80" />
+});
+
 
 function ActivityItem({ activity }: { activity: any }) {
     const { firestore } = useFirebase();
@@ -114,17 +124,8 @@ export default function HostDashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {isLoading ? (
-                    <>
-                        <Skeleton className="h-80" />
-                        <Skeleton className="h-80" />
-                    </>
-                ) : (
-                    <>
-                        <BookingsChart bookings={bookings || []} />
-                        <EarningsChart bookings={bookings || []} />
-                    </>
-                )}
+                <BookingsChart bookings={bookings || []} />
+                <EarningsChart bookings={bookings || []} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

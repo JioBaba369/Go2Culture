@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Search, Award } from "lucide-react";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
-import { FeaturedExperiencesSection } from "@/components/home/featured-experiences";
-import { HowItWorksSection } from "@/components/home/how-it-works";
-import { FeaturedCitiesSection } from "@/components/home/featured-cities";
-import { TestimonialsSection } from "@/components/home/testimonials";
-import { FeaturedSponsorsSection } from "@/components/home/featured-sponsors";
+import dynamic from "next/dynamic";
+
+const HowItWorksSection = dynamic(() => import('@/components/home/how-it-works').then(mod => mod.HowItWorksSection));
+const FeaturedExperiencesSection = dynamic(() => import('@/components/home/featured-experiences').then(mod => mod.FeaturedExperiencesSection));
+const FeaturedCitiesSection = dynamic(() => import('@/components/home/featured-cities').then(mod => mod.FeaturedCitiesSection));
+const TestimonialsSection = dynamic(() => import('@/components/home/testimonials').then(mod => mod.TestimonialsSection));
+const FeaturedSponsorsSection = dynamic(() => import('@/components/home/featured-sponsors').then(mod => mod.FeaturedSponsorsSection));
 
 
 export default function Home() {

@@ -22,10 +22,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { UsersChart, ExperiencesChart } from "@/components/admin/dashboard-charts";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { HostApplication, Experience, User, Review, Coupon } from "@/lib/types";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const UsersChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.UsersChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[350px]" />
+});
+const ExperiencesChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.ExperiencesChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[350px]" />
+});
+
 
 const ActivityIcon = ({ type }: { type: string }) => {
     switch (type) {
