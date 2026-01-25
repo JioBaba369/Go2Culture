@@ -187,14 +187,13 @@ function BookingCalendar() {
             <CardHeader>
                 <CardTitle>Your Booking Calendar</CardTitle>
             </CardHeader>
-            <CardContent className="p-0 sm:p-4">
+            <CardContent>
                 <Calendar
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     modifiers={modifiers}
                     modifiersClassNames={modifiersClassNames}
-                    className="p-0 sm:border rounded-md"
                     disabled={{ before: new Date() }}
                 />
                  <div className="flex gap-4 mt-4 text-sm text-muted-foreground p-4 sm:p-0">
