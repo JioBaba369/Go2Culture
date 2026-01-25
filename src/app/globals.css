@@ -5,36 +5,36 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 210 10% 23%;
-    --card: 210 20% 98%;
-    --card-foreground: 210 10% 23%;
-    --popover: 210 20% 98%;
-    --popover-foreground: 210 10% 23%;
-    --primary: 200 100% 45%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 200 95% 95%;
-    --secondary-foreground: 210 10% 23%;
-    --muted: 210 20% 94%;
-    --muted-foreground: 210 10% 55%;
-    --accent: 200 100% 35%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 200 100% 45%;
+    --background: 60 56% 91%; /* #F5F5DC - Light Beige */
+    --foreground: 60 10% 10%; /* #1C1C1A - Dark Brown/Gray */
+    --card: 60 56% 91%;
+    --card-foreground: 60 10% 10%;
+    --popover: 60 56% 91%;
+    --popover-foreground: 60 10% 10%;
+    --primary: 16 100% 66%; /* #FF7F50 - Coral */
+    --primary-foreground: 16 100% 10%; /* Dark Brown for contrast */
+    --secondary: 16 100% 95%; /* Lighter coral */
+    --secondary-foreground: 16 100% 60%; /* Darker Coral for text */
+    --muted: 60 56% 95%; /* Lighter beige */
+    --muted-foreground: 60 10% 45%; /* #737367 */
+    --accent: 0 59% 35%; /* #8F2424 - Darker Red for contrast */
+    --accent-foreground: 0 0% 100%; /* White */
+    --destructive: 0 59% 41%; /* #A52A2A - PRD Red */
+    --destructive-foreground: 0 0% 100%;
+    --border: 60 30% 85%; /* #E1E1D3 */
+    --input: 60 30% 85%;
+    --ring: 16 100% 66%;
     --radius: 0.8rem;
 
-    /* Custom Sidebar vars aligned with the new theme */
-    --sidebar-background: 210 20% 98%;
-    --sidebar-foreground: 210 10% 23%;
-    --sidebar-primary: 200 100% 45%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 200 95% 95%;
-    --sidebar-accent-foreground: 210 10% 23%;
-    --sidebar-border: 210 20% 88%;
-    --sidebar-ring: 200 100% 45%;
+    /* Custom Sidebar vars */
+    --sidebar-background: 60 56% 91%;
+    --sidebar-foreground: 60 10% 10%;
+    --sidebar-primary: 16 100% 66%;
+    --sidebar-primary-foreground: 16 100% 10%;
+    --sidebar-accent: 60 56% 95%;
+    --sidebar-accent-foreground: 60 10% 10%;
+    --sidebar-border: 60 30% 85%;
+    --sidebar-ring: 16 100% 66%;
   }
 
   .dark {
@@ -44,29 +44,29 @@
     --card-foreground: 210 20% 98%;
     --popover: 210 10% 12%;
     --popover-foreground: 210 20% 98%;
-    --primary: 200 100% 50%;
-    --primary-foreground: 210 10% 10%;
-    --secondary: 200 50% 20%;
-    --secondary-foreground: 210 20% 98%;
+    --primary: 16 100% 66%; /* Coral */
+    --primary-foreground: 16 100% 10%;
+    --secondary: 16 100% 20%; /* Darker coral for dark mode */
+    --secondary-foreground: 16 100% 95%;
     --muted: 210 10% 25%;
     --muted-foreground: 210 20% 70%;
-    --accent: 200 100% 40%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 0 59% 41%; /* #A52A2A */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 210 20% 98%;
     --border: 210 10% 20%;
     --input: 210 10% 20%;
-    --ring: 200 100% 50%;
+    --ring: 16 100% 66%;
      
     /* Custom Sidebar vars for dark mode */
     --sidebar-background: 210 10% 10%;
     --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 200 100% 50%;
-    --sidebar-primary-foreground: 210 10% 10%;
-    --sidebar-accent: 200 50% 20%;
-    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-primary: 16 100% 66%;
+    --sidebar-primary-foreground: 16 100% 10%;
+    --sidebar-accent: 16 100% 20%;
+    --sidebar-accent-foreground: 16 100% 95%;
     --sidebar-border: 210 10% 20%;
-    --sidebar-ring: 200 100% 50%;
+    --sidebar-ring: 16 100% 66%;
   }
 }
 
@@ -90,9 +90,9 @@
   display: none;
 }
 .rdp-dropdown {
-  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  appearance: none;
   border: none;
   background: transparent;
   padding: 0 4px;

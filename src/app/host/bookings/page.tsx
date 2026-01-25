@@ -223,7 +223,7 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
                 {isProcessing === 'cancel' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <X className="mr-2 h-4 w-4"/>} Cancel
             </Button>
             <MessageDialog booking={booking} recipient={guest}>
-              <Button variant="outline" size="icon"><MessageSquare className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" aria-label="Chat with guest"><MessageSquare className="h-4 w-4" /></Button>
             </MessageDialog>
         </CardContent>
       )}

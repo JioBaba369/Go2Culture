@@ -227,7 +227,7 @@ export default function AdminSponsorsPage() {
             {!isLoading && sponsors?.map(sponsor => (
                 <Card key={sponsor.id}>
                     <CardContent className="p-4 flex items-center gap-4">
-                        <Image src={sponsor.logoUrl} alt={sponsor.name} width={64} height={64} className="rounded-md object-contain border p-1" />
+                        <Image src={sponsor.logoUrl} alt="" width={64} height={64} className="rounded-md object-contain border p-1" />
                         <div className="flex-grow space-y-1">
                             <h3 className="font-semibold">{sponsor.name}</h3>
                             <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export default function AdminSponsorsPage() {
                 <TableRow key={sponsor.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
-                        <Image src={sponsor.logoUrl} alt={sponsor.name} width={40} height={40} className="rounded-sm object-contain" />
+                        <Image src={sponsor.logoUrl} alt="" width={40} height={40} className="rounded-sm object-contain" />
                         <span>{sponsor.name}</span>
                       </div>
                     </TableCell>

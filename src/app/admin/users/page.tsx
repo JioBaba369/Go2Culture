@@ -82,6 +82,7 @@ export default function AdminUsersPage() {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">
                                     <MoreHorizontal className="h-5 w-5" />
+                                    <span className="sr-only">Actions</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -186,5 +187,3 @@ export default function AdminUsersPage() {
     </div>
   );
 }
-
-    

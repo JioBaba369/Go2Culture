@@ -77,6 +77,7 @@ export default function AdminReportsPage() {
                 <DropdownMenuTrigger asChild>
                    <Button variant="ghost" size="icon">
                     <MoreHorizontal className="h-5 w-5" />
+                    <span className="sr-only">Actions</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
