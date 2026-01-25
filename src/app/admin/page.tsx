@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -114,6 +113,8 @@ export default function AdminDashboardPage() {
   const { data: reviews } = useCollection<Review>(useMemoFirebase(() => firestore ? collection(firestore, 'reviews') : null, [firestore]));
   const { data: coupons } = useCollection<Coupon>(useMemoFirebase(() => firestore ? collection(firestore, 'coupons') : null, [firestore]));
 
+  const totalHosts = users?.filter(u => u.role === 'host' || u.role === 'both').length || 0;
+
   const stats = [
     {
       title: "Pending Applications",
@@ -122,9 +123,9 @@ export default function AdminDashboardPage() {
       color: "text-blue-500",
     },
     {
-      title: "Approved Hosts",
-      value: experiences ? new Set(experiences.map(exp => exp.hostId)).size : 0,
-      icon: CheckCircle,
+      title: "Total Hosts",
+      value: totalHosts,
+      icon: Users,
       color: "text-green-500",
     },
     {
@@ -133,11 +134,17 @@ export default function AdminDashboardPage() {
       icon: Utensils,
       color: "text-purple-500",
     },
-    {
+     {
       title: "Total Users",
       value: users?.length || 0,
-      icon: Users,
+      icon: UserPlus,
       color: "text-orange-500",
+    },
+    {
+      title: "Active Coupons",
+      value: coupons?.filter(c => c.isActive).length || 0,
+      icon: Tag,
+      color: "text-pink-500",
     },
   ];
 
@@ -153,7 +160,7 @@ export default function AdminDashboardPage() {
       <div className="flex justify-between items-start">
         <h1 className="text-3xl font-headline font-bold">Admin Dashboard</h1>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -165,15 +172,6 @@ export default function AdminDashboardPage() {
             </CardContent>
           </Card>
         ))}
-         <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Coupons</CardTitle>
-               <Tag className={`h-4 w-4 text-muted-foreground text-pink-500`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{coupons?.filter(c => c.isActive).length || 0}</div>
-            </CardContent>
-          </Card>
       </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -202,5 +200,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
