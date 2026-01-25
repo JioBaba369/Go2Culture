@@ -47,7 +47,7 @@ function Calendar({
         table: "w-full border-collapse",
         head_row: "flex justify-between",
         head_cell:
-          "text-muted-foreground font-medium text-sm h-10 flex flex-1 items-center justify-center",
+          "text-muted-foreground font-medium text-sm w-10 h-10 flex items-center justify-center",
 
         // Rows & cells
         row: "flex w-full mt-1 justify-between",
