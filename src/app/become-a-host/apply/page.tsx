@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ import { Step5Location } from "@/components/apply-form/step5-location";
 import { Step6Photos } from "@/components/apply-form/step6-photos";
 import { Step7Compliance } from "@/components/apply-form/step7-compliance";
 import { Step8Pricing } from "@/components/apply-form/step8-pricing";
-
+import { Progress } from "@/components/ui/progress";
 
 const hostingStyleOptions = [
   { id: 'family-style', label: 'Family-style' },
@@ -141,8 +141,51 @@ const formSchema = z.object({
 
 type OnboardingFormValues = z.infer<typeof formSchema>;
 
+const steps = [
+    {
+        id: 'Step 1',
+        name: 'Basic Information',
+        fields: ['fullName', 'email'],
+    },
+    {
+        id: 'Step 2',
+        name: 'Host Profile',
+        fields: ['profile.bio', 'profile.languages', 'profile.culturalBackground', 'profile.hostingStyles'],
+    },
+    {
+        id: 'Step 3',
+        name: 'Experience Basics',
+        fields: ['experience.title', 'experience.description', 'experience.category', 'experience.durationMinutes'],
+    },
+    {
+        id: 'Step 4',
+        name: 'Menu & Food Details',
+        fields: ['experience.menu.description', 'experience.menu.cuisine', 'experience.menu.spiceLevel'],
+    },
+    {
+        id: 'Step 5',
+        name: 'Location & Home Setup',
+        fields: ['location', 'homeSetup'],
+    },
+    {
+        id: 'Step 6',
+        name: 'Photos',
+        fields: [],
+    },
+    {
+        id: 'Step 7',
+        name: 'Compliance',
+        fields: [], // Complex validation, handled on final submit
+    },
+    {
+        id: 'Step 8',
+        name: 'Pricing & Agreements',
+        fields: ['experience.pricing.pricePerGuest', 'compliance.agreeToFoodSafety', 'compliance.guidelinesAccepted'],
+    },
+];
 
 export default function BecomeAHostPage() {
+  const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionState, setSubmissionState] = useState<'idle' | 'success' | 'error'>('idle');
   const { toast } = useToast();
@@ -189,6 +232,32 @@ export default function BecomeAHostPage() {
       }
     },
   });
+
+  async function nextStep() {
+    const fields = steps[currentStep].fields;
+    const output = await methods.trigger(fields as FieldPath<OnboardingFormValues>[], { shouldFocus: true });
+    
+    if (!output) {
+      toast({
+        variant: "destructive",
+        title: "Please fill out all required fields",
+        description: "Check the form for any error messages.",
+      });
+      return;
+    }
+    
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(step => step + 1);
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 0) {
+      setCurrentStep(step => step - 1);
+      window.scrollTo(0, 0);
+    }
+  }
   
   async function onSubmit(values: OnboardingFormValues) {
     if (!firestore || !user) {
@@ -295,37 +364,54 @@ export default function BecomeAHostPage() {
       <div className="text-center max-w-3xl mx-auto">
         <h1 className="font-headline text-4xl md:text-5xl font-bold">Host Application</h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Fill out the form below to share your culture with the world.
+          Join our community of hosts by completing the {steps.length} steps below.
         </p>
       </div>
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8 mt-12 max-w-4xl mx-auto">
-          <Step1BasicInfo />
-          <Step2HostProfile hostingStyleOptions={hostingStyleOptions} />
-          <Step3ExperienceBasics />
-          <Step4Menu />
-          <Step5Location />
-          <Step6Photos />
-          <Step7Compliance />
-          <Step8Pricing />
-          
-          <div className="flex justify-end">
-            <Button type="submit" size="lg" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting for Review...
-                </>
-              ) : (
-                "Submit for Review"
-              )}
-            </Button>
-          </div>
+            
+            <div className="px-4 py-2 space-y-4">
+                <Progress value={((currentStep + 1) / steps.length) * 100} />
+                <p className="text-center text-sm text-muted-foreground">Step {currentStep + 1} of {steps.length}: {steps[currentStep].name}</p>
+            </div>
+
+            {currentStep === 0 && <Step1BasicInfo />}
+            {currentStep === 1 && <Step2HostProfile hostingStyleOptions={hostingStyleOptions} />}
+            {currentStep === 2 && <Step3ExperienceBasics />}
+            {currentStep === 3 && <Step4Menu />}
+            {currentStep === 4 && <Step5Location />}
+            {currentStep === 5 && <Step6Photos />}
+            {currentStep === 6 && <Step7Compliance />}
+            {currentStep === 7 && <Step8Pricing />}
+
+            <div className="flex gap-4 justify-end">
+                {currentStep > 0 && (
+                    <Button type="button" variant="outline" onClick={prevStep}>
+                        Back
+                    </Button>
+                )}
+                {currentStep < steps.length - 1 && (
+                    <Button type="button" onClick={nextStep}>
+                        Next
+                    </Button>
+                )}
+                {currentStep === steps.length - 1 && (
+                    <Button type="submit" size="lg" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Submitting for Review...
+                            </>
+                        ) : (
+                            "Submit for Review"
+                        )}
+                    </Button>
+                )}
+            </div>
         </form>
       </FormProvider>
     </div>
   );
 }
 
-    
