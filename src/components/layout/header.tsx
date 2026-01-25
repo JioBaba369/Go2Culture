@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -15,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { doc } from "firebase/firestore";
@@ -47,7 +45,7 @@ export function Header() {
   const isAdmin = user?.uid === ADMIN_UID;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-[#FEE600]">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
         <nav className="hidden md:flex items-center gap-6">
@@ -55,13 +53,13 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
             >
               {link.label}
             </Link>
           ))}
            {isAdmin && (
-              <Link href="/admin" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              <Link href="/admin" className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground">
                 Admin
               </Link>
             )}
@@ -133,7 +131,7 @@ export function Header() {
               <Button variant="ghost" asChild>
                 <Link href="/login">Log In</Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="bg-foreground text-background hover:bg-foreground/90">
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </>
@@ -199,5 +197,3 @@ export function Header() {
     </header>
   );
 }
-
-    
