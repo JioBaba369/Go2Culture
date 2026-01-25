@@ -16,6 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuGroup,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { doc } from "firebase/firestore";
 import type { User } from "@/lib/types";
