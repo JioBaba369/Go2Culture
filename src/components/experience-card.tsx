@@ -39,6 +39,15 @@ const getFlagEmoji = (name: string): string => {
     return String.fromCodePoint(...codePoints);
 };
 
+const getFlagFromCountryCode = (countryCode: string): string => {
+  if (!countryCode || countryCode.length !== 2) return '';
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+};
+
 function ExperienceCardContent({ experience }: ExperienceCardProps) {
   const firestore = useFirestore();
   const hostRef = useMemoFirebase(
@@ -80,7 +89,7 @@ function ExperienceCardContent({ experience }: ExperienceCardProps) {
           <div className="flex items-start justify-between">
             <Link href={`/experiences/${experience.id}`} className="block">
               <h3 className="font-headline font-semibold text-lg leading-tight hover:underline">
-                {experience.title}
+                {getFlagFromCountryCode(experience.location.country)} {experience.title}
               </h3>
             </Link>
           </div>
