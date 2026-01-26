@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
 import { getFlagEmoji, getFlagFromCountryCode } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getUsername = (url?: string) => {
   if (!url) return '';
@@ -97,24 +98,32 @@ function UserProfilePage() {
           <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="space-y-3 text-center sm:text-left">
-            <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
-            
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-muted-foreground">
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+                <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
                 {isHost && host?.verification?.idVerified && (
-                    <div className="flex items-center gap-1.5 text-green-600 font-semibold">
-                        <ShieldCheck className="h-5 w-5" />
-                        <span>Verified Host</span>
-                    </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <ShieldCheck className="h-7 w-7 text-green-600" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Verified Host</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-muted-foreground">
+                {user.brandName && (<p className="text-lg">{user.brandName}</p>)}
                 {user.location?.country && (
                     <div className="flex items-center gap-1.5">
+                        {user.brandName && <span className="text-sm mx-1">•</span>}
                         {getFlagFromCountryCode(user.location.country)}
-                        <span>From {countries.find(c => c.id === user.location.country)?.name}</span>
+                        <span>{countries.find(c => c.id === user.location.country)?.name}</span>
                     </div>
                 )}
             </div>
-
-            {user.brandName && <p className="text-xl text-muted-foreground">{user.brandName}</p>}
 
             <div className="flex gap-2 justify-center sm:justify-start">
                 <Badge variant={isHost ? "secondary" : "outline"} className="capitalize">{user.role}</Badge>
@@ -125,6 +134,12 @@ function UserProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
+            {isHost && host && host.profile.bio && (
+                <div>
+                    <h2 className="font-headline text-2xl font-semibold mb-4">About {user.fullName.split(' ')[0]}</h2>
+                    <p className="text-muted-foreground leading-relaxed">{host.profile.bio}</p>
+                </div>
+            )}
             {experiences && experiences.length > 0 && (
                 <div>
                 <h2 className="font-headline text-2xl font-semibold mb-4">Experiences by {user.fullName.split(' ')[0]}</h2>
@@ -138,9 +153,7 @@ function UserProfilePage() {
         <aside className="md:col-span-1 space-y-6">
             {isHost && host ? (
                 <div className="p-6 border rounded-xl shadow-sm bg-card">
-                    <h3 className="font-headline text-xl font-semibold mb-4">About {user.fullName.split(' ')[0]}</h3>
-                    {host.profile.bio && <p className="text-muted-foreground leading-relaxed text-sm">{host.profile.bio}</p>}
-                    <Separator className="my-4" />
+                    <h3 className="font-headline text-xl font-semibold mb-4">Host Details</h3>
                     <div className="space-y-4 text-sm">
                         {host.level === 'Superhost' && (
                             <div className="flex items-center gap-2">
@@ -148,10 +161,6 @@ function UserProfilePage() {
                             <span>Superhost</span>
                             </div>
                         )}
-                        <div className="flex items-center gap-3">
-                            <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                            <span>From {getFlagFromCountryCode(host.location.country)} {countries.find(c => c.id === host.location.country)?.name}</span>
-                        </div>
                         {host.profile.culturalBackground && (
                             <div className="flex items-center gap-3">
                             <Flag className="h-5 w-5 text-muted-foreground flex-shrink-0" />
