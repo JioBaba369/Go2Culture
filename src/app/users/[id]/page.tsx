@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -9,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon, ShieldCheck, Award } from 'lucide-react';
+import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon, ShieldCheck, Award, Trophy } from 'lucide-react';
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
@@ -152,7 +153,21 @@ function UserProfilePage() {
                             </div>
                         )}
                     </div>
-                     {host.profile.hostingStyles && host.profile.hostingStyles.length > 0 && (
+                     {host.profile.achievements && host.profile.achievements.length > 0 && (
+                      <>
+                        <Separator className="my-4" />
+                        <h4 className="font-semibold mb-2 text-sm">Achievements</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {host.profile.achievements.map((achievement) => (
+                            <Badge key={achievement} variant="outline" className="font-normal py-1">
+                              <Trophy className="h-4 w-4 mr-2 text-amber-500"/>
+                              {achievement}
+                            </Badge>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {host.profile.hostingStyles && host.profile.hostingStyles.length > 0 && (
                       <>
                         <Separator className="my-4" />
                         <h4 className="font-semibold mb-2 text-sm">Hosting Style</h4>

@@ -150,13 +150,16 @@ export default function ExperienceDetailPage() {
                 </Avatar>
                 <div>
                     <h2 className="font-headline text-2xl">Hosted by {host.name}</h2>
-                    <div className="flex items-center gap-4 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
                         {host.profile.culturalBackground && <Badge variant="outline">{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</Badge>}
                         {host.level === 'Superhost' && (
                             <Badge variant="default" className="gap-1 bg-amber-500 hover:bg-amber-600">
                                 <Award className="h-4 w-4" /> Superhost
                             </Badge>
                         )}
+                         {host.profile.hostingStyles.map(style => (
+                            <Badge key={style} variant="secondary">{style}</Badge>
+                        ))}
                     </div>
                 </div>
             </div>
