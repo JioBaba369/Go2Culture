@@ -45,7 +45,7 @@ export async function approveApplication(
     status: 'approved',
     profile: {
       bio: application.profile.bio,
-      culturalBackground: application.profile.culturalBackground,
+      culturalBackground: application.profile.culturalBackground || '',
       hostingStyles: application.profile.hostingStyles,
     },
     verification: {
@@ -122,7 +122,7 @@ export async function approveApplication(
       region: application.location.region || '',
       suburb: application.location.suburb || '',
     },
-    languages: application.profile.languages.split(',').map(lang => lang.trim()).filter(Boolean)
+    languages: (application.profile.languages || '').split(',').map(lang => lang.trim()).filter(Boolean)
   });
 
   try {
