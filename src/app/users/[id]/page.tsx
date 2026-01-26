@@ -108,123 +108,131 @@ function UserProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
-          {isHost && host?.profile.bio && (
-            <div>
-              <h2 className="font-headline text-2xl font-semibold mb-4">About {user.fullName.split(' ')[0]}</h2>
-              <p className="text-muted-foreground leading-relaxed">{host.profile.bio}</p>
-            </div>
-          )}
-
-          {experiences && experiences.length > 0 && (
-            <div>
-              <Separator className="my-8" />
-              <h2 className="font-headline text-2xl font-semibold mb-4">Experiences by {user.fullName.split(' ')[0]}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {experiences.map(exp => <ExperienceCard key={exp.id} experience={exp} />)}
-              </div>
-            </div>
-          )}
+            {experiences && experiences.length > 0 && (
+                <div>
+                <h2 className="font-headline text-2xl font-semibold mb-4">Experiences by {user.fullName.split(' ')[0]}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {experiences.map(exp => <ExperienceCard key={exp.id} experience={exp} />)}
+                </div>
+                </div>
+            )}
         </div>
-
+        
         <aside className="md:col-span-1 space-y-6">
-            <div className="p-6 border rounded-xl shadow-sm bg-card">
-              <h3 className="font-headline text-xl font-semibold mb-4">About</h3>
-              <div className="space-y-4 text-sm">
-                  {(nativeLanguage || otherLanguages.length > 0) && (
-                    <div className="flex items-start gap-3">
-                      <Languages className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div>
-                        {nativeLanguage && <p><span className="font-semibold">Native:</span> <span className="capitalize text-muted-foreground">{nativeLanguage}</span></p>}
-                        {otherLanguages.length > 0 && <p className={cn(nativeLanguage && 'mt-1')}><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{otherLanguages.join(', ')}</span></p>}
-                      </div>
-                    </div>
-                  )}
-              </div>
-            </div>
-
-            {isHost && host && (
+            {isHost && host ? (
                 <div className="p-6 border rounded-xl shadow-sm bg-card">
-                    <h3 className="font-headline text-xl font-semibold mb-4">Host Details</h3>
+                    <h3 className="font-headline text-xl font-semibold mb-4">About {user.fullName.split(' ')[0]}</h3>
+                    {host.profile.bio && <p className="text-muted-foreground leading-relaxed text-sm">{host.profile.bio}</p>}
+                    <Separator className="my-4" />
                     <div className="space-y-4 text-sm">
-                         {host.verification?.idVerified && (
-                             <div className="flex items-center gap-3">
-                                <ShieldCheck className="h-5 w-5 text-green-600" />
+                        <div className="grid grid-cols-2 gap-4">
+                            {host.verification?.idVerified && (
+                                <div className="flex items-center gap-2">
+                                <ShieldCheck className="h-5 w-5 text-green-600 flex-shrink-0" />
                                 <span>Verified Host</span>
-                            </div>
-                        )}
-                        {host.level === 'Superhost' && (
-                            <div className="flex items-center gap-3">
-                                <Award className="h-5 w-5 text-amber-500" />
+                                </div>
+                            )}
+                            {host.level === 'Superhost' && (
+                                <div className="flex items-center gap-2">
+                                <Award className="h-5 w-5 text-amber-500 flex-shrink-0" />
                                 <span>Superhost</span>
-                            </div>
-                        )}
-                        {host.location.country && (
-                            <div className="flex items-center gap-3">
-                                <Globe className="h-5 w-5 text-muted-foreground" />
-                                <span>From {getFlagFromCountryCode(host.location.country)} {countries.find(c => c.id === host.location.country)?.name}</span>
-                            </div>
-                        )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                            <span>From {getFlagFromCountryCode(host.location.country)} {countries.find(c => c.id === host.location.country)?.name}</span>
+                        </div>
                         {host.profile.culturalBackground && (
                             <div className="flex items-center gap-3">
-                                <Flag className="h-5 w-5 text-muted-foreground" />
-                                <span>{host.profile.culturalBackground}</span>
+                            <Flag className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                            <span>{host.profile.culturalBackground}</span>
+                            </div>
+                        )}
+                        {(nativeLanguage || otherLanguages.length > 0) && (
+                            <div className="flex items-start gap-3">
+                                <Languages className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div>
+                                {nativeLanguage && <p><span className="font-semibold">Native:</span> <span className="capitalize text-muted-foreground">{nativeLanguage}</span></p>}
+                                {otherLanguages.length > 0 && <p className={cn(nativeLanguage && 'mt-1')}><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{otherLanguages.join(', ')}</span></p>}
+                                </div>
                             </div>
                         )}
                     </div>
-                     {host.profile.achievements && host.profile.achievements.length > 0 && (
-                      <>
+                    {host.profile.achievements && host.profile.achievements.length > 0 && (
+                        <>
                         <Separator className="my-4" />
                         <h4 className="font-semibold mb-2 text-sm">Achievements</h4>
                         <div className="flex flex-wrap gap-2">
-                          {host.profile.achievements.map((achievement) => (
+                            {host.profile.achievements.map((achievement) => (
                             <Badge key={achievement} variant="outline" className="font-normal py-1">
-                              <Trophy className="h-4 w-4 mr-2 text-amber-500"/>
-                              {achievement}
+                                <Trophy className="h-4 w-4 mr-2 text-amber-500"/>
+                                {achievement}
                             </Badge>
-                          ))}
+                            ))}
                         </div>
-                      </>
+                        </>
                     )}
                     {host.profile.hostingStyles && host.profile.hostingStyles.length > 0 && (
-                      <>
+                        <>
                         <Separator className="my-4" />
                         <h4 className="font-semibold mb-2 text-sm">Hosting Style</h4>
                         <div className="flex flex-wrap gap-2">
-                          {host.profile.hostingStyles.map(style => <Badge key={style} variant="secondary">{style}</Badge>)}
+                            {host.profile.hostingStyles.map(style => <Badge key={style} variant="secondary">{style}</Badge>)}
                         </div>
-                      </>
+                        </>
                     )}
                 </div>
+            ) : (
+                <div className="p-6 border rounded-xl shadow-sm bg-card">
+                    <h3 className="font-headline text-xl font-semibold mb-4">About</h3>
+                    <div className="space-y-4 text-sm">
+                        {nativeLanguage ? (
+                        <div className="flex items-start gap-3">
+                            <Languages className="h-5 w-5 text-muted-foreground mt-0.5" />
+                            <div>
+                            <p><span className="font-semibold">Native Language:</span> <span className="capitalize text-muted-foreground">{nativeLanguage}</span></p>
+                            </div>
+                        </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">This user hasn't shared many details yet.</p>
+                        )}
+                    </div>
+                </div>
             )}
-          <div className="p-6 border rounded-xl shadow-sm bg-card">
-            <h3 className="font-headline text-xl font-semibold">Contact & Links</h3>
-            <div className="space-y-4 mt-4 text-sm">
-                {user.website && (
-                    <a href={user.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                        <Globe className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">{user.website.replace(/^https?:\/\//, '')}</span>
-                    </a>
-                )}
-                {user.socialMedia?.twitter && (
-                    <a href={user.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                        <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">@{getUsername(user.socialMedia.twitter)}</span>
-                    </a>
-                )}
-                 {user.socialMedia?.instagram && (
-                    <a href={user.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                        <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">@{getUsername(user.socialMedia.instagram)}</span>
-                    </a>
-                )}
-                 {user.socialMedia?.facebook && (
-                    <a href={user.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                        <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                        <span className="truncate">{getUsername(user.socialMedia.facebook)}</span>
-                    </a>
-                )}
+
+            <div className="p-6 border rounded-xl shadow-sm bg-card">
+                <h3 className="font-headline text-xl font-semibold">Contact & Links</h3>
+                <div className="space-y-4 mt-4 text-sm">
+                    {user.website && (
+                        <a href={user.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Globe className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">{user.website.replace(/^https?:\/\//, '')}</span>
+                        </a>
+                    )}
+                    {user.socialMedia?.twitter && (
+                        <a href={user.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">@{getUsername(user.socialMedia.twitter)}</span>
+                        </a>
+                    )}
+                    {user.socialMedia?.instagram && (
+                        <a href={user.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">@{getUsername(user.socialMedia.instagram)}</span>
+                        </a>
+                    )}
+                    {user.socialMedia?.facebook && (
+                        <a href={user.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">{getUsername(user.socialMedia.facebook)}</span>
+                        </a>
+                    )}
+                    {!user.website && !user.socialMedia?.twitter && !user.socialMedia?.instagram && !user.socialMedia?.facebook && (
+                        <p className="text-muted-foreground">No social links provided.</p>
+                    )}
+                </div>
             </div>
-          </div>
         </aside>
       </div>
     </div>
