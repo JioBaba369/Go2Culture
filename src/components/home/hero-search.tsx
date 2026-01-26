@@ -6,8 +6,42 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Search } from 'lucide-react';
-import { countries, regions, suburbs, localAreas } from '@/lib/location-data';
+import { countries, regions, suburbs } from '@/lib/location-data';
 import { Skeleton } from '@/components/ui/skeleton';
+
+function SearchField({
+  label,
+  placeholder,
+  options,
+  onValueChange,
+  value,
+  disabled,
+}: {
+  label: string;
+  placeholder: string;
+  options: { id: string; name: string }[];
+  onValueChange: (value: string) => void;
+  value: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="relative flex-1 w-full px-4 py-2 sm:py-0 group cursor-pointer hover:bg-accent/50 rounded-full transition-colors duration-200">
+      <label className="text-xs font-bold text-foreground">{label}</label>
+      <Select onValueChange={onValueChange} value={value} disabled={disabled}>
+        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-auto p-0 bg-transparent data-[placeholder]:text-muted-foreground">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt.id} value={opt.id}>
+              {opt.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
 export function HeroSearch() {
   const router = useRouter();
@@ -15,11 +49,9 @@ export function HeroSearch() {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedRegion, setSelectedRegion] = useState<string>('');
   const [selectedSuburb, setSelectedSuburb] = useState<string>('');
-  const [selectedLocalArea, setSelectedLocalArea] = useState<string>('');
 
-  const [availableRegions, setAvailableRegions] = useState<{ id: string, name: string }[]>([]);
-  const [availableSuburbs, setAvailableSuburbs] = useState<{ id: string, name: string }[]>([]);
-  const [availableLocalAreas, setAvailableLocalAreas] = useState<{ id: string, name: string }[]>([]);
+  const [availableRegions, setAvailableRegions] = useState<{ id: string; name: string }[]>([]);
+  const [availableSuburbs, setAvailableSuburbs] = useState<{ id: string; name: string }[]>([]);
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -28,93 +60,68 @@ export function HeroSearch() {
 
   useEffect(() => {
     if (selectedCountry) {
-      setAvailableRegions(regions.filter(s => s.countryId === selectedCountry));
-      setSelectedRegion('');
-      setSelectedSuburb('');
-      setSelectedLocalArea('');
-      setAvailableSuburbs([]);
-      setAvailableLocalAreas([]);
+      setAvailableRegions(regions.filter((s) => s.countryId === selectedCountry));
     } else {
       setAvailableRegions([]);
     }
+    setSelectedRegion('');
   }, [selectedCountry]);
 
   useEffect(() => {
     if (selectedRegion) {
-      setAvailableSuburbs(suburbs.filter(s => s.regionId === selectedRegion));
-      setSelectedSuburb('');
-      setSelectedLocalArea('');
-      setAvailableLocalAreas([]);
+      setAvailableSuburbs(suburbs.filter((s) => s.regionId === selectedRegion));
     } else {
       setAvailableSuburbs([]);
     }
+    setSelectedSuburb('');
   }, [selectedRegion]);
-
-  useEffect(() => {
-    if (selectedSuburb) {
-      setAvailableLocalAreas(localAreas.filter(l => l.suburbId === selectedSuburb));
-      setSelectedLocalArea('');
-    } else {
-      setAvailableLocalAreas([]);
-    }
-  }, [selectedSuburb]);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (selectedCountry) params.set('country', selectedCountry);
     if (selectedRegion) params.set('region', selectedRegion);
     if (selectedSuburb) params.set('suburb', selectedSuburb);
-    if (selectedLocalArea) params.set('localArea', selectedLocalArea);
     router.push(`/discover?${params.toString()}`);
   };
 
   const searchBarContent = (
-    <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-0 bg-background rounded-md border p-1">
-        <div className="w-full sm:w-auto flex-1">
-            <Select onValueChange={setSelectedCountry} value={selectedCountry}>
-                <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="Country" /></SelectTrigger>
-                <SelectContent>
-                  {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-            </Select>
-        </div>
-        <Separator orientation="vertical" className="h-6 hidden sm:block" />
-        <div className="w-full sm:w-auto flex-1">
-            <Select onValueChange={setSelectedRegion} value={selectedRegion} disabled={!availableRegions.length}>
-                <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="State / Region" /></SelectTrigger>
-                <SelectContent>
-                  {availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-            </Select>
-        </div>
-        <Separator orientation="vertical" className="h-6 hidden sm:block" />
-        <div className="w-full sm:w-auto flex-1">
-            <Select onValueChange={setSelectedSuburb} value={selectedSuburb} disabled={!availableSuburbs.length}>
-                <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="Suburb/City" /></SelectTrigger>
-                <SelectContent>
-                  {availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-            </Select>
-        </div>
-        <Separator orientation="vertical" className="h-6 hidden sm:block" />
-        <div className="w-full sm:w-auto flex-1">
-            <Select onValueChange={setSelectedLocalArea} value={selectedLocalArea} disabled={!availableLocalAreas.length}>
-                <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-12"><SelectValue placeholder="Area" /></SelectTrigger>
-                <SelectContent>
-                  {availableLocalAreas.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
-                </SelectContent>
-            </Select>
-        </div>
-        <Button onClick={handleSearch} size="lg" className="w-full sm:w-auto h-12 rounded-md">
-            <Search className="h-5 w-5 sm:mr-2" />
-            <span className="hidden sm:inline">Search</span>
+    <div className="flex flex-col sm:flex-row items-center bg-background rounded-full border shadow-lg h-auto sm:h-[72px] w-full p-2 sm:p-0 sm:pr-2">
+      <SearchField
+        label="Country"
+        placeholder="e.g. Australia"
+        options={countries}
+        onValueChange={setSelectedCountry}
+        value={selectedCountry}
+      />
+      <Separator orientation="vertical" className="h-8 hidden sm:block" />
+      <SearchField
+        label="State / Region"
+        placeholder="e.g. New South Wales"
+        options={availableRegions}
+        onValueChange={setSelectedRegion}
+        value={selectedRegion}
+        disabled={!availableRegions.length}
+      />
+      <Separator orientation="vertical" className="h-8 hidden sm:block" />
+      <SearchField
+        label="City"
+        placeholder="e.g. Sydney"
+        options={availableSuburbs}
+        onValueChange={setSelectedSuburb}
+        value={selectedSuburb}
+        disabled={!availableSuburbs.length}
+      />
+       <Button onClick={handleSearch} size="lg" className="w-full mt-2 sm:mt-0 sm:w-auto sm:h-14 sm:rounded-full">
+          <Search className="h-5 w-5 sm:mr-2" />
+           <span className="sm:hidden">Search Locations</span>
+           <span className="hidden sm:inline">Search</span>
         </Button>
     </div>
   );
   
   return (
-    <div className="mt-8 p-2 bg-background/80 backdrop-blur-sm rounded-xl w-full max-w-4xl shadow-lg">
-      {isMounted ? searchBarContent : <Skeleton className="h-[58px] w-full" />}
+    <div className="mt-8 bg-transparent w-full max-w-4xl">
+      {isMounted ? searchBarContent : <Skeleton className="h-[72px] w-full rounded-full" />}
     </div>
   );
 }
