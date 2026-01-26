@@ -65,7 +65,7 @@ const statusVariantMap: Record<
 };
 
 // Sub-component to fetch and render host information for a single experience
-function ExperienceRow({ experience, onActionStart, onActionEnd }: { experience: Experience, onActionStart: () => void, onActionEnd: () => void }) {
+function ExperienceRow({ experience, onActionStart, onActionEnd, setExperienceToDelete }: { experience: Experience, onActionStart: () => void, onActionEnd: () => void, setExperienceToDelete: (experience: Experience) => void }) {
   const firestore = useFirestore();
   const { toast } = useToast();
 
@@ -170,7 +170,7 @@ function ExperienceRow({ experience, onActionStart, onActionEnd }: { experience:
                 {experience.status === 'live' ? <><Pause className="mr-2 h-4 w-4" />Pause Listing</> : <><Play className="mr-2 h-4 w-4" />Make Live</>}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={() => (window as any)(experience)}>
+            <DropdownMenuItem className="text-destructive" onClick={() => setExperienceToDelete(experience)}>
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
@@ -181,7 +181,7 @@ function ExperienceRow({ experience, onActionStart, onActionEnd }: { experience:
   );
 }
 
-function ExperienceCardMobile({ experience, onActionStart, onActionEnd }: { experience: Experience, onActionStart: () => void, onActionEnd: () => void }) {
+function ExperienceCardMobile({ experience, onActionStart, onActionEnd, setExperienceToDelete }: { experience: Experience, onActionStart: () => void, onActionEnd: () => void, setExperienceToDelete: (experience: Experience) => void }) {
   const firestore = useFirestore();
   const { toast } = useToast();
 
@@ -261,7 +261,7 @@ function ExperienceCardMobile({ experience, onActionStart, onActionEnd }: { expe
                 {experience.status === 'live' ? <><Pause className="mr-2 h-4 w-4" />Pause</> : <><Play className="mr-2 h-4 w-4" />Make Live</>}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive" onClick={() => (window as any)(experience)}>
+            <DropdownMenuItem className="text-destructive" onClick={() => setExperienceToDelete(experience)}>
               <Trash2 className="mr-2 h-4 w-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -325,7 +325,7 @@ export default function AdminExperiencesPage() {
             <Skeleton key={i} className="h-32 w-full" />
           ))}
         {experiences?.map((exp) => (
-          <ExperienceCardMobile key={exp.id} experience={exp} onActionStart={() => setIsActionRunning(true)} onActionEnd={() => setIsActionRunning(false)} />
+          <ExperienceCardMobile key={exp.id} experience={exp} onActionStart={() => setIsActionRunning(true)} onActionEnd={() => setIsActionRunning(false)} setExperienceToDelete={setExperienceToDelete} />
         ))}
       </div>
 
@@ -362,7 +362,7 @@ export default function AdminExperiencesPage() {
                   </TableRow>
                 ))}
               {experiences?.map((exp) => (
-                <ExperienceRow key={exp.id} experience={exp} onActionStart={() => setIsActionRunning(true)} onActionEnd={() => setIsActionRunning(false)} />
+                <ExperienceRow key={exp.id} experience={exp} onActionStart={() => setIsActionRunning(true)} onActionEnd={() => setIsActionRunning(false)} setExperienceToDelete={setExperienceToDelete}/>
               ))}
             </TableBody>
           </Table>
