@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import { collection, query, where, doc, updateDoc, arrayUnion, getDoc, orderBy } from 'firebase/firestore';
+import { collection, query, where, doc, updateDoc, arrayUnion, getDoc, orderBy, serverTimestamp } from 'firebase/firestore';
 import { Conversation, Message, User, Booking } from '@/lib/types';
 import { Loader2, Send, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -117,12 +117,21 @@ export function ChatView({ conversationId }: { conversationId: string }) {
 
   // Mark conversation as read
   useEffect(() => {
-    if (conversation && conversationRef && user && conversation.readBy && !conversation.readBy.includes(user.uid)) {
-      updateDoc(conversationRef, {
-        readBy: arrayUnion(user.uid),
-      });
+    if (conversation && conversationRef && user && user.uid) {
+      const lastMessage = conversation.lastMessage;
+      // Only mark as read if there is a last message and the current user is not the sender
+      if (lastMessage && lastMessage.senderId !== user.uid) {
+        const myReadTimestamp = conversation.readBy?.[user.uid]?.toDate();
+        const lastMessageTimestamp = lastMessage.timestamp?.toDate();
+        // and if I haven't read it yet, or my last read is before the last message
+        if (!myReadTimestamp || (lastMessageTimestamp && myReadTimestamp < lastMessageTimestamp)) {
+           updateDoc(conversationRef, {
+            [`readBy.${user.uid}`]: serverTimestamp(),
+          });
+        }
+      }
     }
-  }, [conversation, user, conversationRef]);
+  }, [conversation, conversationRef, user]);
 
   const scrollToBottom = (behavior: 'smooth' | 'auto' = 'auto') => {
     if (scrollAreaRef.current) {

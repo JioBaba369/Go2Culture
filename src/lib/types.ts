@@ -219,6 +219,7 @@ export type Message = {
 
 export type Conversation = {
   id: string; // This will be the bookingId
+  bookingId: string;
   participants: string[];
   participantInfo: {
     [key: string]: {
@@ -235,7 +236,7 @@ export type Conversation = {
     timestamp: any;
     senderId: string;
   };
-  readBy: string[];
+  readBy: { [key: string]: any };
 };
 
 export type Notification = {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -25,8 +26,8 @@ export async function sendMessage(
 
   const batch = writeBatch(firestore);
 
-  // 1. Create the new message document
-  const messageRef = doc(collection(firestore, 'messages'));
+  // 1. Create the new message document in the subcollection
+  const messageRef = doc(collection(firestore, 'conversations', booking.id, 'messages'));
   const newMessage: Omit<Message, 'id'> = {
     bookingId: booking.id,
     senderId: currentUser.id,
@@ -41,6 +42,7 @@ export async function sendMessage(
   const conversationRef = doc(firestore, 'conversations', booking.id);
   const conversationData: Conversation = {
     id: booking.id,
+    bookingId: booking.id,
     participants: [currentUser.id, recipient.id],
     participantInfo: {
       [currentUser.id]: {
@@ -61,11 +63,15 @@ export async function sendMessage(
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    readBy: [currentUser.id], // The sender has "read" it.
+    readBy: { [currentUser.id]: serverTimestamp() },
   };
 
   // Using set with merge: true will create if not exists, and update if it does.
   batch.set(conversationRef, conversationData, { merge: true });
+
+  // 3. Add rate limit update
+  const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
+  batch.set(rateLimitRef, { lastMessageAt: serverTimestamp() }, { merge: true });
 
   try {
     await batch.commit();
@@ -81,7 +87,7 @@ export async function sendMessage(
     errorEmitter.emit(
       'permission-error',
       new FirestorePermissionError({
-        path: `batch write (messages, conversations/${booking.id})`,
+        path: `batch write (messages, conversations/${booking.id}, rateLimits)`,
         operation: 'write',
         requestResourceData: { newMessage, conversationData },
       })

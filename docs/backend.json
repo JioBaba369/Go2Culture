@@ -524,6 +524,10 @@
       "description": "Represents a message thread between users for a specific booking. The document ID is the bookingId.",
       "type": "object",
       "properties": {
+        "bookingId": {
+          "type": "string",
+          "description": "The ID of the booking this conversation is associated with."
+        },
         "participants": {
           "type": "array",
           "items": { "type": "string" },
@@ -557,12 +561,15 @@
           }
         },
         "readBy": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "An array of user IDs who have read the last message."
+          "type": "object",
+          "description": "Map of userId to a timestamp indicating when they last read the conversation.",
+          "additionalProperties": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
-      "required": ["participants", "participantInfo", "lastMessage", "bookingInfo"]
+      "required": ["bookingId", "participants", "participantInfo", "lastMessage", "bookingInfo"]
     },
     "Notification": {
       "title": "Notification",

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -21,7 +22,15 @@ export function ConversationListItem({ conversation, isSelected }: ConversationL
   
   const otherParticipantInfo = conversation.participantInfo[otherParticipantId];
   const lastMessage = conversation.lastMessage;
-  const isUnread = !!(lastMessage && lastMessage.senderId !== user.uid && !conversation.readBy?.includes(user.uid));
+  
+  const myReadTimestamp = conversation.readBy?.[user.uid]?.toDate();
+  const lastMessageTimestamp = lastMessage?.timestamp?.toDate();
+
+  const isUnread = !!(
+    lastMessage &&
+    lastMessage.senderId !== user.uid &&
+    (!myReadTimestamp || (lastMessageTimestamp && myReadTimestamp < lastMessageTimestamp))
+  );
   
   const participantImage = PlaceHolderImages.find(p => p.id === otherParticipantInfo.profilePhotoId);
 
