@@ -63,6 +63,7 @@ export default function ImpactPage() {
                     sizes="100vw"
                     className="object-cover"
                     data-ai-hint="diverse community"
+                    priority
                 />
             </div>
 
