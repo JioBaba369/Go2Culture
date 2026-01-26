@@ -76,7 +76,7 @@ service cloud.firestore {
     /* ───────────── Experiences ───────────── */
 
     match /experiences/{experienceId} {
-      allow get, list: if true;
+      allow read: if true;
       allow create: if isSignedIn();
 
       allow update, delete: if isSignedIn()
@@ -86,13 +86,13 @@ service cloud.firestore {
     /* ───────────── Bookings ───────────── */
 
     match /bookings/{bookingId} {
-      allow get: if isBookingParticipant(resource.data) || isAdmin();
-      allow update: if isBookingParticipant(resource.data) || isAdmin();
+      allow get: if isSignedIn() || isAdmin();
       allow list: if isSignedIn();
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
             .data.termsAccepted == true;
+      allow update: if isBookingParticipant(resource.data) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -113,7 +113,7 @@ service cloud.firestore {
     /* ───────────── Messages ───────────── */
 
     match /messages/{messageId} {
-      allow get: if isParticipant(resource.data) || isAdmin();
+      allow get: if isSignedIn() || isAdmin();
       allow list: if isSignedIn();
 
       allow create: if isSignedIn()
@@ -132,7 +132,7 @@ service cloud.firestore {
     /* ───────────── Conversations ───────────── */
 
     match /conversations/{conversationId} {
-      allow get: if isParticipant(resource.data) || isAdmin();
+      allow get: if isSignedIn() || isAdmin();
       allow list: if isSignedIn();
 
       allow create: if isSignedIn()
