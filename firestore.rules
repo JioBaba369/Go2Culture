@@ -153,7 +153,8 @@ service cloud.firestore {
       allow create: if isAdmin()
         || (
           isSignedIn()
-          && let booking = get(/databases/$(database)/documents/bookings/$(conversationId))
+          && request.resource.data.bookingId is string
+          && let booking = get(/databases/$(database)/documents/bookings/$(request.resource.data.bookingId))
           && booking.exists()
           && request.resource.data.participants.hasAll([
             booking.data.guestId,
@@ -193,7 +194,7 @@ service cloud.firestore {
             isSignedIn()
             && canSendMessage()
             && request.resource.data.senderId == request.auth.uid
-            && request.resource.data.bookingId == resource.data.bookingId
+            && request.resource.data.bookingId == conversationId
           );
 
         // Immutable messages
