@@ -19,11 +19,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection } from "firebase/firestore";
-import { HostApplication, Experience, User, Review, Coupon, Booking } from "@/lib/types";
+import { HostApplication, Experience, User, Review, Booking } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ADMIN_UID } from "@/lib/auth";
 
 const UsersChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.UsersChart), {
   ssr: false,
@@ -112,12 +113,14 @@ const toDate = (timestamp: any) => {
 
 export default function AdminDashboardPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
 
-  const { data: hostApplications } = useCollection<HostApplication>(useMemoFirebase(() => firestore ? collection(firestore, 'hostApplications') : null, [firestore]));
+  const { data: hostApplications } = useCollection<HostApplication>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'hostApplications') : null, [firestore, isAdmin]));
   const { data: experiences } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
-  const { data: users } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
+  const { data: users } = useCollection<User>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'users') : null, [firestore, isAdmin]));
   const { data: reviews } = useCollection<Review>(useMemoFirebase(() => firestore ? collection(firestore, 'reviews') : null, [firestore]));
-  const { data: bookings } = useCollection<Booking>(useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]));
+  const { data: bookings } = useCollection<Booking>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'bookings') : null, [firestore, isAdmin]));
 
   const totalBookings = bookings?.length || 0;
   const totalRevenue = bookings?.filter(b => b.status === 'Confirmed').reduce((sum, b) => sum + b.totalPrice, 0) * 0.15 || 0;
