@@ -24,10 +24,26 @@ import { Step8Pricing } from "@/components/apply-form/step8-pricing";
 import { Progress } from "@/components/ui/progress";
 
 const hostingStyleOptions = [
-  { id: 'family-style', label: 'Family-style' },
-  { id: 'storytelling', label: 'Storytelling' },
-  { id: 'quiet-traditional', label: 'Quiet & traditional' },
-  { id: 'festive-social', label: 'Festive & social' },
+  {
+    id: 'family-style',
+    label: 'Family-style',
+    description: 'I’m passionate about cooking and sharing traditional recipes passed down through generations. I want to welcome my guests warmly, just as I would my close friends and family.'
+  },
+  {
+    id: 'festive-social',
+    label: 'Festive & social',
+    description: 'I thrive on meeting new people while enjoying delicious food. I create an exciting and lively atmosphere where everyone can interact and have a great time.'
+  },
+  {
+    id: 'innovative-gastronomy',
+    label: 'Innovative Gastronomy',
+    description: 'My goal is to amaze my guests with art, creativity and innovative gastronomy. My experience offers a delightful sensory journey in a carefully crafted setting.'
+  },
+  {
+    id: 'storytelling',
+    label: 'Storytelling',
+    description: 'My primary motivation is to showcase my culture through authentic food. I believe curious guests will be immersed in a rich ambiance filled with history and traditions.'
+  },
 ] as const;
 
 const formSchema = z.object({
