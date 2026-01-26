@@ -11,6 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PlacePickerWithMap } from '../ui/place-picker-with-map';
 import { countries, regions, suburbs, localAreas } from '@/lib/location-data';
 import { useEffect } from 'react';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 export function Step5Location() {
   const { control, watch, setValue } = useFormContext();
@@ -22,6 +24,8 @@ export function Step5Location() {
   const availableRegions = regions.filter(s => s.countryId === watchCountry);
   const availableSuburbs = suburbs.filter(s => s.regionId === watchRegion);
   const availableLocalAreas = localAreas.filter(l => l.suburbId === watchSuburb);
+
+  const isCountrySupported = watchCountry && ['AU', 'NZ'].includes(watchCountry);
 
   useEffect(() => {
     if (watchCountry) {
@@ -74,181 +78,186 @@ export function Step5Location() {
                 </FormItem>
               )}
             />
+            {isCountrySupported && (
+              <FormField
+                control={control}
+                name="location.region"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableRegions.length}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+        </div>
+        
+        {watchCountry && !isCountrySupported && (
+            <Alert variant="warning">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Applications Currently Limited</AlertTitle>
+                <AlertDescription>
+                    Thanks for your interest in becoming a Go2Culture host. Applications are temporarily closed for your selected destination. We are currently only accepting applications from Australia and New Zealand. We will contact you when they are open again in your region.
+                </AlertDescription>
+            </Alert>
+        )}
+
+        {isCountrySupported && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={control}
+                name="location.suburb"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Suburb/City</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableSuburbs.length}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Select your suburb/city" /></SelectTrigger></FormControl>
+                      <SelectContent>{availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="location.localArea"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Local Area</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableLocalAreas.length}>
+                      <FormControl><SelectTrigger><SelectValue placeholder="Select your local area" /></SelectTrigger></FormControl>
+                      <SelectContent>{availableLocalAreas.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+          </div>
+          <FormField
+            control={control}
+            name="location.address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Street Address</FormLabel>
+                <FormControl>
+                  <PlacePickerWithMap field={field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={control}
+            name="location.postcode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Postcode</FormLabel>
+                <FormControl><Input {...field} placeholder="e.g. 2000" /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={control}
-              name="location.region"
+              name="homeSetup.homeType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={!availableRegions.length}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} />
-                      </SelectTrigger>
-                    </FormControl>
+                  <FormLabel>Home Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select home type" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      <SelectItem value="Apartment">Apartment</SelectItem>
+                      <SelectItem value="House">House</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <FormField
+            <FormField
               control={control}
-              name="location.suburb"
+              name="homeSetup.seating"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Suburb/City</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={!availableSuburbs.length}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your suburb/city" />
-                      </SelectTrigger>
-                    </FormControl>
+                  <FormLabel>Seating Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select seating type" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      <SelectItem value="Table">Table</SelectItem>
+                      <SelectItem value="Floor">Floor</SelectItem>
+                      <SelectItem value="Mixed">Mixed</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-             <FormField
-              control={control}
-              name="location.localArea"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Local Area</FormLabel>
-                   <Select onValueChange={field.onChange} value={field.value} disabled={!availableLocalAreas.length}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your local area" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableLocalAreas.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-        </div>
-        <FormField
-          control={control}
-          name="location.address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Street Address</FormLabel>
-              <FormControl>
-                <PlacePickerWithMap field={field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={control}
-          name="location.postcode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Postcode</FormLabel>
-              <FormControl><Input {...field} placeholder="e.g. 2000" /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          </div>
           <FormField
             control={control}
-            name="homeSetup.homeType"
+            name="homeSetup.maxGuests"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Home Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Select home type" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    <SelectItem value="Apartment">Apartment</SelectItem>
-                    <SelectItem value="House">House</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Max Guests</FormLabel>
+                <FormControl><Input {...field} type="number" min="1" max="20" /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={control}
-            name="homeSetup.seating"
+            name="homeSetup.accessibility"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Seating Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Select seating type" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    <SelectItem value="Table">Table</SelectItem>
-                    <SelectItem value="Floor">Floor</SelectItem>
-                    <SelectItem value="Mixed">Mixed</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Accessibility Notes</FormLabel>
+                <FormDescription>E.g., "There are 3 steps to enter", "Elevator access available".</FormDescription>
+                <FormControl><Textarea {...field} rows={2} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
-        <FormField
-          control={control}
-          name="homeSetup.maxGuests"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Max Guests</FormLabel>
-              <FormControl><Input {...field} type="number" min="1" max="20" /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="homeSetup.accessibility"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Accessibility Notes</FormLabel>
-              <FormDescription>E.g., "There are 3 steps to enter", "Elevator access available".</FormDescription>
-              <FormControl><Textarea {...field} rows={2} /></FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-2">
-            <FormField control={control} name="homeSetup.pets" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>I have pets</FormLabel></div></FormItem>
-            )} />
-            <FormField control={control} name="homeSetup.smoking" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Smoking is allowed</FormLabel></div></FormItem>
-            )} />
-            <FormField control={control} name="homeSetup.familyFriendly" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Family/Kids friendly</FormLabel></div></FormItem>
-            )} />
-             <FormField control={control} name="homeSetup.elevator" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Elevator in building</FormLabel></div></FormItem>
-            )} />
-            <FormField control={control} name="homeSetup.airConditioning" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Air conditioning</FormLabel></div></FormItem>
-            )} />
-            <FormField control={control} name="homeSetup.wifi" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>WiFi available</FormLabel></div></FormItem>
-            )} />
-            <FormField control={control} name="homeSetup.publicTransportNearby" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Public transport nearby</FormLabel></div></FormItem>
-            )} />
-            <FormField control={control} name="homeSetup.taxiNearby" render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Taxi station nearby</FormLabel></div></FormItem>
-            )} />
-        </div>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-2">
+              <FormField control={control} name="homeSetup.pets" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>I have pets</FormLabel></div></FormItem>
+              )} />
+              <FormField control={control} name="homeSetup.smoking" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Smoking is allowed</FormLabel></div></FormItem>
+              )} />
+              <FormField control={control} name="homeSetup.familyFriendly" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Family/Kids friendly</FormLabel></div></FormItem>
+              )} />
+              <FormField control={control} name="homeSetup.elevator" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Elevator in building</FormLabel></div></FormItem>
+              )} />
+              <FormField control={control} name="homeSetup.airConditioning" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Air conditioning</FormLabel></div></FormItem>
+              )} />
+              <FormField control={control} name="homeSetup.wifi" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>WiFi available</FormLabel></div></FormItem>
+              )} />
+              <FormField control={control} name="homeSetup.publicTransportNearby" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Public transport nearby</FormLabel></div></FormItem>
+              )} />
+              <FormField control={control} name="homeSetup.taxiNearby" render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Taxi station nearby</FormLabel></div></FormItem>
+              )} />
+          </div>
+        </>
+        )}
       </CardContent>
     </Card>
   );

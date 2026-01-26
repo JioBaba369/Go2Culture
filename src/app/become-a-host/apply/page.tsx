@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useForm, FormProvider, FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -232,6 +232,9 @@ export default function BecomeAHostPage() {
     },
   });
 
+  const watchCountry = methods.watch("location.country");
+  const isCountrySupported = !watchCountry || ['AU', 'NZ'].includes(watchCountry);
+
   async function nextStep() {
     const fields = steps[currentStep].fields;
     const output = await methods.trigger(fields as FieldPath<OnboardingFormValues>[], { shouldFocus: true });
@@ -406,7 +409,7 @@ export default function BecomeAHostPage() {
                     </Button>
                 )}
                 {currentStep < steps.length - 1 && (
-                    <Button type="button" onClick={nextStep}>
+                    <Button type="button" onClick={nextStep} disabled={currentStep === 3 && !isCountrySupported}>
                         Next
                     </Button>
                 )}
