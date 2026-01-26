@@ -261,3 +261,38 @@ export async function updateUserByAdmin(
     throw serverError;
   }
 }
+
+export async function updateReportStatus(
+  firestore: Firestore,
+  reportId: string,
+  status: 'Open' | 'In Progress' | 'Resolved'
+) {
+  const reportRef = doc(firestore, 'reports', reportId);
+  const updatedData = { status };
+  try {
+    await updateDoc(reportRef, updatedData);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: reportRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}
+
+export async function deleteExperienceByAdmin(
+    firestore: Firestore,
+    experienceId: string
+) {
+    const expRef = doc(firestore, 'experiences', experienceId);
+    try {
+        await deleteDoc(expRef);
+    } catch(serverError) {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: expRef.path,
+            operation: 'delete'
+        }));
+        throw serverError;
+    }
+}

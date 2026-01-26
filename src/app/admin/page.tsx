@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -121,30 +122,35 @@ export default function AdminDashboardPage() {
       value: hostApplications?.filter(app => app.status === 'Pending').length || 0,
       icon: Clock,
       color: "text-blue-500",
+      href: "/admin/applications"
     },
     {
       title: "Total Hosts",
       value: totalHosts,
       icon: Users,
       color: "text-green-500",
+      href: "/admin/users"
     },
     {
       title: "Live Experiences",
       value: experiences?.filter(exp => exp.status === 'live').length || 0,
       icon: Utensils,
       color: "text-purple-500",
+      href: "/admin/experiences"
     },
      {
       title: "Total Users",
       value: users?.length || 0,
       icon: UserPlus,
       color: "text-orange-500",
+      href: "/admin/users"
     },
     {
       title: "Active Coupons",
       value: coupons?.filter(c => c.isActive).length || 0,
       icon: Tag,
       color: "text-pink-500",
+      href: "/admin/coupons"
     },
   ];
 
@@ -162,15 +168,17 @@ export default function AdminDashboardPage() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              <stat.icon className={`h-4 w-4 text-muted-foreground ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
+          <Link href={stat.href} key={stat.title}>
+            <Card className="hover:bg-muted/50 transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <stat.icon className={`h-4 w-4 text-muted-foreground ${stat.color}`} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 

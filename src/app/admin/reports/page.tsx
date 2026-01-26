@@ -25,13 +25,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Report } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import React from "react";
+import { updateReportStatus } from "@/lib/admin-actions";
+import { useToast } from "@/hooks/use-toast";
 
 const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
   Open: "destructive",
@@ -42,6 +45,8 @@ const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "de
 export default function AdminReportsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading: isAuthLoading } = useUser();
+  const { toast } = useToast();
+  const [updatingReportId, setUpdatingReportId] = React.useState<string | null>(null);
 
   const reportsQuery = useMemoFirebase(
     () => (firestore && user ? collection(firestore, 'reports') : null),
@@ -51,6 +56,57 @@ export default function AdminReportsPage() {
   const { data: reports, isLoading: isReportsLoading } = useCollection<Report>(reportsQuery);
   
   const isLoading = isAuthLoading || (!!user && isReportsLoading);
+
+  const handleUpdateStatus = async (reportId: string, status: 'Open' | 'In Progress' | 'Resolved') => {
+    if (!firestore) return;
+    setUpdatingReportId(reportId);
+    try {
+      await updateReportStatus(firestore, reportId, status);
+      toast({
+        title: "Report Status Updated",
+        description: `The report has been marked as "${status}".`
+      });
+    } catch(error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "Could not update the report status."
+      });
+    } finally {
+      setUpdatingReportId(null);
+    }
+  }
+
+  const renderActions = (report: Report) => {
+    const isUpdatingThis = updatingReportId === report.id;
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" disabled={isUpdatingThis}>
+              {isUpdatingThis ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
+              <span className="sr-only">Actions</span>
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem disabled>View Details</DropdownMenuItem>
+          <DropdownMenuSeparator />
+           {report.status !== 'In Progress' && (
+            <DropdownMenuItem onClick={() => handleUpdateStatus(report.id, 'In Progress')}>Mark as In Progress</DropdownMenuItem>
+           )}
+           {report.status !== 'Resolved' && (
+            <DropdownMenuItem onClick={() => handleUpdateStatus(report.id, 'Resolved')}>Mark as Resolved</DropdownMenuItem>
+           )}
+           {report.status !== 'Open' && (
+            <DropdownMenuItem onClick={() => handleUpdateStatus(report.id, 'Open')}>Re-open Report</DropdownMenuItem>
+           )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem disabled>Suspend User</DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive" disabled>Delete Content</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -73,22 +129,7 @@ export default function AdminReportsPage() {
                 </p>
                 <p className="text-xs text-muted-foreground">Target: {report.targetType} ({report.targetId})</p>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                   <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-5 w-5" />
-                    <span className="sr-only">Actions</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem>View Details</DropdownMenuItem>
-                  <DropdownMenuItem>Mark as Resolved</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Suspend User</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">Delete Content</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {renderActions(report)}
             </div>
              <div className="mt-4 flex items-center justify-between">
               <Badge variant={statusVariantMap[report.status]} className="capitalize">
@@ -150,23 +191,8 @@ export default function AdminReportsPage() {
                         {report.status}
                       </Badge>
                     </TableCell>
-                  <TableCell>
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                           <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Actions</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>Mark as Resolved</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>Suspend User</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Delete Content</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                  <TableCell className="text-right">
+                     {renderActions(report)}
                   </TableCell>
                 </TableRow>
               ))}

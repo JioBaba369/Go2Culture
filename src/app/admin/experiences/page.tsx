@@ -23,11 +23,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Experience, Host } from '@/lib/types';
-import { MoreHorizontal, Eye, Pause, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Pause, Trash2, Loader2, Play } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import {
@@ -40,6 +50,10 @@ import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { countries, suburbs } from '@/lib/location-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import React from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { pauseExperience, startExperience, deleteExperienceByAdmin } from '@/lib/admin-actions';
+
 
 const statusVariantMap: Record<
   string,
@@ -51,8 +65,9 @@ const statusVariantMap: Record<
 };
 
 // Sub-component to fetch and render host information for a single experience
-function ExperienceRow({ experience }: { experience: Experience }) {
+function ExperienceRow({ experience, onActionStart, onActionEnd }: { experience: Experience, onActionStart: () => void, onActionEnd: () => void }) {
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const hostRef = useMemoFirebase(
     () =>
@@ -62,6 +77,23 @@ function ExperienceRow({ experience }: { experience: Experience }) {
     [firestore, experience.userId, experience.hostId]
   );
   const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
+  
+  const handleToggleStatus = async () => {
+    onActionStart();
+    try {
+        if (experience.status === 'live') {
+            await pauseExperience(firestore, experience.id);
+            toast({ title: 'Experience Paused' });
+        } else {
+            await startExperience(firestore, experience.id);
+            toast({ title: 'Experience Live' });
+        }
+    } catch(e: any) {
+        toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    } finally {
+        onActionEnd();
+    }
+  }
 
   if (isHostLoading || !host) {
     return (
@@ -116,7 +148,7 @@ function ExperienceRow({ experience }: { experience: Experience }) {
           {experience.status}
         </Badge>
       </TableCell>
-      <TableCell>
+      <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
@@ -134,12 +166,11 @@ function ExperienceRow({ experience }: { experience: Experience }) {
                 <Eye className="h-4 w-4" /> View Experience
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Pause className="mr-2 h-4 w-4" />
-              Pause Listing
+            <DropdownMenuItem onClick={handleToggleStatus}>
+                {experience.status === 'live' ? <><Pause className="mr-2 h-4 w-4" />Pause Listing</> : <><Play className="mr-2 h-4 w-4" />Make Live</>}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={() => (window as any)(experience)}>
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
@@ -150,8 +181,9 @@ function ExperienceRow({ experience }: { experience: Experience }) {
   );
 }
 
-function ExperienceCardMobile({ experience }: { experience: Experience }) {
+function ExperienceCardMobile({ experience, onActionStart, onActionEnd }: { experience: Experience, onActionStart: () => void, onActionEnd: () => void }) {
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const hostRef = useMemoFirebase(
     () =>
@@ -161,6 +193,23 @@ function ExperienceCardMobile({ experience }: { experience: Experience }) {
     [firestore, experience.userId, experience.hostId]
   );
   const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
+
+  const handleToggleStatus = async () => {
+    onActionStart();
+    try {
+        if (experience.status === 'live') {
+            await pauseExperience(firestore, experience.id);
+            toast({ title: 'Experience Paused' });
+        } else {
+            await startExperience(firestore, experience.id);
+            toast({ title: 'Experience Live' });
+        }
+    } catch(e: any) {
+        toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    } finally {
+        onActionEnd();
+    }
+  }
 
   if (isHostLoading || !host) {
     return <Skeleton className="h-40 w-full" />;
@@ -208,11 +257,11 @@ function ExperienceCardMobile({ experience }: { experience: Experience }) {
                 <Eye className="h-4 w-4" /> View
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Pause className="mr-2 h-4 w-4" /> Pause
+            <DropdownMenuItem onClick={handleToggleStatus}>
+                {experience.status === 'live' ? <><Pause className="mr-2 h-4 w-4" />Pause</> : <><Play className="mr-2 h-4 w-4" />Make Live</>}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={() => (window as any)(experience)}>
               <Trash2 className="mr-2 h-4 w-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -235,12 +284,30 @@ function ExperienceCardMobile({ experience }: { experience: Experience }) {
 
 export default function AdminExperiencesPage() {
   const firestore = useFirestore();
+  const { toast } = useToast();
+  const [isActionRunning, setIsActionRunning] = React.useState(false);
+  const [experienceToDelete, setExperienceToDelete] = React.useState<Experience | null>(null);
+
   const { data: experiences, isLoading } = useCollection<Experience>(
     useMemoFirebase(
       () => (firestore ? collection(firestore, 'experiences') : null),
-      [firestore]
+      [firestore, isActionRunning] // Re-fetch when an action completes
     )
   );
+
+  const handleDelete = async () => {
+    if (!experienceToDelete || !firestore) return;
+    setIsActionRunning(true);
+    try {
+        await deleteExperienceByAdmin(firestore, experienceToDelete.id);
+        toast({ title: 'Experience Deleted'});
+        setExperienceToDelete(null);
+    } catch(e: any) {
+        toast({ title: 'Error', description: e.message, variant: 'destructive'});
+    } finally {
+        setIsActionRunning(false);
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -258,7 +325,7 @@ export default function AdminExperiencesPage() {
             <Skeleton key={i} className="h-32 w-full" />
           ))}
         {experiences?.map((exp) => (
-          <ExperienceCardMobile key={exp.id} experience={exp} />
+          <ExperienceCardMobile key={exp.id} experience={exp} onActionStart={() => setIsActionRunning(true)} onActionEnd={() => setIsActionRunning(false)} />
         ))}
       </div>
 
@@ -280,8 +347,8 @@ export default function AdminExperiencesPage() {
                 <TableHead>Price</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>
-                  <span className="sr-only">Actions</span>
+                <TableHead className="text-right">
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -295,14 +362,28 @@ export default function AdminExperiencesPage() {
                   </TableRow>
                 ))}
               {experiences?.map((exp) => (
-                <ExperienceRow key={exp.id} experience={exp} />
+                <ExperienceRow key={exp.id} experience={exp} onActionStart={() => setIsActionRunning(true)} onActionEnd={() => setIsActionRunning(false)} />
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+      
+      <AlertDialog open={!!experienceToDelete} onOpenChange={(open) => !open && setExperienceToDelete(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>This will permanently delete the experience "{experienceToDelete?.title}". This action cannot be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel disabled={isActionRunning}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} disabled={isActionRunning}>
+                    {isActionRunning ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                    Delete
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
-
-    
