@@ -73,13 +73,15 @@ function ExperienceCardContent({ experience }: ExperienceCardProps) {
             <span>{getFlagEmoji(experience.menu.cuisine)} {experience.menu.cuisine}</span>
           </div>
           {isHostLoading ? <Skeleton className="h-6 w-3/4 mt-2" /> : host && (
-            <div className="flex items-center gap-2 mt-2">
-              <Avatar className="h-6 w-6">
-                {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={host.name} data-ai-hint={hostAvatar.imageHint} />}
-                <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm text-muted-foreground">Hosted by {host.name}</span>
-            </div>
+            <Link href={`/users/${host.userId}`} className="group/host">
+              <div className="flex items-center gap-2 mt-2">
+                <Avatar className="h-6 w-6">
+                  {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={host.name} data-ai-hint={hostAvatar.imageHint} />}
+                  <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-muted-foreground group-hover/host:underline">Hosted by {host.name}</span>
+              </div>
+            </Link>
           )}
         </div>
 

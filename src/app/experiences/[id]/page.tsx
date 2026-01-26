@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import Image from "next/image";
+import Link from 'next/link';
 import type { Experience, Host, Review } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -148,7 +149,7 @@ export default function ExperienceDetailPage() {
                     <AvatarFallback className="text-2xl">{host.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <h2 className="font-headline text-2xl">Hosted by {host.name}</h2>
+                    <h2 className="font-headline text-2xl">Hosted by <Link href={`/users/${host.userId}`} className="hover:underline">{host.name}</Link></h2>
                     <div className="flex flex-wrap items-center gap-2 mt-1">
                         {host.profile.culturalBackground && <Badge variant="outline">{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</Badge>}
                         {host.level === 'Superhost' && (
