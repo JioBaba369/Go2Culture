@@ -680,13 +680,13 @@
       "schema": { "$ref": "#/entities/Review" },
       "description": "Stores reviews given by guests for experiences. Includes `guestId`, `experienceId`, and `hostId` for efficient querying and authorization."
     },
-    "/messages/{messageId}": {
-      "schema": { "$ref": "#/entities/Message" },
-      "description": "Stores messages exchanged between hosts and guests. Includes `senderId`, `receiverId`, and `bookingId` for efficient querying and authorization."
-    },
     "/conversations/{bookingId}": {
       "schema": { "$ref": "#/entities/Conversation" },
       "description": "Stores metadata for conversation threads. The document ID is the booking ID."
+    },
+    "/conversations/{bookingId}/messages/{messageId}": {
+        "schema": { "$ref": "#/entities/Message" },
+        "description": "Stores messages within a conversation thread."
     },
     "/reports/{reportId}": {
       "schema": { "$ref": "#/entities/Report" },

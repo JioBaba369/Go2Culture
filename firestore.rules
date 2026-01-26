@@ -120,47 +120,34 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    /* ───────────────── Messages ───────────────── */
-
-    match /messages/{messageId} {
-
-      // 🔐 Only participants or admin
-      allow get: if isAdmin() || isParticipant(resource.data);
-
-      // ✅ Required for queries. Now secure.
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.participants == request.auth.uid);
-
-      allow create: if isSignedIn()
-        && request.resource.data.senderId == request.auth.uid
-        && hasParticipants(request.resource.data)
-        && request.auth.uid in request.resource.data.participants;
-
-      allow update: if isAdmin()
-        || (isSignedIn()
-            && resource.data.senderId == request.auth.uid
-            && onlyChanges(["text", "editedAt"]));
-
-      allow delete: if isAdmin();
-    }
-
-    /* ───────────────── Conversations ───────────────── */
+    /* ───────────────── Conversations & Messages ───────────────── */
 
     match /conversations/{bookingId} {
+      allow get, update: if isParticipant(resource.data) || isAdmin();
 
-      // 🔐 Only participants or admin
-      allow get: if isAdmin() || isParticipant(resource.data);
-
-      // ✅ Required for queries
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.participants == request.auth.uid);
+      // A user can only list conversations they are a part of.
+      allow list: if isAdmin() || (isSignedIn() && request.query.where.participants[2] == request.auth.uid);
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
         && request.auth.uid in request.resource.data.participants;
 
-      allow update: if isParticipant(resource.data) || isAdmin();
-
       allow delete: if isAdmin();
+
+      // Rule for the messages subcollection
+      match /messages/{messageId} {
+        function isParentConversationParticipant() {
+          return request.auth.uid in get(/databases/$(database)/documents/conversations/$(bookingId)).data.participants;
+        }
+
+        // Allow participants to read and create messages.
+        allow read, create: if isParentConversationParticipant() || isAdmin();
+        
+        // Disallow updates and deletes by clients for message immutability.
+        allow update, delete: if false;
+      }
     }
+
 
     /* ───────────────── Sponsors & Coupons ───────────────── */
 

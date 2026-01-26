@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import { collection, query, where, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
+import { collection, query, where, doc, updateDoc, arrayUnion, getDoc, orderBy } from 'firebase/firestore';
 import { Conversation, Message, User, Booking } from '@/lib/types';
 import { Loader2, Send, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -72,27 +73,16 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   
   const messagesQuery = useMemoFirebase(
     () =>
-      firestore && conversationId && user
+      firestore && conversationId
         ? query(
-            collection(firestore, 'messages'),
-            where('bookingId', '==', conversationId),
-            where('participants', 'array-contains-any', [user.uid])
+            collection(firestore, 'conversations', conversationId, 'messages'),
+            orderBy('timestamp', 'asc')
           )
         : null,
-    [firestore, conversationId, user]
+    [firestore, conversationId]
   );
   
-  const { data: messagesData, isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
-  
-  const messages = useMemo(() => {
-    if (!messagesData) return [];
-    // Client-side sorting to avoid composite index requirement
-    return [...messagesData].sort((a, b) => {
-      const timeA = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : Infinity;
-      const timeB = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : Infinity;
-      return timeA - timeB;
-    });
-  }, [messagesData]);
+  const { data: messages, isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
   
   const form = useForm<MessageFormValues>({
     resolver: zodResolver(messageSchema),
@@ -213,7 +203,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
               <Skeleton className="h-12 w-3/4 rounded-lg" />
               <Skeleton className="h-16 w-3/4 rounded-lg ml-auto" />
             </div>
-          ) : messages.length > 0 ? (
+          ) : messages && messages.length > 0 ? (
             messages.map(msg => (
               <MessageBubble
                 key={msg.id}
