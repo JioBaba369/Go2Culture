@@ -12,7 +12,7 @@ export type User = {
     facebook?: string;
   };
   profilePhotoId?: string;
-  nativeLanguage?: string;
+  languages?: string[];
   brandName?: string;
   preferences?: {
     cuisines?: string[];
@@ -56,7 +56,6 @@ export type Host = {
   
   profile: {
     bio: string;
-    languages: string[];
     culturalBackground: string;
     hostingStyles: string[];
     achievements?: string[];

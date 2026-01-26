@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -13,7 +14,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +35,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
   brandName: z.string().optional(),
-  nativeLanguage: z.string().optional(),
+  languages: z.string().optional(),
   phone: z.string().optional(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   location: z.object({
@@ -109,7 +110,7 @@ export default function ProfilePage() {
     values: {
       fullName: userProfile?.fullName || '',
       brandName: userProfile?.brandName || '',
-      nativeLanguage: userProfile?.nativeLanguage || '',
+      languages: userProfile?.languages?.join(', ') || '',
       phone: userProfile?.phone || '',
       website: userProfile?.website || '',
       location: {
@@ -151,7 +152,7 @@ export default function ProfilePage() {
       const dataToSave = {
         fullName: data.fullName,
         brandName: data.brandName,
-        nativeLanguage: data.nativeLanguage,
+        languages: data.languages ? data.languages.split(',').map(s => s.trim()).filter(Boolean) : [],
         phone: data.phone,
         website: data.website,
         location: {
@@ -364,24 +365,18 @@ export default function ProfilePage() {
                           />
                            <FormField
                             control={form.control}
-                            name="nativeLanguage"
+                            name="languages"
                             render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Native Language</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {languages.map((lang) => (
-                                            <SelectItem key={lang} value={lang.toLowerCase()}>{lang}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <FormItem>
+                                <FormLabel>Languages</FormLabel>
+                                <FormDescription>Enter the languages you speak, separated by commas.</FormDescription>
+                                <FormControl>
+                                    <Input placeholder="e.g. English, Spanish, Italian" {...field} />
+                                </FormControl>
                                 <FormMessage />
-                            </FormItem>
+                                </FormItem>
                             )}
-                          />
+                            />
                           <FormField
                               control={form.control}
                               name="phone"
@@ -565,12 +560,11 @@ export default function ProfilePage() {
                             <span>{host.profile.culturalBackground}</span>
                             </div>
                         )}
-                        {(userProfile.nativeLanguage || (host.profile.languages && host.profile.languages.length > 0)) && (
+                        {userProfile.languages && userProfile.languages.length > 0 && (
                             <div className="flex items-start gap-3">
                                 <Globe className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                                 <div>
-                                {userProfile.nativeLanguage && <p><span className="font-semibold">Native:</span> <span className="capitalize text-muted-foreground">{userProfile.nativeLanguage}</span></p>}
-                                {host.profile.languages && host.profile.languages.length > 0 && <p className={cn(userProfile.nativeLanguage && 'mt-1')}><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{host.profile.languages.join(', ')}</span></p>}
+                                <p><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{userProfile.languages.join(', ')}</span></p>
                                 </div>
                             </div>
                         )}
@@ -603,11 +597,11 @@ export default function ProfilePage() {
                 <div className="p-6 border rounded-xl shadow-sm bg-card">
                     <h3 className="font-headline text-xl font-semibold mb-4">About</h3>
                     <div className="space-y-4 text-sm">
-                        {userProfile.nativeLanguage ? (
+                        {userProfile.languages && userProfile.languages.length > 0 ? (
                         <div className="flex items-start gap-3">
                             <Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
                             <div>
-                            <p><span className="font-semibold">Native Language:</span> <span className="capitalize text-muted-foreground">{userProfile.nativeLanguage}</span></p>
+                            <p><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{userProfile.languages.join(', ')}</span></p>
                             </div>
                         </div>
                         ) : (

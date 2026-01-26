@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -44,7 +45,6 @@ export async function approveApplication(
     status: 'approved',
     profile: {
       bio: application.profile.bio,
-      languages: application.profile.languages.split(',').map(lang => lang.trim()).filter(Boolean),
       culturalBackground: application.profile.culturalBackground,
       hostingStyles: application.profile.hostingStyles,
     },
@@ -117,7 +117,8 @@ export async function approveApplication(
       country: application.location.country,
       region: application.location.region || '',
       suburb: application.location.suburb || '',
-    }
+    },
+    languages: application.profile.languages.split(',').map(lang => lang.trim()).filter(Boolean)
   });
 
   try {

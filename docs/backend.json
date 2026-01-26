@@ -54,9 +54,10 @@
         "profilePhotoId": {
           "type": "string"
         },
-        "nativeLanguage": {
-          "type": "string",
-          "description": "The user's native language."
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "A list of languages the user speaks."
         },
         "brandName": {
           "type": "string",
@@ -130,7 +131,6 @@
           "type": "object",
           "properties": {
             "bio": { "type": "string" },
-            "languages": { "type": "array", "items": { "type": "string" } },
             "culturalBackground": { "type": "string" },
             "hostingStyles": { "type": "array", "items": { "type": "string" } },
             "achievements": {
