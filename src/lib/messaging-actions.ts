@@ -10,6 +10,7 @@ import {
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import type { Booking, Conversation, Message, User } from '@/lib/types';
+import { createNotification } from './notification-actions';
 
 export async function sendMessage(
   firestore: Firestore,
@@ -68,6 +69,14 @@ export async function sendMessage(
 
   try {
     await batch.commit();
+
+    // After message is sent successfully, create notification for the recipient
+    await createNotification(
+      firestore,
+      recipient.id,
+      `You have a new message from ${currentUser.fullName}`,
+      `/messages?id=${booking.id}`
+    );
   } catch (serverError) {
     errorEmitter.emit(
       'permission-error',

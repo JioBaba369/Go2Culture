@@ -7,10 +7,12 @@ import {
   updateDoc,
   serverTimestamp,
   deleteDoc,
+  getDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { Experience } from './types';
+import { Experience, Booking } from './types';
+import { createNotification } from './notification-actions';
 
 export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'userId' | 'createdAt' | 'rating' | 'hostName' | 'hostProfilePhotoId'>>;
 
@@ -42,7 +44,20 @@ export async function confirmBooking(
   const bookingRef = doc(firestore, 'bookings', bookingId);
   const updatedData = { status: 'Confirmed' };
   try {
+    const bookingSnap = await getDoc(bookingRef);
+    if (!bookingSnap.exists()) {
+      throw new Error("Booking not found!");
+    }
+    const booking = bookingSnap.data() as Booking;
+
     await updateDoc(bookingRef, updatedData);
+
+    await createNotification(
+      firestore,
+      booking.guestId,
+      `Your booking for "${booking.experienceTitle}" has been confirmed!`,
+      '/profile/bookings'
+    );
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: bookingRef.path,
@@ -61,7 +76,20 @@ export async function cancelBookingByHost(
   const bookingRef = doc(firestore, 'bookings', bookingId);
   const updatedData = { status: 'Cancelled' };
   try {
+     const bookingSnap = await getDoc(bookingRef);
+    if (!bookingSnap.exists()) {
+      throw new Error("Booking not found!");
+    }
+    const booking = bookingSnap.data() as Booking;
+
     await updateDoc(bookingRef, updatedData);
+
+     await createNotification(
+      firestore,
+      booking.guestId,
+      `Your booking for "${booking.experienceTitle}" was cancelled by the host.`,
+      '/profile/bookings'
+    );
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: bookingRef.path,

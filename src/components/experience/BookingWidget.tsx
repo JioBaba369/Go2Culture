@@ -1,13 +1,13 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebase, useUser } from '@/firebase';
-import { doc, collection, runTransaction, serverTimestamp, getDoc, increment, updateDoc, DocumentReference } from 'firebase/firestore';
+import { useFirebase } from '@/firebase';
+import { doc, collection, runTransaction, serverTimestamp, getDoc, increment, updateDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
-import { Experience, Host, Coupon, Booking, User as UserType } from '@/lib/types';
+import { Experience, Host, Coupon, Booking } from '@/lib/types';
+import { createNotification } from '@/lib/notification-actions';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -106,16 +106,14 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
 
     try {
       await runTransaction(firestore, async (transaction) => {
-        // --- 1. All READS must come first ---
         const userRef = doc(firestore, 'users', user.uid);
-        const userSnapPromise = transaction.get(userRef);
-
         const couponRef = appliedCoupon ? doc(firestore, 'coupons', appliedCoupon.id) : null;
+        
+        const userSnapPromise = transaction.get(userRef);
         const couponSnapPromise = couponRef ? transaction.get(couponRef) : Promise.resolve(null);
         
         const [userSnap, couponSnap] = await Promise.all([userSnapPromise, couponSnapPromise]);
-
-        // --- 2. LOGIC based on read data ---
+        
         const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
         let finalDiscountAmount = 0;
         let isValidCoupon = false;
@@ -133,14 +131,12 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         }
         
         if (appliedCoupon && !isValidCoupon) {
-            // The coupon is invalid at the time of transaction.
+            // The coupon becomes invalid at the time of transaction.
             // We will proceed without it, and the user will be charged the full price.
-            // A toast after the transaction will inform them.
         }
 
         const finalPrice = basePrice - finalDiscountAmount;
 
-        // --- 3. All WRITES come last ---
         const newBookingRef = doc(collection(firestore, 'bookings'));
         const bookingData: Partial<Booking> = {
           guestId: user.uid,
@@ -158,21 +154,17 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
           ...(isValidCoupon && { discountAmount: finalDiscountAmount }),
         };
 
-        // Write booking
         transaction.set(newBookingRef, bookingData);
 
-        // Update coupon if used
         if (isValidCoupon && couponRef) {
             transaction.update(couponRef, { timesUsed: increment(1) });
         }
         
-        // Update user if they haven't accepted terms
         if (userSnap.exists() && !userSnap.data().termsAccepted) {
             transaction.update(userRef, { termsAccepted: true });
         }
       });
       
-      // If a coupon was applied but turned out to be invalid during the transaction, inform the user now.
       if (appliedCoupon && discountAmount > 0 && !(await getDoc(doc(firestore, 'coupons', appliedCoupon.id))).data()?.isActive) {
            toast({ variant: 'destructive', title: 'Coupon Invalid', description: `Coupon "${appliedCoupon.id}" could not be applied.` });
       }
@@ -181,6 +173,15 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         title: isGift ? 'Gift Purchased!' : (experience?.instantBook ? 'Booking Confirmed!' : 'Booking Requested!'),
         description: isGift ? `You've successfully gifted "${experience!.title}".` : (experience?.instantBook ? `Your booking for "${experience!.title}" is confirmed.` : `Your request for "${experience!.title}" has been sent.`),
       });
+
+      // Send notification to host
+      const bookingStatus = isGift || experience?.instantBook ? 'new booking' : 'booking request';
+      await createNotification(
+        firestore,
+        experience.hostId,
+        `You have a ${bookingStatus} from ${user.displayName} for "${experience.title}"!`,
+        '/host/bookings'
+      );
 
       setDate(undefined);
       setNumberOfGuests(1);
