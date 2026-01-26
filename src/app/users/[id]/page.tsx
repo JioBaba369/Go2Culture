@@ -18,13 +18,13 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getUsername = (url?: string) => {
-  if (!url) return '';
-  try {
-    const path = new URL(url).pathname;
-    return path.substring(1).replace(/\/$/, ''); // remove leading/trailing slashes
-  } catch (e) {
-    return url; // fallback to showing the raw value if it's not a valid URL
-  }
+    if (!url) return '';
+    try {
+      const path = new URL(url).pathname;
+      return path.substring(1).replace(/\/$/, ''); // remove leading/trailing slashes
+    } catch (e) {
+      return url; // fallback to showing the raw value if it's not a valid URL
+    }
 };
 
 function UserProfilePage() {
@@ -84,43 +84,33 @@ function UserProfilePage() {
 
   const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
   const isHost = user.role === 'host' || user.role === 'both';
+  const countryName = user.location?.country ? countries.find(c => c.id === user.location.country)?.name : '';
   
-  const nativeLanguage = user.nativeLanguage;
-  const otherLanguages = host?.profile.languages?.filter(
-      (lang) => lang.toLowerCase() !== nativeLanguage?.toLowerCase()
-  ) || [];
+  const nativeLanguage = user.languages?.[0];
+  const otherLanguages = user.languages?.slice(1) || [];
 
   return (
     <div className="py-12 space-y-12">
-      <section className="flex flex-col sm:flex-row items-center gap-6">
+      <section className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
         <Avatar className="h-32 w-32 text-4xl">
           {userImage && <AvatarImage src={userImage.imageUrl} alt={user.fullName} />}
           <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="space-y-3 text-center sm:text-left">
-            <div className="flex items-center justify-center sm:justify-start gap-2">
-                <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
-                {isHost && host?.verification?.idVerified && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <ShieldCheck className="h-7 w-7 text-green-600" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Verified Host</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-            </div>
+        <div className="space-y-4 text-center sm:text-left">
+            <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
             
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-muted-foreground">
-                {user.brandName && (<p className="text-lg">{user.brandName}</p>)}
-                {user.location?.country && (
-                    <div className="flex items-center gap-1.5">
-                        {user.brandName && <span className="text-sm mx-1">•</span>}
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2">
+                {user.brandName && (<p className="text-lg text-muted-foreground">{user.brandName}</p>)}
+                 {isHost && host?.verification?.idVerified && (
+                  <div className="flex items-center gap-1.5 text-sm">
+                      <ShieldCheck className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-foreground">Verified Host</span>
+                  </div>
+              )}
+               {user.location?.country && (
+                    <div className="flex items-center gap-1.5 text-sm">
                         {getFlagFromCountryCode(user.location.country)}
-                        <span>{countries.find(c => c.id === user.location.country)?.name}</span>
+                        <span className="font-medium text-foreground">{countryName}</span>
                     </div>
                 )}
             </div>
@@ -166,12 +156,11 @@ function UserProfilePage() {
                             <span>{host.profile.culturalBackground}</span>
                             </div>
                         )}
-                        {(nativeLanguage || otherLanguages.length > 0) && (
+                        {user.languages && user.languages.length > 0 && (
                             <div className="flex items-start gap-3">
                                 <Languages className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                                 <div>
-                                {nativeLanguage && <p><span className="font-semibold">Native:</span> <span className="capitalize text-muted-foreground">{nativeLanguage}</span></p>}
-                                {otherLanguages.length > 0 && <p className={cn(nativeLanguage && 'mt-1')}><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{otherLanguages.join(', ')}</span></p>}
+                                <p><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{user.languages.join(', ')}</span></p>
                                 </div>
                             </div>
                         )}
@@ -204,11 +193,11 @@ function UserProfilePage() {
                 <div className="p-6 border rounded-xl shadow-sm bg-card">
                     <h3 className="font-headline text-xl font-semibold mb-4">About</h3>
                     <div className="space-y-4 text-sm">
-                        {nativeLanguage ? (
+                        {user.languages && user.languages.length > 0 ? (
                         <div className="flex items-start gap-3">
                             <Languages className="h-5 w-5 text-muted-foreground mt-0.5" />
                             <div>
-                            <p><span className="font-semibold">Native Language:</span> <span className="capitalize text-muted-foreground">{nativeLanguage}</span></p>
+                            <p><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{user.languages.join(', ')}</span></p>
                             </div>
                         </div>
                         ) : (
