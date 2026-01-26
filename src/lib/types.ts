@@ -38,6 +38,8 @@ export type ComplianceFields = {
   foodSafetySupervisor?: boolean;
   foodBusinessNotification?: boolean;
   guidelinesAccepted: boolean;
+  contractAccepted?: boolean;
+  responsibilitiesAccepted?: boolean;
 };
 
 export type Host = {
