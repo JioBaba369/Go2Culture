@@ -1,5 +1,6 @@
 
 'use client';
+import React, { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -34,6 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { countries, suburbs } from "@/lib/location-data";
 import { ADMIN_UID } from "@/lib/auth";
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
@@ -41,6 +44,12 @@ const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'de
   Approved: "default",
   'Changes Needed': "outline",
   Rejected: "destructive",
+};
+
+const riskVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+  Low: "default",
+  Medium: "secondary",
+  High: "destructive",
 };
 
 
@@ -54,8 +63,25 @@ export default function HostApplicationsPage() {
     [firestore, isAdmin]
   );
   const { data: hostApplications, isLoading: areAppsLoading, error } = useCollection<HostApplication>(applicationsQuery);
-  const isLoading = isAuthLoading || areAppsLoading;
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filteredApplications = useMemo(() => {
+    if (!hostApplications) return [];
+    return hostApplications.filter(app => {
+      const searchMatch = searchTerm ?
+        app.hostName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.experience.title.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+      
+      const statusMatch = statusFilter !== 'all' ? app.status === statusFilter : true;
+      
+      return searchMatch && statusMatch;
+    });
+  }, [hostApplications, searchTerm, statusFilter]);
+
+  const isLoading = isAuthLoading || areAppsLoading;
 
   const renderTableRows = (apps: HostApplication[]) => {
     return apps.map((app) => (
@@ -73,6 +99,9 @@ export default function HostApplicationsPage() {
           <Badge variant={statusVariantMap[app.status]}>
             {app.status}
           </Badge>
+        </TableCell>
+         <TableCell>
+          {app.riskFlag && <Badge variant={riskVariantMap[app.riskFlag]}>{app.riskFlag}</Badge>}
         </TableCell>
         <TableCell>
           <DropdownMenu>
@@ -130,9 +159,12 @@ export default function HostApplicationsPage() {
           </DropdownMenu>
         </div>
         <div className="mt-4 flex items-center justify-between">
-          <Badge variant={statusVariantMap[app.status]}>
-            {app.status}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={statusVariantMap[app.status]}>
+              {app.status}
+            </Badge>
+            {app.riskFlag && <Badge variant={riskVariantMap[app.riskFlag]}>{app.riskFlag}</Badge>}
+          </div>
           <p className="text-sm text-muted-foreground">{app.submittedDate?.toDate ? format(app.submittedDate.toDate(), 'PP') : 'N/A'}</p>
         </div>
       </Card>
@@ -143,14 +175,14 @@ export default function HostApplicationsPage() {
     if (isLoading) {
       return Array.from({length: 5}).map((_, i) => (
         <TableRow key={i}>
-          <TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell>
+          <TableCell colSpan={7}><Skeleton className="h-8 w-full" /></TableCell>
         </TableRow>
       ));
     }
     if (error) {
       return (
         <TableRow>
-          <TableCell colSpan={6}>
+          <TableCell colSpan={7}>
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
@@ -162,13 +194,13 @@ export default function HostApplicationsPage() {
         </TableRow>
       );
     }
-    if (hostApplications && hostApplications.length > 0) {
-      return renderTableRows(hostApplications);
+    if (filteredApplications && filteredApplications.length > 0) {
+      return renderTableRows(filteredApplications);
     }
     return (
       <TableRow>
-        <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
-          No applications found.
+        <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+          No applications match the current filters.
         </TableCell>
       </TableRow>
     );
@@ -189,8 +221,8 @@ export default function HostApplicationsPage() {
         </Alert>
       );
     }
-    if (hostApplications && hostApplications.length > 0) {
-      return renderMobileCards(hostApplications);
+    if (filteredApplications && filteredApplications.length > 0) {
+      return renderMobileCards(filteredApplications);
     }
     return (
       <Card className="flex items-center justify-center h-40">
@@ -206,16 +238,43 @@ export default function HostApplicationsPage() {
         <p className="text-muted-foreground">Review, approve, and manage host applications.</p>
        </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col md:flex-row gap-4">
+          <Input 
+            placeholder="Search by host name or experience..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-grow"
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Approved">Approved</SelectItem>
+              <SelectItem value="Changes Needed">Changes Needed</SelectItem>
+              <SelectItem value="Rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+
       {/* Mobile Card View */}
       <div className="grid gap-4 md:hidden">
-        <h2 className="text-xl font-semibold">All Applications</h2>
+        <h2 className="text-xl font-semibold">All Applications ({filteredApplications?.length || 0})</h2>
         {mobileContent()}
       </div>
       
       {/* Desktop Table View */}
       <Card className="hidden md:block">
         <CardHeader>
-          <CardTitle>All Applications</CardTitle>
+          <CardTitle>All Applications ({filteredApplications?.length || 0})</CardTitle>
           <CardDescription>
             A list of all host applications submitted to the platform.
           </CardDescription>
@@ -229,6 +288,7 @@ export default function HostApplicationsPage() {
                 <TableHead>Experience Title</TableHead>
                 <TableHead>Submitted</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Risk</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>

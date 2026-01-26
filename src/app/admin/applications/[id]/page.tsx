@@ -44,6 +44,9 @@ import {
   Wifi,
   Car,
   Bus,
+  Briefcase,
+  BrainCircuit,
+  Link as LinkIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
@@ -75,6 +78,17 @@ function DetailItem({ icon: Icon, label, value, isLink = false }: { icon: React.
         </div>
     );
 }
+
+const riskVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+  Low: "default",
+  Medium: "secondary",
+  High: "destructive",
+};
+
+const TripadvisorIcon = (props: React.ComponentProps<'svg'>) => (
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}><title>Tripadvisor</title><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22.06C6.447 22.06 1.94 17.553 1.94 12S6.447 1.94 12 1.94s10.06 4.497 10.06 10.06-4.497 10.06-10.06 10.06zM7.342 12c0 2.574 2.084 4.658 4.658 4.658s4.658-2.084 4.658-4.658S14.574 7.342 12 7.342s-4.658 2.084-4.658 4.658zm7.316 0c0 1.47-1.188 2.658-2.658 2.658s-2.658-1.188-2.658-2.658S10.53 9.342 12 9.342s2.658 1.188 2.658 2.658z"/></svg>
+);
+
 
 export default function ApplicationDetailPage() {
   const params = useParams();
@@ -269,8 +283,6 @@ export default function ApplicationDetailPage() {
   const hostLocationDisplay = [suburbName, countryName].filter(Boolean).join(', ');
   const fullLocationDisplay = [application.location.address, localAreaName, suburbName, regionName, countryName].filter(Boolean).join(', ');
 
-  const isFinalStatus = application.status === 'Approved' || application.status === 'Rejected';
-
   const applicantImage = PlaceHolderImages.find(p => p.id === application.profile.profilePhotoId);
   const experienceImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
   const idDocImage = PlaceHolderImages.find(p => p.id === application.verification.idDocId);
@@ -283,13 +295,20 @@ export default function ApplicationDetailPage() {
           <h1 className="text-3xl font-headline font-bold">
             Application Review
           </h1>
-          <p className="text-muted-foreground">
-            Reviewing application from{" "}
-            <span className="font-semibold text-foreground">
-              {application.hostName}
-            </span>
-            - <Badge>{application.status}</Badge>
-          </p>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <p className="text-muted-foreground">
+              Reviewing application from{" "}
+              <span className="font-semibold text-foreground">
+                {application.hostName}
+              </span>
+            </p>
+             <Badge>{application.status}</Badge>
+             {application.riskFlag && (
+                <Badge variant={riskVariantMap[application.riskFlag]} className="gap-1.5">
+                    <AlertTriangle className="h-3 w-3" /> Risk: {application.riskFlag}
+                </Badge>
+            )}
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           {application.status === 'Pending' || application.status === 'Changes Needed' ? (
@@ -369,15 +388,12 @@ export default function ApplicationDetailPage() {
                             <p className="text-sm text-muted-foreground">{hostLocationDisplay}</p>
                         </div>
                     </div>
+                    <DetailItem icon={Briefcase} label="Hosting Level" value={application.profile.hostingExperienceLevel} />
+                    <DetailItem icon={BrainCircuit} label="Expertise & Story" value={application.profile.expertise} />
+                    <Separator />
                     <p className="text-sm italic text-muted-foreground">"{application.profile.bio}"</p>
-                    <div className="flex items-center gap-2 text-sm">
-                        <Languages className="h-4 w-4 text-muted-foreground"/>
-                        <span>{application.profile.languages}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                        <Info className="h-4 w-4 text-muted-foreground"/>
-                        <span>Culture: {application.profile.culturalBackground}</span>
-                    </div>
+                    {application.profile.languages && <div className="flex items-center gap-2 text-sm"><Languages className="h-4 w-4 text-muted-foreground"/><span>{application.profile.languages}</span></div>}
+                    {application.profile.culturalBackground && <div className="flex items-center gap-2 text-sm"><Info className="h-4 w-4 text-muted-foreground"/><span>Culture: {application.profile.culturalBackground}</span></div>}
                     <Separator />
                     <p className="font-semibold">Hosting Style</p>
                     <div className="flex flex-wrap gap-2">
@@ -448,21 +464,21 @@ export default function ApplicationDetailPage() {
                         {application.homeSetup.taxiNearby && <DetailItem icon={Car} label="Taxi" value="Nearby" />}
                     </CardContent>
                 </Card>
-                {applicantUser && (
-                    <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Phone /> Contact Information</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid sm:grid-cols-2 gap-4">
-                            <DetailItem icon={Mail} label="Email" value={applicantUser.email} isLink={true} />
-                            <DetailItem icon={Phone} label="Phone" value={applicantUser.phone} />
-                            <DetailItem icon={Globe} label="Website" value={applicantUser.website} isLink={true} />
-                            {applicantUser.socialMedia?.instagram && <DetailItem icon={Instagram} label="Instagram" value={applicantUser.socialMedia.instagram} isLink={true} />}
-                            {applicantUser.socialMedia?.facebook && <DetailItem icon={Facebook} label="Facebook" value={applicantUser.socialMedia.facebook} isLink={true} />}
-                            {applicantUser.socialMedia?.twitter && <DetailItem icon={Twitter} label="X" value={applicantUser.socialMedia.twitter} isLink={true} />}
-                        </CardContent>
-                    </Card>
-                )}
+                <Card className="lg:col-span-2">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><LinkIcon /> Online Presence</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid sm:grid-cols-2 gap-4">
+                        {applicantUser && <DetailItem icon={Mail} label="Email" value={applicantUser.email} isLink={true} />}
+                        {applicantUser && <DetailItem icon={Phone} label="Phone" value={applicantUser.phone} />}
+                        {application.profile.website && <DetailItem icon={Globe} label="Website" value={application.profile.website} isLink={true} />}
+                        {application.profile.socialMedia?.instagram && <DetailItem icon={Instagram} label="Instagram" value={application.profile.socialMedia.instagram} isLink={true} />}
+                        {application.profile.socialMedia?.facebook && <DetailItem icon={Facebook} label="Facebook" value={application.profile.socialMedia.facebook} isLink={true} />}
+                        {application.profile.socialMedia?.twitter && <DetailItem icon={Twitter} label="X" value={application.profile.socialMedia.twitter} isLink={true} />}
+                        {application.profile.socialMedia?.tripadvisor && <DetailItem icon={TripadvisorIcon} label="Tripadvisor" value={application.profile.socialMedia.tripadvisor} isLink={true} />}
+                        {application.profile.socialMedia?.other && <DetailItem icon={LinkIcon} label="Other" value={application.profile.socialMedia.other} isLink={true} />}
+                    </CardContent>
+                </Card>
             </div>
         </TabsContent>
 
@@ -516,5 +532,3 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
-
-    
