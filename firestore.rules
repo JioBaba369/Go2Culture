@@ -76,7 +76,7 @@ service cloud.firestore {
     /* ───────────── Experiences ───────────── */
 
     match /experiences/{experienceId} {
-      allow read: if true;
+      allow get, list: if true;
       allow create: if isSignedIn();
 
       allow update, delete: if isSignedIn()
@@ -88,9 +88,7 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow get: if isBookingParticipant(resource.data) || isAdmin();
       allow update: if isBookingParticipant(resource.data) || isAdmin();
-      // list is allowed for any signed-in user.
-      // The client query MUST enforce filtering by guestId or hostId.
-      allow list: if isSignedIn() || isAdmin();
+      allow list: if isSignedIn();
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
@@ -116,9 +114,7 @@ service cloud.firestore {
 
     match /messages/{messageId} {
       allow get: if isParticipant(resource.data) || isAdmin();
-      // list is allowed for any signed-in user.
-      // The client query MUST enforce filtering.
-      allow list: if isSignedIn() || isAdmin();
+      allow list: if isSignedIn();
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -137,9 +133,7 @@ service cloud.firestore {
 
     match /conversations/{conversationId} {
       allow get: if isParticipant(resource.data) || isAdmin();
-      // A user can list conversations they are a participant in.
-      // The client-side query MUST enforce this.
-      allow list: if isSignedIn() || isAdmin();
+      allow list: if isSignedIn();
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
