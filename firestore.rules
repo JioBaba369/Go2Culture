@@ -44,7 +44,7 @@ service cloud.firestore {
     /* ───────────────── Users ───────────────── */
 
     match /users/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
+      allow get: if true;
       allow list: if isAdmin();
       allow create: if isOwner(userId);
       allow update: if isOwner(userId) || isAdmin();
@@ -128,7 +128,7 @@ service cloud.firestore {
       allow get: if isAdmin() || isParticipant(resource.data);
 
       // ✅ Required for queries
-      allow list: if isSignedIn();
+      allow list: if isSignedIn() && request.query.where.participants.hasAny([request.auth.uid]);
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -145,7 +145,7 @@ service cloud.firestore {
 
     /* ───────────────── Conversations ───────────────── */
 
-    match /conversations/{conversationId} {
+    match /conversations/{bookingId} {
 
       // 🔐 Only participants or admin
       allow get: if isAdmin() || isParticipant(resource.data);
