@@ -1,7 +1,7 @@
 'use client';
 
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Conversation } from '@/lib/types';
 import { Loader2, MessageSquare } from 'lucide-react';
 import { ConversationListItem } from './ConversationListItem';
@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ADMIN_UID } from '@/lib/auth';
+import { useMemo } from 'react';
 
 export function ConversationList({ selectedConversationId }: { selectedConversationId: string | null }) {
   const { user, firestore } = useFirebase();
@@ -19,22 +20,27 @@ export function ConversationList({ selectedConversationId }: { selectedConversat
     const isAdmin = user.uid === ADMIN_UID;
 
     if (isAdmin) {
-      // Admin fetches all conversations, ordered by the last message
-      return query(
-        collection(firestore, 'conversations'),
-        orderBy('lastMessage.timestamp', 'desc')
-      );
+      // Admin fetches all conversations
+      return query(collection(firestore, 'conversations'));
     } else {
       // Regular user only fetches conversations they are a part of
       return query(
         collection(firestore, 'conversations'),
-        where('participants', 'array-contains', user.uid),
-        orderBy('lastMessage.timestamp', 'desc')
+        where('participants', 'array-contains', user.uid)
       );
     }
   }, [user, firestore]);
 
-  const { data: conversations, isLoading } = useCollection<Conversation>(conversationsQuery);
+  const { data: conversationsData, isLoading } = useCollection<Conversation>(conversationsQuery);
+
+  const conversations = useMemo(() => {
+    if (!conversationsData) return [];
+    return [...conversationsData].sort((a, b) => {
+        const timeA = a.lastMessage?.timestamp?.toDate ? a.lastMessage.timestamp.toDate().getTime() : 0;
+        const timeB = b.lastMessage?.timestamp?.toDate ? b.lastMessage.timestamp.toDate().getTime() : 0;
+        return timeB - timeA; // descending
+    });
+  }, [conversationsData]);
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-full"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
