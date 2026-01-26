@@ -44,6 +44,7 @@ export type ComplianceFields = {
   contractAccepted?: boolean;
   responsibilitiesAccepted?: boolean;
   insurancePolicyAccepted?: boolean;
+  agreeToFoodSafety?: boolean;
 };
 
 export type Host = {
@@ -255,8 +256,9 @@ export type HostApplication = {
       other?: string;
     };
     // Kept for data consistency even if not in the form
-    languages: string;
-    culturalBackground: string;
+    languages?: string;
+    culturalBackground?: string;
+    availabilityPreference?: 'weekdays' | 'weekends' | 'not-sure';
   };
 
   verification: {
@@ -287,6 +289,8 @@ export type HostApplication = {
     taxiNearby?: boolean;
     publicTransportNearby?: boolean;
     wifi?: boolean;
+    wowFactors?: string[];
+    spaceDescription?: string;
   };
 
   experience: {
@@ -312,7 +316,7 @@ export type HostApplication = {
     }
   };
 
-  compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean, agreeToFoodSafety: boolean };
+  compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean, agreeToFoodSafety?: boolean };
 };
 
 export type Report = {
