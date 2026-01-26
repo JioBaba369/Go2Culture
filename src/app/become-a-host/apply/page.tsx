@@ -22,6 +22,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { createNotification } from "@/lib/notification-actions";
+import { Separator } from "@/components/ui/separator";
+import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 const wowFactorOptions = [
@@ -46,6 +49,13 @@ const formSchema = z.object({
   hostingLocation: z.string({ required_error: "Please select where you'll host." }),
   wowFactors: z.array(z.string()).optional(),
   spaceDescription: z.string().optional(),
+  country: z.string({ required_error: "Country is required." }),
+  region: z.string().optional(),
+  suburb: z.string({ required_error: "Suburb/City is required." }),
+  localArea: z.string().optional(),
+  address: z.string().min(5, "A detailed address is required."),
+  postcode: z.string().min(3, "Postcode is required."),
+  accessibility: z.string().optional(),
 
   // Step 4
   agreeToTerms: z.boolean().refine(val => val === true, "You must agree to the terms."),
@@ -124,8 +134,44 @@ export default function BecomeAHostPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       wowFactors: [],
+      country: userProfile?.location?.country || '',
+      region: userProfile?.location?.region || '',
+      suburb: userProfile?.location?.suburb || '',
+      address: '',
+      postcode: '',
+      accessibility: '',
     },
   });
+
+  const { watch, setValue } = methods;
+  const watchCountry = watch('country');
+  const watchRegion = watch('region');
+  const watchSuburb = watch('suburb');
+
+  const availableRegions = regions.filter(s => s.countryId === watchCountry);
+  const availableSuburbs = suburbs.filter(s => s.regionId === watchRegion);
+  const availableLocalAreas = localAreas.filter(l => l.suburbId === watchSuburb);
+
+  useEffect(() => {
+    if (watchCountry) {
+        setValue('region', '');
+        setValue('suburb', '');
+        setValue('localArea', '');
+    }
+  }, [watchCountry, setValue]);
+
+  useEffect(() => {
+    if (watchRegion) {
+        setValue('suburb', '');
+        setValue('localArea', '');
+    }
+  }, [watchRegion, setValue]);
+  
+  useEffect(() => {
+    if (watchSuburb) {
+        setValue('localArea', '');
+    }
+  }, [watchSuburb, setValue]);
 
   async function nextStep() {
     let fieldsToValidate: (keyof OnboardingFormValues)[] = [];
@@ -133,7 +179,7 @@ export default function BecomeAHostPage() {
       fieldsToValidate = ['experienceType', 'experienceDescription', 'availability'];
     }
     if (currentStep === 1) {
-        fieldsToValidate = ['hostingLocation'];
+        fieldsToValidate = ['hostingLocation', 'country', 'suburb', 'address', 'postcode'];
     }
     
     const output = await methods.trigger(fieldsToValidate);
@@ -199,13 +245,15 @@ export default function BecomeAHostPage() {
           wowFactors: values.wowFactors,
           spaceDescription: values.spaceDescription,
           seating: 'Table', maxGuests: 4, pets: false, smoking: false,
+          accessibility: values.accessibility,
         },
         location: {
-          country: userData?.location?.country || 'TBD',
-          region: userData?.location?.region || '',
-          suburb: userData?.location?.suburb || 'TBD',
-          address: userData?.location?.address || 'TBD',
-          postcode: userData?.location?.postcode || 'TBD',
+          country: values.country,
+          region: values.region || '',
+          suburb: values.suburb,
+          localArea: values.localArea || '',
+          address: values.address,
+          postcode: values.postcode,
         },
         verification: { idDocId: "admin-id", selfieId: "admin-selfie", status: 'Pending' },
         compliance: { guidelinesAccepted: values.agreeToTerms },
@@ -369,6 +417,75 @@ export default function BecomeAHostPage() {
                         <FormField control={methods.control} name="spaceDescription" render={({ field }) => (
                             <FormItem><FormLabel>Anything we should know about your space or neighborhood?</FormLabel><FormDescription>Example: "I will host in a classic Roman apartment with vintage furniture and an impressive vinyl collection."</FormDescription><FormControl><Textarea rows={3} {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
+
+                        <Separator />
+
+                        <div>
+                            <FormLabel className="text-base">📍 Your Location</FormLabel>
+                            <FormDescription>This helps guests find you. The exact address is only shared after a booking is confirmed.</FormDescription>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={methods.control} name="country" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Country</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl>
+                                    <SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            <FormField control={methods.control} name="region" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableRegions.length}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                        <SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>{availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={methods.control} name="suburb" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Suburb/City</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableSuburbs.length}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select your suburb/city" /></SelectTrigger></FormControl>
+                                    <SelectContent>{availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            <FormField control={methods.control} name="localArea" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Local Area</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableLocalAreas.length}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select your local area" /></SelectTrigger></FormControl>
+                                    <SelectContent>{availableLocalAreas.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </div>
+                        <FormField control={methods.control} name="address" render={({ field }) => (
+                            <FormItem><FormLabel>Street Address</FormLabel><FormControl><Input placeholder="e.g., 123 Main St" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={methods.control} name="postcode" render={({ field }) => (
+                            <FormItem><FormLabel>Postcode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+
+                        <Separator />
+
+                        <FormField control={methods.control} name="accessibility" render={({ field }) => (
+                            <FormItem><FormLabel>Accessibility Information</FormLabel><FormDescription>e.g., "Ground floor access", "Two steps to enter", "Elevator in building"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+
                     </CardContent>
                 </Card>
             )}
