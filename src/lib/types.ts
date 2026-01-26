@@ -320,6 +320,7 @@ export type HostApplication = {
       description: string;
       spiceLevel: 'Mild' | 'Medium' | 'Spicy';
       allergens?: string;
+      dietary?: string[];
     };
 
     pricing: {

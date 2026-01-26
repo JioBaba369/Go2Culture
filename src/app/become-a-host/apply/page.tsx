@@ -52,6 +52,9 @@ const formSchema = z.object({
   menuDescription: z.string().min(20, "Menu description is required."),
   spiceLevel: z.enum(['Mild', 'Medium', 'Spicy'], { required_error: "Please select a spice level." }),
   pricePerGuest: z.coerce.number().min(10, "Price must be at least $10."),
+  menu: z.object({
+    dietary: z.string().optional(),
+  }),
 
   // Step 5: Media - no fields
 
@@ -147,6 +150,7 @@ export default function BecomeAHostPage() {
       durationMinutes: 120,
       maxGuests: 4,
       pricePerGuest: 50,
+      menu: { dietary: '' },
     },
   });
 
@@ -198,7 +202,7 @@ export default function BecomeAHostPage() {
     if (currentStep === 0) fieldsToValidate = ['category', 'experienceTitle', 'experienceDescription', 'durationMinutes'];
     if (currentStep === 1) fieldsToValidate = ['hostingExperienceLevel', 'expertise', 'bio'];
     if (currentStep === 2) fieldsToValidate = ['hostingLocation', 'country', 'suburb', 'address', 'postcode', 'maxGuests'];
-    if (currentStep === 3) fieldsToValidate = ['menuCuisine', 'menuDescription', 'spiceLevel', 'pricePerGuest'];
+    if (currentStep === 3) fieldsToValidate = ['menuCuisine', 'menuDescription', 'spiceLevel', 'pricePerGuest', 'menu.dietary'];
     
     const output = await methods.trigger(fieldsToValidate);
     
@@ -256,7 +260,8 @@ export default function BecomeAHostPage() {
           menu: { 
             cuisine: values.menuCuisine,
             description: values.menuDescription, 
-            spiceLevel: values.spiceLevel 
+            spiceLevel: values.spiceLevel,
+            dietary: values.menu.dietary ? values.menu.dietary.split(',').map(s => s.trim()).filter(Boolean) : [],
           },
           pricing: { 
             pricePerGuest: values.pricePerGuest,
@@ -495,6 +500,9 @@ export default function BecomeAHostPage() {
                                 <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Medium" /></FormControl><FormLabel className="font-normal">Medium</FormLabel></FormItem>
                                 <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Spicy" /></FormControl><FormLabel className="font-normal">Spicy</FormLabel></FormItem>
                             </RadioGroup></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="menu.dietary" render={({ field }) => (
+                            <FormItem><FormLabel>Dietary Options</FormLabel><FormDescription>List any dietary accommodations, separated by commas (e.g., Vegetarian, Gluten-Free).</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="pricePerGuest" render={({ field }) => (
                             <FormItem><FormLabel>Price per guest ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
