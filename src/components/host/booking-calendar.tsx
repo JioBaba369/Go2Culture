@@ -44,9 +44,11 @@ function GuestListItem({ booking }: { booking: Booking }) {
                     <p className="text-sm text-muted-foreground">{booking.numberOfGuests} guest{booking.numberOfGuests > 1 ? 's' : ''}</p>
                 </div>
             </div>
-            <Button variant="outline" size="sm">
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Chat
+            <Button asChild variant="outline" size="sm">
+                <Link href={`/messages?id=${booking.id}`}>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Chat
+                </Link>
             </Button>
         </div>
     );
