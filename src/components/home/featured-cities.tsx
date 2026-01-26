@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -45,15 +46,14 @@ export function FeaturedCitiesSection() {
             return acc;
         }, {} as Record<string, number>);
 
-        const topCityIds = Object.entries(cityCounts)
+        const sortedCityIds = Object.entries(cityCounts)
             .sort((a, b) => b[1] - a[1])
             .map(entry => entry[0]);
         
-        const defaultIds = ['SYD', 'MEL', 'AKL', 'WLG'];
-        const combinedIds = [...new Set([...topCityIds, ...defaultIds])].slice(0, 4);
+        const top4CityIds = sortedCityIds.slice(0, 4);
 
-        const cities = suburbs.filter(s => combinedIds.includes(s.id))
-            .sort((a, b) => combinedIds.indexOf(a.id) - combinedIds.indexOf(b.id));
+        const cities = suburbs.filter(s => top4CityIds.includes(s.id))
+            .sort((a, b) => top4CityIds.indexOf(a.id) - top4CityIds.indexOf(b.id));
         
         return { cities, counts: cityCounts };
 

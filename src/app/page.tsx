@@ -13,7 +13,6 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 const HowItWorksSection = dynamic(() => import('@/components/home/how-it-works').then(mod => mod.HowItWorksSection));
 const FeaturedExperiencesSection = dynamic(() => import('@/components/home/featured-experiences').then(mod => mod.FeaturedExperiencesSection));
 const FeaturedCitiesSection = dynamic(() => import('@/components/home/featured-cities').then(mod => mod.FeaturedCitiesSection));
-const PopularDestinationsSection = dynamic(() => import('@/components/home/popular-destinations').then(mod => mod.PopularDestinationsSection));
 const TopSearchesSection = dynamic(() => import('@/components/home/top-searches').then(mod => mod.TopSearchesSection));
 const TestimonialsSection = dynamic(() => import('@/components/home/testimonials').then(mod => mod.TestimonialsSection));
 const FeaturedSponsorsSection = dynamic(() => import('@/components/home/featured-sponsors').then(mod => mod.FeaturedSponsorsSection));
@@ -54,7 +53,6 @@ export default function Home() {
       <HowItWorksSection />
       <FeaturedExperiencesSection />
       <FeaturedCitiesSection />
-      <PopularDestinationsSection />
       <TopSearchesSection />
       <TestimonialsSection />
       <FeaturedSponsorsSection />

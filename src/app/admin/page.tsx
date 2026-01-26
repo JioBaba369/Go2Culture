@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -19,12 +20,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
-import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import { HostApplication, Experience, User, Review, Booking } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ADMIN_UID } from "@/lib/auth";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const UsersChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.UsersChart), {
   ssr: false,
@@ -44,51 +46,48 @@ const EarningsChart = dynamic(() => import('@/components/admin/dashboard-charts'
 });
 
 
-const ActivityIcon = ({ type }: { type: string }) => {
-    switch (type) {
-        case 'application': return <FileText className="h-5 w-5 text-muted-foreground" />;
-        case 'experience': return <Utensils className="h-5 w-5 text-muted-foreground" />;
-        case 'user': return <Users className="h-5 w-5 text-muted-foreground" />;
-        case 'review': return <Star className="h-5 w-5 text-muted-foreground" />;
-        default: return <Clock className="h-5 w-5 text-muted-foreground" />;
-    }
-};
-
 const ActivityItem = ({ activity }: { activity: any }) => {
+    const firestore = useFirestore();
     const timeAgo = formatDistanceToNow(activity.date, { addSuffix: true });
 
-    let title, href, imageURL, fallbackName;
+    let title, href, imageURL, fallbackName = '?';
 
+    // Different activities have different data structures, so we fetch related data differently.
+    const guestRef = useMemoFirebase(() => (firestore && activity.type === 'review' ? doc(firestore, 'users', activity.data.guestId) : null), [firestore, activity]);
+    const { data: guest } = useDoc<User>(guestRef);
+    
     switch (activity.type) {
         case 'application':
             title = <>New application from <span className="font-semibold">{activity.data.hostName}</span></>;
             href = `/admin/applications/${activity.data.id}`;
-            imageURL = activity.data.profile.photoURL;
+            imageURL = PlaceHolderImages.find(p => p.id === activity.data.profile.profilePhotoId)?.imageUrl;
             fallbackName = activity.data.hostName;
             break;
         case 'experience':
             title = <>New experience created: <span className="font-semibold">{activity.data.title}</span></>;
             href = `/experiences/${activity.data.id}`;
-            // The host data is not denormalized on the experience for this view, so we can't show image.
-            // imageURL = activity.data.host.profilePhotoURL;
-            fallbackName = activity.data.title;
+            imageURL = PlaceHolderImages.find(p => p.id === activity.data.hostProfilePhotoId)?.imageUrl;
+            fallbackName = activity.data.hostName;
             break;
         case 'user':
             title = <><span className="font-semibold">{activity.data.fullName}</span> joined Go2Culture</>;
             href = `/admin/users`;
-            imageURL = activity.data.profilePhotoURL;
+            imageURL = PlaceHolderImages.find(p => p.id === activity.data.profilePhotoId)?.imageUrl;
             fallbackName = activity.data.fullName;
             break;
         case 'review':
-             title = <>A guest left a review</>;
-             href = `/admin/reports`; // Reviews and reports are on the same page
-            // imageURL = reviewedUser?.profilePhotoURL;
-            fallbackName = '?';
+             if (guest) {
+                title = <><span className="font-semibold">{guest.fullName}</span> left a review</>;
+                imageURL = PlaceHolderImages.find(p => p.id === guest.profilePhotoId)?.imageUrl;
+                fallbackName = guest.fullName;
+             } else {
+                 title = 'A new review was submitted';
+             }
+             href = `/admin/reports`;
             break;
         default:
             title = 'An unknown activity occurred';
             href = '/admin';
-            fallbackName = '?';
     }
 
     return (
@@ -207,7 +206,7 @@ export default function AdminDashboardPage() {
         <CardContent>
             {activities.length > 0 ? (
                 <div className="space-y-6">
-                    {activities.map((activity, index) => <ActivityItem key={index} activity={activity} />)}
+                    {activities.map((activity, index) => <ActivityItem key={`${activity.type}-${activity.data.id}-${index}`} activity={activity} />)}
                 </div>
             ) : (
                 <p className="text-muted-foreground">No recent activity to display.</p>

@@ -1,12 +1,11 @@
 
 'use client';
 
-import { useMemo } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ExperienceCard } from '@/components/experience-card';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, limit, query } from 'firebase/firestore';
+import { collection, limit, query, where, orderBy } from 'firebase/firestore';
 import { Experience } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -14,7 +13,12 @@ export function FeaturedExperiencesSection() {
     const firestore = useFirestore();
 
     const experiencesQuery = useMemoFirebase(
-        () => firestore ? query(collection(firestore, 'experiences'), limit(4)) : null,
+        () => firestore ? query(
+            collection(firestore, 'experiences'),
+            where('status', '==', 'live'),
+            orderBy('rating.average', 'desc'),
+            limit(4)
+        ) : null,
         [firestore]
     );
     const { data: experiences, isLoading } = useCollection<Experience>(experiencesQuery);

@@ -6,14 +6,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TestimonialCard } from '@/components/testimonial-card';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, limit, query } from 'firebase/firestore';
+import { collection, limit, query, orderBy } from 'firebase/firestore';
 import { Review } from '@/lib/types';
 
 export function TestimonialsSection() {
     const firestore = useFirestore();
 
     const reviewsQuery = useMemoFirebase(
-        () => firestore ? query(collection(firestore, 'reviews'), limit(3)) : null,
+        () => firestore ? query(collection(firestore, 'reviews'), orderBy('createdAt', 'desc'), limit(3)) : null,
         [firestore]
     );
     const { data: reviews, isLoading: areReviewsLoading } = useCollection<Review>(reviewsQuery);

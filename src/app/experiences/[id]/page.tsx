@@ -1,7 +1,7 @@
 
 'use client';
 
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import Image from "next/image";
 import Link from 'next/link';
 import type { Experience, Host, Review } from "@/lib/types";
@@ -47,6 +47,7 @@ const AmenityItem = ({ icon: Icon, children }: { icon: React.ElementType, childr
 export default function ExperienceDetailPage() {
   const params = useParams();
   const experienceId = params.id as string;
+  const [reviewsLimit, setReviewsLimit] = useState(2);
 
   const firestore = useFirestore();
 
@@ -63,8 +64,8 @@ export default function ExperienceDetailPage() {
   const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
 
   const reviewsQuery = useMemoFirebase(
-    () => (firestore && experienceId ? query(collection(firestore, "reviews"), where("experienceId", "==", experienceId), limit(2)) : null),
-    [firestore, experienceId]
+    () => (firestore && experienceId ? query(collection(firestore, "reviews"), where("experienceId", "==", experienceId), limit(reviewsLimit)) : null),
+    [firestore, experienceId, reviewsLimit]
   );
   const { data: reviews, isLoading: areReviewsLoading } = useCollection<Review>(reviewsQuery);
   
@@ -105,6 +106,11 @@ export default function ExperienceDetailPage() {
   const localAreaName = localAreas.find(l => l.id === experience.location.localArea)?.name || experience.location.localArea;
   const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
   const CategoryIcon = categoryIcons[experience.category];
+  const showAllReviews = () => {
+    setReviewsLimit(100); // Or some other high number
+  };
+  const hasMoreReviews = experience.rating.count > reviewsLimit;
+
 
   return (
     <div className="py-8">
@@ -332,7 +338,7 @@ export default function ExperienceDetailPage() {
                 <p className="text-muted-foreground">No reviews yet for this experience.</p>
               )}
             </div>
-            {experience.rating.count > 2 && <Button variant="outline" className="mt-6">Show all {experience.rating.count} reviews</Button>}
+            {hasMoreReviews && <Button variant="outline" className="mt-6" onClick={showAllReviews}>Show all {experience.rating.count} reviews</Button>}
           </div>
         </div>
         
