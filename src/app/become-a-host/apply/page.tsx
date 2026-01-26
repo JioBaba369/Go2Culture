@@ -8,11 +8,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PartyPopper, User as UserIcon } from "lucide-react";
-import { useFirestore, useUser } from "@/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import type { HostApplication } from "@/lib/types";
+import { Loader2, PartyPopper, User as UserIcon, LayoutDashboard } from "lucide-react";
+import { useFirestore, useUser, useDoc, useMemoFirebase } from "@/firebase";
+import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
+import type { HostApplication, User } from "@/lib/types";
 import { complianceRequirementsByState, countryComplianceRequirements } from "@/lib/compliance-data";
+import { useRouter } from "next/navigation";
 
 import { Step1BasicInfo } from "@/components/apply-form/step1-basic-info";
 import { Step2HostProfile } from "@/components/apply-form/step2-host-profile";
@@ -197,6 +198,13 @@ export default function BecomeAHostPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  const userDocRef = useMemoFirebase(
+    () => (firestore && user ? doc(firestore, "users", user.uid) : null),
+    [firestore, user]
+  );
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
 
   const methods = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
@@ -328,7 +336,9 @@ export default function BecomeAHostPage() {
     }
   }
   
-  if (isUserLoading) {
+  const isLoading = isUserLoading || isProfileLoading;
+
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -352,6 +362,21 @@ export default function BecomeAHostPage() {
             <Link href="/signup">Create Account</Link>
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  if (userProfile && (userProfile.role === 'host' || userProfile.role === 'both')) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-20">
+        <LayoutDashboard className="h-16 w-16 text-primary mb-4" />
+        <h1 className="font-headline text-4xl font-bold">You're already a host!</h1>
+        <p className="mt-4 text-muted-foreground max-w-lg">
+          Thanks for being part of our community. You can manage your experiences, bookings, and profile from your Host Dashboard.
+        </p>
+        <Button asChild className="mt-8">
+          <Link href="/host">Go to Host Dashboard</Link>
+        </Button>
       </div>
     );
   }
