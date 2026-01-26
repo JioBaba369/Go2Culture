@@ -107,7 +107,8 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
     );
   }, [firestore, isOpen, booking.id]);
 
-  const { data: messages = [], isLoading } = useCollection<Message>(messagesQuery);
+  const { data, isLoading } = useCollection<Message>(messagesQuery);
+  const messages = data ?? [];
 
   const form = useForm<MessageFormValues>({
     resolver: zodResolver(messageSchema),
@@ -128,7 +129,7 @@ export function MessageDialog({ booking, recipient, children }: MessageDialogPro
     if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [messages.length]);
+  }, [messages]);
 
   // Also scroll when opening dialog (after first render)
   useEffect(() => {
