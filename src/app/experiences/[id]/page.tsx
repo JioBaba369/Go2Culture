@@ -193,15 +193,18 @@ export default function ExperienceDetailPage() {
           {/* ALLERGENS */}
           <div className="space-y-4">
             <h3 className="font-headline text-2xl">Allergen Information</h3>
-            <Alert variant="default" className="bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-800">
-              <AlertTriangle className="h-4 w-4 !text-amber-600" />
-              <AlertTitle className="text-amber-800 dark:text-amber-300 font-bold">Important Notice</AlertTitle>
-              <AlertDescription className="text-amber-700 dark:text-amber-400 space-y-2">
+            <Alert variant="warning">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle className="font-bold">Important Notice</AlertTitle>
+              <AlertDescription className="space-y-3">
                 <p>In accordance with the <strong>Australia New Zealand Food Standards Code (FSANZ)</strong>, please be aware that food is prepared in a home kitchen where allergens are handled, and cross-contact may occur.</p>
                 {experience.menu.allergens && (
-                  <p><strong>Host-declared potential allergens for this experience:</strong> {experience.menu.allergens}</p>
+                  <div className="p-3 bg-amber-100/50 dark:bg-amber-900/50 rounded-md text-amber-900 dark:text-amber-200">
+                    <p className="font-semibold">Host-declared potential allergens:</p>
+                    <p className="text-sm mt-1">{experience.menu.allergens}</p>
+                  </div>
                 )}
-                <p className="font-semibold">Guests with food allergies or intolerances are strongly advised to contact the host before booking to discuss their specific needs.</p>
+                <p className="!mt-4 font-semibold">Guests with food allergies or intolerances are strongly advised to contact the host before booking to discuss their specific needs.</p>
               </AlertDescription>
             </Alert>
           </div>
