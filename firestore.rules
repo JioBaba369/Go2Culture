@@ -87,24 +87,26 @@ service cloud.firestore {
     /* ───────────────── Bookings ───────────────── */
 
     match /bookings/{bookingId} {
-      allow get: if isBookingParticipant(resource.data) || isAdmin();
-      allow list: if isSignedIn();
+      // 🔐 Only a guest, host, or admin can read a booking.
+      allow read: if isBookingParticipant(resource.data) || isAdmin();
 
+      // Create booking
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
             .data.termsAccepted == true;
 
+      // Update booking
       allow update: if isBookingParticipant(resource.data) || isAdmin();
 
+      // Prevent deletion of transaction history
       allow delete: if isAdmin();
     }
 
     /* ───────────────── Reviews ───────────────── */
 
     match /reviews/{reviewId} {
-      allow get: if true;
-      allow list: if true;
+      allow read: if true;
 
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid;
@@ -118,8 +120,8 @@ service cloud.firestore {
     /* ───────────────── Messages ───────────────── */
 
     match /messages/{messageId} {
-      allow get: if isAdmin() || isParticipant(resource.data);
-      allow list: if isSignedIn();
+      // 🔐 Only participants or admin can read messages.
+      allow read: if isAdmin() || isParticipant(resource.data);
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -137,8 +139,8 @@ service cloud.firestore {
     /* ───────────────── Conversations ───────────────── */
 
     match /conversations/{conversationId} {
-      allow get: if isAdmin() || isParticipant(resource.data);
-      allow list: if isSignedIn();
+      // 🔐 Only participants or admin can read conversations.
+      allow read: if isAdmin() || isParticipant(resource.data);
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
@@ -155,8 +157,7 @@ service cloud.firestore {
     /* ───────────────── Sponsors & Coupons ───────────────── */
 
     match /sponsors/{sponsorId} {
-      allow get: if true;
-      allow list: if true;
+      allow read: if true;
       allow write: if isAdmin();
     }
 

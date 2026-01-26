@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
@@ -56,7 +55,13 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   const conversationRef = useMemoFirebase(() => (firestore && conversationId ? doc(firestore, 'conversations', conversationId) : null), [firestore, conversationId]);
   const { data: conversation, isLoading: isConvoLoading } = useDoc<Conversation>(conversationRef);
 
-  const messagesQuery = useMemoFirebase(() => (firestore && conversationId ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId), orderBy('timestamp', 'asc')) : null), [firestore, conversationId]);
+  const messagesQuery = useMemoFirebase(
+    () =>
+      firestore && user && conversationId
+        ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId), where('participants', 'array-contains', user.uid), orderBy('timestamp', 'asc'))
+        : null,
+    [firestore, user, conversationId]
+  );
   
   const { data: messages = [], isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
   
