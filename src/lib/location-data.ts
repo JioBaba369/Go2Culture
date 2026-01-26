@@ -289,6 +289,26 @@ export const suburbs = [
   { id: 'ZQN', name: 'Queenstown', regionId: 'OTA' },
   { id: 'HLZ', name: 'Hamilton', regionId: 'WKO' },
   { id: 'TRG', name: 'Tauranga', regionId: 'BOP' },
+  
+  // United States
+  { id: 'NYC', name: 'New York City', regionId: 'NY' },
+  { id: 'LA', name: 'Los Angeles', regionId: 'CA' },
+  { id: 'CHI', name: 'Chicago', regionId: 'IL' },
+  { id: 'HOU', name: 'Houston', regionId: 'TX' },
+  { id: 'MIA', name: 'Miami', regionId: 'FL' },
+
+  // Canada
+  { id: 'TOR', name: 'Toronto', regionId: 'ON' },
+  { id: 'MTL', name: 'Montreal', regionId: 'QC' },
+  { id: 'VAN', name: 'Vancouver', regionId: 'BC' },
+  { id: 'CAL', name: 'Calgary', regionId: 'AB' },
+  { id: 'WPG', name: 'Winnipeg', regionId: 'MB' },
+
+  // United Kingdom
+  { id: 'LDN', name: 'London', regionId: 'ENG' },
+  { id: 'EDH', name: 'Edinburgh', regionId: 'SCT' },
+  { id: 'CDF', name: 'Cardiff', regionId: 'WLS' },
+  { id: 'BFS', name: 'Belfast', regionId: 'NIR' },
 ];
 
 // Note: In the app's context, "localAreas" are the suburbs within a city.
@@ -311,6 +331,12 @@ export const localAreas = [
   { id: 'MARRICKVILLE', name: 'Marrickville', suburbId: 'SYD' },
   { id: 'BANKSTOWN', name: 'Bankstown', suburbId: 'SYD' },
   { id: 'CABRAMATTA', name: 'Cabramatta', suburbId: 'SYD' },
+  { id: 'LAKEMBA', name: 'Lakemba', suburbId: 'SYD' },
+  { id: 'CAMPSIE', name: 'Campsie', suburbId: 'SYD' },
+  { id: 'BURWOOD', name: 'Burwood', suburbId: 'SYD' },
+  { id: 'STRATHFIELD', name: 'Strathfield', suburbId: 'SYD' },
+  { id: 'ASHFIELD', name: 'Ashfield', suburbId: 'SYD' },
+  { id: 'GLEBE', name: 'Glebe', suburbId: 'SYD' },
 
 
   // Melbourne (MEL)
@@ -326,6 +352,11 @@ export const localAreas = [
   { id: 'FOOTSCRAY', name: 'Footscray', suburbId: 'MEL' },
   { id: 'COBURG', name: 'Coburg', suburbId: 'MEL' },
   { id: 'BOXHILL', name: 'Box Hill', suburbId: 'MEL' },
+  { id: 'DANDENONG', name: 'Dandenong', suburbId: 'MEL' },
+  { id: 'SPRINGVALE', name: 'Springvale', suburbId: 'MEL' },
+  { id: 'PRESTON', name: 'Preston', suburbId: 'MEL' },
+  { id: 'NORTHCOTE', name: 'Northcote', suburbId: 'MEL' },
+  { id: 'HAWTHORN', name: 'Hawthorn', suburbId: 'MEL' },
 
   // Brisbane (BRI)
   { id: 'WESTEND', name: 'West End', suburbId: 'BRI' },
@@ -336,6 +367,8 @@ export const localAreas = [
   { id: 'KANGAROOPT', name: 'Kangaroo Point', suburbId: 'BRI' },
   { id: 'TOOWONG', name: 'Toowong', suburbId: 'BRI' },
   { id: 'SUNNYBANK', name: 'Sunnybank', suburbId: 'BRI' },
+  { id: 'STONESCORNER', name: 'Stones Corner', suburbId: 'BRI' },
+  { id: 'WOOLLOONGABBA', name: 'Woolloongabba', suburbId: 'BRI' },
 
   // Perth (PER)
   { id: 'FREMANTLE', name: 'Fremantle', suburbId: 'PER' },
@@ -346,6 +379,7 @@ export const localAreas = [
   { id: 'SCARBOROUGH', name: 'Scarborough', suburbId: 'PER' },
   { id: 'MTLAWLEY', name: 'Mount Lawley', suburbId: 'PER' },
   { id: 'VICTORIAPARK', name: 'Victoria Park', suburbId: 'PER' },
+  { id: 'EASTPERTH', name: 'East Perth', suburbId: 'PER' },
 
   // Adelaide (ADL)
   { id: 'NORTHADL', name: 'North Adelaide', suburbId: 'ADL' },
@@ -353,18 +387,21 @@ export const localAreas = [
   { id: 'NORWOOD', name: 'Norwood', suburbId: 'ADL' },
   { id: 'HENLEY', name: 'Henley Beach', suburbId: 'ADL' },
   { id: 'PROSPECT', name: 'Prospect', suburbId: 'ADL' },
+  { id: 'GOODWOOD', name: 'Goodwood', suburbId: 'ADL' },
 
   // Canberra (CBR)
   { id: 'BRADDON', name: 'Braddon', suburbId: 'CBR' },
   { id: 'KINGSTON', name: 'Kingston', suburbId: 'CBR' },
   { id: 'MANUKA', name: 'Manuka', suburbId: 'CBR' },
   { id: 'DICKSON', name: 'Dickson', suburbId: 'CBR' },
+  { id: 'CIVIC', name: 'Civic', suburbId: 'CBR' },
 
   // Hobart (HBA)
   { id: 'BATTERYPT', name: 'Battery Point', suburbId: 'HBA' },
   { id: 'SANDYBAY', name: 'Sandy Bay', suburbId: 'HBA' },
   { id: 'NORTHHBA', name: 'North Hobart', suburbId: 'HBA' },
   { id: 'SALAMANCA', name: 'Salamanca', suburbId: 'HBA' },
+  { id: 'MOONAH', name: 'Moonah', suburbId: 'HBA' },
 
   // Auckland (AKL)
   { id: 'PONSONBY', name: 'Ponsonby', suburbId: 'AKL' },
@@ -399,3 +436,6 @@ export const localAreas = [
   { id: 'ARROWTOWN', name: 'Arrowtown', suburbId: 'ZQN' },
   { id: 'LAKEHAYES', name: 'Lake Hayes', suburbId: 'ZQN' },
 ];
+
+
+    
