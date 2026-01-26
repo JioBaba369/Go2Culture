@@ -1,5 +1,5 @@
 
-import { Users, Utensils, PiggyBank } from 'lucide-react';
+import { Users, Utensils, DollarSign } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -44,7 +44,7 @@ export default function AboutPage() {
                 <div className="text-center">
                      <h2 className="font-headline text-3xl font-bold">Our Philosophy</h2>
                      <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        We are guided by three core principles that turn a simple meal into a movement for World Peace through Taste and Sharing.
+                        We are guided by three core principles.
                     </p>
                 </div>
 
@@ -66,7 +66,7 @@ export default function AboutPage() {
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                            <PiggyBank className="h-8 w-8" />
+                            <DollarSign className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">Empower Local Communities</h3>
                         <p className="text-muted-foreground mt-2">Every experience directly supports local households, providing families with a dignified source of income while strengthening and sustaining their communities.</p>

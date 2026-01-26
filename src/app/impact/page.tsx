@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, Globe, Users, Heart } from 'lucide-react';
+import { DollarSign, Globe, Users, Utensils } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -78,7 +78,7 @@ export default function ImpactPage() {
                 <div className="grid md:grid-cols-3 gap-8 text-center">
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                            <Heart className="h-8 w-8" />
+                            <Utensils className="h-8 w-8" />
                         </div>
                         <h3 className="text-xl font-bold font-headline">Celebrate Authentic Heritage</h3>
                         <p className="text-muted-foreground mt-2">We honour the soul of each culture through home-cooked recipes and traditions passed down across generations—offering flavours, stories, and rituals you won’t find in a typical restaurant.</p>
