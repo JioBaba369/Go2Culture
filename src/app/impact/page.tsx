@@ -78,24 +78,24 @@ export default function ImpactPage() {
                 <div className="grid md:grid-cols-3 gap-8 text-center">
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
-                            <DollarSign className="h-8 w-8" />
-                        </div>
-                        <h3 className="text-xl font-bold font-headline">Economic Empowerment</h3>
-                        <p className="text-muted-foreground mt-2">We provide a direct path for families to generate income by sharing their passion, ensuring the financial benefits of cultural exchange go straight into their hands.</p>
-                    </div>
-                    <div className="flex flex-col items-center">
-                        <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Heart className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Cultural Preservation</h3>
-                        <p className="text-muted-foreground mt-2">By creating a platform for authentic heritage to be shared, we help preserve recipes, traditions, and stories that might otherwise be lost.</p>
+                        <h3 className="text-xl font-bold font-headline">Celebrate Authentic Heritage</h3>
+                        <p className="text-muted-foreground mt-2">We honour the soul of each culture through home-cooked recipes and traditions passed down across generations—offering flavours, stories, and rituals you won’t find in a typical restaurant.</p>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Users className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Social Connection</h3>
-                        <p className="text-muted-foreground mt-2">Food is a universal language that dissolves barriers. We create genuine connections between people from all walks of life, fostering a more inclusive world.</p>
+                        <h3 className="text-xl font-bold font-headline">Create Genuine Human Connection</h3>
+                        <p className="text-muted-foreground mt-2">By welcoming guests into local homes, we enable meaningful cultural exchange that breaks down barriers, broadens perspectives, and allows hosts to share their history with pride.</p>
+                    </div>
+                    <div className="flex flex-col items-center">
+                        <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
+                            <DollarSign className="h-8 w-8" />
+                        </div>
+                        <h3 className="text-xl font-bold font-headline">Empower Local Communities</h3>
+                        <p className="text-muted-foreground mt-2">Every experience directly supports local households, providing families with a dignified source of income while strengthening and sustaining their communities.</p>
                     </div>
                 </div>
 

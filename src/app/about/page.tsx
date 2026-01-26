@@ -54,22 +54,22 @@ export default function AboutPage() {
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Utensils className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Authentic Heritage, Not Commercial Food</h3>
-                        <p className="text-muted-foreground mt-2">Experience the soul of a nation through recipes passed down through generations. This is food cooked from the heart, offering tastes and stories you won't find in any restaurant.</p>
+                        <h3 className="text-xl font-bold font-headline">Celebrate Authentic Heritage</h3>
+                        <p className="text-muted-foreground mt-2">We honour the soul of each culture through home-cooked recipes and traditions passed down across generations—offering flavours, stories, and rituals you won’t find in a typical restaurant.</p>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <Users className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Genuine Connection, Not a Transaction</h3>
-                        <p className="text-muted-foreground mt-2">By entering a home, you participate in a global exchange that dissolves barriers. It’s a two-way street where guests gain a new perspective and hosts share their pride and history.</p>
+                        <h3 className="text-xl font-bold font-headline">Create Genuine Human Connection</h3>
+                        <p className="text-muted-foreground mt-2">By welcoming guests into local homes, we enable meaningful cultural exchange that breaks down barriers, broadens perspectives, and allows hosts to share their history with pride.</p>
                     </div>
                     <div className="flex flex-col items-center">
                         <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                             <PiggyBank className="h-8 w-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-headline">Boosting the Local Household Economy</h3>
-                        <p className="text-muted-foreground mt-2">We are committed to social impact. Every experience directly boosts the household economy of local families, providing them with a dignified way to support their lives while enriching their community.</p>
+                        <h3 className="text-xl font-bold font-headline">Empower Local Communities</h3>
+                        <p className="text-muted-foreground mt-2">Every experience directly supports local households, providing families with a dignified source of income while strengthening and sustaining their communities.</p>
                     </div>
                 </div>
 
