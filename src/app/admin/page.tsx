@@ -44,6 +44,14 @@ const EarningsChart = dynamic(() => import('@/components/admin/dashboard-charts'
   ssr: false,
   loading: () => <Skeleton className="h-[350px]" />
 });
+const UserRolesChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.UserRolesChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[350px]" />
+});
+const ExperienceStatusChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.ExperienceStatusChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[350px]" />
+});
 
 
 const ActivityItem = ({ activity }: { activity: any }) => {
@@ -95,7 +103,7 @@ const ActivityItem = ({ activity }: { activity: any }) => {
     return (
         <div className="flex items-center gap-4">
             <Avatar className="h-9 w-9">
-                {imageURL ? <AvatarImage src={imageURL} alt={fallbackName} /> : <AvatarFallback>{fallbackName.charAt(0)}</AvatarFallback>}
+                {imageURL ? <AvatarImage src={imageURL} alt={fallbackName} /> : <AvatarFallback>{fallbackName ? fallbackName.charAt(0) : '?'}</AvatarFallback>}
             </Avatar>
             <div className="flex-1">
                 <p className="text-sm text-foreground hover:underline"><Link href={href}>{title}</Link></p>
@@ -199,6 +207,11 @@ export default function AdminDashboardPage() {
         <div className="lg:col-span-2">
             <ExperiencesChart experiences={experiences || []}/>
         </div>
+      </div>
+      
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <UserRolesChart users={users || []} />
+        <ExperienceStatusChart experiences={experiences || []} />
       </div>
 
       <Card>

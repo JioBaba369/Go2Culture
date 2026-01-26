@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Pie, PieChart, Cell, Legend } from 'recharts';
@@ -224,6 +225,105 @@ export function EarningsChart({ bookings }: { bookings: Booking[] }) {
                          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                         <Bar dataKey="earnings" fill="var(--color-earnings)" radius={4} />
                     </BarChart>
+                </ChartContainer>
+            </CardContent>
+        </Card>
+    )
+}
+
+export function UserRolesChart({ users }: { users: User[] }) {
+    const data = useMemo(() => {
+        if (!users) return [];
+        const counts = users.reduce((acc, user) => {
+            const role = user.role || 'guest';
+            acc[role] = (acc[role] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return Object.entries(counts).map(([name, value]) => ({
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            value,
+        }));
+    }, [users]);
+
+    const chartConfig = {
+        Guest: {
+            label: "Guests",
+            color: "hsl(var(--primary))",
+        },
+        Host: {
+            label: "Hosts",
+            color: "hsl(var(--accent))",
+        },
+        Both: {
+            label: "Both",
+            color: "hsl(var(--secondary))",
+        },
+    } satisfies ChartConfig;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>User Role Distribution</CardTitle>
+                <CardDescription>Breakdown of users by their role.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <ChartContainer config={chartConfig} className="h-64">
+                    <PieChart>
+                       <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                        <Pie data={data} dataKey="value" nameKey="name" innerRadius={50}>
+                             {data.map((entry) => {
+                                const key = entry.name as keyof typeof chartConfig;
+                                return <Cell key={`cell-${entry.name}`} fill={chartConfig[key]?.color} />
+                            })}
+                        </Pie>
+                        <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                    </PieChart>
+                </ChartContainer>
+            </CardContent>
+        </Card>
+    )
+}
+
+export function ExperienceStatusChart({ experiences }: { experiences: Experience[] }) {
+    const data = useMemo(() => {
+        if (!experiences) return [];
+        const counts = experiences.reduce((acc, exp) => {
+            const status = exp.status || 'draft';
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return Object.entries(counts).map(([name, value]) => ({
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            value,
+        }));
+    }, [experiences]);
+
+    const chartConfig = {
+        Live: { label: "Live", color: "hsl(var(--primary))" },
+        Paused: { label: "Paused", color: "hsl(var(--accent))" },
+        Draft: { label: "Draft", color: "hsl(var(--secondary))" },
+    } satisfies ChartConfig;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Experience Status</CardTitle>
+                <CardDescription>Breakdown of experiences by their status.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <ChartContainer config={chartConfig} className="h-64">
+                    <PieChart>
+                       <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                        <Pie data={data} dataKey="value" nameKey="name" innerRadius={50}>
+                             {data.map((entry) => {
+                                const key = entry.name as keyof typeof chartConfig;
+                                return <Cell key={`cell-${entry.name}`} fill={chartConfig[key]?.color} />
+                            })}
+                        </Pie>
+                        <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                    </PieChart>
                 </ChartContainer>
             </CardContent>
         </Card>
