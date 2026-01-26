@@ -35,7 +35,7 @@ export default function SponsorsPage() {
                         </Card>
                     ))}
                     {sponsors && sponsors.map((sponsor) => (
-                        <Link key={sponsor.id} href={sponsor.website || '#'} target="_blank" rel="noopener noreferrer" className="group">
+                        <Link key={sponsor.id} href={sponsor.website || '/'} target="_blank" rel="noopener noreferrer" className="group">
                             <Card className="flex flex-col items-center justify-center p-6 text-center transition-shadow hover:shadow-lg h-full">
                                 <div className="relative h-24 w-24 mb-4">
                                     <Image

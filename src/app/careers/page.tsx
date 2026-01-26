@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, MapPin, Code } from 'lucide-react';
+import Link from 'next/link';
 
 const openPositions = [
     {
@@ -48,7 +49,7 @@ export default function CareersPage() {
                                     </CardDescription>
                                 </div>
                                 <Button asChild>
-                                    <a href="#">Apply Now</a>
+                                    <Link href={`/contact?subject=Application for ${encodeURIComponent(position.title)}`}>Apply Now</Link>
                                 </Button>
                             </CardHeader>
                         </Card>
@@ -57,8 +58,8 @@ export default function CareersPage() {
                  <div className="text-center mt-12 bg-card p-8 rounded-lg">
                     <h3 className="font-headline text-2xl font-bold">Don't see your role?</h3>
                     <p className="mt-2 text-muted-foreground">We're always looking for great talent. Send us your resume and tell us how you can make a difference at Go2Culture.</p>
-                    <Button variant="outline" className="mt-4">
-                        Contact Us
+                    <Button variant="outline" className="mt-4" asChild>
+                        <Link href="/contact">Contact Us</Link>
                     </Button>
                 </div>
             </div>

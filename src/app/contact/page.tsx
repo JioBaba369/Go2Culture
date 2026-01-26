@@ -12,6 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Mail, MessageSquare, Phone } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -20,11 +22,26 @@ const formSchema = z.object({
   message: z.string().min(10, "Message must be at least 10 characters."),
 });
 
-export default function ContactPage() {
+function ContactForm() {
+  const searchParams = useSearchParams();
+  const subjectFromQuery = searchParams.get('subject');
+
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      subject: subjectFromQuery || '',
+      message: ''
+    }
   });
+
+  useEffect(() => {
+    if (subjectFromQuery) {
+      form.setValue('subject', subjectFromQuery);
+    }
+  }, [subjectFromQuery, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -32,9 +49,95 @@ export default function ContactPage() {
       title: "Message Sent!",
       description: "Thanks for reaching out. We'll get back to you shortly.",
     });
-    form.reset({name: '', email: '', subject: undefined, message: ''});
+    form.reset({name: '', email: '', subject: subjectFromQuery || '', message: ''});
   }
 
+  return (
+      <Card>
+          <CardHeader>
+              <CardTitle>Send us a Message</CardTitle>
+              <CardDescription>Directly contact our support team.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="you@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subject</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value} disabled={!!subjectFromQuery}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a reason for contacting us" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                          {subjectFromQuery ? (
+                             <SelectItem value={subjectFromQuery}>{subjectFromQuery}</SelectItem>
+                          ) : (
+                            <>
+                              <SelectItem value="General Inquiry">General Inquiry</SelectItem>
+                              <SelectItem value="Booking Help">Booking Help</SelectItem>
+                              <SelectItem value="Hosting Question">Hosting Question</SelectItem>
+                              <SelectItem value="Feedback & Suggestions">Feedback & Suggestions</SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                        </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Message</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Tell us more..." className="min-h-[120px]" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit">Send Message</Button>
+              </form>
+            </Form>
+          </CardContent>
+      </Card>
+  )
+}
+
+export default function ContactPage() {
   return (
     <div className="py-12">
       <div className="text-center">
@@ -63,82 +166,9 @@ export default function ContactPage() {
                 </div>
             </div>
         </div>
-
-        <Card>
-            <CardHeader>
-                <CardTitle>Send us a Message</CardTitle>
-                <CardDescription>Directly contact our support team.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="you@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="subject"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Subject</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a reason for contacting us" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="general">General Inquiry</SelectItem>
-                            <SelectItem value="booking">Booking Help</SelectItem>
-                            <SelectItem value="hosting">Hosting Question</SelectItem>
-                            <SelectItem value="feedback">Feedback & Suggestions</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Message</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Tell us more..." className="min-h-[120px]" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit">Send Message</Button>
-                </form>
-              </Form>
-            </CardContent>
-        </Card>
+        <Suspense fallback={<Card><CardHeader><CardTitle>Send us a Message</CardTitle><CardDescription>Directly contact our support team.</CardDescription></CardHeader><CardContent><p>Loading form...</p></CardContent></Card>}>
+          <ContactForm />
+        </Suspense>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Download, Newspaper } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import Link from 'next/link';
 
 const pressMentions = [
     {
@@ -39,10 +40,12 @@ export default function PressPage() {
                 <div className="space-y-6">
                     <h2 className="font-headline text-3xl font-bold">Media Kit</h2>
                     <p className="text-muted-foreground">
-                        Download our media kit for logos, brand guidelines, and high-resolution images.
+                        Our media kit with logos, brand guidelines, and high-resolution images is available upon request.
                     </p>
-                    <Button>
-                        <Download className="mr-2" /> Download Media Kit (.zip)
+                    <Button asChild>
+                        <Link href="/contact?subject=Media Kit Request">
+                          <Download className="mr-2" /> Request Media Kit
+                        </Link>
                     </Button>
                 </div>
                  <div className="space-y-6">
