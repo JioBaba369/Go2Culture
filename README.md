@@ -1,12 +1,10 @@
-g# Go2Culture
+# Go2Culture
 
-Go2Culture is a web application that connects travelers with local hosts for authentic cultural and dining experiences. It's a platform where hosts can share their culture, and guests can discover unique activities like in-home dining, cooking classes, and more.
+Go2Culture is a web platform that brings travellers, migrants, and locals together through authentic cultural and dining experiences hosted in local homes. We believe the most meaningful connections don’t happen in commercial restaurants, but around a shared table—where stories are exchanged, traditions are honoured, and meals are cooked with love. Go2Culture transforms travel and migration into genuine human connection, turning strangers into guests and moments into memories.
 
 This project was built with [Firebase Studio](https://firebase.google.com/studio).
 
 ## Our Philosophy
-
-We believe that the most meaningful connections don’t happen in commercial spaces. They happen around a kitchen table, in a local home, sharing stories over a meal cooked with love. Go2Culture was created to unlock these hidden treasures, transforming tourism into true human connection.
 
 We are guided by three core principles:
 *   **Authentic Heritage, Not Commercial Food**: Experience the soul of a nation through recipes passed down through generations.

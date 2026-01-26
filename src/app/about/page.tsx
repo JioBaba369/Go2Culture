@@ -10,12 +10,9 @@ export default function AboutPage() {
     return (
         <div className="py-12 space-y-16 md:space-y-24">
             <div className="text-center">
-                <h1 className="font-headline text-4xl md:text-5xl font-bold">Go2Culture: Beyond the Restaurant, Into the Heart of Our Global Community</h1>
+                <h1 className="font-headline text-4xl md:text-5xl font-bold">Turning Strangers Into Guests</h1>
                 <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                    We believe that the most meaningful travel and cultural connections don’t happen in commercial spaces. They happen around a kitchen table, in a local home, sharing stories over a meal cooked with love.
-                </p>
-                <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                    Go2Culture was created to unlock these hidden treasures, transforming tourism into true human connection. Whether you're a traveler in a new country or a curious local, we invite you to step off the beaten path and into the heart of a culture.
+                    Go2Culture is a web platform that brings travellers, migrants, and locals together through authentic cultural and dining experiences hosted in local homes. We believe the most meaningful connections don’t happen in commercial restaurants, but around a shared table—where stories are exchanged, traditions are honoured, and meals are cooked with love. Go2Culture transforms travel and migration into genuine human connection, turning strangers into guests and moments into memories.
                 </p>
             </div>
 
