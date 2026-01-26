@@ -86,14 +86,13 @@ service cloud.firestore {
     }
     
     match /conversations/{bookingId} {
-      // Read/update access is for participants or admins.
-      // List queries must be constrained by participant.
-      allow read, update: if isAdmin() || isParticipant(resource.data);
-      
-      // Create is allowed if the user is a participant in the new conversation.
-      allow create: if isParticipant(request.resource.data);
-      
-      // Only admins can delete.
+      // Read permissions
+      allow get: if isAdmin() || isParticipant(resource.data);
+      allow list: if isAdmin(); // Blanket list for admins
+
+      // Write permissions
+      allow create: if isAdmin() || isParticipant(request.resource.data);
+      allow update: if isAdmin() || isParticipant(resource.data);
       allow delete: if isAdmin();
     }
 

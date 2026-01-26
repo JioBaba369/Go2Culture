@@ -7,17 +7,30 @@ import { Loader2 } from 'lucide-react';
 import { ConversationListItem } from './ConversationListItem';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '../ui/card';
+import { ADMIN_UID } from '@/lib/auth';
 
 export function ConversationList({ selectedConversationId }: { selectedConversationId: string | null }) {
   const { user, firestore } = useFirebase();
 
   const conversationsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    return query(
-      collection(firestore, 'conversations'),
-      where('participants', 'array-contains', user.uid),
-      orderBy('lastMessage.timestamp', 'desc')
-    );
+
+    const isAdmin = user.uid === ADMIN_UID;
+
+    if (isAdmin) {
+      // Admin fetches all conversations, ordered by the last message
+      return query(
+        collection(firestore, 'conversations'),
+        orderBy('lastMessage.timestamp', 'desc')
+      );
+    } else {
+      // Regular user only fetches conversations they are a part of
+      return query(
+        collection(firestore, 'conversations'),
+        where('participants', 'array-contains', user.uid),
+        orderBy('lastMessage.timestamp', 'desc')
+      );
+    }
   }, [user, firestore]);
 
   const { data: conversations, isLoading } = useCollection<Conversation>(conversationsQuery);
