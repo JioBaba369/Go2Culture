@@ -1,15 +1,13 @@
-
-
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { collection, query, where, doc } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, isFuture, isPast } from 'date-fns';
+import { format, isPast } from 'date-fns';
 
 import { Loader2, Star, ThumbsUp, MessageSquare, X } from 'lucide-react';
 import type { Booking, Experience, Review, User } from '@/lib/types';
@@ -128,7 +126,7 @@ function ReviewForm({ booking, onFinished }: { booking: Booking, onFinished: () 
   );
 }
 
-function BookingCard({ booking, onAction }: { booking: Booking, onAction: () => void }) {
+function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: { booking: Booking, onAction: () => void, hasReviewed: boolean, isReviewCheckLoading: boolean }) {
   const { firestore } = useFirebase();
   const [isReviewFormOpen, setReviewFormOpen] = useState(false);
   const [isCancelling, setCancelling] = useState(false);
@@ -140,10 +138,6 @@ function BookingCard({ booking, onAction }: { booking: Booking, onAction: () => 
   const hostRef = useMemoFirebase(() => (firestore ? doc(firestore, 'users', booking.hostId) : null), [firestore, booking.hostId]);
   const { data: host, isLoading: isHostLoading } = useDoc<User>(hostRef);
   
-  const reviewQuery = useMemoFirebase(() => (firestore ? query(collection(firestore, 'reviews'), where('bookingId', '==', booking.id), where('guestId', '==', booking.guestId)) : null), [firestore, booking.id, booking.guestId]);
-  const { data: reviews, isLoading: isReviewLoading } = useCollection<Review>(reviewQuery);
-  
-  const hasReviewed = reviews && reviews.length > 0;
   const isCompleted = isPast(booking.bookingDate.toDate());
   
   const handleCancel = async () => {
@@ -181,7 +175,7 @@ function BookingCard({ booking, onAction }: { booking: Booking, onAction: () => 
         </CardContent>
         <CardFooter className="bg-muted/50 p-3 flex flex-wrap gap-2">
             {isCompleted ? (
-                isReviewLoading ? <Skeleton className="h-10 w-32" /> :
+                isReviewCheckLoading ? <Skeleton className="h-10 w-32" /> :
                 hasReviewed ? (
                 <div className="flex items-center gap-2 text-green-600 font-semibold text-sm">
                     <ThumbsUp className="h-4 w-4" /> Reviewed
@@ -233,12 +227,21 @@ export default function MyBookingsPage() {
   const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
   const [key, setKey] = useState(0);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const bookingsQuery = useMemoFirebase(
     () => (user && firestore ? query(collection(firestore, 'bookings'), where('guestId', '==', user.uid)) : null),
     [user, firestore, key]
   );
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
+  
+  const userReviewsQuery = useMemoFirebase(
+    () => (user && firestore ? query(collection(firestore, 'reviews'), where('guestId', '==', user.uid)) : null),
+    [user, firestore, key]
+  );
+  const { data: userReviews, isLoading: areReviewsLoading } = useCollection<Review>(userReviewsQuery);
+
+  const reviewedBookingIds = useMemo(() => userReviews?.map(r => r.bookingId) || [], [userReviews]);
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
@@ -250,8 +253,42 @@ export default function MyBookingsPage() {
     setKey(prev => prev + 1); // Force re-fetch of bookings
   };
 
-  const isLoading = isUserLoading || areBookingsLoading;
+  const isLoading = isUserLoading || areBookingsLoading || areReviewsLoading;
   
+  const filteredBookings = useMemo(() => {
+    if (!bookings) return [];
+
+    const sortedBookings = [...bookings].sort((a,b) => b.bookingDate.toDate() - a.bookingDate.toDate());
+
+    switch (activeFilter) {
+      case 'all':
+        return sortedBookings;
+      case 'Confirmed':
+        return sortedBookings.filter(b => b.status === 'Confirmed');
+      case 'Pending':
+        return sortedBookings.filter(b => b.status === 'Pending');
+      case 'to-review':
+        return sortedBookings.filter(
+          b => isPast(b.bookingDate.toDate()) && b.status === 'Confirmed' && !reviewedBookingIds.includes(b.id)
+        );
+      case 'past':
+        return sortedBookings.filter(b => isPast(b.bookingDate.toDate()));
+      case 'Cancelled':
+        return sortedBookings.filter(b => b.status === 'Cancelled');
+      default:
+        return sortedBookings;
+    }
+  }, [bookings, activeFilter, reviewedBookingIds]);
+
+  const filterOptions = [
+    { label: "All", value: "all" },
+    { label: "Confirmed", value: "Confirmed" },
+    { label: "Pending", value: "Pending" },
+    { label: "To Review", value: "to-review" },
+    { label: "Past", value: "past" },
+    { label: "Cancelled", value: "Cancelled" },
+  ];
+
   if (isLoading) {
     return (
       <div>
@@ -269,14 +306,35 @@ export default function MyBookingsPage() {
     <div>
       <h1 className="text-3xl font-headline font-bold">My Bookings</h1>
       <p className="text-muted-foreground">Your journey with Go2Culture.</p>
+      
+      <div className="flex flex-wrap gap-2 my-8">
+        {filterOptions.map(filter => (
+            <Button
+                key={filter.value}
+                variant={activeFilter === filter.value ? 'default' : 'outline'}
+                onClick={() => setActiveFilter(filter.value)}
+                size="sm"
+            >
+                {filter.label}
+            </Button>
+        ))}
+      </div>
 
       <div className="mt-8 space-y-6">
-        {bookings && bookings.length > 0 ? (
-          bookings.sort((a,b) => b.bookingDate.toDate() - a.bookingDate.toDate()).map(booking => <BookingCard key={booking.id} booking={booking} onAction={handleAction} />)
+        {filteredBookings && filteredBookings.length > 0 ? (
+          filteredBookings.map(booking => (
+            <BookingCard 
+                key={booking.id} 
+                booking={booking} 
+                onAction={handleAction} 
+                hasReviewed={reviewedBookingIds.includes(booking.id)}
+                isReviewCheckLoading={areReviewsLoading}
+            />
+          ))
         ) : (
           <Card className="flex flex-col items-center justify-center text-center p-12 h-80">
-            <h3 className="text-xl font-semibold">You haven't booked anything yet.</h3>
-            <p className="text-muted-foreground mt-2 max-w-sm">When you book an experience, it will show up here. Let's find your next adventure!</p>
+            <h3 className="text-xl font-semibold">No bookings found for this filter.</h3>
+            <p className="text-muted-foreground mt-2 max-w-sm">Try selecting a different filter or booking an experience!</p>
             <Button asChild className="mt-6">
               <Link href="/discover">Discover Experiences</Link>
             </Button>
