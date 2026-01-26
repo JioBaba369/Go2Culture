@@ -63,7 +63,7 @@ export type Host = {
 
   location: {
     country: string;
-    region: string;
+    region?: string;
     suburb: string;
     localArea?: string;
     postcode: string;
@@ -128,7 +128,7 @@ export type Experience = {
   };
   location: {
     country: string;
-    region: string;
+    region?: string;
     suburb: string;
     localArea?: string;
   };

@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { updateExperience, deleteExperienceForHost } from '@/lib/host-actions';
+import { updateExperience, deleteExperienceForHost, type ExperienceUpdateData } from '@/lib/host-actions';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
@@ -150,6 +150,11 @@ export default function EditExperiencePage() {
     try {
         const updateData = {
             ...data,
+            location: {
+              ...data.location,
+              region: data.location.region || '',
+              localArea: data.location.localArea || '',
+            },
             availability: {
                 ...data.availability,
                 // Convert the timeSlots string back to an array for Firestore
