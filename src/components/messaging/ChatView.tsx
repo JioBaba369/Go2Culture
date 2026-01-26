@@ -158,7 +158,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
 
     try {
       await sendMessage(firestore, currentUser, recipient, booking, values.messageText);
-      form.reset();
+      form.setValue('messageText', '');
       setTimeout(() => scrollToBottom('smooth'), 50);
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to send message', description: e.message });
