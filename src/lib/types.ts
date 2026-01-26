@@ -200,6 +200,27 @@ export type Message = {
   participants: string[];
 };
 
+export type Conversation = {
+  id: string; // This will be the bookingId
+  participants: string[];
+  participantInfo: {
+    [key: string]: {
+      fullName: string;
+      profilePhotoId: string;
+    }
+  };
+  bookingInfo: {
+    experienceTitle: string;
+    experienceId: string;
+  };
+  lastMessage: {
+    text: string;
+    timestamp: any;
+    senderId: string;
+  };
+  readBy: string[];
+};
+
 
 // A denormalized type for the admin application view
 export type HostApplication = {

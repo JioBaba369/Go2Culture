@@ -35,8 +35,7 @@ import { useDoc } from '@/firebase/firestore/use-doc';
 import { cancelBookingByHost, confirmBooking } from '@/lib/host-actions';
 import { useToast } from '@/hooks/use-toast';
 import { Check, Loader2, MessageSquare, MoreHorizontal, X } from 'lucide-react';
-import { MessageDialog } from '@/components/messaging/MessageDialog';
-import { DialogTrigger } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 const statusVariantMap: Record<
   string,
@@ -117,25 +116,23 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
         </Badge>
       </TableCell>
       <TableCell className="text-right">
-        <MessageDialog booking={booking} recipient={guest}>
-            <div className="flex items-center justify-end gap-2">
-            {booking.status === 'Pending' && isFuture(booking.bookingDate.toDate()) ? (
-                <>
-                    <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50" onClick={handleConfirm} disabled={!!isProcessing} aria-label="Confirm">
-                        {isProcessing === 'confirm' ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-red-50" onClick={handleCancel} disabled={!!isProcessing} aria-label="Cancel">
-                        {isProcessing === 'cancel' ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4" />}
-                    </Button>
-                </>
-            ) : null }
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Chat with guest">
-                  <MessageSquare className="h-4 w-4" />
+        <div className="flex items-center justify-end gap-2">
+        {booking.status === 'Pending' && isFuture(booking.bookingDate.toDate()) ? (
+            <>
+                <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50" onClick={handleConfirm} disabled={!!isProcessing} aria-label="Confirm">
+                    {isProcessing === 'confirm' ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4" />}
                 </Button>
-              </DialogTrigger>
-            </div>
-        </MessageDialog>
+                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-red-50" onClick={handleCancel} disabled={!!isProcessing} aria-label="Cancel">
+                    {isProcessing === 'cancel' ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4" />}
+                </Button>
+            </>
+        ) : null }
+          <Button asChild variant="ghost" size="icon" aria-label="Chat with guest">
+            <Link href={`/messages?id=${booking.id}`}>
+              <MessageSquare className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   )
@@ -213,9 +210,11 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
             <Button variant="destructive" className="w-full" onClick={handleCancel} disabled={!!isProcessing}>
                 {isProcessing === 'cancel' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <X className="mr-2 h-4 w-4"/>} Cancel
             </Button>
-            <MessageDialog booking={booking} recipient={guest}>
-              <Button variant="outline" size="icon" aria-label="Chat with guest"><MessageSquare className="h-4 w-4" /></Button>
-            </MessageDialog>
+            <Button asChild variant="outline" size="icon" aria-label="Chat with guest">
+              <Link href={`/messages?id=${booking.id}`}>
+                <MessageSquare className="h-4 w-4" />
+              </Link>
+            </Button>
         </CardContent>
       )}
     </Card>

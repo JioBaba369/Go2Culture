@@ -51,10 +51,8 @@
             }
           }
         },
-        "profilePhotoURL": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the user's profile photo from Firebase Storage."
+        "profilePhotoId": {
+          "type": "string"
         },
         "preferences": {
           "type": "object",
@@ -113,7 +111,7 @@
           "enum": ["Superhost"],
           "description": "A special status awarded to top-rated and experienced hosts."
         },
-        "profilePhotoURL": { "type": "string", "format": "uri", "description": "Denormalized host profile photo URL for display." },
+        "profilePhotoId": { "type": "string" },
         "status": { "type": "string", "enum": ["draft", "under_review", "approved", "needs_changes", "suspended"] },
         "profile": {
           "type": "object",
@@ -195,7 +193,7 @@
         },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "userId", "name", "profilePhotoURL", "status", "profile", "verification", "location", "homeSetup", "compliance", "rating", "createdAt"]
+      "required": ["id", "userId", "name", "profilePhotoId", "status", "profile", "verification", "location", "homeSetup", "compliance", "rating", "createdAt"]
     },
     "HostApplication": {
       "title": "Host Application",
@@ -212,7 +210,7 @@
         "profile": {
           "type": "object",
           "properties": {
-            "photoURL": { "type": "string", "format": "uri" },
+            "profilePhotoId": { "type": "string" },
             "bio": { "type": "string" },
             "languages": { "type": "array", "items": { "type": "string" } },
             "culturalBackground": { "type": "string" },
@@ -222,8 +220,8 @@
         "verification": {
           "type": "object",
           "properties": {
-            "idDocURL": { "type": "string", "format": "uri" },
-            "selfieURL": { "type": "string", "format": "uri" },
+            "idDocId": { "type": "string" },
+            "selfieId": { "type": "string" },
             "status": { "type": "string", "enum": ["Verified", "Pending", "Failed"] }
           }
         },
@@ -281,7 +279,7 @@
             "photos": {
               "type": "object",
               "properties": {
-                "mainImageURL": { "type": "string", "format": "uri" }
+                "mainImageId": { "type": "string" }
               }
             }
           }
@@ -311,6 +309,7 @@
       "properties": {
         "id": { "type": "string" },
         "hostId": { "type": "string" },
+        "userId": { "type": "string" },
         "title": { "type": "string" },
         "category": { "type": "string", "enum": ["In-Home Dining", "Cooking Class", "Restaurant Experience", "Special Event", "Art & Craft", "Music & Dance", "History & Walks"] },
         "description": { "type": "string" },
@@ -352,11 +351,12 @@
         "photos": {
           "type": "object",
           "properties": {
-            "mainImageURL": { "type": "string", "format": "uri" },
-            "thumbnailImageURLs": { "type": "array", "items": { "type": "string", "format": "uri" } }
+            "mainImageId": { "type": "string" },
+            "thumbnailImageIds": { "type": "array", "items": { "type": "string" } }
           }
         },
         "status": { "type": "string", "enum": ["draft", "live", "paused"] },
+        "instantBook": { "type": "boolean" },
         "rating": {
           "type": "object",
           "properties": {
@@ -366,7 +366,7 @@
         },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "hostId", "title", "category", "description", "durationMinutes", "menu", "pricing", "availability", "location", "photos", "status", "rating", "createdAt"]
+      "required": ["id", "hostId", "userId", "title", "category", "description", "durationMinutes", "menu", "pricing", "availability", "location", "photos", "status", "rating", "createdAt"]
     },
     "Booking": {
       "title": "Booking",
@@ -385,7 +385,8 @@
         "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled"] },
         "cancellationReason": { "type": "string" },
         "couponId": { "type": "string" },
-        "discountAmount": { "type": "number" }
+        "discountAmount": { "type": "number" },
+        "isGift": { "type": "boolean" }
       },
       "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status"]
     },
@@ -395,6 +396,7 @@
       "description": "Represents a review given by a guest for an experience.",
       "properties": {
         "id": { "type": "string" },
+        "bookingId": { "type": "string" },
         "guestId": { "type": "string", "description": "Reference to the User who wrote the review." },
         "experienceId": { "type": "string", "description": "Reference to Experience." },
         "hostId": { "type": "string", "description": "Reference to Host." },
@@ -404,7 +406,7 @@
         "hostResponse": { "type": "string" },
         "flags": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["id", "guestId", "experienceId", "hostId", "rating", "comment", "createdAt"]
+      "required": ["id", "bookingId", "guestId", "experienceId", "hostId", "rating", "comment", "createdAt"]
     },
     "WishlistItem": {
       "title": "Wishlist Item",
@@ -435,7 +437,52 @@
           "description": "Array containing the UIDs of sender and receiver for security rules."
         }
       },
-      "required": ["id", "senderId", "receiverId", "bookingId", "messageText", "timestamp", "participants"]
+      "required": ["senderId", "receiverId", "bookingId", "messageText", "timestamp", "participants"]
+    },
+     "Conversation": {
+      "title": "Conversation",
+      "description": "Represents a message thread between users for a specific booking. The document ID is the bookingId.",
+      "type": "object",
+      "properties": {
+        "participants": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Array of user IDs for participants in the conversation."
+        },
+        "participantInfo": {
+          "type": "object",
+          "description": "Denormalized info about the participants, keyed by userId.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "fullName": { "type": "string" },
+              "profilePhotoId": { "type": "string" }
+            },
+            "required": ["fullName", "profilePhotoId"]
+          }
+        },
+        "bookingInfo": {
+          "type": "object",
+          "properties": {
+            "experienceTitle": { "type": "string" },
+            "experienceId": { "type": "string" }
+          }
+        },
+        "lastMessage": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "senderId": { "type": "string" }
+          }
+        },
+        "readBy": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "An array of user IDs who have read the last message."
+        }
+      },
+      "required": ["participants", "participantInfo", "lastMessage", "bookingInfo"]
     },
     "Report": {
       "title": "Report",
@@ -538,6 +585,10 @@
     "/messages/{messageId}": {
       "schema": { "$ref": "#/entities/Message" },
       "description": "Stores messages exchanged between hosts and guests. Includes `senderId`, `receiverId`, and `bookingId` for efficient querying and authorization."
+    },
+    "/conversations/{bookingId}": {
+      "schema": { "$ref": "#/entities/Conversation" },
+      "description": "Stores metadata for conversation threads. The document ID is the booking ID."
     },
     "/reports/{reportId}": {
       "schema": { "$ref": "#/entities/Report" },

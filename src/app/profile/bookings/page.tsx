@@ -26,7 +26,6 @@ import { useToast } from '@/hooks/use-toast';
 import { submitReview, cancelBookingByGuest } from '@/lib/user-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { MessageDialog } from '@/components/messaging/MessageDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -217,12 +216,12 @@ function BookingCard({ booking, onAction }: { booking: Booking, onAction: () => 
                     </AlertDialogContent>
                 </AlertDialog>
             ) : null}
-             <MessageDialog booking={booking} recipient={host}>
-                <Button variant="outline" size="sm">
+             <Button asChild variant="outline" size="sm">
+                <Link href={`/messages?id=${booking.id}`}>
                     <MessageSquare className="mr-2 h-4 w-4"/>
                     Chat with Host
-                </Button>
-            </MessageDialog>
+                </Link>
+            </Button>
         </CardFooter>
       </div>
     </Card>
