@@ -57,7 +57,7 @@ function StarRating({ field }: { field: any }) {
             key={ratingValue}
             className={cn(
               "p-1 transition-colors",
-              ratingValue <= (hover || field.value) ? "text-yellow-400" : "text-gray-300"
+              ratingValue <= (hover || field.value) ? "text-accent" : "text-muted-foreground/50"
             )}
             onClick={() => field.onChange(ratingValue)}
             onMouseEnter={() => setHover(ratingValue)}

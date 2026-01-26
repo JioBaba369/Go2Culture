@@ -240,7 +240,7 @@ export type HostApplication = {
   profile: {
     profilePhotoId: string;
     bio: string;
-    languages: string[];
+    languages: string;
     culturalBackground: string;
     hostingStyles: string[];
   };

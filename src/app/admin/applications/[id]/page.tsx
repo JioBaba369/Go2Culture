@@ -372,7 +372,7 @@ export default function ApplicationDetailPage() {
                     <p className="text-sm italic text-muted-foreground">"{application.profile.bio}"</p>
                     <div className="flex items-center gap-2 text-sm">
                         <Languages className="h-4 w-4 text-muted-foreground"/>
-                        <span>{Array.isArray(application.profile.languages) ? application.profile.languages.join(", ") : application.profile.languages}</span>
+                        <span>{application.profile.languages}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                         <Info className="h-4 w-4 text-muted-foreground"/>

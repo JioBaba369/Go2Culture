@@ -3,9 +3,10 @@ import { Users, Utensils, DollarSign } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function AboutPage() {
-    const heroImageURL = "https://images.unsplash.com/photo-1530062845289-9109b2c9c868?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwZGlubmVyfGVufDB8fHx8MTc2OTEwODMxMnww&ixlib=rb-4.1.0&q=80&w=1080";
+    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
 
     return (
         <div className="py-12 space-y-16 md:space-y-24">
@@ -17,16 +18,19 @@ export default function AboutPage() {
             </div>
 
             
-            <div className="my-12 relative h-[50vh] w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
-                <Image
-                    src={heroImageURL}
-                    alt="A vibrant dinner party"
-                    fill
-                    sizes="100vw"
-                    className="object-cover"
-                    priority
-                />
-            </div>
+            {heroImage && (
+                <div className="my-12 relative h-[50vh] w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
+                    <Image
+                        src={heroImage.imageUrl}
+                        alt={heroImage.description}
+                        fill
+                        sizes="100vw"
+                        className="object-cover"
+                        priority
+                        data-ai-hint={heroImage.imageHint}
+                    />
+                </div>
+            )}
             
 
             <div className="max-w-4xl mx-auto space-y-16">

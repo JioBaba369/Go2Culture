@@ -4,9 +4,10 @@ import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShieldCheck, DollarSign, Globe, Heart, Home, User, Utensils, Camera, Brush, Music } from 'lucide-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function BecomeAHostLandingPage() {
-    const heroImageURL = "https://images.unsplash.com/photo-1699730148588-42aabafe9c72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkaW5uZXIlMjBwYXJ0eXxlbnwwfHx8fDE3NjkxMDgzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080";
+    const heroImage = PlaceHolderImages.find(p => p.id === 'exp-1-thumb-1');
 
     const requirements = [
         { icon: User, title: 'Host Profile', description: 'Your photo, bio, and cultural story.' },
@@ -41,16 +42,19 @@ export default function BecomeAHostLandingPage() {
             </section>
             
             
-            <div className="relative h-96 w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
-                <Image
-                    src={heroImageURL}
-                    alt="A vibrant dinner party"
-                    fill
-                    sizes="100vw"
-                    className="object-cover"
-                    priority
-                />
-            </div>
+            {heroImage && (
+                <div className="relative h-96 w-full max-w-5xl mx-auto overflow-hidden rounded-lg">
+                    <Image
+                        src={heroImage.imageUrl}
+                        alt={heroImage.description}
+                        fill
+                        sizes="100vw"
+                        className="object-cover"
+                        priority
+                        data-ai-hint={heroImage.imageHint}
+                    />
+                </div>
+            )}
             
 
              {/* What can you host */}
