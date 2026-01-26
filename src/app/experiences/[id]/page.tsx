@@ -181,7 +181,10 @@ export default function ExperienceDetailPage() {
           
           {/* MENU */}
           <div className="space-y-4">
-            <h3 className="font-headline text-2xl">On the Menu</h3>
+            <h3 className="font-headline text-2xl flex items-center gap-3">
+              <Utensils className="h-6 w-6 text-primary" />
+              On the Menu
+            </h3>
             <p className="italic text-muted-foreground">"{experience.menu.description}"</p>
             <div className="flex flex-wrap gap-4">
                 <Badge variant="secondary">{getFlagEmoji(experience.menu.cuisine)} {experience.menu.cuisine}</Badge>
