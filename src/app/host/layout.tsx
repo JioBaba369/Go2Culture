@@ -1,10 +1,9 @@
-
 'use client';
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { Loader2, Utensils, Calendar, CalendarCheck, LayoutDashboard, LogOut, Home } from 'lucide-react';
+import { Loader2, Utensils, Calendar, CalendarCheck, LayoutDashboard, LogOut, Home, FileText } from 'lucide-react';
 import React from 'react';
 import { signOut } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
@@ -30,6 +29,7 @@ const navItems = [
     { href: '/host/bookings', label: 'Bookings', icon: CalendarCheck },
     { href: '/host/calendar', label: 'Calendar', icon: Calendar },
     { href: '/host/experiences', label: 'Experiences', icon: Utensils },
+    { href: '/host/contract', label: 'Host Contract', icon: FileText },
 ];
 
 export default function HostLayout({ children }: { children: ReactNode }) {
