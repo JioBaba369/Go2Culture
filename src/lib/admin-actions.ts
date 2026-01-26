@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -110,9 +109,16 @@ export async function approveApplication(
   };
   batch.set(experienceRef, newExperienceData);
 
-  // 4. Update the User's role to 'both' to grant host privileges without removing guest status
+  // 4. Update the User's role to 'both' and add location
   const userRef = doc(firestore, 'users', application.userId);
-  batch.update(userRef, { role: 'both' });
+  batch.update(userRef, { 
+    role: 'both',
+    location: {
+      country: application.location.country,
+      region: application.location.region || '',
+      suburb: application.location.suburb || '',
+    }
+  });
 
   try {
     await batch.commit();

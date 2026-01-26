@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -24,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
+import { countries } from '@/lib/location-data';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -59,6 +59,15 @@ const getUsernameFromUrl = (url: string | undefined): string => {
     // If it's not a valid URL, it might be a username already.
     return url;
   }
+};
+
+const getFlagFromCountryCode = (countryCode: string): string => {
+  if (!countryCode || countryCode.length !== 2) return '';
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
 };
 
 
@@ -233,6 +242,8 @@ export default function ProfilePage() {
   }
   
   const userImage = PlaceHolderImages.find(p => p.id === userProfile?.profilePhotoId);
+  const countryName = userProfile.location?.country ? countries.find(c => c.id === userProfile.location.country)?.name : '';
+
   const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
     host: "secondary",
     guest: "outline",
@@ -419,6 +430,15 @@ export default function ProfilePage() {
                     <Label>Member Since</Label>
                     <p className="text-muted-foreground">{userProfile.createdAt?.toDate ? format(userProfile.createdAt.toDate(), 'PPP') : 'N/A'}</p>
                 </div>
+                {userProfile.location?.country && countryName && (
+                  <div>
+                    <Label>Country</Label>
+                    <p className="text-muted-foreground flex items-center gap-2">
+                        {getFlagFromCountryCode(userProfile.location.country)}
+                        {countryName}
+                    </p>
+                  </div>
+                )}
             </div>
         </CardContent>
       </Card>
