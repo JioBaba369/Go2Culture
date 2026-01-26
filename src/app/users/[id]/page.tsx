@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -97,28 +96,38 @@ function UserProfilePage() {
           {userImage && <AvatarImage src={userImage.imageUrl} alt={user.fullName} />}
           <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="space-y-4 text-center sm:text-left">
-            <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
-            
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2">
-                {user.brandName && (<p className="text-lg text-muted-foreground">{user.brandName}</p>)}
-                 {isHost && host?.verification?.idVerified && (
-                  <div className="flex items-center gap-1.5 text-sm">
-                      <ShieldCheck className="h-5 w-5 text-green-600" />
-                      <span className="font-medium text-foreground">Verified Host</span>
-                  </div>
+        <div className="space-y-3 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-3">
+              <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
+              {isHost && host?.verification?.idVerified && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <ShieldCheck className="h-7 w-7 text-green-600" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Verified Host</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-muted-foreground">
+                {user.brandName && (<p className="text-lg font-medium">{user.brandName}</p>)}
+                
+                {user.location?.city && user.location?.country && <span className="hidden sm:block text-muted-foreground/50 mx-1">•</span>}
+
                {user.location?.country && (
-                    <div className="flex items-center gap-1.5 text-sm">
+                    <div className="flex items-center gap-2">
                         {getFlagFromCountryCode(user.location.country)}
-                        <span className="font-medium text-foreground">{countryName}</span>
+                        <span>{user.location.city ? `${user.location.city}, ${countryName}`: countryName}</span>
                     </div>
                 )}
             </div>
 
-            <div className="flex gap-2 justify-center sm:justify-start">
+            <div className="flex gap-2 justify-center sm:justify-start pt-1">
                 <Badge variant={isHost ? "secondary" : "outline"} className="capitalize">{user.role}</Badge>
-                {user.location?.city && <Badge variant="outline">{user.location.city}</Badge>}
             </div>
         </div>
       </section>
