@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, forwardRef } from "react";
@@ -519,7 +518,7 @@ export default function ExperienceDetailPage() {
                     <div className="flex items-center gap-4 mt-1">
                         {host.profile.culturalBackground && <Badge variant="outline">{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</Badge>}
                         {host.level === 'Superhost' && (
-                            <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 gap-1">
+                            <Badge variant="default" className="gap-1 bg-amber-500 hover:bg-amber-600">
                                 <Award className="h-4 w-4" /> Superhost
                             </Badge>
                         )}
@@ -773,3 +772,5 @@ export default function ExperienceDetailPage() {
     </div>
   );
 }
+
+    
