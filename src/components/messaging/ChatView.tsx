@@ -3,8 +3,8 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
-import { Conversation, Message, User } from '@/lib/types';
-import { Loader2, Send } from 'lucide-react';
+import { Conversation, Message, User, Booking } from '@/lib/types';
+import { Loader2, Send, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,6 +19,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { sendMessage } from '@/lib/messaging-actions';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 const messageSchema = z.object({
   messageText: z.string().min(1, 'Message cannot be empty').max(2000, 'Message too long'),
@@ -49,6 +50,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   const { user, firestore } = useFirebase();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const conversationRef = useMemoFirebase(() => (firestore && conversationId ? doc(firestore, 'conversations', conversationId) : null), [firestore, conversationId]);
   const { data: conversation, isLoading: isConvoLoading } = useDoc<Conversation>(conversationRef);
@@ -67,27 +69,26 @@ export function ChatView({ conversationId }: { conversationId: string }) {
 
   // Mark conversation as read
   useEffect(() => {
-    if (conversation && user && !conversation.readBy.includes(user.uid)) {
+    if (conversation && user && conversation.readBy && !conversation.readBy.includes(user.uid)) {
       updateDoc(conversationRef!, {
         readBy: arrayUnion(user.uid),
       });
     }
   }, [conversation, user, conversationRef]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (behavior: 'smooth' | 'auto' = 'auto') => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTo({
         top: scrollAreaRef.current.scrollHeight,
-        behavior: 'smooth',
+        behavior,
       });
     }
   };
 
   useLayoutEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages.length]);
+    scrollToBottom('auto');
+  }, [conversationId]);
+
 
   async function onSubmit(values: MessageFormValues) {
     if (!firestore || !user || !otherParticipantId || !otherParticipantInfo || !conversation) return;
@@ -111,6 +112,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     try {
       await sendMessage(firestore, currentUser, recipient, { id: conversation.id, experienceTitle: conversation.bookingInfo.experienceTitle, experienceId: conversation.bookingInfo.experienceId } as Booking, values.messageText);
       form.reset();
+      setTimeout(() => scrollToBottom('smooth'), 50);
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to send message', description: e.message });
     }
@@ -127,6 +129,13 @@ export function ChatView({ conversationId }: { conversationId: string }) {
         </div>
       ) : (
         <header className="p-4 border-b flex items-center gap-3">
+          {!isDesktop && (
+            <Button asChild variant="ghost" size="icon" className="-ml-2">
+                <Link href="/messages">
+                    <ArrowLeft className="h-5 w-5" />
+                </Link>
+            </Button>
+          )}
           <Avatar>
             {participantImage && <AvatarImage src={participantImage.imageUrl} />}
             <AvatarFallback>{otherParticipantInfo.fullName.charAt(0)}</AvatarFallback>
@@ -158,7 +167,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
               />
             ))
           ) : (
-            <div className="text-center text-muted-foreground py-16">
+            <div className="text-center text-muted-foreground pt-16">
               <p>No messages yet. Say hello!</p>
             </div>
           )}
@@ -177,6 +186,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
                     <Textarea
                       placeholder="Type a message..."
                       className="min-h-10 resize-none"
+                      rows={1}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.handleSubmit(onSubmit)(); } }}
                       {...field}
                     />

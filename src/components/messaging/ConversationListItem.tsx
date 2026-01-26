@@ -21,7 +21,7 @@ export function ConversationListItem({ conversation, isSelected }: ConversationL
   
   const otherParticipantInfo = conversation.participantInfo[otherParticipantId];
   const lastMessage = conversation.lastMessage;
-  const isUnread = !conversation.readBy.includes(user.uid);
+  const isUnread = !!(lastMessage && lastMessage.senderId !== user.uid && !conversation.readBy?.includes(user.uid));
   
   const participantImage = PlaceHolderImages.find(p => p.id === otherParticipantInfo.profilePhotoId);
 
@@ -51,7 +51,7 @@ export function ConversationListItem({ conversation, isSelected }: ConversationL
             {lastMessage.senderId === user.uid && 'You: '}{lastMessage.text}
           </p>
         </div>
-        {isUnread && <div className="h-2.5 w-2.5 rounded-full bg-primary flex-shrink-0" />}
+        {isUnread && <div className="h-2.5 w-2.5 rounded-full bg-primary flex-shrink-0 self-center" />}
       </div>
     </Link>
   );
