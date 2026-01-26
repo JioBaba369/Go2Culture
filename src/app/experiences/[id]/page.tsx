@@ -149,8 +149,9 @@ export default function ExperienceDetailPage() {
                     <AvatarFallback className="text-2xl">{host.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                    <h2 className="font-headline text-2xl">Hosted by <Link href={`/users/${host.userId}`} className="hover:underline">{host.name}</Link></h2>
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <p className="text-base text-muted-foreground">Hosted by</p>
+                    <h2 className="font-headline text-2xl font-bold -mt-1"><Link href={`/users/${host.userId}`} className="hover:underline">{host.name}</Link></h2>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                         {host.profile.culturalBackground && <Badge variant="outline">{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</Badge>}
                         {host.level === 'Superhost' && (
                             <Badge variant="default" className="gap-1 bg-amber-500 hover:bg-amber-600">
