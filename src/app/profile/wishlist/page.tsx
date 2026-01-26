@@ -30,10 +30,14 @@ function WishlistPageContent() {
 
   // 3. Fetch the full experience documents using the IDs
   const experiencesQuery = useMemoFirebase(() => {
-    if (!firestore || experienceIds.length === 0) {
+    const validExperienceIds = experienceIds.filter(id => typeof id === 'string' && id.length > 0);
+
+    if (!firestore || validExperienceIds.length === 0) {
       return null;
     }
-    return query(collection(firestore, 'experiences'), where(documentId(), 'in', experienceIds));
+    // Firestore 'in' queries are limited to 30 items per query.
+    // Slicing to prevent crashes. A production app might need to chunk and merge multiple queries.
+    return query(collection(firestore, 'experiences'), where(documentId(), 'in', validExperienceIds.slice(0, 30)));
   }, [firestore, experienceIds]);
 
   const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
