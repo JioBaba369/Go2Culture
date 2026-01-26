@@ -27,7 +27,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User, Experience, Booking } from "@/lib/types";
-import { MoreHorizontal, Star, Utensils, CalendarCheck, Edit, Eye } from "lucide-react";
+import { MoreHorizontal, Star, Utensils, CalendarCheck, Edit, Eye, UserCheck, UserX, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from 'date-fns';
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
@@ -39,6 +39,8 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { updateUserByAdmin } from '@/lib/admin-actions';
 
 
 const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
@@ -56,6 +58,7 @@ const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "de
 
 export default function AdminUsersPage() {
   const firestore = useFirestore();
+  const { toast } = useToast();
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
   const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]));
@@ -63,9 +66,42 @@ export default function AdminUsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   const isLoading = areUsersLoading || areExperiencesLoading || areBookingsLoading;
   
+  const handleUpdateStatus = async (user: User, newStatus: 'active' | 'suspended' | 'deleted') => {
+    if (!firestore) return;
+    if (user.id === ADMIN_UID) {
+      toast({
+        variant: "destructive",
+        title: "Action Forbidden",
+        description: "The admin user status cannot be changed.",
+      });
+      return;
+    }
+    setIsUpdating(user.id);
+    try {
+      await updateUserByAdmin(firestore, user.id, {
+        fullName: user.fullName,
+        role: user.role,
+        status: newStatus,
+      });
+      toast({
+        title: "User Updated",
+        description: `${user.fullName}'s status has been set to ${newStatus}.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "Could not update the user status.",
+      });
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
   const enrichedUsers = useMemo(() => {
     if (!users || !experiences || !bookings) return [];
 
@@ -184,19 +220,31 @@ export default function AdminUsersPage() {
                                     <p className="text-sm text-muted-foreground">{user.email}</p>
                                 </div>
                             </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <MoreHorizontal className="h-5 w-5" />
-                                        <span className="sr-only">Actions</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                    <DropdownMenuItem asChild><Link href={`/users/${user.id}`}><Eye className="mr-2 h-4 w-4"/>View Profile</Link></DropdownMenuItem>
-                                    <DropdownMenuItem asChild><Link href={`/admin/users/${user.id}/edit`}><Edit className="mr-2 h-4 w-4"/>Edit User</Link></DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            {!isAdmin ? (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon">
+                                            {isUpdating === user.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-5 w-5" />}
+                                            <span className="sr-only">Actions</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                        <DropdownMenuItem asChild><Link href={`/users/${user.id}`}><Eye className="mr-2 h-4 w-4"/>View Profile</Link></DropdownMenuItem>
+                                        <DropdownMenuItem asChild><Link href={`/admin/users/${user.id}/edit`}><Edit className="mr-2 h-4 w-4"/>Edit User</Link></DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        {user.status === 'active' ? (
+                                            <DropdownMenuItem className="text-destructive" onClick={() => handleUpdateStatus(user, 'suspended')} disabled={isUpdating === user.id}>
+                                                <UserX className="mr-2 h-4 w-4" /> Suspend
+                                            </DropdownMenuItem>
+                                        ) : (
+                                            <DropdownMenuItem onClick={() => handleUpdateStatus(user, 'active')} disabled={isUpdating === user.id}>
+                                                <UserCheck className="mr-2 h-4 w-4" /> Activate
+                                            </DropdownMenuItem>
+                                        )}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                             ) : <Badge variant="secondary">Admin</Badge>}
                         </div>
                         <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -247,7 +295,7 @@ export default function AdminUsersPage() {
                 <TableHead>Bookings</TableHead>
                 <TableHead>Avg. Rating</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -288,30 +336,42 @@ export default function AdminUsersPage() {
                             {user.status}
                         </Badge>
                         </TableCell>
-                        <TableCell>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Actions</span>
-                            </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                                <Link href={`/users/${user.id}`}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Profile
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/users/${user.id}/edit`}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit User
-                                </Link>
-                            </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <TableCell className="text-right">
+                        {!isAdmin ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    {isUpdating === user.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
+                                    <span className="sr-only">Actions</span>
+                                </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem asChild>
+                                    <Link href={`/users/${user.id}`}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View Profile
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href={`/admin/users/${user.id}/edit`}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit User
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {user.status === 'active' ? (
+                                    <DropdownMenuItem className="text-destructive" onClick={() => handleUpdateStatus(user, 'suspended')} disabled={isUpdating === user.id}>
+                                        <UserX className="mr-2 h-4 w-4" /> Suspend
+                                    </DropdownMenuItem>
+                                ) : (
+                                    <DropdownMenuItem onClick={() => handleUpdateStatus(user, 'active')} disabled={isUpdating === user.id}>
+                                        <UserCheck className="mr-2 h-4 w-4" /> Activate
+                                    </DropdownMenuItem>
+                                )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : <Badge variant="secondary">Admin</Badge>}
                         </TableCell>
                     </TableRow>
                     )
