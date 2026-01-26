@@ -212,16 +212,16 @@ export default function ExperienceDetailPage() {
                 Allergen Information
             </h3>
             <Alert variant="warning">
-              <AlertTitle className="font-bold">Please Be Advised</AlertTitle>
+              <AlertTitle className="font-bold">Important Notice</AlertTitle>
               <AlertDescription className="space-y-4">
-                <p>This experience takes place in a home kitchen where allergens may be present. While hosts take precautions, cross-contact can occur.</p>
+                <p>Please be aware that this food is prepared in a home kitchen where allergens are handled, and cross-contact may occur. We cannot guarantee an allergen-free environment.</p>
                 {experience.menu.allergens && (
-                  <div className="p-3 bg-amber-100/50 dark:bg-amber-900/50 rounded-md text-amber-900 dark:text-amber-200">
-                    <p className="font-semibold">The host has declared the following potential allergens:</p>
-                    <p className="text-sm mt-1">{experience.menu.allergens}</p>
+                  <div className="p-4 bg-amber-100/50 dark:bg-amber-900/50 rounded-md">
+                    <p className="font-semibold text-amber-950 dark:text-amber-200">Host-declared potential allergens:</p>
+                    <p className="text-sm mt-2 text-amber-800 dark:text-amber-300 whitespace-pre-line">{experience.menu.allergens}</p>
                   </div>
                 )}
-                <p className="font-semibold">If you have a food allergy or intolerance, please contact the host before booking to discuss your needs.</p>
+                <p className="font-semibold">Guests with food allergies or intolerances are strongly advised to contact the host before booking to discuss their specific needs.</p>
               </AlertDescription>
             </Alert>
           </div>
