@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { DateRange } from "react-day-picker"
-import { format } from "date-fns"
+import { format, isBefore, startOfDay } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,13 +12,17 @@ import {
 import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function DateRangePicker({
+type Props = {
+  value?: Date
+  onChange: (date: Date | undefined) => void
+  disabledDates?: Date[]
+}
+
+export function BookingDatePicker({
   value,
   onChange,
-}: {
-  value?: DateRange
-  onChange: (range: DateRange | undefined) => void
-}) {
+  disabledDates = [],
+}: Props) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -31,27 +34,21 @@ export function DateRangePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value?.from ? (
-            value.to ? (
-              <>
-                {format(value.from, "LLL dd, y")} –{" "}
-                {format(value.to, "LLL dd, y")}
-              </>
-            ) : (
-              format(value.from, "LLL dd, y")
-            )
-          ) : (
-            "Select date range"
-          )}
+          {value ? format(value, "PPP") : "Select a date"}
         </Button>
       </PopoverTrigger>
 
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
-          mode="range"
+          mode="single"
           selected={value}
           onSelect={onChange}
-          numberOfMonths={2}
+          disabled={(date) =>
+            isBefore(date, startOfDay(new Date())) ||
+            disabledDates.some(
+              (d) => format(d, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+            )
+          }
           initialFocus
         />
       </PopoverContent>
