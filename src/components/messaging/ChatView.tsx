@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { Conversation, Message, User } from '@/lib/types';
@@ -54,7 +54,8 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   const { data: conversation, isLoading: isConvoLoading } = useDoc<Conversation>(conversationRef);
 
   const messagesQuery = useMemoFirebase(() => (firestore && conversationId ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId), orderBy('timestamp', 'asc')) : null), [firestore, conversationId]);
-  const { data: messages, isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
+  
+  const { data: messages = [], isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
   
   const form = useForm<MessageFormValues>({
     resolver: zodResolver(messageSchema),
@@ -73,17 +74,24 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     }
   }, [conversation, user, conversationRef]);
 
-  // Auto-scroll logic
-  useEffect(() => {
+  const scrollToBottom = () => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
     }
-  }, [messages]);
+  };
+
+  useLayoutEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages.length]);
 
   async function onSubmit(values: MessageFormValues) {
     if (!firestore || !user || !otherParticipantId || !otherParticipantInfo || !conversation) return;
     
-    // We need the full user object for the recipient
     const recipientRef = doc(firestore, 'users', otherParticipantId);
     const recipientSnap = await getDoc(recipientRef);
     if (!recipientSnap.exists()) {
@@ -92,7 +100,6 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     }
     const recipient = { id: recipientSnap.id, ...recipientSnap.data() } as User;
 
-    // We also need the full current user object
     const currentUserRef = doc(firestore, 'users', user.uid);
     const currentUserSnap = await getDoc(currentUserRef);
      if (!currentUserSnap.exists()) {
@@ -140,7 +147,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
               <Skeleton className="h-12 w-3/4 rounded-lg" />
               <Skeleton className="h-16 w-3/4 rounded-lg ml-auto" />
             </div>
-          ) : messages && messages.length > 0 ? (
+          ) : messages.length > 0 ? (
             messages.map(msg => (
               <MessageBubble
                 key={msg.id}
