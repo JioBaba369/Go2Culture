@@ -27,6 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { updatePayoutSettings } from '@/lib/host-actions';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const payoutSchema = z.object({
   billingCountry: z.string().min(1, 'Billing country is required.'),
@@ -425,6 +426,13 @@ export default function HostPayoutsSettingsPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            <Alert>
+                                <Banknote className="h-4 w-4" />
+                                <AlertTitle>Demonstration Only</AlertTitle>
+                                <AlertDescription>
+                                    For demonstration purposes, your full bank account details are not stored. Only the selected billing country is saved to your profile.
+                                </AlertDescription>
+                            </Alert>
                             <FormField
                                 control={form.control}
                                 name="billingCountry"
@@ -469,3 +477,5 @@ export default function HostPayoutsSettingsPage() {
         </div>
     );
 }
+
+    
