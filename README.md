@@ -1,4 +1,4 @@
-# Go2Culture
+g# Go2Culture
 
 Go2Culture is a web application that connects travelers with local hosts for authentic cultural and dining experiences. It's a platform where hosts can share their culture, and guests can discover unique activities like in-home dining, cooking classes, and more.
 

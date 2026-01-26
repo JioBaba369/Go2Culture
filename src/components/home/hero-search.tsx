@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Search } from 'lucide-react';
 import { countries, regions, suburbs } from '@/lib/location-data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
+// A single field in the search bar
 function SearchField({
   label,
   placeholder,
@@ -16,6 +17,8 @@ function SearchField({
   onValueChange,
   value,
   disabled,
+  children,
+  className,
 }: {
   label: string;
   placeholder: string;
@@ -23,22 +26,32 @@ function SearchField({
   onValueChange: (value: string) => void;
   value: string;
   disabled?: boolean;
+  children?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="relative flex-1 w-full px-4 py-2 sm:py-0 group cursor-pointer hover:bg-accent/50 rounded-full transition-colors duration-200">
-      <label className="text-xs font-bold text-foreground">{label}</label>
-      <Select onValueChange={onValueChange} value={value} disabled={disabled}>
-        <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-auto p-0 bg-transparent data-[placeholder]:text-muted-foreground">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((opt) => (
-            <SelectItem key={opt.id} value={opt.id}>
-              {opt.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div
+      className={cn(
+        "relative flex-1 w-full sm:w-auto p-4 sm:px-6 flex justify-between items-center group cursor-pointer hover:bg-muted/50 transition-colors duration-200",
+        className
+      )}
+    >
+      <div className="flex-grow">
+        <label className="text-xs font-bold text-foreground">{label}</label>
+        <Select onValueChange={onValueChange} value={value} disabled={disabled}>
+          <SelectTrigger className="border-none shadow-none focus:ring-0 text-base h-auto p-0 bg-transparent data-[placeholder]:text-muted-foreground -mt-0.5">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((opt) => (
+              <SelectItem key={opt.id} value={opt.id}>
+                {opt.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {children}
     </div>
   );
 }
@@ -65,6 +78,7 @@ export function HeroSearch() {
       setAvailableRegions([]);
     }
     setSelectedRegion('');
+    setSelectedSuburb('');
   }, [selectedCountry]);
 
   useEffect(() => {
@@ -85,43 +99,41 @@ export function HeroSearch() {
   };
 
   const searchBarContent = (
-    <div className="flex flex-col sm:flex-row items-center bg-background rounded-full border shadow-lg h-auto sm:h-[72px] w-full p-2 sm:p-0 sm:pr-2">
+    <div className="flex flex-col sm:flex-row bg-background rounded-full border shadow-lg h-auto w-full divide-y sm:divide-y-0 sm:divide-x overflow-hidden">
       <SearchField
         label="Country"
-        placeholder="e.g. Australia"
+        placeholder="Where to?"
         options={countries}
         onValueChange={setSelectedCountry}
         value={selectedCountry}
       />
-      <Separator orientation="vertical" className="h-8 hidden sm:block" />
       <SearchField
-        label="State / Region"
-        placeholder="e.g. New South Wales"
+        label="Region"
+        placeholder="Any region"
         options={availableRegions}
         onValueChange={setSelectedRegion}
         value={selectedRegion}
-        disabled={!availableRegions.length}
+        disabled={!selectedCountry}
       />
-      <Separator orientation="vertical" className="h-8 hidden sm:block" />
       <SearchField
         label="City"
-        placeholder="e.g. Sydney"
+        placeholder="Any city"
         options={availableSuburbs}
         onValueChange={setSelectedSuburb}
         value={selectedSuburb}
-        disabled={!availableSuburbs.length}
-      />
-       <Button onClick={handleSearch} size="lg" className="w-full mt-2 sm:mt-0 sm:w-auto sm:h-14 sm:rounded-full">
-          <Search className="h-5 w-5 sm:mr-2" />
-           <span className="sm:hidden">Search Locations</span>
-           <span className="hidden sm:inline">Search</span>
+        disabled={!selectedRegion}
+      >
+        <Button onClick={handleSearch} size="lg" className="sm:h-14 sm:w-14 rounded-full bg-primary hover:bg-primary/90 ml-4">
+          <Search className="h-5 w-5" />
+           <span className="sr-only">Search</span>
         </Button>
+      </SearchField>
     </div>
   );
-  
+
   return (
-    <div className="mt-8 bg-transparent w-full max-w-4xl">
-      {isMounted ? searchBarContent : <Skeleton className="h-[72px] w-full rounded-full" />}
+    <div className="mt-8 bg-transparent w-full max-w-3xl">
+      {isMounted ? searchBarContent : <Skeleton className="h-20 w-full rounded-full" />}
     </div>
   );
 }
