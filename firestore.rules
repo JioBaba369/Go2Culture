@@ -129,8 +129,7 @@ service cloud.firestore {
     /* ───────────── Conversations ───────────── */
 
     match /conversations/{conversationId} {
-      allow get: if isAdmin() || isParticipant(resource.data);
-      allow list: if isAdmin();
+      allow read: if isAdmin() || isParticipant(resource.data);
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
