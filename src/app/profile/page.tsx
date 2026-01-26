@@ -63,20 +63,16 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 const getUsernameFromUrl = (url: string | undefined): string => {
-  if (!url) return '';
-  try {
-    const urlObject = new URL(url);
-    const pathParts = urlObject.pathname.split('/').filter(Boolean);
-    return pathParts[0] || '';
-  } catch {
-    // If it's not a valid URL, it might be a username already.
-    return url;
-  }
+    if (!url) return '';
+    try {
+      const urlObject = new URL(url);
+      const pathParts = urlObject.pathname.split('/').filter(Boolean);
+      return pathParts[0] || '';
+    } catch {
+      // If it's not a valid URL, it might be a username already.
+      return url;
+    }
 };
-
-const languages = [
-  "Afrikaans", "Albanian", "Amharic", "Arabic", "Armenian", "Azerbaijani", "Basque", "Belarusian", "Bengali", "Bosnian", "Bulgarian", "Catalan", "Cebuano", "Chichewa", "Chinese (Simplified)", "Chinese (Traditional)", "Corsican", "Croatian", "Czech", "Danish", "Dutch", "English", "Esperanto", "Estonian", "Filipino", "Finnish", "French", "Frisian", "Galician", "Georgian", "German", "Greek", "Gujarati", "Haitian Creole", "Hausa", "Hawaiian", "Hebrew", "Hindi", "Hmong", "Hungarian", "Icelandic", "Igbo", "Indonesian", "Irish", "Italian", "Japanese", "Javanese", "Kannada", "Kazakh", "Khmer", "Korean", "Kurdish (Kurmanji)", "Kyrgyz", "Lao", "Latin", "Latvian", "Lithuanian", "Luxembourgish", "Macedonian", "Malagasy", "Malay", "Malayalam", "Maltese", "Maori", "Marathi", "Mongolian", "Myanmar (Burmese)", "Nepali", "Norwegian", "Pashto", "Persian", "Polish", "Portuguese", "Punjabi", "Romanian", "Russian", "Samoan", "Scots Gaelic", "Serbian", "Sesotho", "Shona", "Sindhi", "Sinhala", "Slovak", "Slovenian", "Somali", "Spanish", "Sundanese", "Swahili", "Swedish", "Tajik", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", "Urdu", "Uzbek", "Vietnamese", "Welsh", "Xhosa", "Yiddish", "Yoruba", "Zulu", "Other"
-];
 
 export default function ProfilePage() {
   const { user, isUserLoading, auth, firestore } = useFirebase();
@@ -107,23 +103,46 @@ export default function ProfilePage() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    values: {
-      fullName: userProfile?.fullName || '',
-      brandName: userProfile?.brandName || '',
-      languages: userProfile?.languages?.join(', ') || '',
-      phone: userProfile?.phone || '',
-      website: userProfile?.website || '',
+    defaultValues: {
+      fullName: '',
+      brandName: '',
+      languages: '',
+      phone: '',
+      website: '',
       location: {
-        city: userProfile?.location?.city || '',
-        country: userProfile?.location?.country || '',
+        city: '',
+        country: '',
       },
       socialMedia: {
-        twitter: getUsernameFromUrl(userProfile?.socialMedia?.twitter),
-        instagram: getUsernameFromUrl(userProfile?.socialMedia?.instagram),
-        facebook: getUsernameFromUrl(userProfile?.socialMedia?.facebook),
+        twitter: '',
+        instagram: '',
+        facebook: '',
       },
     },
   });
+  
+  const { reset } = form;
+
+  React.useEffect(() => {
+    if (userProfile) {
+      reset({
+        fullName: userProfile.fullName || '',
+        brandName: userProfile.brandName || '',
+        languages: userProfile.languages?.join(', ') || '',
+        phone: userProfile.phone || '',
+        website: userProfile.website || '',
+        location: {
+          city: userProfile.location?.city || '',
+          country: userProfile.location?.country || '',
+        },
+        socialMedia: {
+          twitter: getUsernameFromUrl(userProfile.socialMedia?.twitter),
+          instagram: getUsernameFromUrl(userProfile.socialMedia?.instagram),
+          facebook: getUsernameFromUrl(userProfile.socialMedia?.facebook),
+        },
+      });
+    }
+  }, [userProfile, reset]);
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
