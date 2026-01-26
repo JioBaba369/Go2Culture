@@ -43,9 +43,9 @@ function PayoutsSummary({ payouts, bookings, isLoading }: { payouts: HostPayouts
     const totalPaid = payouts.reduce((sum, p) => sum + p.totalEarnings, 0);
     const upcomingPayouts = payouts.reduce((sum, p) => sum + p.upcomingEarnings, 0);
     
-    // Assume platform takes a 15% commission on the total price of confirmed bookings
+    // Assume platform takes a 15% commission on the total price of confirmed, past bookings
     const totalBookingValue = bookings
-      .filter(b => b.status === 'Confirmed')
+      .filter(b => b.status === 'Confirmed' && isPast(b.bookingDate.toDate()))
       .reduce((sum, b) => sum + b.totalPrice, 0);
     
     const platformRevenue = totalBookingValue * 0.15;

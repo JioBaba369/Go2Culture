@@ -17,9 +17,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
-import { isPast, isThisMonth } from 'date-fns';
+import { isPast, isThisMonth, format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
-
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const payoutSchema = z.object({
   accountHolderName: z.string().min(2, 'Account holder name is required.'),
@@ -100,6 +107,23 @@ function PayoutSummary({ bookings, isLoading }: { bookings: Booking[] | null, is
     )
 }
 
+function PayoutHistoryCardMobile({ booking }: { booking: Booking }) {
+    return (
+        <Card className="p-4">
+            <div className="flex justify-between items-start">
+                <div>
+                    <p className="font-semibold">{booking.experienceTitle}</p>
+                    <p className="text-sm text-muted-foreground">{format(booking.bookingDate.toDate(), 'PPP')}</p>
+                </div>
+                <div className="text-right">
+                    <p className="font-bold text-lg">${(booking.totalPrice * 0.85).toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">From ${booking.totalPrice.toFixed(2)}</p>
+                </div>
+            </div>
+        </Card>
+    )
+}
+
 export default function HostPayoutsSettingsPage() {
     const { toast } = useToast();
     const { user, firestore, isUserLoading } = useFirebase();
@@ -111,6 +135,12 @@ export default function HostPayoutsSettingsPage() {
         [user, firestore]
     );
     const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
+
+    const pastConfirmedBookings = useMemo(() => {
+        if (!bookings) return [];
+        return bookings.filter(b => b.status === 'Confirmed' && isPast(b.bookingDate.toDate()))
+                       .sort((a, b) => b.bookingDate.toDate().getTime() - a.bookingDate.toDate().getTime());
+    }, [bookings]);
     
     const form = useForm<PayoutFormValues>({
         resolver: zodResolver(payoutSchema),
@@ -299,6 +329,60 @@ export default function HostPayoutsSettingsPage() {
             </div>
             
             <PayoutSummary bookings={bookings} isLoading={isLoading} />
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Payout History</CardTitle>
+                    <CardDescription>Breakdown of earnings from completed experiences.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {/* Mobile View */}
+                    <div className="grid gap-4 md:hidden">
+                        {isLoading && Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
+                        {!isLoading && pastConfirmedBookings.length > 0 ? (
+                            pastConfirmedBookings.map(booking => <PayoutHistoryCardMobile key={booking.id} booking={booking} />)
+                        ) : (
+                            !isLoading && <p className="text-center text-muted-foreground py-8">No completed bookings yet.</p>
+                        )}
+                    </div>
+                    {/* Desktop View */}
+                    <div className="hidden md:block">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Booking Date</TableHead>
+                                    <TableHead>Experience</TableHead>
+                                    <TableHead className="text-center">Guests</TableHead>
+                                    <TableHead>Total Booking</TableHead>
+                                    <TableHead>Your Payout (85%)</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading && Array.from({length: 3}).map((_, i) => (
+                                    <TableRow key={i}><TableCell colSpan={5}><Skeleton className="h-8 w-full"/></TableCell></TableRow>
+                                ))}
+                                {!isLoading && pastConfirmedBookings.length > 0 ? (
+                                    pastConfirmedBookings.map(booking => (
+                                        <TableRow key={booking.id}>
+                                            <TableCell>{format(booking.bookingDate.toDate(), 'PPP')}</TableCell>
+                                            <TableCell>{booking.experienceTitle}</TableCell>
+                                            <TableCell className="text-center">{booking.numberOfGuests}</TableCell>
+                                            <TableCell>${booking.totalPrice.toFixed(2)}</TableCell>
+                                            <TableCell className="font-semibold">${(booking.totalPrice * 0.85).toFixed(2)}</TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : !isLoading && (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                            No completed bookings yet.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
