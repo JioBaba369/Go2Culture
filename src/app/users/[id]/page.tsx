@@ -96,12 +96,29 @@ function UserProfilePage() {
           {userImage && <AvatarImage src={userImage.imageUrl} alt={user.fullName} />}
           <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="space-y-2 text-center sm:text-left">
+        <div className="space-y-3 text-center sm:text-left">
             <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
-            {user.brandName && <p className="text-xl text-muted-foreground -mt-1">{user.brandName}</p>}
+            
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-muted-foreground">
+                {isHost && host?.verification?.idVerified && (
+                    <div className="flex items-center gap-1.5 text-green-600 font-semibold">
+                        <ShieldCheck className="h-5 w-5" />
+                        <span>Verified Host</span>
+                    </div>
+                )}
+                {user.location?.country && (
+                    <div className="flex items-center gap-1.5">
+                        {getFlagFromCountryCode(user.location.country)}
+                        <span>From {countries.find(c => c.id === user.location.country)?.name}</span>
+                    </div>
+                )}
+            </div>
+
+            {user.brandName && <p className="text-xl text-muted-foreground">{user.brandName}</p>}
+
             <div className="flex gap-2 justify-center sm:justify-start">
                 <Badge variant={isHost ? "secondary" : "outline"} className="capitalize">{user.role}</Badge>
-                {user.location?.country && <Badge variant="outline">{user.location.city ? `${user.location.city}, ` : ''}{countries.find(c => c.id === user.location.country)?.name || user.location.country} {getFlagFromCountryCode(user.location.country)}</Badge>}
+                {user.location?.city && <Badge variant="outline">{user.location.city}</Badge>}
             </div>
         </div>
       </section>
@@ -125,20 +142,12 @@ function UserProfilePage() {
                     {host.profile.bio && <p className="text-muted-foreground leading-relaxed text-sm">{host.profile.bio}</p>}
                     <Separator className="my-4" />
                     <div className="space-y-4 text-sm">
-                        <div className="grid grid-cols-2 gap-4">
-                            {host.verification?.idVerified && (
-                                <div className="flex items-center gap-2">
-                                <ShieldCheck className="h-5 w-5 text-green-600 flex-shrink-0" />
-                                <span>Verified Host</span>
-                                </div>
-                            )}
-                            {host.level === 'Superhost' && (
-                                <div className="flex items-center gap-2">
-                                <Award className="h-5 w-5 text-amber-500 flex-shrink-0" />
-                                <span>Superhost</span>
-                                </div>
-                            )}
-                        </div>
+                        {host.level === 'Superhost' && (
+                            <div className="flex items-center gap-2">
+                            <Award className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                            <span>Superhost</span>
+                            </div>
+                        )}
                         <div className="flex items-center gap-3">
                             <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                             <span>From {getFlagFromCountryCode(host.location.country)} {countries.find(c => c.id === host.location.country)?.name}</span>
