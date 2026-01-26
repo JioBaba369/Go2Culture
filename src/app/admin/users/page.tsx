@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -34,6 +35,7 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { ADMIN_UID } from '@/lib/auth';
 
 
 const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
@@ -103,6 +105,7 @@ export default function AdminUsersPage() {
         {isLoading && Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
         {enrichedUsers?.map((user) => {
             const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
+            const isAdmin = user.id === ADMIN_UID;
             return (
                 <Card key={user.id} className="p-4">
                     <div className="flex items-start justify-between gap-4">
@@ -128,7 +131,7 @@ export default function AdminUsersPage() {
                                 <DropdownMenuItem>View Profile</DropdownMenuItem>
                                 <DropdownMenuItem>Edit User</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive">Suspend User</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" disabled={isAdmin}>Suspend User</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -185,6 +188,7 @@ export default function AdminUsersPage() {
               ))}
               {enrichedUsers?.map((user) => {
                 const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
+                const isAdmin = user.id === ADMIN_UID;
                 return (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">
@@ -228,7 +232,7 @@ export default function AdminUsersPage() {
                           <DropdownMenuItem>View Profile</DropdownMenuItem>
                           <DropdownMenuItem>Edit User</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">Suspend User</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" disabled={isAdmin}>Suspend User</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
