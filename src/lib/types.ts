@@ -106,6 +106,7 @@ export type Host = {
   };
   
   blockedDates?: string[]; // yyyy-MM-dd format
+  billingCountry?: string; // Two-letter ISO country code
 
   createdAt: any; // Allow ServerTimestamp
 };

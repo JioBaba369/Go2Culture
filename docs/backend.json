@@ -234,6 +234,10 @@
           },
           "description": "A list of dates the host has marked as unavailable."
         },
+        "billingCountry": {
+          "type": "string",
+          "description": "The country where the host receives payouts. Stored as a two-letter ISO country code."
+        },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "name", "profilePhotoId", "status", "profile", "verification", "location", "homeSetup", "compliance", "rating", "createdAt"]
@@ -320,7 +324,11 @@
                 "cuisine": { "type": "string" },
                 "description": { "type": "string" },
                 "spiceLevel": { "type": "string", "enum": ["Mild", "Medium", "Spicy"] },
-                "allergens": { "type": "string" }
+                "allergens": { "type": "string" },
+                "dietary": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
               }
             },
             "pricing": {

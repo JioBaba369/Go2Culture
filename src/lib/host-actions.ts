@@ -14,6 +14,26 @@ import { Experience } from './types';
 
 export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'userId' | 'createdAt' | 'rating' | 'hostName' | 'hostProfilePhotoId'>>;
 
+export async function updatePayoutSettings(
+  firestore: Firestore,
+  hostId: string,
+  userId: string,
+  data: { billingCountry: string }
+) {
+  const hostRef = doc(firestore, 'users', userId, 'hosts', hostId);
+  const dataToUpdate = { ...data, updatedAt: serverTimestamp() };
+  try {
+    await updateDoc(hostRef, dataToUpdate);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: hostRef.path,
+      operation: 'update',
+      requestResourceData: dataToUpdate,
+    }));
+    throw serverError;
+  }
+}
+
 // Function to confirm a booking
 export async function confirmBooking(
   firestore: Firestore,

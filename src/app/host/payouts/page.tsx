@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,14 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { countries } from '@/lib/location-data';
 import { Banknote, DollarSign, Loader2, TrendingUp, Wallet } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
-import type { Booking } from '@/lib/types';
+import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, where, doc } from 'firebase/firestore';
+import type { Booking, Host } from '@/lib/types';
 import { isPast, isThisMonth, format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -27,8 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { updatePayoutSettings } from '@/lib/host-actions';
 
 const payoutSchema = z.object({
+  billingCountry: z.string().min(1, 'Billing country is required.'),
   accountHolderName: z.string().min(2, 'Account holder name is required.'),
   bsb: z.string().optional(),
   accountNumber: z.string().min(1, 'Account number is required.'),
@@ -127,8 +128,10 @@ function PayoutHistoryCardMobile({ booking }: { booking: Booking }) {
 export default function HostPayoutsSettingsPage() {
     const { toast } = useToast();
     const { user, firestore, isUserLoading } = useFirebase();
-    const [billingCountry, setBillingCountry] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    const hostRef = useMemoFirebase(() => (user && firestore ? doc(firestore, 'users', user.uid, 'hosts', user.uid) : null), [user, firestore]);
+    const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
 
     const bookingsQuery = useMemoFirebase(
         () => (user && firestore ? query(collection(firestore, 'bookings'), where('hostId', '==', user.uid)) : null),
@@ -145,6 +148,7 @@ export default function HostPayoutsSettingsPage() {
     const form = useForm<PayoutFormValues>({
         resolver: zodResolver(payoutSchema),
         defaultValues: {
+            billingCountry: '',
             accountHolderName: '',
             bsb: '',
             accountNumber: '',
@@ -154,21 +158,48 @@ export default function HostPayoutsSettingsPage() {
         },
     });
 
-    const onSubmit = (values: PayoutFormValues) => {
+    useEffect(() => {
+        if (host?.billingCountry) {
+            form.setValue('billingCountry', host.billingCountry);
+        }
+    }, [host, form]);
+
+    const watchedBillingCountry = form.watch('billingCountry');
+
+    const onSubmit = async (values: PayoutFormValues) => {
+        if (!user || !firestore) return;
         setIsSaving(true);
-        console.log("Simulating save with data:", values);
-        // Simulate API call since we are not storing real bank data
-        setTimeout(() => {
+        
+        try {
+            // 1. Save the non-sensitive billingCountry to Firestore
+            await updatePayoutSettings(firestore, user.uid, user.uid, {
+                billingCountry: values.billingCountry,
+            });
+
+            // 2. Simulate saving the sensitive bank details
+            console.log("Simulating save of sensitive bank details:", {
+                accountHolderName: values.accountHolderName,
+                bsb: values.bsb,
+                accountNumber: values.accountNumber,
+                routingNumber: values.routingNumber,
+                iban: values.iban,
+                swift: values.swift,
+            });
+            
             toast({
                 title: 'Billing Information Saved',
                 description: 'Your payout details have been updated.',
             });
+            form.reset(values); // Mark form as not dirty
+        } catch(error: any) {
+            toast({ variant: 'destructive', title: 'Save failed', description: error.message });
+        } finally {
             setIsSaving(false);
-        }, 1000);
+        }
     }
     
     const renderBankFields = () => {
-        switch(billingCountry) {
+        switch(watchedBillingCountry) {
             case 'AU':
                 return (
                     <div className="space-y-4">
@@ -317,7 +348,7 @@ export default function HostPayoutsSettingsPage() {
         }
     }
 
-    const isLoading = isUserLoading || areBookingsLoading;
+    const isLoading = isUserLoading || areBookingsLoading || isHostLoading;
 
     return (
         <div className="space-y-8">
@@ -394,30 +425,39 @@ export default function HostPayoutsSettingsPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="billingCountry">Billing Country</Label>
-                                <Select onValueChange={setBillingCountry} value={billingCountry}>
-                                    <SelectTrigger id="billingCountry">
-                                        <SelectValue placeholder="Please set your billing country" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {countries.map(country => (
-                                            <SelectItem key={country.id} value={country.id}>{country.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            <FormField
+                                control={form.control}
+                                name="billingCountry"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Billing Country</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Please set your billing country" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {countries.map(country => (
+                                                    <SelectItem key={country.id} value={country.id}>{country.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                            {billingCountry && (
+                            {watchedBillingCountry && (
                                 <div className="p-4 border rounded-md space-y-4 bg-muted/50">
                                     <h3 className="font-semibold">Enter Your Account Details</h3>
                                     {renderBankFields()}
                                 </div>
                             )}
                         </CardContent>
-                        {billingCountry && (
+                        {watchedBillingCountry && (
                             <CardFooter>
-                                <Button type="submit" disabled={isSaving}>
+                                <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
                                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
                                     Save Payout Information
                                 </Button>
