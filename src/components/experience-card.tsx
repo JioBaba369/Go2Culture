@@ -6,7 +6,7 @@ import Link from "next/link";
 import type { Experience, Host } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, MapPin } from "lucide-react";
+import { Star, MapPin, Utensils } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, suburbs } from "@/lib/location-data";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
@@ -17,6 +17,27 @@ import { WishlistButton } from "./wishlist-button";
 interface ExperienceCardProps {
   experience: Experience;
 }
+
+const getFlagEmoji = (name: string): string => {
+    if (!name) return '';
+    const countryCodeMapping: { [key: string]: string } = {
+        'Italian': 'IT', 'Mexican': 'MX', 'Japanese': 'JP', 'Indian': 'IN',
+        'Thai': 'TH', 'French': 'FR', 'Vietnamese': 'VN', 'Lebanese': 'LB',
+        'Australian': 'AU', 'New Zealand': 'NZ', 'Māori': 'NZ', 'Syrian': 'SY',
+        'Australia': 'AU',
+    };
+    
+    const matchedKey = Object.keys(countryCodeMapping).find(key => name.includes(key));
+    const code = matchedKey ? countryCodeMapping[matchedKey] : '';
+
+    if (!code) return '';
+
+    const codePoints = code
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+};
 
 function ExperienceCardContent({ experience }: ExperienceCardProps) {
   const firestore = useFirestore();
@@ -66,6 +87,10 @@ function ExperienceCardContent({ experience }: ExperienceCardProps) {
           <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
             <span>{suburbName}, {countryName}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+            <Utensils className="h-4 w-4 shrink-0" />
+            <span>{getFlagEmoji(experience.menu.cuisine)} {experience.menu.cuisine}</span>
           </div>
           {isHostLoading ? <Skeleton className="h-6 w-3/4 mt-2" /> : host && (
             <div className="flex items-center gap-2 mt-2">
