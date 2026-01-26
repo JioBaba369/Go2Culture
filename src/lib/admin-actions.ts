@@ -46,7 +46,8 @@ export async function approveApplication(
     profile: {
       bio: application.profile.bio,
       culturalBackground: application.profile.culturalBackground || '',
-      hostingStyles: application.profile.hostingStyles,
+      hostingStyles: application.profile.hostingStyles || [],
+      achievements: [], // Not collected in form yet
     },
     verification: {
       idVerified: true, // Assuming verification is part of approval
@@ -60,7 +61,11 @@ export async function approveApplication(
       localArea: application.location.localArea || '',
       postcode: application.location.postcode,
     },
-    homeSetup: application.homeSetup,
+    homeSetup: {
+      ...application.homeSetup,
+      pets: application.homeSetup.pets || false,
+      smoking: application.homeSetup.smoking || false,
+    },
     compliance: {
         ...application.compliance,
         guidelinesAccepted: true,
@@ -83,11 +88,14 @@ export async function approveApplication(
     description: application.experience.description || '',
     durationMinutes: application.experience.durationMinutes,
     menu: {
-      ...application.experience.menu,
+      cuisine: application.experience.menu.cuisine,
+      description: application.experience.menu.description,
+      spiceLevel: application.experience.menu.spiceLevel,
       dietary: [], // Dietary is missing from application form, default to empty
     },
     pricing: {
-      ...application.experience.pricing,
+      pricePerGuest: application.experience.pricing.pricePerGuest,
+      maxGuests: application.experience.pricing.maxGuests,
       minGuests: 1,
     },
     availability: {

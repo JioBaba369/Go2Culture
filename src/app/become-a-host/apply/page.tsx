@@ -19,56 +19,55 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescripti
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { createNotification } from "@/lib/notification-actions";
-import { Separator } from "@/components/ui/separator";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-
-const wowFactorOptions = [
-    { id: 'rooftop', label: 'Rooftop' },
-    { id: 'view', label: 'View' },
-    { id: 'terrace', label: 'Terrace' },
-    { id: 'garden', label: 'Garden' },
-    { id: 'fine-dining', label: 'Fine-dining' },
-    { id: 'historical-monument', label: 'Historical monument' },
-    { id: 'live-music', label: 'Live music' },
-    { id: 'unique-setting', label: 'Unique setting' },
-    { id: 'other-wow', label: 'Other' },
-] as const;
-
 const formSchema = z.object({
-  // Step 1
-  experienceType: z.string({ required_error: "Please select an experience type." }),
+  // Step 1: Experience Basics
+  category: z.string({ required_error: "Please select an experience category." }),
+  experienceTitle: z.string().min(5, "Title must be at least 5 characters."),
   experienceDescription: z.string().min(50, "Please describe the experience (min 50 characters)."),
-  availability: z.enum(['weekdays', 'weekends', 'not-sure'], { required_error: "Please select your availability." }),
+  durationMinutes: z.coerce.number().min(30, "Duration must be at least 30 minutes."),
+
+  // Step 2: About You
+  hostingExperienceLevel: z.enum(['professional', 'passionate'], { required_error: "Please select your experience level." }),
+  expertise: z.string().min(20, "Please describe your expertise (min 20 characters)."),
+  bio: z.string().min(50, "Please write a short bio (min 50 characters)."),
   
-  // Step 2
+  // Step 3: Location & Home Setup
   hostingLocation: z.string({ required_error: "Please select where you'll host." }),
-  wowFactors: z.array(z.string()).optional(),
-  spaceDescription: z.string().optional(),
   country: z.string({ required_error: "Country is required." }),
   region: z.string().optional(),
   suburb: z.string({ required_error: "Suburb/City is required." }),
   localArea: z.string().optional(),
   address: z.string().min(5, "A detailed address is required."),
   postcode: z.string().min(3, "Postcode is required."),
+  maxGuests: z.coerce.number().min(1, "Must host at least 1 guest.").max(20, "Cannot host more than 20 guests."),
   accessibility: z.string().optional(),
+  
+  // Step 4: Menu & Pricing
+  menuCuisine: z.string().min(3, "Cuisine is required."),
+  menuDescription: z.string().min(20, "Menu description is required."),
+  spiceLevel: z.enum(['Mild', 'Medium', 'Spicy'], { required_error: "Please select a spice level." }),
+  pricePerGuest: z.coerce.number().min(10, "Price must be at least $10."),
 
-  // Step 4
+  // Step 5: Media - no fields
+
+  // Step 6: Final Review
   agreeToTerms: z.boolean().refine(val => val === true, "You must agree to the terms."),
 });
-
 
 type OnboardingFormValues = z.infer<typeof formSchema>;
 
 const steps = [
-    { id: 'Step 1', name: 'Experience Type & Description' },
-    { id: 'Step 2', name: 'Location & Atmosphere' },
-    { id: 'Step 3', name: 'Media Upload' },
-    { id: 'Step 4', name: 'Final Review & Terms' },
+    { id: 'Step 1', name: 'Experience Basics' },
+    { id: 'Step 2', name: 'About You' },
+    { id: 'Step 3', name: 'Location & Home Setup' },
+    { id: 'Step 4', name: 'Menu & Pricing' },
+    { id: 'Step 5', name: 'Media Upload' },
+    { id: 'Step 6', name: 'Final Review & Terms' },
 ];
 
 function HostApplicationStatus({ application }: { application: HostApplication }) {
@@ -133,13 +132,21 @@ export default function BecomeAHostPage() {
   const methods = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      wowFactors: [],
       country: userProfile?.location?.country || '',
       region: userProfile?.location?.region || '',
       suburb: userProfile?.location?.suburb || '',
       address: '',
       postcode: '',
       accessibility: '',
+      bio: '',
+      expertise: '',
+      experienceTitle: '',
+      experienceDescription: '',
+      menuCuisine: '',
+      menuDescription: '',
+      durationMinutes: 120,
+      maxGuests: 4,
+      pricePerGuest: 50,
     },
   });
 
@@ -151,6 +158,19 @@ export default function BecomeAHostPage() {
   const availableRegions = regions.filter(s => s.countryId === watchCountry);
   const availableSuburbs = suburbs.filter(s => s.regionId === watchRegion);
   const availableLocalAreas = localAreas.filter(l => l.suburbId === watchSuburb);
+
+  useEffect(() => {
+    if (userProfile && !methods.formState.isDirty) {
+        methods.reset({
+            ...methods.getValues(),
+            country: userProfile.location?.country || '',
+            region: userProfile.location?.region || '',
+            suburb: userProfile.location?.suburb || '',
+        });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile, methods.formState.isDirty]);
+
 
   useEffect(() => {
     if (watchCountry) {
@@ -175,12 +195,10 @@ export default function BecomeAHostPage() {
 
   async function nextStep() {
     let fieldsToValidate: (keyof OnboardingFormValues)[] = [];
-    if (currentStep === 0) {
-      fieldsToValidate = ['experienceType', 'experienceDescription', 'availability'];
-    }
-    if (currentStep === 1) {
-        fieldsToValidate = ['hostingLocation', 'country', 'suburb', 'address', 'postcode'];
-    }
+    if (currentStep === 0) fieldsToValidate = ['category', 'experienceTitle', 'experienceDescription', 'durationMinutes'];
+    if (currentStep === 1) fieldsToValidate = ['hostingExperienceLevel', 'expertise', 'bio'];
+    if (currentStep === 2) fieldsToValidate = ['hostingLocation', 'country', 'suburb', 'address', 'postcode', 'maxGuests'];
+    if (currentStep === 3) fieldsToValidate = ['menuCuisine', 'menuDescription', 'spiceLevel', 'pricePerGuest'];
     
     const output = await methods.trigger(fieldsToValidate);
     
@@ -225,26 +243,33 @@ export default function BecomeAHostPage() {
         riskFlag: null,
         profile: {
           profilePhotoId: userData?.profilePhotoId || "guest-1",
-          bio: 'To be completed by host.',
-          expertise: 'To be completed by host.',
-          hostingExperienceLevel: 'passionate',
+          bio: values.bio,
+          expertise: values.expertise,
+          hostingExperienceLevel: values.hostingExperienceLevel,
           hostingStyles: [],
-          availabilityPreference: values.availability,
         },
         experience: {
-          category: values.experienceType,
+          category: values.category,
           description: values.experienceDescription,
-          title: `New Experience by ${user.displayName}`,
-          durationMinutes: 120,
-          menu: { cuisine: 'TBD', description: 'TBD', spiceLevel: 'Mild' },
-          pricing: { pricePerGuest: 50, maxGuests: 4 },
+          title: values.experienceTitle,
+          durationMinutes: values.durationMinutes,
+          menu: { 
+            cuisine: values.menuCuisine,
+            description: values.menuDescription, 
+            spiceLevel: values.spiceLevel 
+          },
+          pricing: { 
+            pricePerGuest: values.pricePerGuest,
+            maxGuests: values.maxGuests,
+          },
           photos: { mainImageId: 'dining-area' },
         },
         homeSetup: {
           homeType: values.hostingLocation,
-          wowFactors: values.wowFactors,
-          spaceDescription: values.spaceDescription,
-          seating: 'Table', maxGuests: 4, pets: false, smoking: false,
+          seating: 'Table', 
+          maxGuests: values.maxGuests,
+          pets: false, 
+          smoking: false,
           accessibility: values.accessibility,
         },
         location: {
@@ -261,7 +286,6 @@ export default function BecomeAHostPage() {
 
       await addDoc(collection(firestore, 'hostApplications'), applicationData as any);
       
-      // Create notification
       await createNotification(
         firestore,
         user.uid,
@@ -367,142 +391,132 @@ export default function BecomeAHostPage() {
 
             {currentStep === 0 && (
                 <Card>
-                    <CardHeader><CardTitle>1. Experience Type & Description</CardTitle><CardDescription>What type of experience will you host first?</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>1. Experience Basics</CardTitle><CardDescription>Tell us about the experience you want to create.</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                        <FormField control={methods.control} name="experienceType" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>What type of experiences would you like to host?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Dinner" /></FormControl><FormLabel className="font-normal">Dinner</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Cooking Class" /></FormControl><FormLabel className="font-normal">Cooking class</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="History & Walks" /></FormControl><FormLabel className="font-normal">Food tour</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem>
-                            </RadioGroup></FormControl><FormMessage /></FormItem>
+                         <FormField control={methods.control} name="category" render={({ field }) => (
+                            <FormItem><FormLabel>What is the category of your experience?</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category..."/></SelectTrigger></FormControl><SelectContent>
+                                <SelectItem value="In-Home Dining">In-Home Dining</SelectItem>
+                                <SelectItem value="Cooking Class">Cooking Class</SelectItem>
+                                <SelectItem value="Special Event">Special Event</SelectItem>
+                                <SelectItem value="Art & Craft">Art & Craft</SelectItem>
+                                <SelectItem value="Music & Dance">Music & Dance</SelectItem>
+                                <SelectItem value="History & Walks">History & Walks</SelectItem>
+                            </SelectContent></Select><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="experienceTitle" render={({ field }) => (
+                            <FormItem><FormLabel>Give your experience a title</FormLabel><FormControl><Input placeholder="e.g., Authentic Pasta Making with Nonna's Recipes" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="experienceDescription" render={({ field }) => (
-                            <FormItem><FormLabel>Describe the first experience you would like to host</FormLabel><FormDescription>E.g., for a dinner, what should guests expect? What is the atmosphere? How many courses? Why is the setting special?</FormDescription><FormControl><Textarea rows={5} {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Describe the experience</FormLabel><FormDescription>What should guests expect? What is the atmosphere? Why is it special?</FormDescription><FormControl><Textarea rows={5} {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={methods.control} name="availability" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>How often are you available to host?</FormLabel><FormDescription>Don't worry, you will have full control over your availability!</FormDescription><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="weekdays" /></FormControl><FormLabel className="font-normal">Weekdays</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="weekends" /></FormControl><FormLabel className="font-normal">Weekends</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="not-sure" /></FormControl><FormLabel className="font-normal">I don't know yet</FormLabel></FormItem>
-                            </RadioGroup></FormControl><FormMessage /></FormItem>
+                        <FormField control={methods.control} name="durationMinutes" render={({ field }) => (
+                            <FormItem><FormLabel>Estimated duration (in minutes)</FormLabel><FormControl><Input type="number" placeholder="e.g., 180" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                     </CardContent>
                 </Card>
             )}
+
             {currentStep === 1 && (
+                 <Card>
+                    <CardHeader><CardTitle>2. About You</CardTitle><CardDescription>Help guests get to know their future host.</CardDescription></CardHeader>
+                    <CardContent className="space-y-6">
+                        <FormField control={methods.control} name="hostingExperienceLevel" render={({ field }) => (
+                            <FormItem className="space-y-3"><FormLabel>Which best describes you?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="passionate" /></FormControl><FormLabel className="font-normal">I'm a passionate home cook</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="professional" /></FormControl><FormLabel className="font-normal">I'm a professional chef or have culinary training</FormLabel></FormItem>
+                            </RadioGroup></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="expertise" render={({ field }) => (
+                            <FormItem><FormLabel>Describe your culinary background and expertise</FormLabel><FormDescription>E.g., "I learned to cook from my grandmother in Naples...", "I trained at Le Cordon Bleu...", "I've been hosting pop-up dinners for 5 years..."</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                         <FormField control={methods.control} name="bio" render={({ field }) => (
+                            <FormItem><FormLabel>Your Host Bio</FormLabel><FormDescription>Tell guests a little about yourself, your story, and your passion for your culture.</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                    </CardContent>
+                </Card>
+            )}
+
+            {currentStep === 2 && (
                 <Card>
-                    <CardHeader><CardTitle>2. Location & Atmosphere</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>3. Location & Home Setup</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
                         <FormField control={methods.control} name="hostingLocation" render={({ field }) => (
                             <FormItem className="space-y-3"><FormLabel>Where will you host?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
                                 <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="My home" /></FormControl><FormLabel className="font-normal">My home</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Event space" /></FormControl><FormLabel className="font-normal">Event space</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Event space" /></FormControl><FormLabel className="font-normal">A rented space</FormLabel></FormItem>
                                 <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem>
                             </RadioGroup></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={methods.control} name="wowFactors" render={() => (
-                            <FormItem><div className="mb-4"><FormLabel className="text-base">🤩 The WOW Factor</FormLabel><FormDescription>Select all that apply.</FormDescription></div>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">{wowFactorOptions.map((item) => (
-                                <FormField key={item.id} control={methods.control} name="wowFactors" render={({ field }) => (
-                                <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl><Checkbox checked={field.value?.includes(item.label)} onCheckedChange={(checked) => {
-                                        return checked ? field.onChange([...(field.value || []), item.label]) : field.onChange(field.value?.filter((value) => value !== item.label))
-                                    }} /></FormControl>
-                                    <FormLabel className="font-normal">{item.label}</FormLabel>
-                                </FormItem>
-                                )}/>
-                            ))}</div><FormMessage /></FormItem>
-                        )}/>
-                        <FormField control={methods.control} name="spaceDescription" render={({ field }) => (
-                            <FormItem><FormLabel>Anything we should know about your space or neighborhood?</FormLabel><FormDescription>Example: "I will host in a classic Roman apartment with vintage furniture and an impressive vinyl collection."</FormDescription><FormControl><Textarea rows={3} {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-
-                        <Separator />
-
-                        <div>
-                            <FormLabel className="text-base">📍 Your Location</FormLabel>
-                            <FormDescription>This helps guests find you. The exact address is only shared after a booking is confirmed.</FormDescription>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField control={methods.control} name="country" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Country</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl>
-                                    <SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
+                                <FormItem><FormLabel>Country</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger></FormControl><SelectContent>{countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                             )} />
                             <FormField control={methods.control} name="region" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableRegions.length}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                        <SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>{availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
+                                <FormItem><FormLabel>{watchCountry === 'NZ' ? 'Region' : 'State'}</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={!availableRegions.length}><FormControl><SelectTrigger><SelectValue placeholder={watchCountry === 'NZ' ? 'Select your region' : 'Select your state'} /></SelectTrigger></FormControl><SelectContent>{availableRegions.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                             )} />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField control={methods.control} name="suburb" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Suburb/City</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableSuburbs.length}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select your suburb/city" /></SelectTrigger></FormControl>
-                                    <SelectContent>{availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
+                                <FormItem><FormLabel>Suburb/City</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={!availableSuburbs.length}><FormControl><SelectTrigger><SelectValue placeholder="Select your suburb/city" /></SelectTrigger></FormControl><SelectContent>{availableSuburbs.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                             )} />
                             <FormField control={methods.control} name="localArea" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Local Area</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value} disabled={!availableLocalAreas.length}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select your local area" /></SelectTrigger></FormControl>
-                                    <SelectContent>{availableLocalAreas.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
+                                <FormItem><FormLabel>Local Area</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={!availableLocalAreas.length}><FormControl><SelectTrigger><SelectValue placeholder="Select your local area" /></SelectTrigger></FormControl><SelectContent>{availableLocalAreas.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                             )} />
                         </div>
                         <FormField control={methods.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Street Address</FormLabel><FormControl><Input placeholder="e.g., 123 Main St" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Street Address</FormLabel><FormDescription>The exact address is only shared after a booking is confirmed.</FormDescription><FormControl><Input placeholder="e.g., 123 Main St" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={methods.control} name="postcode" render={({ field }) => (
                             <FormItem><FormLabel>Postcode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-
-                        <Separator />
-
+                         <FormField control={methods.control} name="maxGuests" render={({ field }) => (
+                            <FormItem><FormLabel>Maximum number of guests</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
                         <FormField control={methods.control} name="accessibility" render={({ field }) => (
                             <FormItem><FormLabel>Accessibility Information</FormLabel><FormDescription>e.g., "Ground floor access", "Two steps to enter", "Elevator in building"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
-
                     </CardContent>
                 </Card>
             )}
-            {currentStep === 2 && (
+
+             {currentStep === 3 && (
+                <Card>
+                    <CardHeader><CardTitle>4. Menu & Pricing</CardTitle></CardHeader>
+                    <CardContent className="space-y-6">
+                        <FormField control={methods.control} name="menuCuisine" render={({ field }) => (
+                            <FormItem><FormLabel>Cuisine Type</FormLabel><FormControl><Input placeholder="e.g., Italian, Thai, Lebanese" {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="menuDescription" render={({ field }) => (
+                            <FormItem><FormLabel>Describe your menu</FormLabel><FormDescription>What will you be serving your guests?</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="spiceLevel" render={({ field }) => (
+                            <FormItem className="space-y-3"><FormLabel>What is the spice level?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Mild" /></FormControl><FormLabel className="font-normal">Mild</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Medium" /></FormControl><FormLabel className="font-normal">Medium</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Spicy" /></FormControl><FormLabel className="font-normal">Spicy</FormLabel></FormItem>
+                            </RadioGroup></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="pricePerGuest" render={({ field }) => (
+                            <FormItem><FormLabel>Price per guest ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                    </CardContent>
+                </Card>
+            )}
+
+            {currentStep === 4 && (
                  <Card>
-                    <CardHeader><CardTitle>3. Media Upload (The "Trust" Step)</CardTitle><CardDescription>Time to show off! To build a trusted community, ensuring guests feel safe starts with your photos.</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>5. Media Upload</CardTitle><CardDescription>To build a trusted community, ensuring guests feel safe starts with your photos.</CardDescription></CardHeader>
                     <CardContent className="space-y-4">
                         <p className="text-sm text-muted-foreground">For now, we'll use placeholders. You'll be able to upload your own photos after your application is approved.</p>
                         <FormItem><FormLabel>Profile Picture</FormLabel><FormControl><Input type="file" disabled /></FormControl></FormItem>
                         <FormItem><FormLabel>Gallery (add a minimum of 4 photos)</FormLabel><FormControl><Input type="file" multiple disabled /></FormControl><FormDescription>Tip: High-quality photos of the location, dishes, and people enjoying themselves are key to attracting guests.</FormDescription></FormItem>
-                        <FormItem><FormLabel>Video (Optional)</FormLabel><FormControl><Input type="file" disabled /></FormControl><FormDescription>Show our team your place and give us a wave!</FormDescription></FormItem>
                     </CardContent>
                 </Card>
             )}
-            {currentStep === 3 && (
+
+            {currentStep === 5 && (
                 <Card>
-                    <CardHeader><CardTitle>4. Final Review & Terms</CardTitle><CardDescription>Please review our terms and conditions before submitting.</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>6. Final Review & Terms</CardTitle><CardDescription>Please review our terms and conditions before submitting.</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
                         <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
                             <li><strong>Respect My Guests:</strong> I pledge to show no bias and foster an inclusive environment.</li>
