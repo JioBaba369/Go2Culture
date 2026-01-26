@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { Conversation, Message, User, Booking } from '@/lib/types';
@@ -58,12 +58,22 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   const messagesQuery = useMemoFirebase(
     () =>
       firestore && user && conversationId
-        ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId), where('participants', 'array-contains', user.uid), orderBy('timestamp', 'asc'))
+        ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId), where('participants', 'array-contains', user.uid))
         : null,
     [firestore, user, conversationId]
   );
   
-  const { data: messages = [], isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
+  const { data: messagesData, isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
+  
+  const messages = useMemo(() => {
+    if (!messagesData) return [];
+    // Client-side sorting to avoid composite index requirement
+    return [...messagesData].sort((a, b) => {
+      const timeA = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : Infinity;
+      const timeB = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : Infinity;
+      return timeA - timeB;
+    });
+  }, [messagesData]);
   
   const form = useForm<MessageFormValues>({
     resolver: zodResolver(messageSchema),
