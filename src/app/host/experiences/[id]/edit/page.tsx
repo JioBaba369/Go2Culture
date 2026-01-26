@@ -54,6 +54,8 @@ const experienceSchema = z.object({
     }),
     timeSlots: z.string().min(3, "Please enter at least one time slot (e.g., 19:00)."),
   }),
+  inclusions: z.string().optional(),
+  whatToBring: z.string().optional(),
   instantBook: z.boolean().default(false),
 }).superRefine((data, ctx) => {
   if ((data.location.country === 'AU' || data.location.country === 'NZ') && !data.location.region) {
@@ -113,6 +115,8 @@ export default function EditExperiencePage() {
           ? experience.availability.timeSlots.join(', ')
           : experience?.availability?.timeSlots || '',
       },
+      inclusions: experience?.inclusions?.join(', ') || '',
+      whatToBring: experience?.whatToBring?.join(', ') || '',
       instantBook: experience?.instantBook || false,
     },
   });
@@ -152,7 +156,7 @@ export default function EditExperiencePage() {
     if (!firestore) return;
     setSaveState('saving');
     try {
-        const updateData = {
+        const updateData: ExperienceUpdateData = {
             ...data,
             location: {
               ...data.location,
@@ -163,7 +167,9 @@ export default function EditExperiencePage() {
                 ...data.availability,
                 // Convert the timeSlots string back to an array for Firestore
                 timeSlots: data.availability.timeSlots.split(',').map(s => s.trim()).filter(Boolean),
-            }
+            },
+            inclusions: data.inclusions?.split(',').map(s => s.trim()).filter(Boolean) || [],
+            whatToBring: data.whatToBring?.split(',').map(s => s.trim()).filter(Boolean) || [],
         };
         await updateExperience(firestore, experienceId, updateData);
         toast({
@@ -326,6 +332,28 @@ export default function EditExperiencePage() {
                         </FormItem>
                     )} />
                 </div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <FormField control={methods.control} name="inclusions" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Inclusions</FormLabel>
+                        <FormDescription>List what is included in your experience, separated by commas.</FormDescription>
+                        <FormControl><Textarea {...field} placeholder="e.g., Welcome drink, 3-course meal, Apron" /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                 <FormField control={methods.control} name="whatToBring" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>What Guests Should Bring</FormLabel>
+                        <FormDescription>List any items guests should bring, separated by commas.</FormDescription>
+                        <FormControl><Textarea {...field} placeholder="e.g., Your favorite beverage, A container for leftovers" /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
             </CardContent>
         </Card>
         

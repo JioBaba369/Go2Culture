@@ -325,6 +325,14 @@
         "id": { "type": "string" },
         "hostId": { "type": "string" },
         "userId": { "type": "string" },
+        "hostName": {
+          "type": "string",
+          "description": "Denormalized host name for display."
+        },
+        "hostProfilePhotoId": {
+          "type": "string",
+          "description": "Denormalized host profile photo ID for display."
+        },
         "title": { "type": "string" },
         "category": { "type": "string", "enum": ["In-Home Dining", "Cooking Class", "Restaurant Experience", "Special Event", "Art & Craft", "Music & Dance", "History & Walks"] },
         "description": { "type": "string" },
@@ -370,6 +378,16 @@
             "thumbnailImageIds": { "type": "array", "items": { "type": "string" } }
           }
         },
+        "inclusions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "A list of items included in the experience (e.g., 'Welcome drink', '3-course meal')."
+        },
+        "whatToBring": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "A list of items guests should bring (e.g., 'An appetite!', 'Your own beverage')."
+        },
         "status": { "type": "string", "enum": ["draft", "live", "paused"] },
         "instantBook": { "type": "boolean" },
         "rating": {
@@ -381,7 +399,7 @@
         },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "hostId", "userId", "title", "category", "description", "durationMinutes", "menu", "pricing", "availability", "location", "photos", "status", "rating", "createdAt"]
+      "required": ["id", "hostId", "userId", "hostName", "hostProfilePhotoId", "title", "category", "description", "durationMinutes", "menu", "pricing", "availability", "location", "photos", "status", "rating", "createdAt"]
     },
     "Booking": {
       "title": "Booking",

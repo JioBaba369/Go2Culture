@@ -1,3 +1,4 @@
+
 'use client';
 
 import { forwardRef } from "react";
@@ -8,7 +9,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Utensils, Home, Wind, Accessibility, AlertTriangle, Award, Trophy, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, PartyPopper, Brush, Music, Landmark, Dog, Cigarette } from "lucide-react";
+import { Star, MapPin, Utensils, Home, Wind, Accessibility, AlertTriangle, Award, Trophy, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, PartyPopper, Brush, Music, Landmark, Dog, Cigarette, CheckCircle, ShoppingBag } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, doc, query, where, limit } from "firebase/firestore";
@@ -243,11 +244,47 @@ export default function ExperienceDetailPage() {
                 {host.homeSetup.publicTransportNearby && <AmenityItem icon={Bus}>Public transport nearby</AmenityItem>}
              </div>
           </div>
+          <Separator />
+
+          {/* INCLUSIONS */}
+          {experience.inclusions && experience.inclusions.length > 0 && (
+          <>
+          <div className="space-y-4">
+              <h3 className="font-headline text-2xl">What's Included</h3>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {experience.inclusions.map((item, index) => (
+                  <li key={index} className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span>{item}</span>
+                  </li>
+              ))}
+              </ul>
+          </div>
+          <Separator />
+          </>
+          )}
+
+          {/* WHAT TO BRING */}
+          {experience.whatToBring && experience.whatToBring.length > 0 && (
+          <>
+          <div className="space-y-4">
+              <h3 className="font-headline text-2xl">What to Bring</h3>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {experience.whatToBring.map((item, index) => (
+                  <li key={index} className="flex items-center gap-3">
+                  <ShoppingBag className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span>{item}</span>
+                  </li>
+              ))}
+              </ul>
+          </div>
+          <Separator />
+          </>
+          )}
           
           {/* HOST ACHIEVEMENTS */}
           {host.profile.achievements && host.profile.achievements.length > 0 && (
             <>
-              <Separator />
               <div className="space-y-4">
                 <h3 className="font-headline text-2xl">Host Achievements</h3>
                 <div className="flex flex-wrap gap-2">
@@ -259,9 +296,9 @@ export default function ExperienceDetailPage() {
                   ))}
                 </div>
               </div>
+              <Separator />
             </>
           )}
-          <Separator />
           
            {/* LOCATION MAP */}
           <div className="space-y-4">

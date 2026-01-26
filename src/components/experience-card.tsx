@@ -3,15 +3,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { Experience, Host } from "@/lib/types";
+import type { Experience } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MapPin, Utensils } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, suburbs } from "@/lib/location-data";
-import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
-import { Skeleton } from "./ui/skeleton";
 import { WishlistButton } from "./wishlist-button";
 import { getFlagEmoji, getFlagFromCountryCode } from "@/lib/format";
 
@@ -20,16 +17,8 @@ interface ExperienceCardProps {
 }
 
 function ExperienceCardContent({ experience }: ExperienceCardProps) {
-  const firestore = useFirestore();
-  const hostRef = useMemoFirebase(
-    () => firestore && experience.userId ? doc(firestore, 'users', experience.userId, 'hosts', experience.hostId) : null,
-    [firestore, experience.userId, experience.hostId]
-  );
-  // Note: This pattern makes a doc read for every card. For production, denormalizing host data into the experience doc would be more performant.
-  const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
-
   const mainImage = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
-  const hostAvatar = host ? PlaceHolderImages.find(p => p.id === host.profilePhotoId) : null;
+  const hostAvatar = experience.hostProfilePhotoId ? PlaceHolderImages.find(p => p.id === experience.hostProfilePhotoId) : null;
 
   const countryName = countries.find(c => c.id === experience.location.country)?.name || experience.location.country;
   const suburbName = suburbs.find(s => s.id === experience.location.suburb)?.name || experience.location.suburb;
@@ -72,14 +61,14 @@ function ExperienceCardContent({ experience }: ExperienceCardProps) {
             <Utensils className="h-4 w-4 shrink-0" />
             <span>{getFlagEmoji(experience.menu.cuisine)} {experience.menu.cuisine}</span>
           </div>
-          {isHostLoading ? <Skeleton className="h-6 w-3/4 mt-2" /> : host && (
-            <Link href={`/users/${host.userId}`} className="group/host">
+          {experience.hostName && (
+            <Link href={`/users/${experience.userId}`} className="group/host">
               <div className="flex items-center gap-2 mt-2">
                 <Avatar className="h-6 w-6">
-                  {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={host.name} data-ai-hint={hostAvatar.imageHint} />}
-                  <AvatarFallback>{host.name.charAt(0)}</AvatarFallback>
+                  {hostAvatar && <AvatarImage src={hostAvatar.imageUrl} alt={experience.hostName} data-ai-hint={hostAvatar.imageHint} />}
+                  <AvatarFallback>{experience.hostName.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className="text-sm text-muted-foreground group-hover/host:underline">Hosted by {host.name}</span>
+                <span className="text-sm text-muted-foreground group-hover/host:underline">Hosted by {experience.hostName}</span>
               </div>
             </Link>
           )}

@@ -118,6 +118,8 @@ export type Experience = {
   id: string; // experienceId
   hostId: string;
   userId: string; // The user ID of the host
+  hostName: string; // Denormalized host name
+  hostProfilePhotoId: string; // Denormalized host photo
   title: string;
   category: 'In-Home Dining' | 'Cooking Class' | 'Restaurant Experience' | 'Special Event' | 'Art & Craft' | 'Music & Dance' | 'History & Walks';
   description: string;
@@ -148,6 +150,8 @@ export type Experience = {
     mainImageId: string;
     thumbnailImageIds?: string[];
   };
+  inclusions?: string[];
+  whatToBring?: string[];
   status: 'draft' | 'live' | 'paused';
   instantBook?: boolean;
   rating: {
