@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -243,250 +244,252 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-6">
-        <Avatar className="h-20 w-20">
-            {userImage ? <AvatarImage src={userImage.imageUrl} alt={userProfile?.fullName || 'User'} /> : null}
-            <AvatarFallback className="text-3xl">{userProfile?.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div>
-            <h1 className="text-3xl font-headline font-bold">Welcome back, {userProfile.fullName.split(' ')[0]}</h1>
-            <p className="text-muted-foreground">Manage your account settings and personal information.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-6">
+          <Avatar className="h-20 w-20">
+              {userImage ? <AvatarImage src={userImage.imageUrl} alt={userProfile?.fullName || 'User'} /> : null}
+              <AvatarFallback className="text-3xl">{userProfile?.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+              <h1 className="text-3xl font-headline font-bold">Welcome back, {userProfile.fullName.split(' ')[0]}</h1>
+              <p className="text-muted-foreground">Manage your account settings and personal information.</p>
+          </div>
         </div>
+         <Button asChild variant="outline">
+            <Link href={`/users/${user.uid}`}>
+                <Eye className="mr-2 h-4 w-4" />
+                View Public Profile
+            </Link>
+        </Button>
       </div>
 
-       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card>
-                <CardHeader className="flex flex-row items-start justify-between">
-                    <div>
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="md:col-span-2 space-y-8">
+                <Card>
+                    <CardHeader>
                         <CardTitle>Personal Information</CardTitle>
                         <CardDescription>Update your public name and contact details.</CardDescription>
-                    </div>
-                    <Button asChild variant="outline">
-                        <Link href={`/users/${user.uid}`}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Public Profile
-                        </Link>
-                    </Button>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="fullName"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Full Name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Your full name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Your phone number" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="website"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Website</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://your-website.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                    <CardTitle>Social Media</CardTitle>
+                    <CardDescription>Link your social media profiles. Enter your handle only.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="socialMedia.twitter"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>X</FormLabel>
+                                <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                    <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                        <Twitter className="h-5 w-5" />
+                                    </div>
+                                    <span className="shrink-0 text-muted-foreground">https://x.com/</span>
+                                    <FormControl>
+                                        <Input
+                                        placeholder="your_handle"
+                                        {...field}
+                                        className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                        />
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="socialMedia.instagram"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Instagram</FormLabel>
+                                <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                    <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                        <Instagram className="h-5 w-5" />
+                                    </div>
+                                    <span className="shrink-0 text-muted-foreground">https://instagram.com/</span>
+                                    <FormControl>
+                                        <Input
+                                        placeholder="your_handle"
+                                        {...field}
+                                        className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                        />
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="socialMedia.facebook"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Facebook</FormLabel>
+                                <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                    <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                        <Facebook className="h-5 w-5" />
+                                    </div>
+                                    <span className="shrink-0 text-muted-foreground">https://facebook.com/</span>
+                                    <FormControl>
+                                        <Input
+                                        placeholder="your_handle"
+                                        {...field}
+                                        className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                        />
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                    <CardFooter>
+                         <Button type="submit" disabled={profileSaveState === 'saving' || !form.formState.isDirty}>
+                            {profileSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {profileSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                            {profileSaveState === 'saved' ? 'Saved!' : 'Save Profile Changes'}
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </form>
+        </Form>
+      
+        <div className="md:col-span-1 space-y-8">
+            <Card>
+                <CardHeader>
+                <CardTitle>Account Information</CardTitle>
+                <CardDescription>This information is private and not shared with other users.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Your full name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
+                    <div className="grid sm:grid-cols-2 md:grid-cols-1 gap-4">
+                        <div>
+                            <Label>Email Address</Label>
+                            <p className="text-muted-foreground">{userProfile.email}</p>
+                        </div>
+                        <div>
+                            <Label>Your Role</Label>
+                            <div className="mt-1">
+                                <Badge variant={roleVariantMap[userProfile.role]} className="capitalize">{userProfile.role}</Badge>
+                            </div>
+                        </div>
+                        <div>
+                            <Label>Member Since</Label>
+                            <p className="text-muted-foreground">{userProfile.createdAt?.toDate ? format(userProfile.createdAt.toDate(), 'PPP') : 'N/A'}</p>
+                        </div>
+                        {userProfile.location?.country && countryName && (
+                        <div>
+                            <Label>Country</Label>
+                            <p className="text-muted-foreground flex items-center gap-2">
+                                {getFlagFromCountryCode(userProfile.location.country)}
+                                {countryName}
+                            </p>
+                        </div>
                         )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Your phone number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name="website"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Website</FormLabel>
-                            <FormControl>
-                                <Input placeholder="https://your-website.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    </div>
                 </CardContent>
             </Card>
 
             <Card>
-                <CardHeader>
-                <CardTitle>Social Media</CardTitle>
-                <CardDescription>Link your social media profiles.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="socialMedia.twitter"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>X</FormLabel>
-                             <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                    <Twitter className="h-5 w-5" />
-                                </div>
-                                <span className="shrink-0 text-muted-foreground">https://x.com/</span>
-                                <FormControl>
-                                    <Input
-                                    placeholder="your_handle"
-                                    {...field}
-                                    className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                    />
-                                </FormControl>
-                            </div>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="socialMedia.instagram"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Instagram</FormLabel>
-                             <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                    <Instagram className="h-5 w-5" />
-                                </div>
-                                <span className="shrink-0 text-muted-foreground">https://instagram.com/</span>
-                                <FormControl>
-                                    <Input
-                                    placeholder="your_handle"
-                                    {...field}
-                                    className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                    />
-                                </FormControl>
-                            </div>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="socialMedia.facebook"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Facebook</FormLabel>
-                            <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                    <Facebook className="h-5 w-5" />
-                                </div>
-                                <span className="shrink-0 text-muted-foreground">https://facebook.com/</span>
-                                <FormControl>
-                                    <Input
-                                    placeholder="your_handle"
-                                    {...field}
-                                    className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                    />
-                                </FormControl>
-                            </div>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </CardContent>
+                <Form {...passwordForm}>
+                    <form onSubmit={passwordForm.handleSubmit(onPasswordChangeSubmit)}>
+                        <CardHeader>
+                            <CardTitle>Change Password</CardTitle>
+                            <CardDescription>Update your password. Make sure it's at least 6 characters long.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <FormField
+                                control={passwordForm.control}
+                                name="currentPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Current Password</FormLabel>
+                                        <FormControl><Input type="password" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={passwordForm.control}
+                                name="newPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>New Password</FormLabel>
+                                        <FormControl><Input type="password" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={passwordForm.control}
+                                name="confirmPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Confirm New Password</FormLabel>
+                                        <FormControl><Input type="password" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </CardContent>
+                        <CardFooter>
+                            <Button type="submit" disabled={passwordSaveState !== 'idle' || !passwordForm.formState.isDirty}>
+                                {passwordSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {passwordSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                                {passwordSaveState === 'saved' ? 'Saved!' : 'Change Password'}
+                            </Button>
+                        </CardFooter>
+                    </form>
+                </Form>
             </Card>
-            
-            <div className="flex justify-end">
-                <Button type="submit" disabled={profileSaveState === 'saving' || !form.formState.isDirty}>
-                    {profileSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {profileSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
-                    {profileSaveState === 'saved' ? 'Saved!' : 'Save Changes'}
-                </Button>
-            </div>
-        </form>
-       </Form>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Information</CardTitle>
-          <CardDescription>This information is private and not shared with other users.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="grid sm:grid-cols-3 gap-4">
-                <div>
-                    <Label>Email Address</Label>
-                    <p className="text-muted-foreground">{userProfile.email}</p>
-                </div>
-                <div>
-                    <Label>Your Role</Label>
-                    <div className="mt-1">
-                        <Badge variant={roleVariantMap[userProfile.role]} className="capitalize">{userProfile.role}</Badge>
-                    </div>
-                </div>
-                <div>
-                    <Label>Member Since</Label>
-                    <p className="text-muted-foreground">{userProfile.createdAt?.toDate ? format(userProfile.createdAt.toDate(), 'PPP') : 'N/A'}</p>
-                </div>
-                {userProfile.location?.country && countryName && (
-                  <div>
-                    <Label>Country</Label>
-                    <p className="text-muted-foreground flex items-center gap-2">
-                        {getFlagFromCountryCode(userProfile.location.country)}
-                        {countryName}
-                    </p>
-                  </div>
-                )}
-            </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <Form {...passwordForm}>
-            <form onSubmit={passwordForm.handleSubmit(onPasswordChangeSubmit)}>
-                <CardHeader>
-                    <CardTitle>Change Password</CardTitle>
-                    <CardDescription>Update your password. Make sure it's at least 6 characters long.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <FormField
-                        control={passwordForm.control}
-                        name="currentPassword"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Current Password</FormLabel>
-                                <FormControl><Input type="password" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={passwordForm.control}
-                        name="newPassword"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>New Password</FormLabel>
-                                <FormControl><Input type="password" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={passwordForm.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Confirm New Password</FormLabel>
-                                <FormControl><Input type="password" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </CardContent>
-                <CardFooter>
-                    <Button type="submit" disabled={passwordSaveState !== 'idle' || !passwordForm.formState.isDirty}>
-                        {passwordSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {passwordSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
-                        {passwordSaveState === 'saved' ? 'Saved!' : 'Change Password'}
-                    </Button>
-                </CardFooter>
-            </form>
-        </Form>
-      </Card>
-
+        </div>
+      </div>
     </div>
   );
 }
