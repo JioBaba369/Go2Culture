@@ -1,6 +1,5 @@
-
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -16,18 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { Booking, User } from '@/lib/types';
 import { collection, query, where, doc } from 'firebase/firestore';
-import { format, isFuture } from 'date-fns';
+import { format, isFuture, isPast } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -226,6 +219,7 @@ export default function HostBookingsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const [key, setKey] = useState(0); // Used to force a refetch
+  const [filter, setFilter] = useState('all');
 
   const bookingsQuery = useMemoFirebase(
     () => (user && firestore ? query(collection(firestore, 'bookings'), where('hostId', '==', user.uid)) : null),
@@ -239,7 +233,23 @@ export default function HostBookingsPage() {
     setKey(prev => prev + 1); // Increment key to trigger refetch
   };
   
-  const sortedBookings = bookings ? [...bookings].sort((a, b) => b.bookingDate.toDate() - a.bookingDate.toDate()) : [];
+  const sortedBookings = useMemo(() => {
+    if (!bookings) return [];
+    return [...bookings].sort((a, b) => b.bookingDate.toDate() - a.bookingDate.toDate());
+  }, [bookings]);
+
+  const filteredBookings = useMemo(() => {
+    if (!sortedBookings) return [];
+    switch (filter) {
+      case 'all': return sortedBookings;
+      case 'upcoming': return sortedBookings.filter(b => isFuture(b.bookingDate.toDate()));
+      case 'past': return sortedBookings.filter(b => isPast(b.bookingDate.toDate()));
+      case 'pending': return sortedBookings.filter(b => b.status === 'Pending');
+      case 'confirmed': return sortedBookings.filter(b => b.status === 'Confirmed');
+      case 'cancelled': return sortedBookings.filter(b => b.status === 'Cancelled');
+      default: return sortedBookings;
+    }
+  }, [sortedBookings, filter]);
 
   return (
     <div className="space-y-8">
@@ -248,17 +258,31 @@ export default function HostBookingsPage() {
             <p className="text-muted-foreground">A list of all bookings for your experiences.</p>
         </div>
 
+        <Card>
+            <CardHeader>
+                <CardTitle>Filter Bookings</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+                <Button variant={filter === 'all' ? 'default' : 'outline'} onClick={() => setFilter('all')}>All</Button>
+                <Button variant={filter === 'upcoming' ? 'default' : 'outline'} onClick={() => setFilter('upcoming')}>Upcoming</Button>
+                <Button variant={filter === 'past' ? 'default' : 'outline'} onClick={() => setFilter('past')}>Past</Button>
+                <Button variant={filter === 'pending' ? 'default' : 'outline'} onClick={() => setFilter('pending')}>Pending</Button>
+                <Button variant={filter === 'confirmed' ? 'default' : 'outline'} onClick={() => setFilter('confirmed')}>Confirmed</Button>
+                <Button variant={filter === 'cancelled' ? 'default' : 'outline'} onClick={() => setFilter('cancelled')}>Cancelled</Button>
+            </CardContent>
+        </Card>
+
        {/* Mobile Card View */}
       <div className="grid gap-4 md:hidden">
         {isLoading && Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-48 w-full" />
         ))}
-        {sortedBookings?.map((booking) => (
+        {filteredBookings?.map((booking) => (
           <HostBookingCardMobile key={booking.id} booking={booking} onAction={handleAction}/>
         ))}
-         {!isLoading && sortedBookings?.length === 0 && (
+         {!isLoading && filteredBookings?.length === 0 && (
             <Card className="flex items-center justify-center h-40">
-                <p className="text-muted-foreground">You have no bookings yet.</p>
+                <p className="text-muted-foreground">No bookings match this filter.</p>
             </Card>
         )}
       </div>
@@ -293,13 +317,13 @@ export default function HostBookingsPage() {
                     </TableCell>
                   </TableRow>
                 ))}
-              {sortedBookings?.map((booking) => (
+              {filteredBookings?.map((booking) => (
                 <HostBookingRow key={booking.id} booking={booking} onAction={handleAction}/>
               ))}
-               {!isLoading && sortedBookings?.length === 0 && (
+               {!isLoading && filteredBookings?.length === 0 && (
                  <TableRow>
                    <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
-                     You have no bookings yet.
+                     No bookings match this filter.
                    </TableCell>
                  </TableRow>
               )}
