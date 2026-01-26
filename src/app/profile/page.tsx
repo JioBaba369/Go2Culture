@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc, updateDoc, serverTimestamp, collection, where, query } from 'firebase/firestore';
@@ -561,7 +561,7 @@ export default function ProfilePage() {
                         )}
                         {userProfile.languages && userProfile.languages.length > 0 && (
                             <div className="flex items-start gap-3">
-                                <Globe className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <Languages className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                                 <div>
                                 <p><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{userProfile.languages.join(', ')}</span></p>
                                 </div>
@@ -598,7 +598,7 @@ export default function ProfilePage() {
                     <div className="space-y-4 text-sm">
                         {userProfile.languages && userProfile.languages.length > 0 ? (
                         <div className="flex items-start gap-3">
-                            <Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
+                            <Languages className="h-5 w-5 text-muted-foreground mt-0.5" />
                             <div>
                             <p><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{userProfile.languages.join(', ')}</span></p>
                             </div>
@@ -633,6 +633,39 @@ export default function ProfilePage() {
                     </div>
                 </CardContent>
             </Card>
+
+            <div className="p-6 border rounded-xl shadow-sm bg-card">
+                <h3 className="font-headline text-xl font-semibold">Contact & Links</h3>
+                <div className="space-y-4 mt-4 text-sm">
+                    {userProfile.website && (
+                        <a href={userProfile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Globe className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">{userProfile.website.replace(/^https?:\/\//, '')}</span>
+                        </a>
+                    )}
+                    {userProfile.socialMedia?.twitter && (
+                        <a href={userProfile.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">@{getUsername(userProfile.socialMedia.twitter)}</span>
+                        </a>
+                    )}
+                    {userProfile.socialMedia?.instagram && (
+                        <a href={userProfile.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">@{getUsername(userProfile.socialMedia.instagram)}</span>
+                        </a>
+                    )}
+                    {userProfile.socialMedia?.facebook && (
+                        <a href={userProfile.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">{getUsername(userProfile.socialMedia.facebook)}</span>
+                        </a>
+                    )}
+                    {!userProfile.website && !userProfile.socialMedia?.twitter && !userProfile.socialMedia?.instagram && !userProfile.socialMedia?.facebook && (
+                        <p className="text-muted-foreground">No social links provided.</p>
+                    )}
+                </div>
+            </div>
 
             <Card>
                 <Form {...passwordForm}>
@@ -686,39 +719,6 @@ export default function ProfilePage() {
                     </form>
                 </Form>
             </Card>
-
-            <div className="p-6 border rounded-xl shadow-sm bg-card">
-                <h3 className="font-headline text-xl font-semibold">Contact & Links</h3>
-                <div className="space-y-4 mt-4 text-sm">
-                    {userProfile.website && (
-                        <a href={userProfile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                            <Globe className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">{userProfile.website.replace(/^https?:\/\//, '')}</span>
-                        </a>
-                    )}
-                    {userProfile.socialMedia?.twitter && (
-                        <a href={userProfile.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                            <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">@{getUsername(userProfile.socialMedia.twitter)}</span>
-                        </a>
-                    )}
-                    {userProfile.socialMedia?.instagram && (
-                        <a href={userProfile.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                            <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">@{getUsername(userProfile.socialMedia.instagram)}</span>
-                        </a>
-                    )}
-                    {userProfile.socialMedia?.facebook && (
-                        <a href={userProfile.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
-                            <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">{getUsername(userProfile.socialMedia.facebook)}</span>
-                        </a>
-                    )}
-                    {!userProfile.website && !userProfile.socialMedia?.twitter && !userProfile.socialMedia?.instagram && !userProfile.socialMedia?.facebook && (
-                        <p className="text-muted-foreground">No social links provided.</p>
-                    )}
-                </div>
-            </div>
         </div>
       </div>
     </div>
