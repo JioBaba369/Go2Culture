@@ -54,6 +54,14 @@
         "profilePhotoId": {
           "type": "string"
         },
+        "nativeLanguage": {
+          "type": "string",
+          "description": "The user's native language."
+        },
+        "brandName": {
+          "type": "string",
+          "description": "The user's brand name, if they have one."
+        },
         "preferences": {
           "type": "object",
           "properties": {
@@ -79,7 +87,8 @@
           "properties": {
             "country": { "type": "string" },
             "region": { "type": "string" },
-            "suburb": { "type": "string" }
+            "suburb": { "type": "string" },
+            "city": { "type": "string" }
           }
         },
         "status": {

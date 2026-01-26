@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -26,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { countries } from '@/lib/location-data';
 
 export default function SignupPage() {
   const auth = useAuth();
@@ -59,6 +61,12 @@ export default function SignupPage() {
       const fullName = `${firstName} ${lastName}`;
       await updateProfile(user, { displayName: fullName });
 
+      const cityCountryParts = cityCountry.split(',').map(s => s.trim());
+      const city = cityCountryParts[0] || '';
+      const countryName = cityCountryParts[1] || '';
+      const countryData = countries.find(c => c.name.toLowerCase() === countryName.toLowerCase());
+      const countryCode = countryData ? countryData.id : '';
+
       const userRef = doc(firestore, 'users', user.uid);
       await setDoc(userRef, {
         id: user.uid,
@@ -66,6 +74,12 @@ export default function SignupPage() {
         fullName,
         email: user.email,
         phone,
+        nativeLanguage,
+        brandName,
+        location: {
+            city: city,
+            country: countryCode,
+        },
         status: 'active',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),

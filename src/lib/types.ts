@@ -12,7 +12,9 @@ export type User = {
     instagram?: string;
     facebook?: string;
   };
-  profilePhotoId?: string; 
+  profilePhotoId?: string;
+  nativeLanguage?: string;
+  brandName?: string;
   preferences?: {
     cuisines?: string[];
     dietary?: string[];
@@ -22,6 +24,7 @@ export type User = {
     country: string;
     region?: string;
     suburb?: string;
+    city?: string;
   }
   status: 'active' | 'suspended' | 'deleted';
   createdAt: any; // Allow ServerTimestamp
