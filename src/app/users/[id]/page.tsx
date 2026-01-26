@@ -14,7 +14,7 @@ import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon, Shi
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
-import { getFlagEmoji } from '@/lib/format';
+import { getFlagEmoji, getFlagFromCountryCode } from '@/lib/format';
 
 const getUsername = (url?: string) => {
   if (!url) return '';
@@ -92,8 +92,12 @@ function UserProfilePage() {
           <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="space-y-2 text-center sm:text-left">
-          <h1 className="font-headline text-4xl font-bold">{user.fullName} {user.location?.country && getFlagEmoji(countries.find(c => c.id === user.location?.country)?.name || '')}</h1>
-          <Badge variant={isHost ? "secondary" : "outline"} className="capitalize text-lg">{user.role}</Badge>
+            <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
+            {user.brandName && <p className="text-xl text-muted-foreground -mt-1">{user.brandName}</p>}
+            <div className="flex gap-2 justify-center sm:justify-start">
+                <Badge variant={isHost ? "secondary" : "outline"} className="capitalize">{user.role}</Badge>
+                {user.location?.country && <Badge variant="outline">{user.location.city ? `${user.location.city}, ` : ''}{countries.find(c => c.id === user.location.country)?.name || user.location.country} {getFlagFromCountryCode(user.location.country)}</Badge>}
+            </div>
         </div>
       </section>
 
@@ -118,6 +122,24 @@ function UserProfilePage() {
         </div>
 
         <aside className="md:col-span-1 space-y-6">
+            <div className="p-6 border rounded-xl shadow-sm bg-card">
+              <h3 className="font-headline text-xl font-semibold mb-4">About</h3>
+              <div className="space-y-4 text-sm">
+                {user.nativeLanguage && (
+                  <div className="flex items-center gap-3">
+                    <Languages className="h-5 w-5 text-muted-foreground" />
+                    <span className="capitalize">Native language: {user.nativeLanguage}</span>
+                  </div>
+                )}
+                 {host?.profile.languages && host.profile.languages.length > 0 && (
+                    <div className="flex items-center gap-3">
+                        <Languages className="h-5 w-5 text-muted-foreground" />
+                        <span>Also speaks {host.profile.languages.join(', ')}</span>
+                    </div>
+                )}
+              </div>
+            </div>
+
             {isHost && host && (
                 <div className="p-6 border rounded-xl shadow-sm bg-card">
                     <h3 className="font-headline text-xl font-semibold mb-4">Host Details</h3>
@@ -137,19 +159,13 @@ function UserProfilePage() {
                         {host.location.country && (
                             <div className="flex items-center gap-3">
                                 <Globe className="h-5 w-5 text-muted-foreground" />
-                                <span>From {getFlagEmoji(countries.find(c => c.id === host.location.country)?.name || '')} {countries.find(c => c.id === host.location.country)?.name}</span>
+                                <span>From {getFlagFromCountryCode(host.location.country)} {countries.find(c => c.id === host.location.country)?.name}</span>
                             </div>
                         )}
                         {host.profile.culturalBackground && (
                             <div className="flex items-center gap-3">
                                 <UsersIcon className="h-5 w-5 text-muted-foreground" />
                                 <span>{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</span>
-                            </div>
-                        )}
-                        {host.profile.languages && host.profile.languages.length > 0 && (
-                            <div className="flex items-center gap-3">
-                                <Languages className="h-5 w-5 text-muted-foreground" />
-                                <span>Speaks {host.profile.languages.join(', ')}</span>
                             </div>
                         )}
                     </div>

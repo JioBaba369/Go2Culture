@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Twitter, Instagram, Facebook, Eye } from 'lucide-react';
+import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe } from 'lucide-react';
 import { User } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -26,11 +26,18 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 import { countries } from '@/lib/location-data';
 import { getFlagFromCountryCode } from '@/lib/format';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
+  brandName: z.string().optional(),
+  nativeLanguage: z.string().optional(),
   phone: z.string().optional(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  location: z.object({
+    city: z.string().optional(),
+    country: z.string().optional(),
+  }).optional(),
   socialMedia: z.object({
     twitter: z.string().optional(),
     instagram: z.string().optional(),
@@ -83,8 +90,14 @@ export default function ProfilePage() {
     resolver: zodResolver(profileFormSchema),
     values: {
       fullName: userProfile?.fullName || '',
+      brandName: userProfile?.brandName || '',
+      nativeLanguage: userProfile?.nativeLanguage || '',
       phone: userProfile?.phone || '',
       website: userProfile?.website || '',
+      location: {
+        city: userProfile?.location?.city || '',
+        country: userProfile?.location?.country || '',
+      },
       socialMedia: {
         twitter: getUsernameFromUrl(userProfile?.socialMedia?.twitter),
         instagram: getUsernameFromUrl(userProfile?.socialMedia?.instagram),
@@ -119,8 +132,15 @@ export default function ProfilePage() {
       
       const dataToSave = {
         fullName: data.fullName,
+        brandName: data.brandName,
+        nativeLanguage: data.nativeLanguage,
         phone: data.phone,
         website: data.website,
+        location: {
+            ...userProfile?.location, // Preserve existing fields like region/suburb
+            city: data.location?.city,
+            country: data.location?.country
+        },
         socialMedia: {
           twitter: data.socialMedia?.twitter ? `https://x.com/${data.socialMedia.twitter.replace('@', '')}` : '',
           instagram: data.socialMedia?.instagram ? `https://instagram.com/${data.socialMedia.instagram.replace('@', '')}` : '',
@@ -285,6 +305,45 @@ export default function ProfilePage() {
                                 </FormItem>
                             )}
                         />
+                         <FormField
+                            control={form.control}
+                            name="brandName"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Brand Name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Your public brand name (optional)" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="nativeLanguage"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Native Language</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="english">English</SelectItem>
+                                        <SelectItem value="spanish">Spanish</SelectItem>
+                                        <SelectItem value="french">French</SelectItem>
+                                        <SelectItem value="german">German</SelectItem>
+                                        <SelectItem value="italian">Italian</SelectItem>
+                                        <SelectItem value="mandarin">Mandarin</SelectItem>
+                                        <SelectItem value="hindi">Hindi</SelectItem>
+                                        <SelectItem value="arabic">Arabic</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="phone"
@@ -298,6 +357,39 @@ export default function ProfilePage() {
                                 </FormItem>
                             )}
                         />
+                        <div className="grid grid-cols-2 gap-4">
+                           <FormField
+                            control={form.control}
+                            name="location.country"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select country..." />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                            <FormField
+                            control={form.control}
+                            name="location.city"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl><Input placeholder="Your city" {...field} /></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                        </div>
                         <FormField
                             control={form.control}
                             name="website"
