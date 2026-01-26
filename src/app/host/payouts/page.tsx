@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,8 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { countries } from '@/lib/location-data';
-import { Banknote, Loader2 } from 'lucide-react';
+import { Banknote, DollarSign, Loader2, TrendingUp, Wallet } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import type { Booking } from '@/lib/types';
+import { isPast, isThisMonth } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 const payoutSchema = z.object({
   accountHolderName: z.string().min(2, 'Account holder name is required.'),
@@ -25,10 +32,85 @@ const payoutSchema = z.object({
 
 type PayoutFormValues = z.infer<typeof payoutSchema>;
 
+function PayoutSummary({ bookings, isLoading }: { bookings: Booking[] | null, isLoading: boolean }) {
+    const summary = useMemo(() => {
+        if (!bookings) return { totalEarnings: 0, upcomingEarnings: 0, thisMonthEarnings: 0 };
+        
+        const confirmedBookings = bookings.filter(b => b.status === 'Confirmed');
+
+        // Payout is 85% of total price
+        const totalEarnings = confirmedBookings
+            .filter(b => isPast(b.bookingDate.toDate()))
+            .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0); 
+
+        const upcomingEarnings = confirmedBookings
+            .filter(b => !isPast(b.bookingDate.toDate()))
+            .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
+
+        const thisMonthEarnings = confirmedBookings
+            .filter(b => isThisMonth(b.bookingDate.toDate()) && isPast(b.bookingDate.toDate()))
+            .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
+
+        return { totalEarnings, upcomingEarnings, thisMonthEarnings };
+    }, [bookings]);
+
+    if (isLoading) {
+        return (
+            <div className="grid gap-4 md:grid-cols-3">
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+                <Skeleton className="h-28" />
+            </div>
+        );
+    }
+    
+    return (
+        <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Paid Out</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">${summary.totalEarnings.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">Lifetime earnings from completed experiences.</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Upcoming Payouts</CardTitle>
+                    <Wallet className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">${summary.upcomingEarnings.toFixed(2)}</div>
+                     <p className="text-xs text-muted-foreground">From future confirmed bookings.</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">This Month's Payout</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">${summary.thisMonthEarnings.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">Payout for completed bookings this month.</p>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
 export default function HostPayoutsSettingsPage() {
     const { toast } = useToast();
+    const { user, firestore, isUserLoading } = useFirebase();
     const [billingCountry, setBillingCountry] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    const bookingsQuery = useMemoFirebase(
+        () => (user && firestore ? query(collection(firestore, 'bookings'), where('hostId', '==', user.uid)) : null),
+        [user, firestore]
+    );
+    const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
     
     const form = useForm<PayoutFormValues>({
         resolver: zodResolver(payoutSchema),
@@ -205,14 +287,19 @@ export default function HostPayoutsSettingsPage() {
         }
     }
 
+    const isLoading = isUserLoading || areBookingsLoading;
+
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-headline font-bold">Payout Settings</h1>
+                <h1 className="text-3xl font-headline font-bold">Payouts</h1>
                 <p className="text-muted-foreground mt-2 max-w-3xl">
-                    Manage how you receive payments for your experiences.
+                    Review your earnings and manage how you receive payments.
                 </p>
             </div>
+            
+            <PayoutSummary bookings={bookings} isLoading={isLoading} />
+
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <Card>

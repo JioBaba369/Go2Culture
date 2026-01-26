@@ -166,15 +166,15 @@ export default function AdminPayoutsPage() {
       
       const totalEarnings = hostBookings
         .filter(b => b.status === 'Confirmed' && isPast(b.bookingDate.toDate()))
-        .reduce((sum, b) => sum + b.totalPrice, 0);
+        .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
 
       const upcomingEarnings = hostBookings
         .filter(b => b.status === 'Confirmed' && !isPast(b.bookingDate.toDate()))
-        .reduce((sum, b) => sum + b.totalPrice, 0);
+        .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
         
       const pendingEarnings = hostBookings
         .filter(b => b.status === 'Pending')
-        .reduce((sum, b) => sum + b.totalPrice, 0);
+        .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
 
       return {
         host,
