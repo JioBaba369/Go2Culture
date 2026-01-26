@@ -265,7 +265,10 @@ export default function ExperienceDetailPage() {
           
            {/* LOCATION MAP */}
           <div className="space-y-4">
-            <h3 className="font-headline text-2xl">Where you'll be</h3>
+            <h3 className="font-headline text-2xl flex items-center gap-3">
+              <MapPin className="h-6 w-6 text-primary" />
+              Where you'll be
+            </h3>
             <div className="text-muted-foreground">{localAreaName}, {suburbName}, {countryName}</div>
             <div className="relative aspect-video w-full rounded-lg bg-muted mt-2">
                 <ExperienceMap locationQuery={`${localAreaName}, {suburbName}, ${countryName}`} />
