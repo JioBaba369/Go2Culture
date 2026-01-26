@@ -1,4 +1,3 @@
-
 'use client';
 
 import { forwardRef } from "react";
@@ -192,19 +191,21 @@ export default function ExperienceDetailPage() {
           
           {/* ALLERGENS */}
           <div className="space-y-4">
-            <h3 className="font-headline text-2xl">Allergen Information</h3>
+            <h3 className="font-headline text-2xl flex items-center gap-3">
+                <AlertTriangle className="h-7 w-7 text-amber-500"/>
+                Allergen Information
+            </h3>
             <Alert variant="warning">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle className="font-bold">Important Notice</AlertTitle>
-              <AlertDescription className="space-y-3">
-                <p>In accordance with the <strong>Australia New Zealand Food Standards Code (FSANZ)</strong>, please be aware that food is prepared in a home kitchen where allergens are handled, and cross-contact may occur.</p>
+              <AlertTitle className="font-bold">Please Be Advised</AlertTitle>
+              <AlertDescription className="space-y-4">
+                <p>This experience takes place in a home kitchen where allergens may be present. While hosts take precautions, cross-contact can occur.</p>
                 {experience.menu.allergens && (
                   <div className="p-3 bg-amber-100/50 dark:bg-amber-900/50 rounded-md text-amber-900 dark:text-amber-200">
-                    <p className="font-semibold">Host-declared potential allergens:</p>
+                    <p className="font-semibold">The host has declared the following potential allergens:</p>
                     <p className="text-sm mt-1">{experience.menu.allergens}</p>
                   </div>
                 )}
-                <p className="!mt-4 font-semibold">Guests with food allergies or intolerances are strongly advised to contact the host before booking to discuss their specific needs.</p>
+                <p className="font-semibold">If you have a food allergy or intolerance, please contact the host before booking to discuss your needs.</p>
               </AlertDescription>
             </Alert>
           </div>
@@ -251,7 +252,7 @@ export default function ExperienceDetailPage() {
             <h3 className="font-headline text-2xl">Where you'll be</h3>
             <div className="text-muted-foreground">{localAreaName}, {suburbName}, {countryName}</div>
             <div className="relative aspect-video w-full rounded-lg bg-muted mt-2">
-                <ExperienceMap locationQuery={`${localAreaName}, ${suburbName}, ${countryName}`} />
+                <ExperienceMap locationQuery={`${localAreaName}, {suburbName}, ${countryName}`} />
             </div>
             <p className="text-sm text-muted-foreground">This is an approximate location. The exact address is provided after booking.</p>
           </div>
