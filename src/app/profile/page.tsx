@@ -26,7 +26,6 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 import { countries } from '@/lib/location-data';
 import { getFlagFromCountryCode } from '@/lib/format';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { ExperienceCard } from '@/components/experience-card';
 import { cn } from '@/lib/utils';
@@ -62,15 +61,13 @@ const passwordFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
-const getUsernameFromUrl = (url: string | undefined): string => {
+const getUsername = (url?: string) => {
     if (!url) return '';
     try {
-      const urlObject = new URL(url);
-      const pathParts = urlObject.pathname.split('/').filter(Boolean);
-      return pathParts[0] || '';
-    } catch {
-      // If it's not a valid URL, it might be a username already.
-      return url;
+      const path = new URL(url).pathname;
+      return path.substring(1).replace(/\/$/, ''); // remove leading/trailing slashes
+    } catch (e) {
+      return url; // fallback to showing the raw value if it's not a valid URL
     }
 };
 
@@ -100,49 +97,32 @@ export default function ProfilePage() {
     [firestore, user]
   );
   const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
+  
+  const countryNameForForm = React.useMemo(() => {
+    if (!userProfile?.location?.country) return '';
+    const country = countries.find(c => c.id === userProfile.location.country);
+    return country ? country.name : userProfile.location.country; // Fallback to raw value
+  }, [userProfile?.location?.country]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      fullName: '',
-      brandName: '',
-      languages: '',
-      phone: '',
-      website: '',
+    values: {
+      fullName: userProfile?.fullName || '',
+      brandName: userProfile?.brandName || '',
+      languages: userProfile?.languages?.join(', ') || '',
+      phone: userProfile?.phone || '',
+      website: userProfile?.website || '',
       location: {
-        city: '',
-        country: '',
+        city: userProfile?.location?.city || '',
+        country: countryNameForForm,
       },
       socialMedia: {
-        twitter: '',
-        instagram: '',
-        facebook: '',
+        twitter: getUsername(userProfile?.socialMedia?.twitter),
+        instagram: getUsername(userProfile?.socialMedia?.instagram),
+        facebook: getUsername(userProfile?.socialMedia?.facebook),
       },
     },
   });
-  
-  const { reset } = form;
-
-  React.useEffect(() => {
-    if (userProfile) {
-      reset({
-        fullName: userProfile.fullName || '',
-        brandName: userProfile.brandName || '',
-        languages: userProfile.languages?.join(', ') || '',
-        phone: userProfile.phone || '',
-        website: userProfile.website || '',
-        location: {
-          city: userProfile.location?.city || '',
-          country: userProfile.location?.country || '',
-        },
-        socialMedia: {
-          twitter: getUsernameFromUrl(userProfile.socialMedia?.twitter),
-          instagram: getUsernameFromUrl(userProfile.socialMedia?.instagram),
-          facebook: getUsernameFromUrl(userProfile.socialMedia?.facebook),
-        },
-      });
-    }
-  }, [userProfile, reset]);
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -168,6 +148,10 @@ export default function ProfilePage() {
     try {
       const userRef = doc(firestore, 'users', user.uid);
       
+      const countryFromForm = data.location?.country || '';
+      const countryEntry = countries.find(c => c.name.toLowerCase() === countryFromForm.toLowerCase());
+      const countryCodeToSave = countryEntry ? countryEntry.id : countryFromForm;
+
       const dataToSave = {
         fullName: data.fullName,
         brandName: data.brandName,
@@ -177,7 +161,7 @@ export default function ProfilePage() {
         location: {
             ...userProfile?.location, // Preserve existing fields like region/suburb
             city: data.location?.city,
-            country: data.location?.country
+            country: countryCodeToSave,
         },
         socialMedia: {
           twitter: data.socialMedia?.twitter ? `https://x.com/${data.socialMedia.twitter.replace('@', '')}` : '',
@@ -201,7 +185,10 @@ export default function ProfilePage() {
       setProfileSaveState('saved');
       await auth.currentUser.reload();
       router.refresh(); 
-      form.reset(data); // Resets the dirty state
+      form.reset({
+        ...data,
+        location: { ...data.location, country: countryFromForm }
+      }); 
       setTimeout(() => setProfileSaveState('idle'), 3000);
     } catch (error) {
       toast({
@@ -414,22 +401,15 @@ export default function ProfilePage() {
                               control={form.control}
                               name="location.country"
                               render={({ field }) => (
-                                  <FormItem>
+                                <FormItem>
                                   <FormLabel>Country</FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                      <FormControl>
-                                      <SelectTrigger>
-                                          <SelectValue placeholder="Select country..." />
-                                      </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                      {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                                      </SelectContent>
-                                  </Select>
+                                  <FormControl>
+                                    <Input placeholder="Your country" {...field} />
+                                  </FormControl>
                                   <FormMessage />
-                                  </FormItem>
+                                </FormItem>
                               )}
-                              />
+                            />
                               <FormField
                               control={form.control}
                               name="location.city"
@@ -719,19 +699,19 @@ export default function ProfilePage() {
                     {userProfile.socialMedia?.twitter && (
                         <a href={userProfile.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                             <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">@{getUsernameFromUrl(userProfile.socialMedia.twitter)}</span>
+                            <span className="truncate">@{getUsername(userProfile.socialMedia.twitter)}</span>
                         </a>
                     )}
                     {userProfile.socialMedia?.instagram && (
                         <a href={userProfile.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                             <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">@{getUsernameFromUrl(userProfile.socialMedia.instagram)}</span>
+                            <span className="truncate">@{getUsername(userProfile.socialMedia.instagram)}</span>
                         </a>
                     )}
                     {userProfile.socialMedia?.facebook && (
                         <a href={userProfile.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                             <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">{getUsernameFromUrl(userProfile.socialMedia.facebook)}</span>
+                            <span className="truncate">{getUsername(userProfile.socialMedia.facebook)}</span>
                         </a>
                     )}
                     {!userProfile.website && !userProfile.socialMedia?.twitter && !userProfile.socialMedia?.instagram && !userProfile.socialMedia?.facebook && (
@@ -744,3 +724,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
