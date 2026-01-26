@@ -3,7 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /* ───────────── Helpers ───────────── */
+    /* ───────────────── Helpers ───────────────── */
 
     function isSignedIn() {
       return request.auth != null;
@@ -41,7 +41,7 @@ service cloud.firestore {
         .hasOnly(fields);
     }
 
-    /* ───────────── Users ───────────── */
+    /* ───────────────── Users ───────────────── */
 
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
@@ -64,7 +64,7 @@ service cloud.firestore {
       }
     }
 
-    /* ───────────── Host Applications ───────────── */
+    /* ───────────────── Host Applications ───────────────── */
 
     match /hostApplications/{applicationId} {
       allow create: if isSignedIn()
@@ -73,7 +73,7 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    /* ───────────── Experiences ───────────── */
+    /* ───────────────── Experiences ───────────────── */
 
     match /experiences/{experienceId} {
       allow read: if true;
@@ -83,20 +83,25 @@ service cloud.firestore {
         && (resource.data.hostId == request.auth.uid || isAdmin());
     }
 
-    /* ───────────── Bookings ───────────── */
+    /* ───────────────── Bookings ───────────────── */
 
     match /bookings/{bookingId} {
-      allow get: if isSignedIn() || isAdmin();
-      allow list: if isSignedIn();
+      allow read: if isBookingParticipant(resource.data) || isAdmin();
+
+      // Create booking
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
             .data.termsAccepted == true;
+
+      // Update booking
       allow update: if isBookingParticipant(resource.data) || isAdmin();
+
+      // Prevent deletion of transaction history
       allow delete: if isAdmin();
     }
 
-    /* ───────────── Reviews ───────────── */
+    /* ───────────────── Reviews ───────────────── */
 
     match /reviews/{reviewId} {
       allow read: if true;
@@ -110,11 +115,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    /* ───────────── Messages ───────────── */
+    /* ───────────────── Messages ───────────────── */
 
     match /messages/{messageId} {
-      allow get: if isSignedIn() || isAdmin();
-      allow list: if isSignedIn();
+      allow read: if isParticipant(resource.data) || isAdmin();
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -129,11 +133,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    /* ───────────── Conversations ───────────── */
+    /* ───────────────── Conversations ───────────────── */
 
     match /conversations/{conversationId} {
-      allow get: if isSignedIn() || isAdmin();
-      allow list: if isSignedIn();
+      allow read: if isParticipant(resource.data) || isAdmin();
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
@@ -147,7 +150,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    /* ───────────── Sponsors & Coupons ───────────── */
+    /* ───────────────── Sponsors & Coupons ───────────────── */
 
     match /sponsors/{sponsorId} {
       allow read: if true;
@@ -163,7 +166,7 @@ service cloud.firestore {
             && onlyChanges(["timesUsed"]));
     }
 
-    /* ───────────── Admin Only ───────────── */
+    /* ───────────────── Admin Only ───────────────── */
 
     match /reports/{reportId} {
       allow read, write: if isAdmin();
