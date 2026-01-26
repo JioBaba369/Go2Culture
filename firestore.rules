@@ -127,8 +127,8 @@ service cloud.firestore {
       // 🔐 Only participants or admin
       allow get: if isAdmin() || isParticipant(resource.data);
 
-      // ✅ Required for queries. Now permissive, relies on client query being secure.
-      allow list: if isSignedIn();
+      // ✅ Required for queries. Now secure.
+      allow list: if isAdmin() || (isSignedIn() && request.query.where.participants == request.auth.uid);
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -151,7 +151,7 @@ service cloud.firestore {
       allow get: if isAdmin() || isParticipant(resource.data);
 
       // ✅ Required for queries
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.participants.hasAny([request.auth.uid]));
+      allow list: if isAdmin() || (isSignedIn() && request.query.where.participants == request.auth.uid);
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)

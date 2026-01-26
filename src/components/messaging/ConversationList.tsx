@@ -26,7 +26,7 @@ export function ConversationList({ selectedConversationId }: { selectedConversat
       // Regular user only fetches conversations they are a part of
       return query(
         collection(firestore, 'conversations'),
-        where('participants', 'array-contains-any', [user.uid])
+        where('participants', 'array-contains', user.uid)
       );
     }
   }, [user, firestore]);
