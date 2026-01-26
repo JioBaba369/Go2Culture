@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User, Experience, Booking } from "@/lib/types";
-import { MoreHorizontal, Star, Utensils, CalendarCheck } from "lucide-react";
+import { MoreHorizontal, Star, Utensils, CalendarCheck, Edit, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from 'date-fns';
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
@@ -36,6 +36,7 @@ import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ADMIN_UID } from '@/lib/auth';
+import Link from 'next/link';
 
 
 const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
@@ -128,10 +129,8 @@ export default function AdminUsersPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem>View Profile</DropdownMenuItem>
-                                <DropdownMenuItem>Edit User</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive" disabled={isAdmin}>Suspend User</DropdownMenuItem>
+                                <DropdownMenuItem asChild><Link href={`/users/${user.id}`}><Eye className="mr-2 h-4 w-4"/>View Profile</Link></DropdownMenuItem>
+                                <DropdownMenuItem asChild><Link href={`/admin/users/${user.id}/edit`}><Edit className="mr-2 h-4 w-4"/>Edit User</Link></DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
@@ -229,10 +228,18 @@ export default function AdminUsersPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem>Edit User</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive" disabled={isAdmin}>Suspend User</DropdownMenuItem>
+                           <DropdownMenuItem asChild>
+                            <Link href={`/users/${user.id}`}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/users/${user.id}/edit`}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit User
+                            </Link>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

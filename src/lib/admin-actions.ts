@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -11,7 +10,7 @@ import {
   updateDoc,
   deleteDoc,
 } from 'firebase/firestore';
-import type { HostApplication, Host, Experience } from './types';
+import type { HostApplication, Host, Experience, User } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -238,6 +237,26 @@ export async function deleteSponsor(
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: sponsorRef.path,
       operation: 'delete',
+    }));
+    throw serverError;
+  }
+}
+
+// Function for admin to update a user's details
+export async function updateUserByAdmin(
+  firestore: Firestore,
+  userId: string,
+  data: { fullName: string; role: 'guest' | 'host' | 'both'; status: 'active' | 'suspended' | 'deleted' }
+) {
+  const userRef = doc(firestore, 'users', userId);
+  const updatedData = { ...data, updatedAt: serverTimestamp() };
+  try {
+    await updateDoc(userRef, updatedData as any);
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: userRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
     }));
     throw serverError;
   }
