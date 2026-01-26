@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck, Trophy, Award } from 'lucide-react';
+import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck, Trophy, Award, Languages } from 'lucide-react';
 import { User, Host, Experience } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -98,31 +98,48 @@ export default function ProfilePage() {
   );
   const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
   
-  const countryNameForForm = React.useMemo(() => {
-    if (!userProfile?.location?.country) return '';
-    const country = countries.find(c => c.id === userProfile.location.country);
-    return country ? country.name : userProfile.location.country; // Fallback to raw value
-  }, [userProfile?.location?.country]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    values: {
-      fullName: userProfile?.fullName || '',
-      brandName: userProfile?.brandName || '',
-      languages: userProfile?.languages?.join(', ') || '',
-      phone: userProfile?.phone || '',
-      website: userProfile?.website || '',
-      location: {
-        city: userProfile?.location?.city || '',
-        country: countryNameForForm,
-      },
-      socialMedia: {
-        twitter: getUsername(userProfile?.socialMedia?.twitter),
-        instagram: getUsername(userProfile?.socialMedia?.instagram),
-        facebook: getUsername(userProfile?.socialMedia?.facebook),
-      },
-    },
+    defaultValues: {
+        fullName: '',
+        brandName: '',
+        languages: '',
+        phone: '',
+        website: '',
+        location: {
+            city: '',
+            country: '',
+        },
+        socialMedia: {
+            twitter: '',
+            instagram: '',
+            facebook: '',
+        },
+    }
   });
+
+  useEffect(() => {
+    if (userProfile) {
+        const countryName = userProfile.location?.country ? countries.find(c => c.id === userProfile.location.country)?.name || userProfile.location.country : '';
+        form.reset({
+            fullName: userProfile.fullName || '',
+            brandName: userProfile.brandName || '',
+            languages: userProfile.languages?.join(', ') || '',
+            phone: userProfile.phone || '',
+            website: userProfile.website || '',
+            location: {
+                city: userProfile.location?.city || '',
+                country: countryName,
+            },
+            socialMedia: {
+                twitter: getUsername(userProfile.socialMedia?.twitter),
+                instagram: getUsername(userProfile.socialMedia?.instagram),
+                facebook: getUsername(userProfile.socialMedia?.facebook),
+            },
+        });
+    }
+  }, [userProfile, form]);
 
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),

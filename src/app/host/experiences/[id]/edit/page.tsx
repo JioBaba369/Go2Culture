@@ -87,39 +87,74 @@ export default function EditExperiencePage() {
   
   const methods = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
-    values: {
-      title: experience?.title || '',
-      description: experience?.description || '',
-      category: experience?.category || 'In-Home Dining',
-      durationMinutes: experience?.durationMinutes || 0,
+    defaultValues: {
+      title: '',
+      description: '',
+      category: 'In-Home Dining',
+      durationMinutes: 0,
       menu: {
-        cuisine: experience?.menu?.cuisine || '',
-        description: experience?.menu?.description || '',
-        dietary: experience?.menu?.dietary || [],
-        allergens: experience?.menu?.allergens || '',
-        spiceLevel: experience?.menu?.spiceLevel || 'Mild',
+        cuisine: '',
+        description: '',
+        dietary: [],
+        allergens: '',
+        spiceLevel: 'Mild',
       },
       location: {
-        country: experience?.location?.country || '',
-        region: experience?.location?.region || '',
-        suburb: experience?.location?.suburb || '',
-        localArea: experience?.location?.localArea || '',
+        country: '',
+        region: '',
+        suburb: '',
+        localArea: '',
       },
       pricing: {
-        pricePerGuest: experience?.pricing?.pricePerGuest || 0,
-        maxGuests: experience?.pricing?.maxGuests || 0,
+        pricePerGuest: 0,
+        maxGuests: 0,
       },
       availability: {
-        days: experience?.availability?.days || [],
-        timeSlots: Array.isArray(experience?.availability?.timeSlots)
-          ? experience.availability.timeSlots.join(', ')
-          : experience?.availability?.timeSlots || '',
+        days: [],
+        timeSlots: '',
       },
-      inclusions: experience?.inclusions?.join(', ') || '',
-      whatToBring: experience?.whatToBring?.join(', ') || '',
-      instantBook: experience?.instantBook || false,
+      inclusions: '',
+      whatToBring: '',
+      instantBook: false,
     },
   });
+
+  useEffect(() => {
+    if (experience) {
+      methods.reset({
+        title: experience.title || '',
+        description: experience.description || '',
+        category: experience.category || 'In-Home Dining',
+        durationMinutes: experience.durationMinutes || 0,
+        menu: {
+          cuisine: experience.menu?.cuisine || '',
+          description: experience.menu?.description || '',
+          dietary: experience.menu?.dietary || [],
+          allergens: experience.menu?.allergens || '',
+          spiceLevel: experience.menu?.spiceLevel || 'Mild',
+        },
+        location: {
+          country: experience.location?.country || '',
+          region: experience.location?.region || '',
+          suburb: experience.location?.suburb || '',
+          localArea: experience.location?.localArea || '',
+        },
+        pricing: {
+          pricePerGuest: experience.pricing?.pricePerGuest || 0,
+          maxGuests: experience.pricing?.maxGuests || 0,
+        },
+        availability: {
+          days: experience.availability?.days || [],
+          timeSlots: Array.isArray(experience.availability?.timeSlots)
+            ? experience.availability.timeSlots.join(', ')
+            : experience.availability?.timeSlots || '',
+        },
+        inclusions: experience.inclusions?.join(', ') || '',
+        whatToBring: experience.whatToBring?.join(', ') || '',
+        instantBook: experience.instantBook || false,
+      });
+    }
+  }, [experience, methods]);
 
   const { watch, setValue } = methods;
   const watchCountry = watch('location.country');

@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { updateUserByAdmin } from '@/lib/admin-actions';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ADMIN_UID } from '@/lib/auth';
@@ -47,12 +47,20 @@ export default function EditUserPage() {
 
   const methods = useForm<UserFormValues>({
     resolver: zodResolver(userEditSchema),
-    values: {
-      fullName: user?.fullName || '',
-      role: user?.role || 'guest',
-      status: user?.status || 'active',
+    defaultValues: {
+      fullName: '',
+      role: 'guest',
+      status: 'active',
     },
   });
+
+  useEffect(() => {
+    if (user) {
+        const { fullName = '', role = 'guest', status = 'active' } = user;
+        methods.reset({ fullName, role, status });
+    }
+  }, [user, methods]);
+
 
   const onSubmit = async (data: UserFormValues) => {
     if (!firestore) return;
