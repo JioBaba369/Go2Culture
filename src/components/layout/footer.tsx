@@ -1,4 +1,3 @@
-
 'use client';
 import Link from "next/link";
 import { Logo } from "@/components/logo";
@@ -18,7 +17,7 @@ export function Footer() {
           <div className="sm:col-span-2 md:col-span-1 space-y-4">
             <Logo className="text-primary" />
             <p className="text-sm text-muted-foreground">
-              Experience Authentic Food & Culture.
+              “Experience culture the way locals live it — around the table, at home, together.”
             </p>
           </div>
           <div>
