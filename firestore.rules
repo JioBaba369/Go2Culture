@@ -33,6 +33,14 @@ service cloud.firestore {
         && (request.auth.uid == data.guestId
             || request.auth.uid == data.hostId);
     }
+    
+    function isQueryingOwnConversations() {
+      // Ensure the query filters for conversations where the user is a participant.
+      // This makes the list query secure.
+      return request.query.where[0][0] == 'participants'
+        && request.query.where[0][1] == 'array-contains'
+        && request.query.where[0][2] == request.auth.uid;
+    }
 
     function onlyChanges(fields) {
       return request.resource.data
@@ -123,14 +131,12 @@ service cloud.firestore {
     /* ───────────────── Conversations & Messages ───────────────── */
 
     match /conversations/{bookingId} {
-      allow get, update: if isParticipant(resource.data) || isAdmin();
+      allow get: if isParticipant(resource.data) || isAdmin();
 
       // A user can only list conversations they are a part of.
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.participants[2] == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && isQueryingOwnConversations());
 
-      allow create: if isSignedIn()
-        && hasParticipants(request.resource.data)
-        && request.auth.uid in request.resource.data.participants;
+      allow create, update: if isParticipant(request.resource.data) || isAdmin();
 
       allow delete: if isAdmin();
 
