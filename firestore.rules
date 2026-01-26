@@ -88,7 +88,7 @@ service cloud.firestore {
 
     match /bookings/{bookingId} {
       allow get: if isBookingParticipant(resource.data) || isAdmin();
-      allow list: if isSignedIn(); // Client-side queries must filter by user ID
+      allow list: if isSignedIn();
 
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid
@@ -103,7 +103,8 @@ service cloud.firestore {
     /* ───────────────── Reviews ───────────────── */
 
     match /reviews/{reviewId} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if true;
 
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid;
@@ -118,7 +119,7 @@ service cloud.firestore {
 
     match /messages/{messageId} {
       allow get: if isAdmin() || isParticipant(resource.data);
-      allow list: if isSignedIn(); // Client-side queries must filter by user ID
+      allow list: if isSignedIn();
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -137,7 +138,7 @@ service cloud.firestore {
 
     match /conversations/{conversationId} {
       allow get: if isAdmin() || isParticipant(resource.data);
-      allow list: if isSignedIn(); // Client-side queries must filter by user ID
+      allow list: if isSignedIn();
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
@@ -154,7 +155,8 @@ service cloud.firestore {
     /* ───────────────── Sponsors & Coupons ───────────────── */
 
     match /sponsors/{sponsorId} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if true;
       allow write: if isAdmin();
     }
 

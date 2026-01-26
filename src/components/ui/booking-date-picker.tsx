@@ -1,27 +1,30 @@
+
 "use client"
 
 import * as React from "react"
-import { format, isBefore, startOfDay } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+import type { Matcher } from 'react-day-picker';
+
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 type Props = {
   value?: Date
   onChange: (date: Date | undefined) => void
-  disabledDates?: Date[]
+  disabled?: Matcher | Matcher[]
 }
 
 export function BookingDatePicker({
   value,
   onChange,
-  disabledDates = [],
+  disabled,
 }: Props) {
   return (
     <Popover>
@@ -43,12 +46,7 @@ export function BookingDatePicker({
           mode="single"
           selected={value}
           onSelect={onChange}
-          disabled={(date) =>
-            isBefore(date, startOfDay(new Date())) ||
-            disabledDates.some(
-              (d) => format(d, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
-            )
-          }
+          disabled={disabled}
           initialFocus
         />
       </PopoverContent>

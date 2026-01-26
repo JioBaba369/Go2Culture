@@ -16,11 +16,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Star, Loader2, Tag, CheckCircle, Calendar as CalendarIcon, Users, Gift, Zap } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { Star, Loader2, Tag, CheckCircle, Users, Gift, Zap } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
 import Link from 'next/link';
+import { BookingDatePicker } from '../ui/booking-date-picker';
 
 interface BookingWidgetProps {
     experience: Experience;
@@ -217,29 +216,11 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             <div className="flex flex-col space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="date-picker">Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date ? format(date, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={setDate}
-                          disabled={disabledDays}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <BookingDatePicker
+                        value={date}
+                        onChange={setDate}
+                        disabled={disabledDays}
+                    />
                 </div>
 
                 <div className="space-y-2">
