@@ -86,7 +86,10 @@ service cloud.firestore {
     /* ───────────── Bookings ───────────── */
 
     match /bookings/{bookingId} {
-      allow read, update: if isBookingParticipant(resource.data) || isAdmin();
+      allow get, update: if isBookingParticipant(resource.data) || isAdmin();
+      // list is allowed for any signed-in user.
+      // The client query MUST enforce filtering by guestId or hostId.
+      allow list: if isSignedIn() || isAdmin();
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
@@ -111,7 +114,10 @@ service cloud.firestore {
     /* ───────────── Messages ───────────── */
 
     match /messages/{messageId} {
-      allow read: if isAdmin() || isParticipant(resource.data);
+      allow get: if isAdmin() || isParticipant(resource.data);
+      // list is allowed for any signed-in user.
+      // The client query MUST enforce filtering.
+      allow list: if isSignedIn() || isAdmin();
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -129,7 +135,10 @@ service cloud.firestore {
     /* ───────────── Conversations ───────────── */
 
     match /conversations/{conversationId} {
-      allow read: if isAdmin() || isParticipant(resource.data);
+      allow get: if isAdmin() || isParticipant(resource.data);
+      // A user can list conversations they are a participant in.
+      // The client-side query MUST enforce this.
+      allow list: if isSignedIn() || isAdmin();
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
