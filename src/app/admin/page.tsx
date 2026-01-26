@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -11,20 +10,18 @@ import {
 import {
   Utensils,
   Users,
-  MessageSquareWarning,
-  CheckCircle,
   Clock,
   Star,
-  UserPlus,
   FileText,
-  Tag,
+  DollarSign,
+  CalendarCheck,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
-import { HostApplication, Experience, User, Review, Coupon } from "@/lib/types";
+import { HostApplication, Experience, User, Review, Coupon, Booking } from "@/lib/types";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -36,13 +33,21 @@ const ExperiencesChart = dynamic(() => import('@/components/admin/dashboard-char
   ssr: false,
   loading: () => <Skeleton className="h-[350px]" />
 });
+const BookingsChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.BookingsChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[350px]" />
+});
+const EarningsChart = dynamic(() => import('@/components/admin/dashboard-charts').then(mod => mod.EarningsChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[350px]" />
+});
 
 
 const ActivityIcon = ({ type }: { type: string }) => {
     switch (type) {
         case 'application': return <FileText className="h-5 w-5 text-muted-foreground" />;
         case 'experience': return <Utensils className="h-5 w-5 text-muted-foreground" />;
-        case 'user': return <UserPlus className="h-5 w-5 text-muted-foreground" />;
+        case 'user': return <Users className="h-5 w-5 text-muted-foreground" />;
         case 'review': return <Star className="h-5 w-5 text-muted-foreground" />;
         default: return <Clock className="h-5 w-5 text-muted-foreground" />;
     }
@@ -112,45 +117,41 @@ export default function AdminDashboardPage() {
   const { data: experiences } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
   const { data: users } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
   const { data: reviews } = useCollection<Review>(useMemoFirebase(() => firestore ? collection(firestore, 'reviews') : null, [firestore]));
-  const { data: coupons } = useCollection<Coupon>(useMemoFirebase(() => firestore ? collection(firestore, 'coupons') : null, [firestore]));
+  const { data: bookings } = useCollection<Booking>(useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]));
 
-  const totalHosts = users?.filter(u => u.role === 'host' || u.role === 'both').length || 0;
+  const totalBookings = bookings?.length || 0;
+  const totalRevenue = bookings?.filter(b => b.status === 'Confirmed').reduce((sum, b) => sum + b.totalPrice, 0) * 0.15 || 0;
 
   const stats = [
     {
       title: "Pending Applications",
       value: hostApplications?.filter(app => app.status === 'Pending').length || 0,
       icon: Clock,
-      color: "text-blue-500",
       href: "/admin/applications"
     },
     {
-      title: "Total Hosts",
-      value: totalHosts,
-      icon: Users,
-      color: "text-green-500",
-      href: "/admin/users"
+      title: "Total Bookings",
+      value: totalBookings,
+      icon: CalendarCheck,
+      href: "/admin/bookings"
     },
     {
       title: "Live Experiences",
       value: experiences?.filter(exp => exp.status === 'live').length || 0,
       icon: Utensils,
-      color: "text-purple-500",
       href: "/admin/experiences"
     },
      {
       title: "Total Users",
       value: users?.length || 0,
-      icon: UserPlus,
-      color: "text-orange-500",
+      icon: Users,
       href: "/admin/users"
     },
     {
-      title: "Active Coupons",
-      value: coupons?.filter(c => c.isActive).length || 0,
-      icon: Tag,
-      color: "text-pink-500",
-      href: "/admin/coupons"
+      title: "Est. Total Revenue",
+      value: `$${totalRevenue.toFixed(0)}`,
+      icon: DollarSign,
+      href: "/admin/payouts"
     },
   ];
 
@@ -172,7 +173,7 @@ export default function AdminDashboardPage() {
             <Card className="hover:bg-muted/50 transition-colors">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <stat.icon className={`h-4 w-4 text-muted-foreground ${stat.color}`} />
+                <stat.icon className={`h-4 w-4 text-muted-foreground`} />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
@@ -181,6 +182,11 @@ export default function AdminDashboardPage() {
           </Link>
         ))}
       </div>
+
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+         <BookingsChart bookings={bookings || []} />
+         <EarningsChart bookings={bookings || []} />
+       </div>
 
        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">
