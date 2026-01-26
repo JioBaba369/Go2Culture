@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
+import { collection, query, where, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { Conversation, Message, User, Booking } from '@/lib/types';
 import { Loader2, Send, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -33,7 +33,7 @@ function MessageBubble({ msg, isSender, avatarUrl, name }: { msg: Message; isSen
       {!isSender && (
         <Avatar className="h-8 w-8 shrink-0">
           {avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}
-          <AvatarFallback>{name.charAt(0) ?? '?'}</AvatarFallback>
+          <AvatarFallback>{name ? name.charAt(0) : '?'}</AvatarFallback>
         </Avatar>
       )}
       <div className={cn('max-w-[75%] md:max-w-[66%] rounded-lg px-3 py-2 text-sm break-words', isSender ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground')}>
@@ -52,9 +52,23 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
+  // 1. Fetch conversation and booking in parallel
   const conversationRef = useMemoFirebase(() => (firestore && conversationId ? doc(firestore, 'conversations', conversationId) : null), [firestore, conversationId]);
   const { data: conversation, isLoading: isConvoLoading } = useDoc<Conversation>(conversationRef);
 
+  const bookingRef = useMemoFirebase(() => (firestore && conversationId ? doc(firestore, 'bookings', conversationId) : null), [firestore, conversationId]);
+  const { data: booking, isLoading: isBookingLoading } = useDoc<Booking>(bookingRef);
+
+  // 2. Determine other participant from booking
+  const otherParticipantId = useMemo(() => {
+    if (!user || !booking) return null;
+    return user.uid === booking.hostId ? booking.guestId : booking.hostId;
+  }, [user, booking]);
+
+  // 3. Fetch other participant's user profile
+  const otherParticipantRef = useMemoFirebase(() => (firestore && otherParticipantId ? doc(firestore, 'users', otherParticipantId) : null), [firestore, otherParticipantId]);
+  const { data: otherParticipant, isLoading: isParticipantLoading } = useDoc<User>(otherParticipantRef);
+  
   const messagesQuery = useMemoFirebase(
     () =>
       firestore && user && conversationId
@@ -80,13 +94,36 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     defaultValues: { messageText: '' },
   });
   
-  const otherParticipantId = conversation?.participants.find(p => p !== user?.uid);
-  const otherParticipantInfo = otherParticipantId ? conversation?.participantInfo[otherParticipantId] : null;
+  const otherParticipantInfo = useMemo(() => {
+    if (conversation && otherParticipantId && conversation.participantInfo) {
+      return conversation.participantInfo[otherParticipantId];
+    }
+    if (otherParticipant) {
+      return {
+        fullName: otherParticipant.fullName,
+        profilePhotoId: otherParticipant.profilePhotoId || 'guest-1',
+      };
+    }
+    return null;
+  }, [conversation, otherParticipant, otherParticipantId]);
+
+  const bookingInfo = useMemo(() => {
+    if (conversation && conversation.bookingInfo) {
+        return conversation.bookingInfo;
+    }
+    if (booking) {
+        return {
+            experienceTitle: booking.experienceTitle,
+            experienceId: booking.experienceId
+        }
+    }
+    return null;
+  }, [conversation, booking]);
 
   // Mark conversation as read
   useEffect(() => {
-    if (conversation && user && conversation.readBy && !conversation.readBy.includes(user.uid)) {
-      updateDoc(conversationRef!, {
+    if (conversation && conversationRef && user && conversation.readBy && !conversation.readBy.includes(user.uid)) {
+      updateDoc(conversationRef, {
         readBy: arrayUnion(user.uid),
       });
     }
@@ -107,15 +144,9 @@ export function ChatView({ conversationId }: { conversationId: string }) {
 
 
   async function onSubmit(values: MessageFormValues) {
-    if (!firestore || !user || !otherParticipantId || !otherParticipantInfo || !conversation) return;
+    if (!firestore || !user || !otherParticipantId || !otherParticipant || !booking) return;
     
-    const recipientRef = doc(firestore, 'users', otherParticipantId);
-    const recipientSnap = await getDoc(recipientRef);
-    if (!recipientSnap.exists()) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not find recipient.' });
-        return;
-    }
-    const recipient = { id: recipientSnap.id, ...recipientSnap.data() } as User;
+    const recipient = otherParticipant;
 
     const currentUserRef = doc(firestore, 'users', user.uid);
     const currentUserSnap = await getDoc(currentUserRef);
@@ -126,7 +157,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     const currentUser = { id: currentUserSnap.id, ...currentUserSnap.data() } as User;
 
     try {
-      await sendMessage(firestore, currentUser, recipient, { id: conversation.id, experienceTitle: conversation.bookingInfo.experienceTitle, experienceId: conversation.bookingInfo.experienceId } as Booking, values.messageText);
+      await sendMessage(firestore, currentUser, recipient, booking, values.messageText);
       form.reset();
       setTimeout(() => scrollToBottom('smooth'), 50);
     } catch (e: any) {
@@ -134,12 +165,12 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     }
   }
   
-  const isLoading = isConvoLoading || areMessagesLoading;
+  const isLoading = isConvoLoading || areMessagesLoading || isBookingLoading || isParticipantLoading;
   const participantImage = otherParticipantInfo ? PlaceHolderImages.find(p => p.id === otherParticipantInfo.profilePhotoId) : null;
   
   return (
     <div className="flex flex-col h-full">
-      {isLoading || !otherParticipantInfo ? (
+      {isLoading ? (
         <div className="p-4 border-b">
           <Skeleton className="h-10 w-48" />
         </div>
@@ -154,13 +185,13 @@ export function ChatView({ conversationId }: { conversationId: string }) {
           )}
           <Avatar>
             {participantImage && <AvatarImage src={participantImage.imageUrl} />}
-            <AvatarFallback>{otherParticipantInfo.fullName.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{otherParticipantInfo?.fullName?.charAt(0) ?? '?'}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold">{otherParticipantInfo.fullName}</h3>
-            <Link href={`/experiences/${conversation?.bookingInfo.experienceId}`} className="text-xs text-muted-foreground hover:underline truncate">
-              re: {conversation?.bookingInfo.experienceTitle}
-            </Link>
+            <h3 className="font-semibold">{otherParticipantInfo?.fullName}</h3>
+            {bookingInfo && <Link href={`/experiences/${bookingInfo.experienceId}`} className="text-xs text-muted-foreground hover:underline truncate">
+              re: {bookingInfo.experienceTitle}
+            </Link>}
           </div>
         </header>
       )}
@@ -210,7 +241,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
                 </FormItem>
               )}
             />
-            <Button type="submit" size="icon" disabled={form.formState.isSubmitting || !form.formState.isValid}>
+            <Button type="submit" size="icon" disabled={form.formState.isSubmitting || !form.formState.isValid || isLoading}>
               {form.formState.isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </form>
