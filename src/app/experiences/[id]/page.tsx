@@ -29,6 +29,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerClose, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
+import { ExperienceMap } from "@/components/experience-map";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -323,9 +324,6 @@ export default function ExperienceDetailPage() {
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
   const totalPrice = basePrice - discountAmount;
 
-  const mapQuery = encodeURIComponent(`${localAreaName}, ${suburbName}, ${countryName}`);
-  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
-
   const DatePickerTrigger = (
     <Button
       variant={"outline"}
@@ -422,14 +420,9 @@ export default function ExperienceDetailPage() {
           <div className="space-y-4">
             <h3 className="font-headline text-2xl">Where you'll be</h3>
             <div className="text-muted-foreground">{localAreaName}, {suburbName}, {countryName}</div>
-             <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="block group">
-                <div className="relative aspect-video w-full rounded-lg bg-muted flex items-center justify-center relative overflow-hidden mt-2 transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2">
-                    <Image src="https://picsum.photos/seed/map/800/450" fill className="object-cover" sizes="100vw" alt="Map of the area" data-ai-hint="map area" />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
-                    <MapPin className="h-10 w-10 text-white drop-shadow-lg transition-transform group-hover:scale-110" />
-                    <div className="absolute bottom-3 right-3 bg-background/80 backdrop-blur-sm text-foreground text-xs font-semibold py-1 px-2 rounded-md">View on map</div>
-                </div>
-            </a>
+            <div className="relative aspect-video w-full rounded-lg bg-muted mt-2">
+                <ExperienceMap locationQuery={`${localAreaName}, ${suburbName}, ${countryName}`} />
+            </div>
             <p className="text-sm text-muted-foreground">This is an approximate location. The exact address is provided after booking.</p>
           </div>
           <Separator />
