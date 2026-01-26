@@ -36,7 +36,7 @@ export default function BecomeAHostLandingPage() {
                 </Button>
                 <p className="mt-2 text-sm text-muted-foreground">It takes about 15–25 minutes to apply.</p>
                 <p className="mt-4 text-sm text-muted-foreground">
-                    Already have an operating business? <Link href="/contact" className="underline hover:text-primary">Click here</Link> to see how Go2Culture can help you reach more audiences.
+                    <Link href="/contact" className="underline hover:text-primary">Reach more guests for your business with Go2Culture</Link>
                 </p>
             </section>
             
