@@ -12,11 +12,15 @@ export type User = {
     facebook?: string;
   };
   profilePhotoId?: string;
+  bio?: string;
+  profession?: string;
+  birthDate?: string;
   languages?: string[];
   brandName?: string;
   preferences?: {
     cuisines?: string[];
     dietary?: string[];
+    guiltyPleasures?: string;
     priceRange?: { min: number, max: number };
   };
   location?: {

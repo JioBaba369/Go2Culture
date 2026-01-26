@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck, Trophy, Award, Languages } from 'lucide-react';
+import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck, Trophy, Award, Languages, CalendarIcon } from 'lucide-react';
 import { User, Host, Experience } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -30,23 +30,32 @@ import { Separator } from '@/components/ui/separator';
 import { ExperienceCard } from '@/components/experience-card';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Textarea } from '@/components/ui/textarea';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
-  brandName: z.string().optional(),
-  languages: z.string().optional(),
-  phone: z.string().optional(),
-  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  birthDate: z.date({
+      coerce: true,
+      errorMap: (issue, { defaultError }) => ({
+        message: issue.code === "invalid_date" ? "That's not a valid date!" : defaultError.message,
+      })
+    }).optional(),
   location: z.object({
     city: z.string().optional(),
-    country: z.string().optional(),
   }).optional(),
-  socialMedia: z.object({
-    twitter: z.string().optional(),
-    instagram: z.string().optional(),
-    facebook: z.string().optional(),
+  phone: z.string().optional(),
+  profession: z.string().optional(),
+  languages: z.string().optional(),
+  bio: z.string().max(150, "Your bio should not exceed 150 characters.").optional(),
+  preferences: z.object({
+    guiltyPleasures: z.string().optional(),
+    cuisines: z.string().optional(), // as comma-separated string
+    dietary: z.string().optional(), // as comma-separated string
   }).optional(),
 });
+
 
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required."),
@@ -103,40 +112,36 @@ export default function ProfilePage() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
         fullName: '',
-        brandName: '',
-        languages: '',
+        location: { city: '' },
         phone: '',
-        website: '',
-        location: {
-            city: '',
-            country: '',
-        },
-        socialMedia: {
-            twitter: '',
-            instagram: '',
-            facebook: '',
-        },
+        profession: '',
+        languages: '',
+        bio: '',
+        preferences: {
+            guiltyPleasures: '',
+            cuisines: '',
+            dietary: '',
+        }
     }
   });
 
   useEffect(() => {
     if (userProfile) {
-        const countryName = userProfile.location?.country ? countries.find(c => c.id === userProfile.location.country)?.name || userProfile.location.country : '';
         form.reset({
             fullName: userProfile.fullName || '',
-            brandName: userProfile.brandName || '',
-            languages: userProfile.languages?.join(', ') || '',
-            phone: userProfile.phone || '',
-            website: userProfile.website || '',
+            birthDate: userProfile.birthDate ? new Date(userProfile.birthDate) : undefined,
             location: {
                 city: userProfile.location?.city || '',
-                country: countryName,
             },
-            socialMedia: {
-                twitter: getUsername(userProfile.socialMedia?.twitter),
-                instagram: getUsername(userProfile.socialMedia?.instagram),
-                facebook: getUsername(userProfile.socialMedia?.facebook),
-            },
+            phone: userProfile.phone || '',
+            profession: userProfile.profession || '',
+            languages: userProfile.languages?.join(', ') || '',
+            bio: userProfile.bio || '',
+            preferences: {
+                guiltyPleasures: userProfile.preferences?.guiltyPleasures || '',
+                cuisines: userProfile.preferences?.cuisines?.join(', ') || '',
+                dietary: userProfile.preferences?.dietary?.join(', ') || '',
+            }
         });
     }
   }, [userProfile, form]);
@@ -165,25 +170,22 @@ export default function ProfilePage() {
     try {
       const userRef = doc(firestore, 'users', user.uid);
       
-      const countryFromForm = data.location?.country || '';
-      const countryEntry = countries.find(c => c.name.toLowerCase() === countryFromForm.toLowerCase());
-      const countryCodeToSave = countryEntry ? countryEntry.id : countryFromForm;
-
-      const dataToSave = {
+      const dataToSave: Partial<User> = {
         fullName: data.fullName,
-        brandName: data.brandName,
-        languages: data.languages ? data.languages.split(',').map(s => s.trim()).filter(Boolean) : [],
-        phone: data.phone,
-        website: data.website,
+        birthDate: data.birthDate ? data.birthDate.toISOString().split('T')[0] : undefined,
         location: {
-            ...userProfile?.location, // Preserve existing fields like region/suburb
+            ...userProfile?.location,
             city: data.location?.city,
-            country: countryCodeToSave,
         },
-        socialMedia: {
-          twitter: data.socialMedia?.twitter ? `https://x.com/${data.socialMedia.twitter.replace('@', '')}` : '',
-          instagram: data.socialMedia?.instagram ? `https://instagram.com/${data.socialMedia.instagram.replace('@', '')}` : '',
-          facebook: data.socialMedia?.facebook ? `https://facebook.com/${data.socialMedia.facebook.replace('@', '')}` : '',
+        phone: data.phone,
+        profession: data.profession,
+        languages: data.languages ? data.languages.split(',').map(s => s.trim()).filter(Boolean) : [],
+        bio: data.bio,
+        preferences: {
+            ...userProfile?.preferences,
+            guiltyPleasures: data.preferences?.guiltyPleasures,
+            cuisines: data.preferences?.cuisines ? data.preferences.cuisines.split(',').map(s => s.trim()).filter(Boolean) : [],
+            dietary: data.preferences?.dietary ? data.preferences.dietary.split(',').map(s => s.trim()).filter(Boolean) : [],
         },
         updatedAt: serverTimestamp()
       };
@@ -202,10 +204,7 @@ export default function ProfilePage() {
       setProfileSaveState('saved');
       await auth.currentUser.reload();
       router.refresh(); 
-      form.reset({
-        ...data,
-        location: { ...data.location, country: countryFromForm }
-      }); 
+      form.reset(data);
       setTimeout(() => setProfileSaveState('idle'), 3000);
     } catch (error) {
       toast({
@@ -330,6 +329,7 @@ export default function ProfilePage() {
                   </TooltipProvider>
                 )}
             </div>
+            
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-muted-foreground">
                 {userProfile.brandName && (<p className="text-lg">{userProfile.brandName}</p>)}
                 {userProfile.location?.country && (
@@ -352,193 +352,95 @@ export default function ProfilePage() {
 
        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
         <div className="md:col-span-2 space-y-8">
-          <Form {...form}>
+            <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <Card>
-                      <CardHeader>
-                          <CardTitle>Personal Information</CardTitle>
-                          <CardDescription>Update your public name and contact details.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                          <FormField
-                              control={form.control}
-                              name="fullName"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>Full Name</FormLabel>
-                                  <FormControl>
-                                      <Input placeholder="Your full name" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                          <FormField
-                              control={form.control}
-                              name="brandName"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>Brand Name</FormLabel>
-                                  <FormControl>
-                                      <Input placeholder="Your public brand name (optional)" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                           <FormField
-                            control={form.control}
-                            name="languages"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Languages</FormLabel>
-                                <FormDescription>Enter the languages you speak, separated by commas.</FormDescription>
-                                <FormControl>
-                                    <Input placeholder="e.g. English, Spanish, Italian" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                          <FormField
-                              control={form.control}
-                              name="phone"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>Phone Number</FormLabel>
-                                  <FormControl>
-                                      <Input placeholder="Your phone number" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="location.country"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Country</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Your country" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                              <FormField
-                              control={form.control}
-                              name="location.city"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>City</FormLabel>
-                                  <FormControl><Input placeholder="Your city" {...field} /></FormControl>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                              />
-                          </div>
-                          <FormField
-                              control={form.control}
-                              name="website"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>Website</FormLabel>
-                                  <FormControl>
-                                      <Input placeholder="https://your-website.com" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                      </CardContent>
-                  </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Profile Picture</CardTitle>
+                        <CardDescription>Don't forget a smile is the best way to introduce yourself to others.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex items-center gap-4">
+                        <Avatar className="h-20 w-20">
+                            {userImage ? <AvatarImage src={userImage.imageUrl} alt={userProfile?.fullName || 'User'} /> : null}
+                            <AvatarFallback className="text-3xl">{userProfile?.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <Button type="button" variant="outline" disabled>Change profile picture</Button>
+                    </CardContent>
+                </Card>
 
-                  <Card>
-                      <CardHeader>
-                      <CardTitle>Social Media</CardTitle>
-                      <CardDescription>Link your social media profiles. Enter your handle only.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                          <FormField
-                              control={form.control}
-                              name="socialMedia.twitter"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>X</FormLabel>
-                                  <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                      <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                          <Twitter className="h-5 w-5" />
-                                      </div>
-                                      <span className="shrink-0 text-muted-foreground">https://x.com/</span>
-                                      <FormControl>
-                                          <Input
-                                          placeholder="your_handle"
-                                          {...field}
-                                          className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                          />
-                                      </FormControl>
-                                  </div>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                          <FormField
-                              control={form.control}
-                              name="socialMedia.instagram"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>Instagram</FormLabel>
-                                  <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                      <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                          <Instagram className="h-5 w-5" />
-                                      </div>
-                                      <span className="shrink-0 text-muted-foreground">https://instagram.com/</span>
-                                      <FormControl>
-                                          <Input
-                                          placeholder="your_handle"
-                                          {...field}
-                                          className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                          />
-                                      </FormControl>
-                                  </div>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                          <FormField
-                              control={form.control}
-                              name="socialMedia.facebook"
-                              render={({ field }) => (
-                                  <FormItem>
-                                  <FormLabel>Facebook</FormLabel>
-                                  <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                      <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                          <Facebook className="h-5 w-5" />
-                                      </div>
-                                      <span className="shrink-0 text-muted-foreground">https://facebook.com/</span>
-                                      <FormControl>
-                                          <Input
-                                          placeholder="your_handle"
-                                          {...field}
-                                          className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                          />
-                                      </FormControl>
-                                  </div>
-                                  <FormMessage />
-                                  </FormItem>
-                              )}
-                          />
-                      </CardContent>
-                      <CardFooter>
-                          <Button type="submit" disabled={profileSaveState === 'saving' || !form.formState.isDirty}>
-                              {profileSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                              {profileSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
-                              {profileSaveState === 'saved' ? 'Saved!' : 'Save Profile Changes'}
-                          </Button>
-                      </CardFooter>
-                  </Card>
+                <Card>
+                  <CardHeader><CardTitle>Personal Information</CardTitle></CardHeader>
+                  <CardContent className="space-y-6">
+                    <FormField control={form.control} name="fullName" render={({ field }) => (
+                      <FormItem><FormLabel>Your name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="birthDate" render={({ field }) => (
+                      <FormItem><FormLabel>Your birth date</FormLabel>
+                        <Popover><PopoverTrigger asChild>
+                            <FormControl>
+                            <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal",!field.value && "text-muted-foreground")}>
+                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus captionLayout="dropdown-buttons" fromYear={1900} toYear={new Date().getFullYear()}/>
+                        </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}/>
+                     <FormField control={form.control} name="location.city" render={({ field }) => (
+                      <FormItem><FormLabel>Your city</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                     <FormField control={form.control} name="phone" render={({ field }) => (
+                      <FormItem><FormLabel>Phone number</FormLabel><FormControl><Input {...field} /></FormControl><FormDescription>Only shared with hosts/guests after a booking is confirmed.</FormDescription><FormMessage /></FormItem>
+                    )}/>
+                    
+                    <Separator/>
+
+                    <div>
+                        <h3 className="font-semibold text-lg">About you</h3>
+                        <p className="text-sm text-muted-foreground">Future guests would love to know more about you!</p>
+                    </div>
+
+                    <FormField control={form.control} name="profession" render={({ field }) => (
+                      <FormItem><FormLabel>Profession</FormLabel><FormControl><Input placeholder="Chef, alpinist, superhero..." {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="languages" render={({ field }) => (
+                        <FormItem><FormLabel>Languages you speak</FormLabel><FormControl><Input placeholder="English, French, Spanish..." {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="bio" render={({ field }) => (
+                        <FormItem><FormLabel>Tell us about yourself</FormLabel><FormControl><Textarea placeholder="Eatwith is all about people! Help future guests get to know you." {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+
+                    <Separator/>
+
+                    <div>
+                        <h3 className="font-semibold text-lg">Food preferences</h3>
+                        <p className="text-sm text-muted-foreground">Tell us about your guilty pleasures and favorite dishes!</p>
+                    </div>
+
+                    <FormField control={form.control} name="preferences.guiltyPleasures" render={({ field }) => (
+                        <FormItem><FormLabel>Guilty pleasures</FormLabel><FormControl><Input placeholder="e.g.: Chocolate, chocolate and chocolate ;)" {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                     <FormField control={form.control} name="preferences.cuisines" render={({ field }) => (
+                        <FormItem><FormLabel>Your favorite cuisines to enjoy</FormLabel><FormControl><Input placeholder="e.g.: Italian, Japanese..." {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+                     <FormField control={form.control} name="preferences.dietary" render={({ field }) => (
+                        <FormItem><FormLabel>My dietary restrictions</FormLabel><FormControl><Input placeholder="e.g.: Vegetarian, gluten-free..." {...field} /></FormControl><FormMessage /></FormItem>
+                    )}/>
+
+                  </CardContent>
+                  <CardFooter>
+                      <Button type="submit" disabled={profileSaveState === 'saving' || !form.formState.isDirty}>
+                          {profileSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          {profileSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                          {profileSaveState === 'saved' ? 'Saved!' : 'Save'}
+                      </Button>
+                  </CardFooter>
+                </Card>
               </form>
           </Form>
 
