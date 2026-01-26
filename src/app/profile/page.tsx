@@ -412,7 +412,7 @@ export default function ProfilePage() {
                         <FormItem><FormLabel>Languages you speak</FormLabel><FormControl><Input placeholder="English, French, Spanish..." {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     <FormField control={form.control} name="bio" render={({ field }) => (
-                        <FormItem><FormLabel>Tell us about yourself</FormLabel><FormControl><Textarea placeholder="Eatwith is all about people! Help future guests get to know you." {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Tell us about yourself</FormLabel><FormControl><Textarea placeholder="Go2Culture is all about people! Help future guests get to know you. Tell them about the things you like: your food preferences, favorite travel destination, etc.." {...field} /></FormControl><FormMessage /></FormItem>
                     )}/>
 
                     <Separator/>
@@ -643,5 +643,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

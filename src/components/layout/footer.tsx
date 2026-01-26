@@ -1,10 +1,11 @@
+
 'use client';
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { useState, useEffect } from "react";
 
 export function Footer() {
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [year, setYear] = useState<number>();
 
   useEffect(() => {
     setYear(new Date().getFullYear());
