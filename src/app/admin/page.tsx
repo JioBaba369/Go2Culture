@@ -50,7 +50,7 @@ const ActivityItem = ({ activity }: { activity: any }) => {
     const firestore = useFirestore();
     const timeAgo = formatDistanceToNow(activity.date, { addSuffix: true });
 
-    let title, href, imageURL, fallbackName = '?';
+    let title, href, imageURL, fallbackName: string = '?';
 
     // Different activities have different data structures, so we fetch related data differently.
     const guestRef = useMemoFirebase(() => (firestore && activity.type === 'review' ? doc(firestore, 'users', activity.data.guestId) : null), [firestore, activity]);
@@ -61,39 +61,41 @@ const ActivityItem = ({ activity }: { activity: any }) => {
             title = <>New application from <span className="font-semibold">{activity.data.hostName}</span></>;
             href = `/admin/applications/${activity.data.id}`;
             imageURL = PlaceHolderImages.find(p => p.id === activity.data.profile.profilePhotoId)?.imageUrl;
-            fallbackName = activity.data.hostName;
+            fallbackName = activity.data.hostName || '?';
             break;
         case 'experience':
             title = <>New experience created: <span className="font-semibold">{activity.data.title}</span></>;
             href = `/experiences/${activity.data.id}`;
             imageURL = PlaceHolderImages.find(p => p.id === activity.data.hostProfilePhotoId)?.imageUrl;
-            fallbackName = activity.data.hostName;
+            fallbackName = activity.data.hostName || '?';
             break;
         case 'user':
             title = <><span className="font-semibold">{activity.data.fullName}</span> joined Go2Culture</>;
             href = `/admin/users`;
             imageURL = PlaceHolderImages.find(p => p.id === activity.data.profilePhotoId)?.imageUrl;
-            fallbackName = activity.data.fullName;
+            fallbackName = activity.data.fullName || '?';
             break;
         case 'review':
              if (guest) {
                 title = <><span className="font-semibold">{guest.fullName}</span> left a review</>;
                 imageURL = PlaceHolderImages.find(p => p.id === guest.profilePhotoId)?.imageUrl;
-                fallbackName = guest.fullName;
+                fallbackName = guest.fullName || '?';
              } else {
                  title = 'A new review was submitted';
+                 fallbackName = '?';
              }
              href = `/admin/reports`;
             break;
         default:
             title = 'An unknown activity occurred';
             href = '/admin';
+            fallbackName = '?';
     }
 
     return (
         <div className="flex items-center gap-4">
             <Avatar className="h-9 w-9">
-                {imageURL ? <AvatarImage src={imageURL} alt="User" /> : <AvatarFallback>{fallbackName.charAt(0)}</AvatarFallback>}
+                {imageURL ? <AvatarImage src={imageURL} alt={fallbackName} /> : <AvatarFallback>{fallbackName.charAt(0)}</AvatarFallback>}
             </Avatar>
             <div className="flex-1">
                 <p className="text-sm text-foreground hover:underline"><Link href={href}>{title}</Link></p>
