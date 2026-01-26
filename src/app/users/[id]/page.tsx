@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon, ShieldCheck, Award, Trophy } from 'lucide-react';
+import { Globe, Twitter, Instagram, Facebook, Languages, ShieldCheck, Award, Trophy, Flag } from 'lucide-react';
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
@@ -166,8 +166,8 @@ function UserProfilePage() {
                         )}
                         {host.profile.culturalBackground && (
                             <div className="flex items-center gap-3">
-                                <UsersIcon className="h-5 w-5 text-muted-foreground" />
-                                <span>{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</span>
+                                <Flag className="h-5 w-5 text-muted-foreground" />
+                                <span>{host.profile.culturalBackground}</span>
                             </div>
                         )}
                     </div>
