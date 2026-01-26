@@ -13,7 +13,7 @@ import { Globe, Twitter, Instagram, Facebook, Languages, ShieldCheck, Award, Tro
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
-import { getFlagEmoji, getFlagFromCountryCode } from '@/lib/format';
+import { getFlagFromCountryCode } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -134,12 +134,6 @@ function UserProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
-            {isHost && host && host.profile.bio && (
-                <div>
-                    <h2 className="font-headline text-2xl font-semibold mb-4">About {user.fullName.split(' ')[0]}</h2>
-                    <p className="text-muted-foreground leading-relaxed">{host.profile.bio}</p>
-                </div>
-            )}
             {experiences && experiences.length > 0 && (
                 <div>
                 <h2 className="font-headline text-2xl font-semibold mb-4">Experiences by {user.fullName.split(' ')[0]}</h2>
@@ -151,9 +145,14 @@ function UserProfilePage() {
         </div>
         
         <aside className="md:col-span-1 space-y-6">
-            {isHost && host ? (
+             {isHost && host ? (
                 <div className="p-6 border rounded-xl shadow-sm bg-card">
-                    <h3 className="font-headline text-xl font-semibold mb-4">Host Details</h3>
+                    <h3 className="font-headline text-xl font-semibold mb-4">About {user.fullName.split(' ')[0]}</h3>
+                    
+                    {host.profile.bio && (
+                        <p className="text-muted-foreground leading-relaxed mb-4">{host.profile.bio}</p>
+                    )}
+
                     <div className="space-y-4 text-sm">
                         {host.level === 'Superhost' && (
                             <div className="flex items-center gap-2">
