@@ -79,8 +79,7 @@ service cloud.firestore {
     }
 
     match /messages/{messageId} {
-      allow get: if isAdmin() || isParticipant(resource.data);
-      allow list: if isAdmin() || isParticipant(resource.data);
+      allow read: if isAdmin() || isParticipant(resource.data);
       allow create: if isSignedIn() && (request.resource.data.senderId == request.auth.uid);
       allow update: if isSignedIn() && (resource.data.senderId == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
