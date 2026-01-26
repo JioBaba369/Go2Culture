@@ -306,7 +306,7 @@ export default function ProfilePage() {
                   </TooltipProvider>
                 )}
             </div>
-            <div className="flex flex-wrap items-center gap-x-4 mt-1 text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-muted-foreground">
                 {userProfile.brandName && (<p className="text-lg">{userProfile.brandName}</p>)}
                 {userProfile.location?.country && (
                     <div className="flex items-center gap-1.5">
@@ -706,19 +706,19 @@ export default function ProfilePage() {
                     {userProfile.socialMedia?.twitter && (
                         <a href={userProfile.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                             <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">@{getUsername(userProfile.socialMedia.twitter)}</span>
+                            <span className="truncate">@{getUsernameFromUrl(userProfile.socialMedia.twitter)}</span>
                         </a>
                     )}
                     {userProfile.socialMedia?.instagram && (
                         <a href={userProfile.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                             <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">@{getUsername(userProfile.socialMedia.instagram)}</span>
+                            <span className="truncate">@{getUsernameFromUrl(userProfile.socialMedia.instagram)}</span>
                         </a>
                     )}
                     {userProfile.socialMedia?.facebook && (
                         <a href={userProfile.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
                             <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                            <span className="truncate">{getUsername(userProfile.socialMedia.facebook)}</span>
+                            <span className="truncate">{getUsernameFromUrl(userProfile.socialMedia.facebook)}</span>
                         </a>
                     )}
                     {!userProfile.website && !userProfile.socialMedia?.twitter && !userProfile.socialMedia?.instagram && !userProfile.socialMedia?.facebook && (
