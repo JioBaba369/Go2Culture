@@ -13,6 +13,7 @@ import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon, Shi
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
+import { getFlagEmoji } from '@/lib/format';
 
 const getUsername = (url?: string) => {
   if (!url) return '';
@@ -23,28 +24,6 @@ const getUsername = (url?: string) => {
     return url; // fallback to showing the raw value if it's not a valid URL
   }
 };
-
-const getFlagEmoji = (name: string): string => {
-    if (!name) return '';
-    const countryCodeMapping: { [key: string]: string } = {
-        'Italian': 'IT', 'Mexican': 'MX', 'Japanese': 'JP', 'Indian': 'IN',
-        'Thai': 'TH', 'French': 'FR', 'Vietnamese': 'VN', 'Lebanese': 'LB',
-        'Australian': 'AU', 'New Zealand': 'NZ', 'Māori': 'NZ', 'Syrian': 'SY',
-        'Australia': 'AU',
-    };
-    
-    const matchedKey = Object.keys(countryCodeMapping).find(key => name.includes(key));
-    const code = matchedKey ? countryCodeMapping[matchedKey] : '';
-
-    if (!code) return '';
-
-    const codePoints = code
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-};
-
 
 function UserProfilePage() {
   const params = useParams();

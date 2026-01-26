@@ -7,7 +7,7 @@ export function Logo({ className }: { className?: string }) {
     <Link href="/" className={cn("flex items-center gap-2", className)}>
       <UtensilsCrossed className="h-6 w-6" />
       <span className="font-sans text-2xl font-extrabold">
-        Go2Culture.com
+        Go2Culture
       </span>
     </Link>
   );

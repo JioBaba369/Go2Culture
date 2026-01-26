@@ -44,7 +44,7 @@ export async function approveApplication(
     status: 'approved',
     profile: {
       bio: application.profile.bio,
-      languages: Array.isArray(application.profile.languages) ? application.profile.languages : [application.profile.languages],
+      languages: application.profile.languages.split(',').map(lang => lang.trim()).filter(Boolean),
       culturalBackground: application.profile.culturalBackground,
       hostingStyles: application.profile.hostingStyles,
     },

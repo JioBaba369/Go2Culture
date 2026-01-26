@@ -24,6 +24,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 import { countries } from '@/lib/location-data';
+import { getFlagFromCountryCode } from '@/lib/format';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -60,16 +61,6 @@ const getUsernameFromUrl = (url: string | undefined): string => {
     return url;
   }
 };
-
-const getFlagFromCountryCode = (countryCode: string): string => {
-  if (!countryCode || countryCode.length !== 2) return '';
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-};
-
 
 export default function ProfilePage() {
   const { user, isUserLoading, auth, firestore } = useFirebase();
