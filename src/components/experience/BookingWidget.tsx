@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, forwardRef } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
 import { doc, collection, runTransaction, serverTimestamp, getDoc, increment } from 'firebase/firestore';
-import DatePicker from 'react-datepicker';
 import { format } from 'date-fns';
 import { Experience, Host, Coupon, Booking, User } from '@/lib/types';
 
@@ -17,27 +16,13 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Star, Loader2, Tag, CheckCircle, Calendar as CalendarIcon, Users, Gift, Zap } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
 interface BookingWidgetProps {
     experience: Experience;
     host: Host;
 }
-
-const DatePickerCustomInput = forwardRef<HTMLButtonElement, { value?: string; onClick?: React.MouseEventHandler<HTMLButtonElement> }>(
-    ({ value, onClick }, ref) => (
-      <Button
-        variant={"outline"}
-        className={cn("w-full justify-start text-left font-normal h-10", !value && "text-muted-foreground")}
-        onClick={onClick}
-        ref={ref}
-      >
-        <CalendarIcon className="mr-2 h-4 w-4" />
-        {value || <span>Pick a date</span>}
-      </Button>
-    )
-);
-DatePickerCustomInput.displayName = 'DatePickerCustomInput';
-
 
 export function BookingWidget({ experience, host }: BookingWidgetProps) {
   const [date, setDate] = useState<Date | undefined>();
@@ -166,20 +151,20 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
     }
   };
 
-  const filterDate = (day: Date): boolean => {
+  const disabledDays = (day: Date): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (day < today) return false;
+    if (day < today) return true;
 
     if (experience.availability.days && experience.availability.days.length > 0) {
-        if (!experience.availability.days.includes(format(day, 'EEEE'))) return false;
+        if (!experience.availability.days.includes(format(day, 'EEEE'))) return true;
     }
     
     if (host?.blockedDates?.includes(format(day, 'yyyy-MM-dd'))) {
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   };
   
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
@@ -215,17 +200,29 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             <div className="flex flex-col space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="date-picker">Date</Label>
-                    <DatePicker
-                        id="date-picker"
-                        selected={date}
-                        onChange={(d: Date | null) => setDate(d || undefined)}
-                        filterDate={filterDate}
-                        minDate={new Date()}
-                        placeholderText="Pick a date"
-                        className="w-full"
-                        customInput={<DatePickerCustomInput />}
-                        dateFormat="PPP"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          disabled={disabledDays}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                 </div>
 
                 <div className="space-y-2">
