@@ -27,6 +27,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
 
 function DiscoverPageContent() {
   const searchParams = useSearchParams();
@@ -100,7 +101,12 @@ function DiscoverPageContent() {
       </div>
       <Accordion type="multiple" defaultValue={['category', 'price']} className="w-full">
         <AccordionItem value="category">
-            <AccordionTrigger className="font-semibold">Category</AccordionTrigger>
+            <AccordionTrigger className="font-semibold">
+              <div className="flex w-full items-center justify-between pr-1">
+                <span>Category</span>
+                {categories.length > 0 && <Badge variant="secondary">{categories.length}</Badge>}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
                 <div className="space-y-2 pt-2">
                     {allCategories.map(option => (
@@ -119,7 +125,12 @@ function DiscoverPageContent() {
             </AccordionContent>
         </AccordionItem>
         <AccordionItem value="price">
-            <AccordionTrigger className="font-semibold">Price</AccordionTrigger>
+            <AccordionTrigger className="font-semibold">
+               <div className="flex w-full items-center justify-between pr-1">
+                <span>Price</span>
+                {price[0] < maxPrice && <Badge variant="secondary">${price[0]} max</Badge>}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
                 <div className="pt-2">
                     <p className="text-sm text-muted-foreground">Up to ${price[0]}</p>
@@ -135,7 +146,12 @@ function DiscoverPageContent() {
             </AccordionContent>
         </AccordionItem>
          <AccordionItem value="cuisine">
-            <AccordionTrigger className="font-semibold">Cuisine</AccordionTrigger>
+            <AccordionTrigger className="font-semibold">
+               <div className="flex w-full items-center justify-between pr-1">
+                <span>Cuisine</span>
+                {cuisine !== 'all' && <Badge variant="secondary" className="max-w-[120px] truncate">{cuisine}</Badge>}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
                   <div className="space-y-2 pt-2">
                     <Select value={cuisine} onValueChange={setCuisine}>
@@ -149,7 +165,12 @@ function DiscoverPageContent() {
             </AccordionContent>
         </AccordionItem>
         <AccordionItem value="dietary">
-            <AccordionTrigger className="font-semibold">Dietary Needs</AccordionTrigger>
+            <AccordionTrigger className="font-semibold">
+              <div className="flex w-full items-center justify-between pr-1">
+                <span>Dietary Needs</span>
+                {dietary.length > 0 && <Badge variant="secondary">{dietary.length}</Badge>}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
                   <div className="space-y-2 pt-2">
                     {allDietary.map(option => (
@@ -168,7 +189,12 @@ function DiscoverPageContent() {
             </AccordionContent>
         </AccordionItem>
         <AccordionItem value="rating">
-            <AccordionTrigger className="font-semibold">Rating</AccordionTrigger>
+            <AccordionTrigger className="font-semibold">
+              <div className="flex w-full items-center justify-between pr-1">
+                <span>Rating</span>
+                {rating !== 'all' && <Badge variant="secondary">{rating} & up</Badge>}
+              </div>
+            </AccordionTrigger>
             <AccordionContent>
                 <div className="pt-2">
                     <Select value={rating} onValueChange={setRating}>

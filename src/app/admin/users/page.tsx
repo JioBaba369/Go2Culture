@@ -1,6 +1,6 @@
-
 'use client';
 
+import React, { useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User } from "@/lib/types";
-import { MoreHorizontal } from "lucide-react";
+import { User, Experience, Booking } from "@/lib/types";
+import { MoreHorizontal, Star, Utensils, CalendarCheck } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from 'date-fns';
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
@@ -51,7 +51,44 @@ const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "de
 
 export default function AdminUsersPage() {
   const firestore = useFirestore();
-  const { data: users, isLoading } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
+  const { data: users, isLoading: areUsersLoading } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
+  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
+  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]));
+
+  const isLoading = areUsersLoading || areExperiencesLoading || areBookingsLoading;
+  
+  const enrichedUsers = useMemo(() => {
+    if (!users || !experiences || !bookings) return [];
+
+    return users.map(user => {
+      let hostData, guestData;
+
+      if (user.role === 'host' || user.role === 'both') {
+        const hostExperiences = experiences.filter(exp => exp.userId === user.id);
+        const totalRatings = hostExperiences.reduce((acc, exp) => acc + (exp.rating.average * exp.rating.count), 0);
+        const totalRatingCount = hostExperiences.reduce((acc, exp) => acc + exp.rating.count, 0);
+        hostData = {
+          experienceCount: hostExperiences.length,
+          averageRating: totalRatingCount > 0 ? (totalRatings / totalRatingCount).toFixed(2) : 'N/A',
+        };
+      }
+
+      if (user.role === 'guest' || user.role === 'both') {
+        const guestBookings = bookings.filter(b => b.guestId === user.id);
+        guestData = {
+          bookingCount: guestBookings.length,
+        };
+      }
+      
+      return {
+        ...user,
+        hostData,
+        guestData,
+      }
+    });
+
+  }, [users, experiences, bookings]);
+
 
   return (
     <div className="space-y-8">
@@ -63,8 +100,8 @@ export default function AdminUsersPage() {
       {/* Mobile Card View */}
        <div className="grid gap-4 md:hidden">
         <h2 className="text-xl font-semibold">All Users</h2>
-        {isLoading && Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-36 w-full" />)}
-        {users?.map((user) => {
+        {isLoading && Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
+        {enrichedUsers?.map((user) => {
             const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
             return (
                 <Card key={user.id} className="p-4">
@@ -77,7 +114,6 @@ export default function AdminUsersPage() {
                             <div className="space-y-1">
                                 <p className="font-semibold">{user.fullName}</p>
                                 <p className="text-sm text-muted-foreground">{user.email}</p>
-                                <p className="text-sm text-muted-foreground">{user.phone}</p>
                             </div>
                         </div>
                         <DropdownMenu>
@@ -95,6 +131,19 @@ export default function AdminUsersPage() {
                                 <DropdownMenuItem className="text-destructive">Suspend User</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                    </div>
+                     <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                            {user.hostData && (
+                                <>
+                                 <span className="flex items-center gap-1"><Utensils className="h-3.5 w-3.5"/>{user.hostData.experienceCount} Exp.</span>
+                                 <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5"/>{user.hostData.averageRating} Rating</span>
+                                </>
+                            )}
+                             {user.guestData && (
+                                <span className="flex items-center gap-1"><CalendarCheck className="h-3.5 w-3.5"/>{user.guestData.bookingCount} Bookings</span>
+                            )}
+                        </div>
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                          <div className="flex items-center gap-2">
@@ -121,19 +170,20 @@ export default function AdminUsersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Joined</TableHead>
+                <TableHead>Experiences</TableHead>
+                <TableHead>Bookings</TableHead>
+                <TableHead>Avg. Rating</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading && Array.from({length: 5}).map((_, i) => (
-                <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-10 w-full"/></TableCell></TableRow>
+                <TableRow key={i}><TableCell colSpan={8}><Skeleton className="h-10 w-full"/></TableCell></TableRow>
               ))}
-              {users?.map((user) => {
+              {enrichedUsers?.map((user) => {
                 const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
                 return (
                   <TableRow key={user.id}>
@@ -145,23 +195,25 @@ export default function AdminUsersPage() {
                         </Avatar>
                         <div className="grid gap-0.5">
                           <span className="font-semibold">{user.fullName}</span>
+                           <span className="text-xs text-muted-foreground">{user.email}</span>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.phone}</TableCell>
                     <TableCell>
                       <Badge variant={roleVariantMap[user.role]} className="capitalize">
                         {user.role}
                       </Badge>
                     </TableCell>
+                     <TableCell>
+                      {user.createdAt?.toDate ? format(user.createdAt.toDate(), 'PP') : ''}
+                    </TableCell>
+                    <TableCell>{user.hostData ? user.hostData.experienceCount : 'N/A'}</TableCell>
+                    <TableCell>{user.guestData ? user.guestData.bookingCount : 'N/A'}</TableCell>
+                    <TableCell>{user.hostData ? user.hostData.averageRating : 'N/A'}</TableCell>
                     <TableCell>
                       <Badge variant={statusVariantMap[user.status]} className="capitalize">
                         {user.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {user.createdAt?.toDate ? format(user.createdAt.toDate(), 'PP') : ''}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
