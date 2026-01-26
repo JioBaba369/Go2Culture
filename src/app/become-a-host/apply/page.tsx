@@ -8,9 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PartyPopper, User as UserIcon, LayoutDashboard } from "lucide-react";
-import { useFirestore, useUser, useDoc, useMemoFirebase } from "@/firebase";
-import { addDoc, collection, doc, serverTimestamp, getDoc } from "firebase/firestore";
+import { Loader2, PartyPopper, User as UserIcon, LayoutDashboard, Hourglass, Edit, XCircle, HelpCircle } from "lucide-react";
+import { useFirestore, useUser, useDoc, useMemoFirebase, useCollection } from "@/firebase";
+import { addDoc, collection, doc, serverTimestamp, getDoc, query, where, limit } from "firebase/firestore";
 import type { HostApplication, User } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
@@ -61,6 +61,43 @@ const steps = [
     { id: 'Step 4', name: 'Final Review & Terms' },
 ];
 
+function HostApplicationStatus({ application }: { application: HostApplication }) {
+  let icon, title, description;
+
+  switch (application.status) {
+    case 'Pending':
+      icon = <Hourglass className="h-16 w-16 text-amber-500 mb-4" />;
+      title = "Application Pending Review";
+      description = "Our team has received your application and is currently reviewing it. We appreciate your patience and will notify you via email as soon as there's an update. This usually takes 3-5 business days.";
+      break;
+    case 'Changes Needed':
+      icon = <Edit className="h-16 w-16 text-blue-500 mb-4" />;
+      title = "Changes Requested";
+      description = "Our community team has reviewed your application and requires some changes before it can be approved. Please check your email for detailed feedback and instructions on how to edit your application.";
+      break;
+    case 'Rejected':
+      icon = <XCircle className="h-16 w-16 text-destructive mb-4" />;
+      title = "Application Not Approved";
+      description = "We appreciate you taking the time to apply. After careful consideration, we are unable to move forward with your application at this time. Thank you for your interest in the Go2Culture community.";
+      break;
+    default:
+      icon = <HelpCircle className="h-16 w-16 text-muted-foreground mb-4" />;
+      title = "Application Status";
+      description = "There is an update regarding your application. Please check your email for more details.";
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-20">
+      {icon}
+      <h1 className="font-headline text-4xl font-bold">{title}</h1>
+      <p className="mt-4 text-muted-foreground max-w-2xl">{description}</p>
+      <Button asChild variant="outline" className="mt-8">
+        <Link href="/">Back to Homepage</Link>
+      </Button>
+    </div>
+  );
+}
+
 export default function BecomeAHostPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,6 +112,13 @@ export default function BecomeAHostPage() {
     [firestore, user]
   );
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
+  
+  const hostApplicationsQuery = useMemoFirebase(
+    () => (firestore && user ? query(collection(firestore, 'hostApplications'), where('userId', '==', user.uid), limit(1)) : null),
+    [firestore, user]
+  );
+  const { data: hostApplications, isLoading: areAppsLoading } = useCollection<HostApplication>(hostApplicationsQuery);
+  const existingApplication = hostApplications?.[0];
 
   const methods = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
@@ -167,14 +211,14 @@ export default function BecomeAHostPage() {
         compliance: { guidelinesAccepted: values.agreeToTerms },
       };
 
-      await addDoc(collection(firestore, 'hostApplications'), applicationData);
+      await addDoc(collection(firestore, 'hostApplications'), applicationData as any);
       
       // Create notification
       await createNotification(
         firestore,
         user.uid,
         "We received your application and we can’t wait to review it!",
-        "/host" // Link to host dashboard
+        "/become-a-host/apply"
       );
 
       setSubmissionState('success');
@@ -188,7 +232,7 @@ export default function BecomeAHostPage() {
     }
   }
   
-  const isLoading = isUserLoading || isProfileLoading;
+  const isLoading = isUserLoading || isProfileLoading || areAppsLoading;
 
   if (isLoading) {
     return (
@@ -212,6 +256,10 @@ export default function BecomeAHostPage() {
         </div>
       </div>
     );
+  }
+
+  if (existingApplication && userProfile && userProfile.role === 'guest') {
+    return <HostApplicationStatus application={existingApplication} />;
   }
 
   if (userProfile && (userProfile.role === 'host' || userProfile.role === 'both')) {
