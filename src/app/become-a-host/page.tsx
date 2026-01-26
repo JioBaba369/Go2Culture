@@ -35,6 +35,9 @@ export default function BecomeAHostLandingPage() {
                     <Link href="/become-a-host/apply">🚀 Become a Host</Link>
                 </Button>
                 <p className="mt-2 text-sm text-muted-foreground">It takes about 15–25 minutes to apply.</p>
+                <p className="mt-4 text-sm text-muted-foreground">
+                    Already have an operating business? <Link href="/contact" className="underline hover:text-primary">Click here</Link> to see how Go2Culture can help you reach more audiences.
+                </p>
             </section>
             
             
@@ -166,5 +169,3 @@ export default function BecomeAHostLandingPage() {
         </div>
     );
 }
-
-    
