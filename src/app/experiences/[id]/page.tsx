@@ -2,14 +2,13 @@
 
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import type { Experience, Host, Review, User, Coupon, Booking } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
@@ -25,11 +24,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { WishlistButton } from "@/components/wishlist-button";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Drawer, DrawerContent, DrawerTrigger, DrawerClose, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 import { ExperienceMap } from "@/components/experience-map";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -88,14 +86,7 @@ export default function ExperienceDetailPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [couponError, setCouponError] = useState('');
-  const [isDatePickerOpen, setDatePickerOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const isMobile = useMediaQuery("(max-width: 767px)");
   const firestore = useFirestore();
   const { user } = useUser();
   const { toast } = useToast();
@@ -262,25 +253,33 @@ export default function ExperienceDetailPage() {
     }
   };
 
-  const disabledDays = (day: Date): boolean => {
-    // Check against weekly availability
-    if (experience.availability.days && experience.availability.days.length > 0) {
-      const dayOfWeek = format(day, 'EEEE');
-      if (!experience.availability.days.includes(dayOfWeek)) {
-        return true;
-      }
+  const filterDate = (day: Date): boolean => {
+    // Return false for disabled days, true for enabled
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Compare dates only
+    if (day < today) {
+      return false;
     }
 
+    if (experience) {
+        // Check against weekly availability
+        if (experience.availability.days && experience.availability.days.length > 0) {
+            const dayOfWeek = format(day, 'EEEE');
+            if (!experience.availability.days.includes(dayOfWeek)) {
+                return false;
+            }
+        }
+    }
+    
     // Check against specific blocked dates by the host
     if (host?.blockedDates) {
       const dateString = format(day, 'yyyy-MM-dd');
-      // The blocked dates are stored as 'yyyy-MM-dd' strings
       if (host.blockedDates.includes(dateString)) {
-        return true;
+        return false;
       }
     }
 
-    return false;
+    return true;
   };
 
 
@@ -324,35 +323,20 @@ export default function ExperienceDetailPage() {
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
   const totalPrice = basePrice - discountAmount;
 
-  const DatePickerTrigger = (
-    <Button
-      variant={"outline"}
-      className={cn(
-        "w-full justify-start text-left font-normal h-12 sm:h-10",
-        !date && "text-muted-foreground"
-      )}
-    >
-      <CalendarIcon className="mr-2 h-4 w-4" />
-      {date ? format(date, "PPP") : <span>Pick a date</span>}
-    </Button>
+  const DatePickerCustomInput = forwardRef<HTMLButtonElement, { value?: string; onClick?: React.MouseEventHandler<HTMLButtonElement> }>(
+    ({ value, onClick }, ref) => (
+      <Button
+        variant={"outline"}
+        className={cn("w-full justify-start text-left font-normal h-10", !value && "text-muted-foreground")}
+        onClick={onClick}
+        ref={ref}
+      >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {value || <span>Pick a date</span>}
+      </Button>
+    )
   );
-
-  const CalendarComponent = (
-     <Calendar
-        mode="single"
-        selected={date}
-        onSelect={(d) => {
-            setDate(d);
-            if (!isMobile) {
-                setDatePickerOpen(false);
-            }
-        }}
-        disabled={[
-            { before: new Date() },
-            disabledDays,
-        ]}
-      />
-  );
+  DatePickerCustomInput.displayName = 'DatePickerCustomInput';
 
 
   return (
@@ -537,36 +521,18 @@ export default function ExperienceDetailPage() {
                 ) : (
                     <div className="flex flex-col space-y-4">
                         <div className="space-y-2">
-                            <Label>Date</Label>
-                             {isMounted ? (
-                                !isMobile ? (
-                                    <Popover open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
-                                        <PopoverTrigger asChild>{DatePickerTrigger}</PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">{CalendarComponent}</PopoverContent>
-                                    </Popover>
-                                ) : (
-                                    <Drawer open={isDatePickerOpen} onOpenChange={setDatePickerOpen}>
-                                        <DrawerTrigger asChild>{DatePickerTrigger}</DrawerTrigger>
-                                        <DrawerContent>
-                                            <DrawerHeader className="sr-only">
-                                            <DrawerTitle>Select a date</DrawerTitle>
-                                            <DrawerDescription>Choose a date for your experience.</DrawerDescription>
-                                            </DrawerHeader>
-                                            <div className="p-4">{CalendarComponent}</div>
-                                            <DrawerClose asChild><Button className="w-full mt-4 h-12">Done</Button></DrawerClose>
-                                        </DrawerContent>
-                                    </Drawer>
-                                )
-                            ) : (
-                                 <Button
-                                    variant={"outline"}
-                                    className="w-full justify-start text-left font-normal h-12 sm:h-10 text-muted-foreground"
-                                    disabled
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    <span>Pick a date</span>
-                                </Button>
-                            )}
+                            <Label htmlFor="date-picker">Date</Label>
+                             <DatePicker
+                                id="date-picker"
+                                selected={date}
+                                onChange={(d: Date) => setDate(d)}
+                                filterDate={filterDate}
+                                minDate={new Date()}
+                                placeholderText="Pick a date"
+                                className="w-full"
+                                customInput={<DatePickerCustomInput />}
+                                dateFormat="PPP"
+                                />
                         </div>
 
                         <div className="space-y-2">
@@ -642,3 +608,4 @@ export default function ExperienceDetailPage() {
     </div>
   );
 }
+
