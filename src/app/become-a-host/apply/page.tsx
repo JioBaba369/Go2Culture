@@ -15,7 +15,6 @@ import type { HostApplication, User } from "@/lib/types";
 import { complianceRequirementsByState, countryComplianceRequirements } from "@/lib/compliance-data";
 import { useRouter } from "next/navigation";
 
-import { Step1BasicInfo } from "@/components/apply-form/step1-basic-info";
 import { Step2HostProfile } from "@/components/apply-form/step2-host-profile";
 import { Step3ExperienceBasics } from "@/components/apply-form/step3-experience-basics";
 import { Step4Menu } from "@/components/apply-form/step4-menu";
@@ -33,9 +32,6 @@ const hostingStyleOptions = [
 ] as const;
 
 const formSchema = z.object({
-  fullName: z.string().min(2, "Full name is required."),
-  email: z.string().email("Invalid email address."),
-  
   profile: z.object({
     profilePhoto: z.any().optional(),
     bio: z.string().min(50, "Please tell us a bit more about yourself (min. 50 characters)."),
@@ -151,41 +147,36 @@ type OnboardingFormValues = z.infer<typeof formSchema>;
 const steps = [
     {
         id: 'Step 1',
-        name: 'Basic Information',
-        fields: ['fullName', 'email'],
-    },
-    {
-        id: 'Step 2',
         name: 'Host Profile',
         fields: ['profile.bio', 'profile.languages', 'profile.culturalBackground', 'profile.hostingStyles'],
     },
     {
-        id: 'Step 3',
+        id: 'Step 2',
         name: 'Experience Basics',
         fields: ['experience.title', 'experience.description', 'experience.category', 'experience.durationMinutes'],
     },
     {
-        id: 'Step 4',
+        id: 'Step 3',
         name: 'Menu & Food Details',
         fields: ['experience.menu.description', 'experience.menu.cuisine', 'experience.menu.spiceLevel'],
     },
     {
-        id: 'Step 5',
+        id: 'Step 4',
         name: 'Location & Home Setup',
         fields: [], // Complex validation, handled on final submit
     },
     {
-        id: 'Step 6',
+        id: 'Step 5',
         name: 'Photos',
         fields: [],
     },
     {
-        id: 'Step 7',
+        id: 'Step 6',
         name: 'Compliance',
         fields: [], // Complex validation, handled on final submit
     },
     {
-        id: 'Step 8',
+        id: 'Step 7',
         name: 'Pricing & Agreements',
         fields: ['experience.pricing.pricePerGuest', 'compliance.agreeToFoodSafety', 'compliance.guidelinesAccepted'],
     },
@@ -209,8 +200,6 @@ export default function BecomeAHostPage() {
   const methods = useForm<OnboardingFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: user?.displayName || '',
-      email: user?.email || '',
       profile: {
         hostingStyles: [],
         bio: '',
@@ -280,7 +269,7 @@ export default function BecomeAHostPage() {
   }
   
   async function onSubmit(values: OnboardingFormValues) {
-    if (!firestore || !user) {
+    if (!firestore || !user || !user.displayName) {
       toast({
         variant: "destructive",
         title: "Authentication Error",
@@ -300,7 +289,7 @@ export default function BecomeAHostPage() {
       const applicationData: Omit<HostApplication, 'id'> = {
         ...restOfValues,
         userId: user.uid,
-        hostName: values.fullName,
+        hostName: user.displayName,
         profile: {
           ...profileData,
           profilePhotoId: "guest-1", // Placeholder
@@ -413,14 +402,13 @@ export default function BecomeAHostPage() {
                 <p className="text-center text-sm text-muted-foreground">Step {currentStep + 1} of {steps.length}: {steps[currentStep].name}</p>
             </div>
 
-            {currentStep === 0 && <Step1BasicInfo />}
-            {currentStep === 1 && <Step2HostProfile hostingStyleOptions={hostingStyleOptions} />}
-            {currentStep === 2 && <Step3ExperienceBasics />}
-            {currentStep === 3 && <Step4Menu />}
-            {currentStep === 4 && <Step5Location />}
-            {currentStep === 5 && <Step6Photos />}
-            {currentStep === 6 && <Step7Compliance />}
-            {currentStep === 7 && <Step8Pricing />}
+            {currentStep === 0 && <Step2HostProfile hostingStyleOptions={hostingStyleOptions} />}
+            {currentStep === 1 && <Step3ExperienceBasics />}
+            {currentStep === 2 && <Step4Menu />}
+            {currentStep === 3 && <Step5Location />}
+            {currentStep === 4 && <Step6Photos />}
+            {currentStep === 5 && <Step7Compliance />}
+            {currentStep === 6 && <Step8Pricing />}
 
             <div className="flex gap-4 justify-end">
                 {currentStep > 0 && (
