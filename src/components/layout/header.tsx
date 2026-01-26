@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Menu, User as UserIcon, LayoutDashboard, Heart, CalendarCheck, MessageSquare } from "lucide-react";
+import { LogOut, Menu, User as UserIcon, LayoutDashboard, Heart, CalendarCheck, MessageSquare, Wallet } from "lucide-react";
 import { useFirebase, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -97,13 +97,13 @@ export function Header() {
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/messages">
                       <MessageSquare className="mr-2 h-4 w-4" />
-                      <span>Messages</span>
+                      <span>Inbox</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/profile/bookings">
                       <CalendarCheck className="mr-2 h-4 w-4" />
-                      <span>My Bookings</span>
+                      <span>My Reservations</span>
                     </Link>
                   </DropdownMenuItem>
                    <DropdownMenuItem asChild className="cursor-pointer">
@@ -115,7 +115,13 @@ export function Header() {
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link href="/profile">
                       <UserIcon className="mr-2 h-4 w-4" />
-                      <span>My Profile</span>
+                      <span>Account Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/profile/referrals">
+                      <Wallet className="mr-2 h-4 w-4" />
+                      <span>Refer a Friend</span>
                     </Link>
                   </DropdownMenuItem>
                   {isHost && (
@@ -171,16 +177,19 @@ export function Header() {
                   {user ? (
                      <>
                       <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
-                        <Link href="/messages">Messages</Link>
+                        <Link href="/messages">Inbox</Link>
                       </Button>
                        <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
-                        <Link href="/profile/bookings">My Bookings</Link>
+                        <Link href="/profile/bookings">My Reservations</Link>
                       </Button>
                        <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
                         <Link href="/profile/wishlist">My Wishlist</Link>
                       </Button>
                       <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
-                        <Link href="/profile">My Profile</Link>
+                        <Link href="/profile">Account Settings</Link>
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
+                        <Link href="/profile/referrals">Refer a Friend</Link>
                       </Button>
                       {isHost && (
                          <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>

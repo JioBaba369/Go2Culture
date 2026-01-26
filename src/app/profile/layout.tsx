@@ -5,14 +5,15 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useFirebase } from '@/firebase';
 import { Button } from '@/components/ui/button';
-import { Loader2, User, CalendarCheck, Heart, Wallet } from 'lucide-react';
+import { Loader2, User, CalendarCheck, Heart, Wallet, MessageSquare } from 'lucide-react';
 import React from 'react';
 
 const profileNavItems = [
-  { href: '/profile', label: 'Profile Settings', icon: User },
-  { href: '/profile/bookings', label: 'My Bookings', icon: CalendarCheck },
+  { href: '/profile', label: 'Account Settings', icon: User },
+  { href: '/messages', label: 'Inbox', icon: MessageSquare },
+  { href: '/profile/bookings', label: 'My Reservations', icon: CalendarCheck },
   { href: '/profile/wishlist', label: 'My Wishlist', icon: Heart },
-  { href: '/profile/referrals', label: 'Referrals & Credits', icon: Wallet },
+  { href: '/profile/referrals', label: 'Refer a Friend', icon: Wallet },
 ];
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
