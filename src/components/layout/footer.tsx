@@ -18,7 +18,7 @@ export function Footer() {
           <div className="sm:col-span-2 md:col-span-1 space-y-4">
             <Logo className="text-primary" />
             <p className="text-sm text-muted-foreground">
-              Experience culture the way locals live it — around the table, at home, together.
+              Experience Authentic Food & Culture.
             </p>
           </div>
           <div>

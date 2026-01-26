@@ -24,8 +24,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Go2Culture - Go where culture lives.',
-  description: 'Experience culture the way locals live it — around the table, at home, together.',
+  title: 'Go2Culture - Experience Authentic Food & Culture.',
+  description: 'Experience Authentic Food & Culture.',
   icons: {
     icon: '/favicon.ico',
   },
