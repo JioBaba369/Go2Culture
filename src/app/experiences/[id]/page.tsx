@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, Gift, Zap } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, Gift, Zap, Brush, Music, Landmark, PartyPopper } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, where, limit, runTransaction, getDoc, serverTimestamp, increment } from "firebase/firestore";
@@ -28,6 +28,38 @@ import { cn } from "@/lib/utils";
 import { ExperienceMap } from "@/components/experience-map";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
+const categoryIcons: Record<string, React.ElementType> = {
+    'In-Home Dining': Home,
+    'Cooking Class': Utensils,
+    'Restaurant Experience': Utensils,
+    'Special Event': PartyPopper,
+    'Art & Craft': Brush,
+    'Music & Dance': Music,
+    'History & Walks': Landmark,
+};
+
+const getFlagEmoji = (name: string): string => {
+    if (!name) return '';
+    const countryCodeMapping: { [key: string]: string } = {
+        'Italian': 'IT', 'Mexican': 'MX', 'Japanese': 'JP', 'Indian': 'IN',
+        'Thai': 'TH', 'French': 'FR', 'Vietnamese': 'VN', 'Lebanese': 'LB',
+        'Australian': 'AU', 'New Zealand': 'NZ', 'Māori': 'NZ', 'Syrian': 'SY',
+        'Australia': 'AU',
+    };
+    
+    const matchedKey = Object.keys(countryCodeMapping).find(key => name.includes(key));
+    const code = matchedKey ? countryCodeMapping[matchedKey] : '';
+
+    if (!code) return '';
+
+    const codePoints = code
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+};
+
 
 function ReviewItem({ review }: { review: Review }) {
   const firestore = useFirestore();
@@ -413,6 +445,7 @@ export default function ExperienceDetailPage() {
   const durationHours = Math.round(experience.durationMinutes / 60 * 10) / 10;
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
   const totalPrice = basePrice - discountAmount;
+  const CategoryIcon = categoryIcons[experience.category];
 
   const DatePickerCustomInput = forwardRef<HTMLButtonElement, { value?: string; onClick?: React.MouseEventHandler<HTMLButtonElement> }>(
     ({ value, onClick }, ref) => (
@@ -436,20 +469,22 @@ export default function ExperienceDetailPage() {
         <div>
             <h1 className="font-headline text-4xl md:text-5xl font-bold">{experience.title}</h1>
             
-            <div className="flex items-center gap-4 mt-4 text-muted-foreground">
-            <div className="flex items-center gap-1">
-                <Star className="h-5 w-5 text-accent fill-accent" />
-                <span className="font-bold text-foreground">{experience.rating.average}</span>
-                <span>({experience.rating.count} reviews)</span>
-            </div>
-            <span className="text-muted-foreground">·</span>
-            <div className="flex items-center gap-1">
-                <MapPin className="h-5 w-5" />
-                <span>{localAreaName}, {suburbName}, {countryName}</span>
-            </div>
-            <span className="text-muted-foreground">·</span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-muted-foreground">
+                {CategoryIcon && <div className="flex items-center gap-1"><CategoryIcon className="h-5 w-5" /><span>{experience.category}</span></div>}
+                <span className="text-muted-foreground hidden sm:inline">·</span>
+                <div className="flex items-center gap-1">
+                    <Star className="h-5 w-5 text-accent fill-accent" />
+                    <span className="font-bold text-foreground">{experience.rating.average}</span>
+                    <span>({experience.rating.count} reviews)</span>
+                </div>
+                <span className="text-muted-foreground hidden sm:inline">·</span>
+                <div className="flex items-center gap-1">
+                    <MapPin className="h-5 w-5" />
+                    <span>{localAreaName}, {suburbName}, {countryName}</span>
+                </div>
+                <span className="text-muted-foreground hidden sm:inline">·</span>
                 <span>{durationHours} hours</span>
-                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground hidden sm:inline">·</span>
                 <span>Up to {experience.pricing.maxGuests} guests</span>
             </div>
         </div>
@@ -481,11 +516,14 @@ export default function ExperienceDetailPage() {
                 </Avatar>
                 <div>
                     <h2 className="font-headline text-2xl">Hosted by {host.name}</h2>
-                    {host.level === 'Superhost' && (
-                        <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 gap-1 mt-1">
-                            <Award className="h-4 w-4" /> Superhost
-                        </Badge>
-                    )}
+                    <div className="flex items-center gap-4 mt-1">
+                        {host.profile.culturalBackground && <Badge variant="outline">{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</Badge>}
+                        {host.level === 'Superhost' && (
+                            <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 gap-1">
+                                <Award className="h-4 w-4" /> Superhost
+                            </Badge>
+                        )}
+                    </div>
                 </div>
             </div>
             <Separator/>
@@ -515,7 +553,7 @@ export default function ExperienceDetailPage() {
             <h3 className="font-headline text-2xl">On the Menu</h3>
             <p className="italic text-muted-foreground">"{experience.menu.description}"</p>
             <div className="flex flex-wrap gap-4">
-                <Badge variant="secondary">Cuisine: {experience.menu.cuisine}</Badge>
+                <Badge variant="secondary">{getFlagEmoji(experience.menu.cuisine)} {experience.menu.cuisine}</Badge>
                 <Badge variant="secondary">Spice: {experience.menu.spiceLevel}</Badge>
                 {experience.menu.dietary.map(d => <Badge key={d} variant="outline">{d}</Badge>)}
             </div>

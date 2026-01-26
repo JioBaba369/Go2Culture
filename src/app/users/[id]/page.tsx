@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -10,9 +11,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Twitter, Instagram, Facebook } from 'lucide-react';
+import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon } from 'lucide-react';
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
+import { countries } from '@/lib/location-data';
 
 const getUsername = (url?: string) => {
   if (!url) return '';
@@ -22,6 +24,27 @@ const getUsername = (url?: string) => {
   } catch (e) {
     return url; // fallback to showing the raw value if it's not a valid URL
   }
+};
+
+const getFlagEmoji = (name: string): string => {
+    if (!name) return '';
+    const countryCodeMapping: { [key: string]: string } = {
+        'Italian': 'IT', 'Mexican': 'MX', 'Japanese': 'JP', 'Indian': 'IN',
+        'Thai': 'TH', 'French': 'FR', 'Vietnamese': 'VN', 'Lebanese': 'LB',
+        'Australian': 'AU', 'New Zealand': 'NZ', 'Māori': 'NZ', 'Syrian': 'SY',
+        'Australia': 'AU',
+    };
+    
+    const matchedKey = Object.keys(countryCodeMapping).find(key => name.includes(key));
+    const code = matchedKey ? countryCodeMapping[matchedKey] : '';
+
+    if (!code) return '';
+
+    const codePoints = code
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
 };
 
 
@@ -91,7 +114,7 @@ function UserProfilePage() {
           <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="space-y-2 text-center sm:text-left">
-          <h1 className="font-headline text-4xl font-bold">{user.fullName}</h1>
+          <h1 className="font-headline text-4xl font-bold">{user.fullName} {user.location?.country && getFlagEmoji(countries.find(c => c.id === user.location?.country)?.name || '')}</h1>
           <Badge variant={isHost ? "secondary" : "outline"} className="capitalize text-lg">{user.role}</Badge>
         </div>
       </section>
@@ -117,6 +140,31 @@ function UserProfilePage() {
         </div>
 
         <aside className="md:col-span-1 space-y-6">
+            {isHost && host && (
+                <div className="p-6 border rounded-xl shadow-sm bg-card">
+                    <h3 className="font-headline text-xl font-semibold mb-4">Host Details</h3>
+                    <div className="space-y-4 text-sm">
+                        {host.location.country && (
+                            <div className="flex items-center gap-3">
+                                <Globe className="h-5 w-5 text-muted-foreground" />
+                                <span>From {getFlagEmoji(countries.find(c => c.id === host.location.country)?.name || '')} {countries.find(c => c.id === host.location.country)?.name}</span>
+                            </div>
+                        )}
+                        {host.profile.culturalBackground && (
+                            <div className="flex items-center gap-3">
+                                <UsersIcon className="h-5 w-5 text-muted-foreground" />
+                                <span>{getFlagEmoji(host.profile.culturalBackground)} {host.profile.culturalBackground}</span>
+                            </div>
+                        )}
+                        {host.profile.languages && host.profile.languages.length > 0 && (
+                            <div className="flex items-center gap-3">
+                                <Languages className="h-5 w-5 text-muted-foreground" />
+                                <span>Speaks {host.profile.languages.join(', ')}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
           <div className="p-6 border rounded-xl shadow-sm bg-card">
             <h3 className="font-headline text-xl font-semibold">Contact & Links</h3>
             <div className="space-y-4 mt-4 text-sm">
