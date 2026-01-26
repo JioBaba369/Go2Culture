@@ -33,6 +33,7 @@ import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { countries, suburbs } from "@/lib/location-data";
+import { ADMIN_UID } from "@/lib/auth";
 
 
 const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
@@ -46,13 +47,14 @@ const statusVariantMap: Record<string, 'secondary' | 'default' | 'outline' | 'de
 export default function HostApplicationsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading: isAuthLoading } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
   
   const applicationsQuery = useMemoFirebase(
-    () => (firestore && user ? collection(firestore, 'hostApplications') : null),
-    [firestore, user]
+    () => (firestore && isAdmin ? collection(firestore, 'hostApplications') : null),
+    [firestore, isAdmin]
   );
   const { data: hostApplications, isLoading: areAppsLoading, error } = useCollection<HostApplication>(applicationsQuery);
-  const isLoading = isAuthLoading || (!!user && areAppsLoading);
+  const isLoading = isAuthLoading || areAppsLoading;
 
 
   const renderTableRows = (apps: HostApplication[]) => {

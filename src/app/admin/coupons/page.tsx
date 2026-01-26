@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { Coupon } from "@/lib/types";
 import { format } from 'date-fns';
@@ -66,6 +66,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { deleteCoupon } from "@/lib/admin-actions";
+import { ADMIN_UID } from "@/lib/auth";
 
 const couponSchema = z.object({
     id: z.string().min(3, "Code must be at least 3 characters long.").toUpperCase(),
@@ -215,7 +216,9 @@ function CouponForm({ coupon, onFinished }: { coupon?: Coupon, onFinished: () =>
 
 export default function AdminCouponsPage() {
   const firestore = useFirestore();
-  const couponsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'coupons') : null, [firestore]);
+  const { user } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
+  const couponsQuery = useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'coupons') : null, [firestore, isAdmin]);
   const { data: coupons, isLoading } = useCollection<Coupon>(couponsQuery);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | undefined>(undefined);

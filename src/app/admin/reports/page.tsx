@@ -35,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
 import { updateReportStatus } from "@/lib/admin-actions";
 import { useToast } from "@/hooks/use-toast";
+import { ADMIN_UID } from "@/lib/auth";
 
 const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
   Open: "destructive",
@@ -47,15 +48,16 @@ export default function AdminReportsPage() {
   const { user, isUserLoading: isAuthLoading } = useUser();
   const { toast } = useToast();
   const [updatingReportId, setUpdatingReportId] = React.useState<string | null>(null);
+  const isAdmin = user?.uid === ADMIN_UID;
 
   const reportsQuery = useMemoFirebase(
-    () => (firestore && user ? collection(firestore, 'reports') : null),
-    [firestore, user]
+    () => (firestore && isAdmin ? collection(firestore, 'reports') : null),
+    [firestore, isAdmin]
   );
 
   const { data: reports, isLoading: isReportsLoading } = useCollection<Report>(reportsQuery);
   
-  const isLoading = isAuthLoading || (!!user && isReportsLoading);
+  const isLoading = isAuthLoading || isReportsLoading;
 
   const handleUpdateStatus = async (reportId: string, status: 'Open' | 'In Progress' | 'Resolved') => {
     if (!firestore) return;

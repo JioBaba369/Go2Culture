@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -15,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { Booking, User } from '@/lib/types';
 import { collection } from 'firebase/firestore';
 import { useMemo } from 'react';
@@ -24,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { isPast } from 'date-fns';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Banknote, DollarSign, TrendingUp } from 'lucide-react';
+import { ADMIN_UID } from '@/lib/auth';
 
 type HostPayouts = {
   host: User;
@@ -134,16 +136,18 @@ function PayoutCardMobile({ payout }: { payout: HostPayouts }) {
 
 export default function AdminPayoutsPage() {
   const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
 
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(
-    useMemoFirebase(() => (firestore ? collection(firestore, 'users') : null), [firestore])
+    useMemoFirebase(() => (firestore && isAdmin ? collection(firestore, 'users') : null), [firestore, isAdmin])
   );
 
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(
-    useMemoFirebase(() => (firestore ? collection(firestore, 'bookings') : null), [firestore])
+    useMemoFirebase(() => (firestore && isAdmin ? collection(firestore, 'bookings') : null), [firestore, isAdmin])
   );
 
-  const isLoading = areUsersLoading || areBookingsLoading;
+  const isLoading = isUserLoading || areUsersLoading || areBookingsLoading;
 
   const hostPayouts = useMemo<HostPayouts[]>(() => {
     if (!users || !bookings) return [];

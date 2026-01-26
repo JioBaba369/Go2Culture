@@ -24,6 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDoc } from '@/firebase/firestore/use-doc';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { ADMIN_UID } from '@/lib/auth';
 
 const statusVariantMap: Record<
   string,
@@ -126,10 +127,11 @@ function BookingCardMobile({ booking }: { booking: Booking }) {
 export default function AdminBookingsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(
     useMemoFirebase(
-      () => (firestore && user ? collection(firestore, 'bookings') : null),
-      [firestore, user]
+      () => (firestore && isAdmin ? collection(firestore, 'bookings') : null),
+      [firestore, isAdmin]
     )
   );
 
@@ -206,5 +208,3 @@ export default function AdminBookingsPage() {
     </div>
   );
 }
-
-    

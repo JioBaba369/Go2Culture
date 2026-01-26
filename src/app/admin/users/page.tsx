@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -30,7 +31,7 @@ import { User, Experience, Booking } from "@/lib/types";
 import { MoreHorizontal, Star, Utensils, CalendarCheck, Edit, Eye, UserCheck, UserX, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from 'date-fns';
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -59,9 +60,11 @@ const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "de
 export default function AdminUsersPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { data: users, isLoading: areUsersLoading } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]));
-  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
-  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]));
+  const { user } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
+  const { data: users, isLoading: areUsersLoading } = useCollection<User>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'users') : null, [firestore, isAdmin]));
+  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(useMemoFirebase(() => (firestore ? collection(firestore, 'experiences') : null), [firestore]));
+  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'bookings') : null, [firestore, isAdmin]));
 
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
