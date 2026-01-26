@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase, useUser } from '@/firebase';
-import { doc, collection, runTransaction, serverTimestamp, getDoc, increment, updateDoc } from 'firebase/firestore';
+import { doc, collection, runTransaction, serverTimestamp, getDoc, increment, updateDoc, DocumentReference } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { Experience, Host, Coupon, Booking, User as UserType } from '@/lib/types';
 
@@ -106,21 +106,42 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
 
     try {
       await runTransaction(firestore, async (transaction) => {
-        const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
+        // --- 1. All READS must come first ---
+        const userRef = doc(firestore, 'users', user.uid);
+        const userSnapPromise = transaction.get(userRef);
+
+        const couponRef = appliedCoupon ? doc(firestore, 'coupons', appliedCoupon.id) : null;
+        const couponSnapPromise = couponRef ? transaction.get(couponRef) : Promise.resolve(null);
         
-        if (appliedCoupon) {
-          const couponRef = doc(firestore, 'coupons', appliedCoupon.id);
-          const couponSnap = await transaction.get(couponRef);
-          if (!couponSnap.exists() || !couponSnap.data().isActive) {
-             // Coupon became invalid, proceed without it but notify user
-            toast({ variant: 'destructive', title: 'Coupon Invalid', description: `Coupon "${appliedCoupon.id}" could not be applied.` });
-          } else {
-            transaction.update(couponRef, { timesUsed: increment(1) });
-          }
+        const [userSnap, couponSnap] = await Promise.all([userSnapPromise, couponSnapPromise]);
+
+        // --- 2. LOGIC based on read data ---
+        const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
+        let finalDiscountAmount = 0;
+        let isValidCoupon = false;
+
+        if (couponRef && couponSnap && couponSnap.exists()) {
+            const couponData = couponSnap.data() as Coupon;
+            if (couponData.isActive && (!couponData.usageLimit || couponData.timesUsed < couponData.usageLimit)) {
+                if (!couponData.minSpend || basePrice >= couponData.minSpend) {
+                    finalDiscountAmount = couponData.discountType === 'fixed'
+                        ? couponData.discountValue
+                        : basePrice * (couponData.discountValue / 100);
+                    isValidCoupon = true;
+                }
+            }
         }
         
+        if (appliedCoupon && !isValidCoupon) {
+            // The coupon is invalid at the time of transaction.
+            // We will proceed without it, and the user will be charged the full price.
+            // A toast after the transaction will inform them.
+        }
+
+        const finalPrice = basePrice - finalDiscountAmount;
+
+        // --- 3. All WRITES come last ---
         const newBookingRef = doc(collection(firestore, 'bookings'));
-        
         const bookingData: Partial<Booking> = {
           guestId: user.uid,
           experienceId: experience!.id,
@@ -129,23 +150,32 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
           hostName: host!.name,
           bookingDate: date,
           numberOfGuests: numberOfGuests,
-          totalPrice: basePrice - discountAmount,
+          totalPrice: finalPrice,
           status: isGift || experience?.instantBook ? 'Confirmed' : 'Pending',
           isGift: isGift,
           createdAt: serverTimestamp(),
-          ...(appliedCoupon && { couponId: appliedCoupon.id }),
-          ...(discountAmount > 0 && { discountAmount: discountAmount }),
+          ...(isValidCoupon && appliedCoupon && { couponId: appliedCoupon.id }),
+          ...(isValidCoupon && { discountAmount: finalDiscountAmount }),
         };
 
+        // Write booking
         transaction.set(newBookingRef, bookingData);
 
-        // Update user's termsAccepted field if it's not already set
-        const userRef = doc(firestore, 'users', user.uid);
-        const userSnap = await transaction.get(userRef);
+        // Update coupon if used
+        if (isValidCoupon && couponRef) {
+            transaction.update(couponRef, { timesUsed: increment(1) });
+        }
+        
+        // Update user if they haven't accepted terms
         if (userSnap.exists() && !userSnap.data().termsAccepted) {
             transaction.update(userRef, { termsAccepted: true });
         }
       });
+      
+      // If a coupon was applied but turned out to be invalid during the transaction, inform the user now.
+      if (appliedCoupon && discountAmount > 0 && !(await getDoc(doc(firestore, 'coupons', appliedCoupon.id))).data()?.isActive) {
+           toast({ variant: 'destructive', title: 'Coupon Invalid', description: `Coupon "${appliedCoupon.id}" could not be applied.` });
+      }
 
       toast({
         title: isGift ? 'Gift Purchased!' : (experience?.instantBook ? 'Booking Confirmed!' : 'Booking Requested!'),
