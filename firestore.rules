@@ -83,8 +83,8 @@ service cloud.firestore {
     }
     
     match /conversations/{bookingId} {
-      allow read, update: if isSignedIn() && request.auth.uid in resource.data.participants;
-      allow create: if isSignedIn() && request.auth.uid in request.resource.data.participants;
+      allow read, update: if (isSignedIn() && request.auth.uid in resource.data.participants) || isAdmin();
+      allow create: if (isSignedIn() && request.auth.uid in request.resource.data.participants) || isAdmin();
     }
 
     match /sponsors/{sponsorId} {
