@@ -1,10 +1,9 @@
-
 'use client';
 
 import React, { useState } from 'react';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, where, query } from 'firebase/firestore';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from 'firebase/auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,8 +17,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck } from 'lucide-react';
-import { User, Host } from '@/lib/types';
+import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck, Trophy, Award } from 'lucide-react';
+import { User, Host, Experience } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -292,9 +291,9 @@ export default function ProfilePage() {
               <AvatarFallback className="text-3xl">{userProfile?.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-headline text-4xl font-bold">{userProfile.fullName}</h1>
-              {isHost && host?.verification?.idVerified && (
+             <div className="flex items-center gap-2">
+                <h1 className="font-headline text-4xl font-bold">{userProfile.fullName}</h1>
+                {isHost && host?.verification?.idVerified && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
@@ -307,15 +306,15 @@ export default function ProfilePage() {
                   </TooltipProvider>
                 )}
             </div>
-            <div className="flex flex-wrap items-center gap-x-4 mt-1">
-              {userProfile.brandName && <p className="text-lg text-muted-foreground">{userProfile.brandName}</p>}
-              {userProfile.location?.country && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                      {userProfile.brandName && <span className="text-sm mx-1">•</span>}
-                      {getFlagFromCountryCode(userProfile.location.country)}
-                      <span>From {countryName}</span>
-                  </div>
-              )}
+            <div className="flex flex-wrap items-center gap-x-4 mt-1 text-muted-foreground">
+                {userProfile.brandName && (<p className="text-lg">{userProfile.brandName}</p>)}
+                {userProfile.location?.country && (
+                    <div className="flex items-center gap-1.5">
+                        {userProfile.brandName && <span className="text-sm mx-1">•</span>}
+                        {getFlagFromCountryCode(userProfile.location.country)}
+                        <span>From {countryName}</span>
+                    </div>
+                )}
             </div>
           </div>
         </div>
@@ -532,8 +531,8 @@ export default function ProfilePage() {
               </form>
           </Form>
 
-          {areExperiencesLoading ? <Skeleton className="h-80 w-full" /> : experiences && experiences.length > 0 && (
-              <div className="space-y-4">
+           {areExperiencesLoading ? <Skeleton className="h-80 w-full" /> : experiences && experiences.length > 0 && (
+                <div className="space-y-4">
                   <h2 className="font-headline text-2xl font-semibold">Your Experiences</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       {experiences.map(exp => <ExperienceCard key={exp.id} experience={exp} />)}
@@ -543,6 +542,81 @@ export default function ProfilePage() {
         </div>
       
         <div className="md:col-span-1 space-y-8">
+             {isHost && host ? (
+                <div className="p-6 border rounded-xl shadow-sm bg-card">
+                    <h3 className="font-headline text-xl font-semibold mb-4">About {userProfile.fullName.split(' ')[0]}</h3>
+                    
+                    {host.profile.bio && (
+                        <p className="text-muted-foreground leading-relaxed mb-4">{host.profile.bio}</p>
+                    )}
+
+                     <div className="space-y-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4">
+                           {host.level === 'Superhost' && (
+                                <div className="flex items-center gap-2">
+                                <Award className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                                <span>Superhost</span>
+                                </div>
+                            )}
+                        </div>
+                        {host.profile.culturalBackground && (
+                            <div className="flex items-center gap-3">
+                            <Flag className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                            <span>{host.profile.culturalBackground}</span>
+                            </div>
+                        )}
+                        {(userProfile.nativeLanguage || (host.profile.languages && host.profile.languages.length > 0)) && (
+                            <div className="flex items-start gap-3">
+                                <Globe className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div>
+                                {userProfile.nativeLanguage && <p><span className="font-semibold">Native:</span> <span className="capitalize text-muted-foreground">{userProfile.nativeLanguage}</span></p>}
+                                {host.profile.languages && host.profile.languages.length > 0 && <p className={cn(userProfile.nativeLanguage && 'mt-1')}><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{host.profile.languages.join(', ')}</span></p>}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    {host.profile.achievements && host.profile.achievements.length > 0 && (
+                        <>
+                        <Separator className="my-4" />
+                        <h4 className="font-semibold mb-2 text-sm">Achievements</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {host.profile.achievements.map((achievement) => (
+                            <Badge key={achievement} variant="outline" className="font-normal py-1">
+                                <Trophy className="h-4 w-4 mr-2 text-amber-500"/>
+                                {achievement}
+                            </Badge>
+                            ))}
+                        </div>
+                        </>
+                    )}
+                    {host.profile.hostingStyles && host.profile.hostingStyles.length > 0 && (
+                        <>
+                        <Separator className="my-4" />
+                        <h4 className="font-semibold mb-2 text-sm">Hosting Style</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {host.profile.hostingStyles.map(style => <Badge key={style} variant="secondary">{style}</Badge>)}
+                        </div>
+                        </>
+                    )}
+                </div>
+            ) : (
+                <div className="p-6 border rounded-xl shadow-sm bg-card">
+                    <h3 className="font-headline text-xl font-semibold mb-4">About</h3>
+                    <div className="space-y-4 text-sm">
+                        {userProfile.nativeLanguage ? (
+                        <div className="flex items-start gap-3">
+                            <Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
+                            <div>
+                            <p><span className="font-semibold">Native Language:</span> <span className="capitalize text-muted-foreground">{userProfile.nativeLanguage}</span></p>
+                            </div>
+                        </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">This user hasn't shared many details yet.</p>
+                        )}
+                    </div>
+                </div>
+            )}
+            
             <Card>
                 <CardHeader>
                 <CardTitle>Account Information</CardTitle>
@@ -619,6 +693,39 @@ export default function ProfilePage() {
                     </form>
                 </Form>
             </Card>
+
+            <div className="p-6 border rounded-xl shadow-sm bg-card">
+                <h3 className="font-headline text-xl font-semibold">Contact & Links</h3>
+                <div className="space-y-4 mt-4 text-sm">
+                    {userProfile.website && (
+                        <a href={userProfile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Globe className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">{userProfile.website.replace(/^https?:\/\//, '')}</span>
+                        </a>
+                    )}
+                    {userProfile.socialMedia?.twitter && (
+                        <a href={userProfile.socialMedia.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Twitter className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">@{getUsername(userProfile.socialMedia.twitter)}</span>
+                        </a>
+                    )}
+                    {userProfile.socialMedia?.instagram && (
+                        <a href={userProfile.socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Instagram className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">@{getUsername(userProfile.socialMedia.instagram)}</span>
+                        </a>
+                    )}
+                    {userProfile.socialMedia?.facebook && (
+                        <a href={userProfile.socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-primary transition-colors group">
+                            <Facebook className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            <span className="truncate">{getUsername(userProfile.socialMedia.facebook)}</span>
+                        </a>
+                    )}
+                    {!userProfile.website && !userProfile.socialMedia?.twitter && !userProfile.socialMedia?.instagram && !userProfile.socialMedia?.facebook && (
+                        <p className="text-muted-foreground">No social links provided.</p>
+                    )}
+                </div>
+            </div>
         </div>
       </div>
     </div>
