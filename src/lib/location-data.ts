@@ -314,6 +314,7 @@ export const suburbs = [
 // Note: In the app's context, "localAreas" are the suburbs within a city.
 export const localAreas = [
   // Sydney (SYD)
+  { id: 'CBD-SYD', name: 'Sydney CBD', suburbId: 'SYD' },
   { id: 'SURRY', name: 'Surry Hills', suburbId: 'SYD' },
   { id: 'BONDI', name: 'Bondi', suburbId: 'SYD' },
   { id: 'NEWTOWN_SYD', name: 'Newtown', suburbId: 'SYD' },
