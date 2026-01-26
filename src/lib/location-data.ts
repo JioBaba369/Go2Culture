@@ -59,24 +59,33 @@ export const localAreas = [
    { id: "NEWTOWN", name: "Newtown", suburbId: "SYD" },
    { id: "HARRISPARK", name: "Harris Park", suburbId: "SYD"},
    { id: "BONDI", name: "Bondi", suburbId: "SYD" },
+   { id: "PARRAMATTA", name: "Parramatta", suburbId: "SYD" },
+   { id: "MANLY", name: "Manly", suburbId: "SYD" },
+   { id: "CHATSWOOD", name: "Chatswood", suburbId: "SYD" },
 
    // Melbourne
    { id: "FITZROY", name: "Fitzroy", suburbId: "MEL" },
    { id: "CARLTON", name: "Carlton", suburbId: "MEL" },
    { id: "STKILDA", name: "St Kilda", suburbId: "MEL" },
    { id: "CBD-MEL", name: "CBD", suburbId: "MEL" },
+   { id: "RICHMOND", name: "Richmond", suburbId: "MEL" },
+   { id: "SOUTHYARRA", name: "South Yarra", suburbId: "MEL" },
+   { id: "BRUNSWICK", name: "Brunswick", suburbId: "MEL" },
 
    // Brisbane
    { id: "FORTVAL", name: "Fortitude Valley", suburbId: "BRI" },
    { id: "WESTEND", name: "West End", suburbId: "BRI" },
+   { id: "SOUTHBANK", name: "South Bank", suburbId: "BRI" },
 
    // Perth
    { id: "FREMANTLE", name: "Fremantle", suburbId: "PER" },
    { id: "CBD-PER", name: "CBD", suburbId: "PER" },
+   { id: "NORTHBRIDGE", name: "Northbridge", suburbId: "PER" },
 
    // Adelaide
    { id: "CBD-ADL", name: "CBD", suburbId: "ADL" },
    { id: "NORWOOD", name: "Norwood", suburbId: "ADL" },
+   { id: "GLENELG", name: "Glenelg", suburbId: "ADL" },
 
    // Canberra
    { id: "BRADDON", name: "Braddon", suburbId: "CBR" },
