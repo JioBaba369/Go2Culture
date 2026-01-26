@@ -243,9 +243,20 @@ export type HostApplication = {
   profile: {
     profilePhotoId: string;
     bio: string;
+    hostingStyles: string[];
+    expertise: string;
+    hostingExperienceLevel: 'professional' | 'passionate';
+    website?: string;
+    socialMedia?: {
+      facebook?: string;
+      instagram?: string;
+      twitter?: string;
+      tripadvisor?: string;
+      other?: string;
+    };
+    // Kept for data consistency even if not in the form
     languages: string;
     culturalBackground: string;
-    hostingStyles: string[];
   };
 
   verification: {

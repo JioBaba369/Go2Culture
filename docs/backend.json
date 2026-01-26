@@ -226,10 +226,21 @@
           "type": "object",
           "properties": {
             "profilePhotoId": { "type": "string" },
-            "bio": { "type": "string" },
-            "languages": { "type": "string" },
-            "culturalBackground": { "type": "string" },
-            "hostingStyles": { "type": "array", "items": { "type": "string" } }
+            "bio": { "type": "string", "description": "Host's story and food journey." },
+            "hostingStyles": { "type": "array", "items": { "type": "string" } },
+            "expertise": { "type": "string", "description": "Details about culinary background, event hosting experience, and professional training." },
+            "hostingExperienceLevel": { "type": "string", "enum": ["professional", "passionate"] },
+            "website": { "type": "string", "format": "uri" },
+            "socialMedia": {
+              "type": "object",
+              "properties": {
+                "facebook": { "type": "string", "format": "uri" },
+                "instagram": { "type": "string", "format": "uri" },
+                "twitter": { "type": "string", "format": "uri" },
+                "tripadvisor": { "type": "string", "format": "uri" },
+                "other": { "type": "string", "format": "uri" }
+              }
+            }
           }
         },
         "verification": {

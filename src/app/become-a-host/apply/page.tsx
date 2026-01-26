@@ -49,12 +49,20 @@ const hostingStyleOptions = [
 const formSchema = z.object({
   profile: z.object({
     profilePhoto: z.any().optional(),
-    bio: z.string().min(50, "Please tell us a bit more about yourself (min. 50 characters)."),
-    languages: z.string().min(2, "Please list the languages you speak."),
-    culturalBackground: z.string().min(2, "What is your cultural background?"),
+    bio: z.string().min(50, "Please share your story and food journey (min. 50 characters)."),
     hostingStyles: z.array(z.string()).refine(value => value.some(item => item), {
       message: "You have to select at least one hosting style.",
     }),
+    expertise: z.string().min(50, "Please tell us about your expertise (min. 50 characters)."),
+    hostingExperienceLevel: z.enum(['professional', 'passionate'], { required_error: "Please select your hosting experience level." }),
+    website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+    socialMedia: z.object({
+      facebook: z.string().optional(),
+      instagram: z.string().optional(),
+      twitter: z.string().optional(),
+      tripadvisor: z.string().optional(),
+      other: z.string().optional(),
+    }).optional(),
   }),
   
   experience: z.object({
@@ -159,7 +167,7 @@ const steps = [
     {
         id: 'Step 1',
         name: 'Host Profile',
-        fields: ['profile.bio', 'profile.languages', 'profile.culturalBackground', 'profile.hostingStyles'],
+        fields: ['profile.bio', 'profile.hostingStyles', 'profile.expertise', 'profile.hostingExperienceLevel'],
     },
     {
         id: 'Step 2',
@@ -209,8 +217,9 @@ export default function BecomeAHostPage() {
       profile: {
         hostingStyles: [],
         bio: '',
-        culturalBackground: '',
-        languages: '',
+        expertise: '',
+        website: '',
+        socialMedia: {},
       },
       experience: {
         title: '',
@@ -295,6 +304,10 @@ export default function BecomeAHostPage() {
         ...restOfValues
       } = values;
 
+      // Extract cultural background and languages if they were part of the user object
+      const userDoc = await getDoc(userDocRef!);
+      const userData = userDoc.data();
+
       const applicationData: Omit<HostApplication, 'id'> = {
         ...restOfValues,
         userId: user.uid,
@@ -302,6 +315,9 @@ export default function BecomeAHostPage() {
         profile: {
           ...profileData,
           profilePhotoId: "guest-1", // Placeholder
+          // Ensure these fields are passed through if they exist, otherwise use a default
+          languages: userData?.languages?.join(', ') || '',
+          culturalBackground: userData?.culturalBackground || '',
         },
         experience: {
           ...experienceData,
