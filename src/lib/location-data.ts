@@ -435,7 +435,88 @@ export const localAreas = [
   { id: 'FRANKTON', name: 'Frankton', suburbId: 'ZQN' },
   { id: 'ARROWTOWN', name: 'Arrowtown', suburbId: 'ZQN' },
   { id: 'LAKEHAYES', name: 'Lake Hayes', suburbId: 'ZQN' },
+
+  // New York City (NYC)
+  { id: 'MANHATTAN', name: 'Manhattan', suburbId: 'NYC' },
+  { id: 'BROOKLYN', name: 'Brooklyn', suburbId: 'NYC' },
+  { id: 'QUEENS', name: 'Queens', suburbId: 'NYC' },
+  { id: 'BRONX', name: 'The Bronx', suburbId: 'NYC' },
+  { id: 'STATENISLAND', name: 'Staten Island', suburbId: 'NYC' },
+
+  // Los Angeles (LA)
+  { id: 'HOLLYWOOD', name: 'Hollywood', suburbId: 'LA' },
+  { id: 'SANTAMONICA', name: 'Santa Monica', suburbId: 'LA' },
+  { id: 'BEVERLYHILLS', name: 'Beverly Hills', suburbId: 'LA' },
+  { id: 'VENICE', name: 'Venice', suburbId: 'LA' },
+  { id: 'DOWNTOWNLA', name: 'Downtown LA', suburbId: 'LA' },
+
+  // Chicago (CHI)
+  { id: 'THELOOP', name: 'The Loop', suburbId: 'CHI' },
+  { id: 'LINCOLNPARK', name: 'Lincoln Park', suburbId: 'CHI' },
+  { id: 'WICKERPARK', name: 'Wicker Park', suburbId: 'CHI' },
+  { id: 'RIVERNORTH', name: 'River North', suburbId: 'CHI' },
+
+  // Houston (HOU)
+  { id: 'DOWNTOWNHOU', name: 'Downtown', suburbId: 'HOU' },
+  { id: 'GALLERIA', name: 'Galleria-Uptown', suburbId: 'HOU' },
+  { id: 'MIDTOWNHOU', name: 'Midtown', suburbId: 'HOU' },
+  { id: 'MONTROSE', name: 'Montrose', suburbId: 'HOU' },
+
+  // Miami (MIA)
+  { id: 'SOUTHBEACH', name: 'South Beach', suburbId: 'MIA' },
+  { id: 'WYNWOOD', name: 'Wynwood', suburbId: 'MIA' },
+  { id: 'BRICKELL', name: 'Brickell', suburbId: 'MIA' },
+  { id: 'LITTLEHAVANA', name: 'Little Havana', suburbId: 'MIA' },
+
+  // Toronto (TOR)
+  { id: 'DOWNTOWNTOR', name: 'Downtown', suburbId: 'TOR' },
+  { id: 'YORKVILLE', name: 'Yorkville', suburbId: 'TOR' },
+  { id: 'THEANNEX', name: 'The Annex', suburbId: 'TOR' },
+  { id: 'QUEENWEST', name: 'Queen West', suburbId: 'TOR' },
+
+  // Montreal (MTL)
+  { id: 'OLDMTL', name: 'Old Montreal', suburbId: 'MTL' },
+  { id: 'LEPLATEAU', name: 'Le Plateau', suburbId: 'MTL' },
+  { id: 'MILEEND', name: 'Mile End', suburbId: 'MTL' },
+  { id: 'GRIFFINTOWN', name: 'Griffintown', suburbId: 'MTL' },
+
+  // Vancouver (VAN)
+  { id: 'GASTOWN', name: 'Gastown', suburbId: 'VAN' },
+  { id: 'YALETOWN', name: 'Yaletown', suburbId: 'VAN' },
+  { id: 'KITSILANO', name: 'Kitsilano', suburbId: 'VAN' },
+  { id: 'MAINSTREET', name: 'Main Street', suburbId: 'VAN' },
+
+  // Calgary (CAL)
+  { id: 'BELTLINE', name: 'Beltline', suburbId: 'CAL' },
+  { id: 'KENSINGTON', name: 'Kensington', suburbId: 'CAL' },
+  { id: 'INGLEWOOD', name: 'Inglewood', suburbId: 'CAL' },
+  { id: 'STEPHENAVE', name: 'Stephen Avenue', suburbId: 'CAL' },
+
+  // Winnipeg (WPG)
+  { id: 'THEFORKS', name: 'The Forks', suburbId: 'WPG' },
+  { id: 'EXCHANGEDIST', name: 'Exchange District', suburbId: 'WPG' },
+  { id: 'OSBORNEVILLAGE', name: 'Osborne Village', suburbId: 'WPG' },
+
+  // London (LDN)
+  { id: 'SOHO', name: 'Soho', suburbId: 'LDN' },
+  { id: 'SHOREDITCH', name: 'Shoreditch', suburbId: 'LDN' },
+  { id: 'NOTTINGHILL', name: 'Notting Hill', suburbId: 'LDN' },
+  { id: 'COVENTGARDEN', name: 'Covent Garden', suburbId: 'LDN' },
+  { id: 'SOUTHKENSINGTON', name: 'South Kensington', suburbId: 'LDN' },
+
+  // Edinburgh (EDH)
+  { id: 'OLDTOWN', name: 'Old Town', suburbId: 'EDH' },
+  { id: 'NEWTOWNEDH', name: 'New Town', suburbId: 'EDH' },
+  { id: 'LEITH', name: 'Leith', suburbId: 'EDH' },
+  { id: 'STOCKBRIDGE', name: 'Stockbridge', suburbId: 'EDH' },
+
+  // Cardiff (CDF)
+  { id: 'CARDIFFBAY', name: 'Cardiff Bay', suburbId: 'CDF' },
+  { id: 'CITYCENTRE', name: 'City Centre', suburbId: 'CDF' },
+  { id: 'PONTCANNA', name: 'Pontcanna', suburbId: 'CDF' },
+
+  // Belfast (BFS)
+  { id: 'CATHEDRALQTR', name: 'Cathedral Quarter', suburbId: 'BFS' },
+  { id: 'TITANICQTR', name: 'Titanic Quarter', suburbId: 'BFS' },
+  { id: 'QUEENSQTR', name: 'Queen\'s Quarter', suburbId: 'BFS' },
 ];
-
-
-    
