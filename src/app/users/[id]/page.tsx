@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -11,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon } from 'lucide-react';
+import { Globe, Twitter, Instagram, Facebook, Languages, Users as UsersIcon, ShieldCheck, Award } from 'lucide-react';
 import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
@@ -144,6 +142,18 @@ function UserProfilePage() {
                 <div className="p-6 border rounded-xl shadow-sm bg-card">
                     <h3 className="font-headline text-xl font-semibold mb-4">Host Details</h3>
                     <div className="space-y-4 text-sm">
+                         {host.verification?.idVerified && (
+                             <div className="flex items-center gap-3">
+                                <ShieldCheck className="h-5 w-5 text-green-600" />
+                                <span>Verified Host</span>
+                            </div>
+                        )}
+                        {host.level === 'Superhost' && (
+                            <div className="flex items-center gap-3">
+                                <Award className="h-5 w-5 text-amber-500" />
+                                <span>Superhost</span>
+                            </div>
+                        )}
                         {host.location.country && (
                             <div className="flex items-center gap-3">
                                 <Globe className="h-5 w-5 text-muted-foreground" />
@@ -163,6 +173,15 @@ function UserProfilePage() {
                             </div>
                         )}
                     </div>
+                     {host.profile.hostingStyles && host.profile.hostingStyles.length > 0 && (
+                      <>
+                        <Separator className="my-4" />
+                        <h4 className="font-semibold mb-2 text-sm">Hosting Style</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {host.profile.hostingStyles.map(style => <Badge key={style} variant="secondary">{style}</Badge>)}
+                        </div>
+                      </>
+                    )}
                 </div>
             )}
           <div className="p-6 border rounded-xl shadow-sm bg-card">
