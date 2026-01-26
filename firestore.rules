@@ -76,7 +76,8 @@ service cloud.firestore {
     /* ───────────────── Experiences ───────────────── */
 
     match /experiences/{experienceId} {
-      allow get, list: if true;
+      allow get: if true;
+      allow list: if true;
       allow create: if isSignedIn();
 
       allow update, delete: if isSignedIn()
@@ -86,18 +87,16 @@ service cloud.firestore {
     /* ───────────────── Bookings ───────────────── */
 
     match /bookings/{bookingId} {
-      allow read: if isBookingParticipant(resource.data) || isAdmin();
+      allow get: if isBookingParticipant(resource.data) || isAdmin();
+      allow list: if isSignedIn(); // Client-side queries must filter by user ID
 
-      // Create booking
       allow create: if isSignedIn()
         && request.resource.data.guestId == request.auth.uid
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
             .data.termsAccepted == true;
 
-      // Update booking
       allow update: if isBookingParticipant(resource.data) || isAdmin();
 
-      // Prevent deletion of transaction history
       allow delete: if isAdmin();
     }
 
@@ -118,7 +117,8 @@ service cloud.firestore {
     /* ───────────────── Messages ───────────────── */
 
     match /messages/{messageId} {
-      allow read: if isParticipant(resource.data) || isAdmin();
+      allow get: if isAdmin() || isParticipant(resource.data);
+      allow list: if isSignedIn(); // Client-side queries must filter by user ID
 
       allow create: if isSignedIn()
         && request.resource.data.senderId == request.auth.uid
@@ -136,7 +136,8 @@ service cloud.firestore {
     /* ───────────────── Conversations ───────────────── */
 
     match /conversations/{conversationId} {
-      allow read: if isParticipant(resource.data) || isAdmin();
+      allow get: if isAdmin() || isParticipant(resource.data);
+      allow list: if isSignedIn(); // Client-side queries must filter by user ID
 
       allow create: if isSignedIn()
         && hasParticipants(request.resource.data)
