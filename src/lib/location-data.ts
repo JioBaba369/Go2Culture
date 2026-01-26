@@ -249,6 +249,26 @@ export const regions = [
   { id: 'OTA', name: 'Otago', countryId: 'NZ' },
   { id: 'WKO', name: 'Waikato', countryId: 'NZ' },
   { id: 'BOP', name: 'Bay of Plenty', countryId: 'NZ' },
+  
+  // United States
+  { id: 'CA', name: 'California', countryId: 'US' },
+  { id: 'NY', name: 'New York', countryId: 'US' },
+  { id: 'TX', name: 'Texas', countryId: 'US' },
+  { id: 'FL', name: 'Florida', countryId: 'US' },
+  { id: 'IL', name: 'Illinois', countryId: 'US' },
+
+  // Canada
+  { id: 'ON', name: 'Ontario', countryId: 'CA' },
+  { id: 'QC', name: 'Quebec', countryId: 'CA' },
+  { id: 'BC', name: 'British Columbia', countryId: 'CA' },
+  { id: 'AB', name: 'Alberta', countryId: 'CA' },
+  { id: 'MB', name: 'Manitoba', countryId: 'CA' },
+
+  // United Kingdom
+  { id: 'ENG', name: 'England', countryId: 'GB' },
+  { id: 'SCT', name: 'Scotland', countryId: 'GB' },
+  { id: 'WLS', name: 'Wales', countryId: 'GB' },
+  { id: 'NIR', name: 'Northern Ireland', countryId: 'GB' },
 ];
 
 // Note: In the app's context, "suburbs" are treated as major cities.
