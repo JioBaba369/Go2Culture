@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -15,6 +14,7 @@ import { ExperienceCard } from '@/components/experience-card';
 import { Separator } from '@/components/ui/separator';
 import { countries } from '@/lib/location-data';
 import { getFlagEmoji, getFlagFromCountryCode } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 const getUsername = (url?: string) => {
   if (!url) return '';
@@ -83,6 +83,11 @@ function UserProfilePage() {
 
   const userImage = PlaceHolderImages.find(p => p.id === user.profilePhotoId);
   const isHost = user.role === 'host' || user.role === 'both';
+  
+  const nativeLanguage = user.nativeLanguage;
+  const otherLanguages = host?.profile.languages?.filter(
+      (lang) => lang.toLowerCase() !== nativeLanguage?.toLowerCase()
+  ) || [];
 
   return (
     <div className="py-12 space-y-12">
@@ -125,18 +130,15 @@ function UserProfilePage() {
             <div className="p-6 border rounded-xl shadow-sm bg-card">
               <h3 className="font-headline text-xl font-semibold mb-4">About</h3>
               <div className="space-y-4 text-sm">
-                {user.nativeLanguage && (
-                  <div className="flex items-center gap-3">
-                    <Languages className="h-5 w-5 text-muted-foreground" />
-                    <span className="capitalize">Native language: {user.nativeLanguage}</span>
-                  </div>
-                )}
-                 {host?.profile.languages && host.profile.languages.length > 0 && (
-                    <div className="flex items-center gap-3">
-                        <Languages className="h-5 w-5 text-muted-foreground" />
-                        <span>Also speaks {host.profile.languages.join(', ')}</span>
+                  {(nativeLanguage || otherLanguages.length > 0) && (
+                    <div className="flex items-start gap-3">
+                      <Languages className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div>
+                        {nativeLanguage && <p><span className="font-semibold">Native:</span> <span className="capitalize text-muted-foreground">{nativeLanguage}</span></p>}
+                        {otherLanguages.length > 0 && <p className={cn(nativeLanguage && 'mt-1')}><span className="font-semibold">Speaks:</span> <span className="capitalize text-muted-foreground">{otherLanguages.join(', ')}</span></p>}
+                      </div>
                     </div>
-                )}
+                  )}
               </div>
             </div>
 

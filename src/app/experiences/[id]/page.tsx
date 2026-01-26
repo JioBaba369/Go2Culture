@@ -8,7 +8,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Utensils, Home, Wind, Accessibility, AlertTriangle, Award, Trophy, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, PartyPopper, Brush, Music, Landmark } from "lucide-react";
+import { Star, MapPin, Utensils, Home, Wind, Accessibility, AlertTriangle, Award, Trophy, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, PartyPopper, Brush, Music, Landmark, Dog, Cigarette } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, doc, query, where, limit } from "firebase/firestore";
@@ -31,6 +31,17 @@ const categoryIcons: Record<string, React.ElementType> = {
     'Music & Dance': Music,
     'History & Walks': Landmark,
 };
+
+const AmenityItem = ({ icon: Icon, children }: { icon: React.ElementType, children: React.ReactNode }) => {
+  if (!children) return null;
+  return (
+    <div className="flex items-start gap-3">
+      <Icon className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+      <span>{children}</span>
+    </div>
+  );
+};
+
 
 export default function ExperienceDetailPage() {
   const params = useParams();
@@ -219,17 +230,17 @@ export default function ExperienceDetailPage() {
           {/* HOME SETUP */}
           <div className="space-y-4">
             <h3 className="font-headline text-2xl">About your host's home</h3>
-             <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2"><Home className="h-5 w-5 text-primary" /><span>{host.homeSetup.homeType} with {host.homeSetup.seating} seating</span></div>
-                <div className="flex items-center gap-2"><Home className="h-5 w-5 text-primary" /><span>Pets live here: {host.homeSetup.pets ? 'Yes' : 'No'}</span></div>
-                <div className="flex items-center gap-2"><Wind className="h-5 w-5 text-primary" /><span>Smoking allowed: {host.homeSetup.smoking ? 'Yes' : 'No'}</span></div>
-                {host.homeSetup.accessibility && <div className="flex items-center gap-2"><Accessibility className="h-5 w-5 text-primary" /><span>{host.homeSetup.accessibility}</span></div>}
-                {host.homeSetup.familyFriendly && <div className="flex items-center gap-2"><Baby className="h-5 w-5 text-primary" /><span>Family/Kid friendly</span></div>}
-                {host.homeSetup.elevator && <div className="flex items-center gap-2"><ArrowUpFromLine className="h-5 w-5 text-primary" /><span>Elevator in building</span></div>}
-                {host.homeSetup.airConditioning && <div className="flex items-center gap-2"><AirVent className="h-5 w-5 text-primary" /><span>Air conditioning</span></div>}
-                {host.homeSetup.wifi && <div className="flex items-center gap-2"><Wifi className="h-5 w-5 text-primary" /><span>WiFi available</span></div>}
-                {host.homeSetup.taxiNearby && <div className="flex items-center gap-2"><Car className="h-5 w-5 text-primary" /><span>Taxi station nearby</span></div>}
-                {host.homeSetup.publicTransportNearby && <div className="flex items-center gap-2"><Bus className="h-5 w-5 text-primary" /><span>Public transport nearby</span></div>}
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <AmenityItem icon={Home}>{host.homeSetup.homeType} with {host.homeSetup.seating} seating</AmenityItem>
+                {host.homeSetup.pets && <AmenityItem icon={Dog}>Pets are welcome</AmenityItem>}
+                {host.homeSetup.smoking && <AmenityItem icon={Cigarette}>Smoking is allowed</AmenityItem>}
+                {host.homeSetup.accessibility && <AmenityItem icon={Accessibility}>{host.homeSetup.accessibility}</AmenityItem>}
+                {host.homeSetup.familyFriendly && <AmenityItem icon={Baby}>Family & kid friendly</AmenityItem>}
+                {host.homeSetup.elevator && <AmenityItem icon={ArrowUpFromLine}>Elevator in building</AmenityItem>}
+                {host.homeSetup.airConditioning && <AmenityItem icon={AirVent}>Air conditioning</AmenityItem>}
+                {host.homeSetup.wifi && <AmenityItem icon={Wifi}>WiFi available</AmenityItem>}
+                {host.homeSetup.taxiNearby && <AmenityItem icon={Car}>Taxi station nearby</AmenityItem>}
+                {host.homeSetup.publicTransportNearby && <AmenityItem icon={Bus}>Public transport nearby</AmenityItem>}
              </div>
           </div>
           
