@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, forwardRef } from "react";
@@ -10,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, Gift } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, Gift, Zap } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, where, limit, runTransaction, getDoc, serverTimestamp, increment } from "firebase/firestore";
@@ -216,7 +217,7 @@ export default function ExperienceDetailPage() {
           bookingDate: date,
           numberOfGuests: numberOfGuests,
           totalPrice: basePrice - discountAmount,
-          status: 'Pending',
+          status: experience?.instantBook ? 'Confirmed' : 'Pending',
           createdAt: serverTimestamp(),
         };
 
@@ -232,8 +233,10 @@ export default function ExperienceDetailPage() {
       });
 
       toast({
-        title: 'Booking Requested!',
-        description: `Your request for "${experience!.title}" has been sent to the host. You'll be notified upon confirmation.`,
+        title: experience?.instantBook ? 'Booking Confirmed!' : 'Booking Requested!',
+        description: experience?.instantBook
+            ? `Your booking for "${experience!.title}" is confirmed. Enjoy your experience!`
+            : `Your request for "${experience!.title}" has been sent to the host. You'll be notified upon confirmation.`,
       });
       setDate(undefined);
       setNumberOfGuests(1);
@@ -600,9 +603,16 @@ export default function ExperienceDetailPage() {
                         <span className="text-2xl font-bold">${experience.pricing.pricePerGuest}</span>
                         <span className="text-muted-foreground"> / person</span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm">
-                        <Star className="h-4 w-4" /> 
-                        <span>{experience.rating.average} ({experience.rating.count})</span>
+                    <div className="flex items-center gap-2">
+                        {experience.instantBook && (
+                            <Badge variant="default" className="gap-1 bg-blue-500 hover:bg-blue-600">
+                                <Zap className="h-4 w-4" /> Instant Book
+                            </Badge>
+                        )}
+                        <div className="flex items-center gap-1 text-sm">
+                            <Star className="h-4 w-4" /> 
+                            <span>{experience.rating.average} ({experience.rating.count})</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -690,7 +700,7 @@ export default function ExperienceDetailPage() {
                             disabled={!date || isBooking || isGifting}
                             onClick={handleBooking}
                         >
-                            {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
+                            {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : (experience.instantBook ? 'Book' : 'Request to Book')}
                         </Button>
 
                         <div className="relative flex items-center justify-center my-2">
@@ -713,7 +723,9 @@ export default function ExperienceDetailPage() {
                             Gift this experience
                         </Button>
 
-                        <p className="text-xs text-center text-muted-foreground">You won't be charged until the host confirms</p>
+                        <p className="text-xs text-center text-muted-foreground">
+                            {experience.instantBook ? 'You will be charged immediately' : "You won't be charged until the host confirms"}
+                        </p>
                     </div>
                 )}
              </div>

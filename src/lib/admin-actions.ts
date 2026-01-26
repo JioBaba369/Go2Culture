@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -103,6 +104,7 @@ export async function approveApplication(
       mainImageId: application.experience.photos.mainImageId,
       thumbnailImageIds: [],
     },
+    instantBook: false,
     status: 'live',
     rating: { average: 0, count: 0 },
     createdAt: serverTimestamp(),

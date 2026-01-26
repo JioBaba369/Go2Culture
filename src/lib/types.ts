@@ -144,6 +144,7 @@ export type Experience = {
     thumbnailImageIds?: string[];
   };
   status: 'draft' | 'live' | 'paused';
+  instantBook?: boolean;
   rating: {
     average: number;
     count: number;

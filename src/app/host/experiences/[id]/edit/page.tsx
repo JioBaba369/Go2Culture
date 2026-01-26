@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -23,6 +24,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Switch } from '@/components/ui/switch';
 
 const experienceSchema = z.object({
   title: z.string().min(5, "Experience title is required."),
@@ -52,6 +54,7 @@ const experienceSchema = z.object({
     }),
     timeSlots: z.string().min(3, "Please enter at least one time slot (e.g., 19:00)."),
   }),
+  instantBook: z.boolean().default(false),
 }).superRefine((data, ctx) => {
   if ((data.location.country === 'AU' || data.location.country === 'NZ') && !data.location.region) {
     ctx.addIssue({
@@ -110,6 +113,7 @@ export default function EditExperiencePage() {
           ? experience.availability.timeSlots.join(', ')
           : experience?.availability?.timeSlots || '',
       },
+      instantBook: experience?.instantBook || false,
     },
   });
 
@@ -358,6 +362,35 @@ export default function EditExperiencePage() {
         </Card>
         
         <Card>
+            <CardHeader><CardTitle>Booking Settings</CardTitle></CardHeader>
+            <CardContent>
+                <FormField
+                    control={methods.control}
+                    name="instantBook"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">
+                                    Instant Book
+                                </FormLabel>
+                                <FormDescription>
+                                    Allow guests to book instantly without needing your approval.
+                                    Your calendar must be up-to-date.
+                                </FormDescription>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
+                        </FormItem>
+                    )}
+                />
+            </CardContent>
+        </Card>
+
+        <Card>
             <CardHeader>
                 <CardTitle className="text-destructive">Danger Zone</CardTitle>
                 <CardDescription>These actions are permanent and cannot be undone.</CardDescription>
@@ -391,4 +424,5 @@ export default function EditExperiencePage() {
     </FormProvider>
   );
 }
+
 
