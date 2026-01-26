@@ -72,10 +72,14 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   
   const messagesQuery = useMemoFirebase(
     () =>
-      firestore && conversationId
-        ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId))
+      firestore && conversationId && user
+        ? query(
+            collection(firestore, 'messages'),
+            where('bookingId', '==', conversationId),
+            where('participants', 'array-contains-any', [user.uid])
+          )
         : null,
-    [firestore, conversationId]
+    [firestore, conversationId, user]
   );
   
   const { data: messagesData, isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
@@ -162,7 +166,9 @@ export function ChatView({ conversationId }: { conversationId: string }) {
       form.setValue('messageText', '');
       setTimeout(() => {
           scrollToBottom('smooth');
-          inputRef.current?.focus();
+          if (inputRef.current) {
+              inputRef.current.focus();
+          }
       }, 50);
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to send message', description: e.message });
