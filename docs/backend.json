@@ -101,6 +101,18 @@
             "type": "boolean",
             "description": "Indicates if the user has accepted the platform's terms and conditions."
         },
+        "referralCode": {
+          "type": "string",
+          "description": "The user's unique referral code."
+        },
+        "referralCredit": {
+          "type": "number",
+          "description": "The amount of referral credit the user has available."
+        },
+        "referredBy": {
+          "type": "string",
+          "description": "The referral code of the user who referred this user."
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"

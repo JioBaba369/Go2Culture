@@ -29,6 +29,9 @@ export type User = {
   createdAt: any; // Allow ServerTimestamp
   updatedAt: any; // Allow ServerTimestamp
   termsAccepted?: boolean;
+  referralCode?: string;
+  referralCredit?: number;
+  referredBy?: string;
 };
 
 export type ComplianceFields = {
