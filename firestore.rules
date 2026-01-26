@@ -146,8 +146,11 @@ service cloud.firestore {
           return request.auth.uid in get(/databases/$(database)/documents/conversations/$(bookingId)).data.participants;
         }
 
-        // Allow participants to read and create messages.
-        allow read, create: if isParentConversationParticipant() || isAdmin();
+        // Allow participants to read messages.
+        allow read: if isParentConversationParticipant() || isAdmin();
+
+        // Allow participants to create messages, ensuring the sender is the authenticated user.
+        allow create: if (isParticipant(request.resource.data) && request.resource.data.senderId == request.auth.uid) || isAdmin();
         
         // Disallow updates and deletes by clients for message immutability.
         allow update, delete: if false;
