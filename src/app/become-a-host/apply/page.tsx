@@ -19,7 +19,6 @@ import { Step2HostProfile } from "@/components/apply-form/step2-host-profile";
 import { Step3ExperienceBasics } from "@/components/apply-form/step3-experience-basics";
 import { Step4Menu } from "@/components/apply-form/step4-menu";
 import { Step5Location } from "@/components/apply-form/step5-location";
-import { Step6Photos } from "@/components/apply-form/step6-photos";
 import { Step7Compliance } from "@/components/apply-form/step7-compliance";
 import { Step8Pricing } from "@/components/apply-form/step8-pricing";
 import { Progress } from "@/components/ui/progress";
@@ -52,10 +51,6 @@ const formSchema = z.object({
       cuisine: z.string().min(3, "Cuisine type is required."),
       allergens: z.string().optional(),
       spiceLevel: z.string({ required_error: "Please select a spice level." }),
-    }),
-    photos: z.object({
-      foodPhotos: z.any().optional(),
-      diningAreaPhoto: z.any().optional(),
     }),
     pricing: z.object({
       pricePerGuest: z.coerce.number().min(10, "Price must be at least $10."),
@@ -167,16 +162,11 @@ const steps = [
     },
     {
         id: 'Step 5',
-        name: 'Photos',
-        fields: [],
-    },
-    {
-        id: 'Step 6',
         name: 'Compliance',
         fields: [], // Complex validation, handled on final submit
     },
     {
-        id: 'Step 7',
+        id: 'Step 6',
         name: 'Pricing & Agreements',
         fields: ['experience.pricing.pricePerGuest', 'compliance.agreeToFoodSafety', 'compliance.guidelinesAccepted'],
     },
@@ -282,7 +272,7 @@ export default function BecomeAHostPage() {
     try {
       const {
         profile: { profilePhoto, ...profileData },
-        experience: { photos, ...experienceData },
+        experience: { ...experienceData },
         ...restOfValues
       } = values;
 
@@ -406,9 +396,8 @@ export default function BecomeAHostPage() {
             {currentStep === 1 && <Step3ExperienceBasics />}
             {currentStep === 2 && <Step4Menu />}
             {currentStep === 3 && <Step5Location />}
-            {currentStep === 4 && <Step6Photos />}
-            {currentStep === 5 && <Step7Compliance />}
-            {currentStep === 6 && <Step8Pricing />}
+            {currentStep === 4 && <Step7Compliance />}
+            {currentStep === 5 && <Step8Pricing />}
 
             <div className="flex gap-4 justify-end">
                 {currentStep > 0 && (

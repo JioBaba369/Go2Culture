@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
@@ -87,7 +88,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
 
   useLayoutEffect(() => {
     scrollToBottom('auto');
-  }, [conversationId]);
+  }, [conversationId, messages]);
 
 
   async function onSubmit(values: MessageFormValues) {

@@ -12,7 +12,6 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { WishlistItem } from '@/lib/types';
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -113,46 +112,6 @@ export function useCollection<T = any>(
   if(memoizedTargetRefOrQuery && !(memoizedTargetRefOrQuery as any).__memo) {
     console.warn('useCollection received a query/reference that was not created with useMemoFirebase. This can lead to infinite loops and excessive reads. Query/Ref:', memoizedTargetRefOrQuery);
   }
-
-  return { data, isLoading, error };
-}
-
-// Special hook for wishlist items which are just IDs
-export function useWishlistCollection(
-  memoizedTargetRefOrQuery:
-    | (CollectionReference<DocumentData> | Query<DocumentData> | null)
-): UseCollectionResult<WishlistItem> {
-  const [data, setData] = useState<WithId<WishlistItem>[] | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<FirestoreError | null>(null);
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (!memoizedTargetRefOrQuery) {
-      setData(null);
-      setIsLoading(false);
-      return;
-    }
-
-    const unsubscribe = onSnapshot(
-      memoizedTargetRefOrQuery,
-      (snapshot) => {
-        const results = snapshot.docs.map(doc => ({
-          id: doc.id,
-          createdAt: doc.data().createdAt,
-        }));
-        setData(results);
-        setError(null);
-        setIsLoading(false);
-      },
-      (err) => {
-        setError(err);
-        setIsLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [memoizedTargetRefOrQuery]);
 
   return { data, isLoading, error };
 }
