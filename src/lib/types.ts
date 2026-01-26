@@ -233,6 +233,15 @@ export type Conversation = {
   readBy: string[];
 };
 
+export type Notification = {
+  id: string;
+  userId: string;
+  message: string;
+  link?: string;
+  isRead: boolean;
+  createdAt: any; // Allow ServerTimestamp
+};
+
 
 // A denormalized type for the admin application view
 export type HostApplication = {

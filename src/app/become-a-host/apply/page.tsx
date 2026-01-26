@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { createNotification } from "@/lib/notification-actions";
 
 
 const wowFactorOptions = [
@@ -167,6 +168,15 @@ export default function BecomeAHostPage() {
       };
 
       await addDoc(collection(firestore, 'hostApplications'), applicationData);
+      
+      // Create notification
+      await createNotification(
+        firestore,
+        user.uid,
+        "We received your application and we can’t wait to review it!",
+        "/host" // Link to host dashboard
+      );
+
       setSubmissionState('success');
 
     } catch (error) {

@@ -16,10 +16,11 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { useAuth, useFirestore } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { createNotification } from '@/lib/notification-actions';
 
 export default function SignupPage() {
   const auth = useAuth();
@@ -48,6 +49,9 @@ export default function SignupPage() {
       
       const fullName = `${firstName} ${lastName}`;
       await updateProfile(user, { displayName: fullName });
+      
+      // Send verification email
+      await sendEmailVerification(user);
 
       const userRef = doc(firestore, 'users', user.uid);
       await setDoc(userRef, {
@@ -62,7 +66,15 @@ export default function SignupPage() {
         termsAccepted: true,
       });
 
-      toast({ title: "Account Created!", description: "Welcome to Go2Culture. Start exploring experiences or apply to be a host." });
+      // Create notification for email verification
+      await createNotification(
+        firestore,
+        user.uid,
+        `${fullName}, please confirm your email address.`,
+        '/profile'
+      );
+
+      toast({ title: "Account Created!", description: "Welcome to Go2Culture. Please check your email to verify your account." });
       router.push('/'); // Redirect to homepage after successful signup
     } catch (error: any) {
       console.error(error);

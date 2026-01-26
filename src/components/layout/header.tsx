@@ -22,6 +22,7 @@ import { doc } from "firebase/firestore";
 import type { User } from "@/lib/types";
 import { ADMIN_UID } from "@/lib/auth";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 
 const navLinks = [
   { href: "/discover", label: "Discover" },
@@ -72,74 +73,77 @@ export function Header() {
           {isUserLoading ? (
             <div className="h-10 w-24 bg-muted rounded-md animate-pulse" />
           ) : user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary-foreground/10">
-                  <Avatar className="h-10 w-10">
-                    {userImage ? (
-                      <AvatarImage src={userImage.imageUrl} alt={user.displayName || 'User'} />
-                    ) : null}
-                    <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.displayName || 'Go2Culture User'}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/messages">
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      <span>Inbox</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/profile/bookings">
-                      <CalendarCheck className="mr-2 h-4 w-4" />
-                      <span>My Reservations</span>
-                    </Link>
-                  </DropdownMenuItem>
-                   <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/profile/wishlist">
-                      <Heart className="mr-2 h-4 w-4" />
-                      <span>My Wishlist</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/profile">
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Account Settings</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href="/profile/referrals">
-                      <Wallet className="mr-2 h-4 w-4" />
-                      <span>Refer a Friend</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  {isHost && (
+            <div className="flex items-center gap-0.5">
+              <NotificationsDropdown />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary-foreground/10">
+                    <Avatar className="h-10 w-10">
+                      {userImage ? (
+                        <AvatarImage src={userImage.imageUrl} alt={user.displayName || 'User'} />
+                      ) : null}
+                      <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.displayName || 'Go2Culture User'}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
                     <DropdownMenuItem asChild className="cursor-pointer">
-                        <Link href="/host">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            <span>Host Dashboard</span>
-                        </Link>
+                      <Link href="/messages">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        <span>Inbox</span>
+                      </Link>
                     </DropdownMenuItem>
-                  )}
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link href="/profile/bookings">
+                        <CalendarCheck className="mr-2 h-4 w-4" />
+                        <span>My Reservations</span>
+                      </Link>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link href="/profile/wishlist">
+                        <Heart className="mr-2 h-4 w-4" />
+                        <span>My Wishlist</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link href="/profile">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        <span>Account Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link href="/profile/referrals">
+                        <Wallet className="mr-2 h-4 w-4" />
+                        <span>Refer a Friend</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    {isHost && (
+                      <DropdownMenuItem asChild className="cursor-pointer">
+                          <Link href="/host">
+                              <LayoutDashboard className="mr-2 h-4 w-4" />
+                              <span>Host Dashboard</span>
+                          </Link>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           ) : (
             <>
               <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" asChild>
