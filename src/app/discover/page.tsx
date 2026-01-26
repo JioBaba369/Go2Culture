@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/sheet';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { countries, regions, suburbs } from '@/lib/location-data';
 
 function DiscoverPageContent() {
   const searchParams = useSearchParams();
@@ -47,6 +48,7 @@ function DiscoverPageContent() {
   const allCategories = useMemo(() => [...new Set(liveExperiences.map(e => e.category))].sort(), [liveExperiences]);
   const maxPrice = useMemo(() => liveExperiences.length > 0 ? Math.ceil(Math.max(...liveExperiences.map(e => e.pricing.pricePerGuest)) / 5) * 5 : 150, [liveExperiences]);
 
+  const searchQuery = searchParams.get('q')?.toLowerCase();
   const [cuisine, setCuisine] = useState(searchParams.get('cuisine') || 'all');
   const [dietary, setDietary] = useState<string[]>(searchParams.getAll('dietary'));
   const [categories, setCategories] = useState<string[]>(searchParams.getAll('category'));
@@ -60,18 +62,40 @@ function DiscoverPageContent() {
   const filteredExperiences = useMemo(() => {
     if (!liveExperiences) return [];
     return liveExperiences.filter(exp => {
+      // Free text search from hero
+      if (searchQuery) {
+        const countryName = countries.find(c => c.id === exp.location.country)?.name || '';
+        const regionName = regions.find(r => r.id === exp.location.region)?.name || '';
+        const suburbName = suburbs.find(s => s.id === exp.location.suburb)?.name || '';
+
+        const searchMatch = 
+          exp.title.toLowerCase().includes(searchQuery) ||
+          exp.description.toLowerCase().includes(searchQuery) ||
+          exp.menu.cuisine.toLowerCase().includes(searchQuery) ||
+          exp.category.toLowerCase().includes(searchQuery) ||
+          countryName.toLowerCase().includes(searchQuery) ||
+          regionName.toLowerCase().includes(searchQuery) ||
+          suburbName.toLowerCase().includes(searchQuery);
+        
+        if (!searchMatch) return false;
+      }
+      
+      // Sidebar filters
       if (cuisine !== 'all' && exp.menu.cuisine !== cuisine) return false;
       if (categories.length > 0 && !categories.includes(exp.category)) return false;
       if (dietary.length > 0 && !dietary.every(d => exp.menu.dietary?.includes(d))) return false;
       if (exp.pricing.pricePerGuest > price[0]) return false;
       if (rating !== 'all' && exp.rating.average < Number(rating)) return false;
+      
+      // Direct navigation filters
       if (searchParams.get('country') && exp.location.country !== searchParams.get('country')) return false;
       if (searchParams.get('region') && exp.location.region !== searchParams.get('region')) return false;
       if (searchParams.get('suburb') && exp.location.suburb !== searchParams.get('suburb')) return false;
       if (searchParams.get('localArea') && exp.location.localArea !== searchParams.get('localArea')) return false;
+
       return true;
     });
-  }, [cuisine, dietary, categories, price, rating, searchParams, liveExperiences]);
+  }, [searchQuery, cuisine, dietary, categories, price, rating, searchParams, liveExperiences]);
 
   const handleDietaryChange = (option: string) => {
     setDietary(prev => 
@@ -243,6 +267,13 @@ function DiscoverPageContent() {
               </SheetContent>
             </Sheet>
           </div>
+
+          {searchQuery && (
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-xl font-semibold">Results for:</h2>
+              <Badge variant="secondary" className="text-lg py-1">{searchQuery}</Badge>
+            </div>
+          )}
 
           <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {liveExperiences.length || 0} experiences.</p>
           {areExperiencesLoading ? (
