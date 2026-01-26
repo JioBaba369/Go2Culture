@@ -38,6 +38,12 @@ import {
   Twitter,
   Instagram,
   Facebook,
+  Baby,
+  ArrowUpFromLine,
+  AirVent,
+  Wifi,
+  Car,
+  Bus,
 } from "lucide-react";
 import Link from "next/link";
 import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
@@ -427,13 +433,19 @@ export default function ApplicationDetailPage() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Home /> Home Setup</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4">
                         <DetailItem icon={Home} label="Home Type" value={application.homeSetup.homeType} />
                         <DetailItem icon={UsersIcon} label="Seating" value={application.homeSetup.seating} />
                         <DetailItem icon={UsersIcon} label="Max Guests" value={application.homeSetup.maxGuests} />
                         <DetailItem icon={Info} label="Pets" value={application.homeSetup.pets ? 'Yes' : 'No'} />
                         <DetailItem icon={Info} label="Smoking" value={application.homeSetup.smoking ? 'Yes' : 'No'} />
                         <DetailItem icon={Info} label="Accessibility" value={application.homeSetup.accessibility || 'Not specified'} />
+                        {application.homeSetup.familyFriendly && <DetailItem icon={Baby} label="Family Friendly" value="Yes" />}
+                        {application.homeSetup.elevator && <DetailItem icon={ArrowUpFromLine} label="Elevator" value="Yes" />}
+                        {application.homeSetup.airConditioning && <DetailItem icon={AirVent} label="Air Conditioning" value="Yes" />}
+                        {application.homeSetup.wifi && <DetailItem icon={Wifi} label="WiFi" value="Yes" />}
+                        {application.homeSetup.publicTransportNearby && <DetailItem icon={Bus} label="Public Transport" value="Nearby" />}
+                        {application.homeSetup.taxiNearby && <DetailItem icon={Car} label="Taxi" value="Nearby" />}
                     </CardContent>
                 </Card>
                 {applicantUser && (

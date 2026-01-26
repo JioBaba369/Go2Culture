@@ -76,6 +76,12 @@ export type Host = {
     pets: boolean;
     smoking: boolean;
     accessibility?: string;
+    familyFriendly?: boolean;
+    elevator?: boolean;
+    airConditioning?: boolean;
+    taxiNearby?: boolean;
+    publicTransportNearby?: boolean;
+    wifi?: boolean;
   };
   
   compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean };
@@ -232,6 +238,12 @@ export type HostApplication = {
     pets: boolean;
     smoking: boolean;
     accessibility?: string;
+    familyFriendly?: boolean;
+    elevator?: boolean;
+    airConditioning?: boolean;
+    taxiNearby?: boolean;
+    publicTransportNearby?: boolean;
+    wifi?: boolean;
   };
 
   experience: {

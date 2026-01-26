@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, forwardRef } from "react";
@@ -11,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, where, limit, runTransaction, getDoc, serverTimestamp, increment } from "firebase/firestore";
@@ -455,6 +454,12 @@ export default function ExperienceDetailPage() {
                 <div className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /><span>Pets live here: {host.homeSetup.pets ? 'Yes' : 'No'}</span></div>
                 <div className="flex items-center gap-2"><Wind className="h-5 w-5 text-primary" /><span>Smoking allowed: {host.homeSetup.smoking ? 'Yes' : 'No'}</span></div>
                 {host.homeSetup.accessibility && <div className="flex items-center gap-2"><Accessibility className="h-5 w-5 text-primary" /><span>{host.homeSetup.accessibility}</span></div>}
+                {host.homeSetup.familyFriendly && <div className="flex items-center gap-2"><Baby className="h-5 w-5 text-primary" /><span>Family/Kid friendly</span></div>}
+                {host.homeSetup.elevator && <div className="flex items-center gap-2"><ArrowUpFromLine className="h-5 w-5 text-primary" /><span>Elevator in building</span></div>}
+                {host.homeSetup.airConditioning && <div className="flex items-center gap-2"><AirVent className="h-5 w-5 text-primary" /><span>Air conditioning</span></div>}
+                {host.homeSetup.wifi && <div className="flex items-center gap-2"><Wifi className="h-5 w-5 text-primary" /><span>WiFi available</span></div>}
+                {host.homeSetup.taxiNearby && <div className="flex items-center gap-2"><Car className="h-5 w-5 text-primary" /><span>Taxi station nearby</span></div>}
+                {host.homeSetup.publicTransportNearby && <div className="flex items-center gap-2"><Bus className="h-5 w-5 text-primary" /><span>Public transport nearby</span></div>}
              </div>
           </div>
           
@@ -608,4 +613,3 @@ export default function ExperienceDetailPage() {
     </div>
   );
 }
-

@@ -108,27 +108,31 @@ export function Step5Location() {
             </FormItem>
           )}
         />
-        <div className="flex items-center space-x-8 pt-2">
-          <FormField
-            control={control}
-            name="homeSetup.pets"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                <div className="space-y-1 leading-none"><FormLabel>I have pets</FormLabel></div>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="homeSetup.smoking"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                <div className="space-y-1 leading-none"><FormLabel>Smoking is allowed</FormLabel></div>
-              </FormItem>
-            )}
-          />
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-2">
+            <FormField control={control} name="homeSetup.pets" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>I have pets</FormLabel></div></FormItem>
+            )} />
+            <FormField control={control} name="homeSetup.smoking" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Smoking is allowed</FormLabel></div></FormItem>
+            )} />
+            <FormField control={control} name="homeSetup.familyFriendly" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Family/Kids friendly</FormLabel></div></FormItem>
+            )} />
+             <FormField control={control} name="homeSetup.elevator" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Elevator in building</FormLabel></div></FormItem>
+            )} />
+            <FormField control={control} name="homeSetup.airConditioning" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Air conditioning</FormLabel></div></FormItem>
+            )} />
+            <FormField control={control} name="homeSetup.wifi" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>WiFi available</FormLabel></div></FormItem>
+            )} />
+            <FormField control={control} name="homeSetup.publicTransportNearby" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Public transport nearby</FormLabel></div></FormItem>
+            )} />
+            <FormField control={control} name="homeSetup.taxiNearby" render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><div className="space-y-1 leading-none"><FormLabel>Taxi station nearby</FormLabel></div></FormItem>
+            )} />
         </div>
       </CardContent>
     </Card>

@@ -81,6 +81,12 @@ const formSchema = z.object({
     pets: z.boolean().default(false),
     smoking: z.boolean().default(false),
     accessibility: z.string().optional(),
+    familyFriendly: z.boolean().default(false),
+    elevator: z.boolean().default(false),
+    airConditioning: z.boolean().default(false),
+    wifi: z.boolean().default(false),
+    publicTransportNearby: z.boolean().default(false),
+    taxiNearby: z.boolean().default(false),
   }),
   
   compliance: z.object({
@@ -165,7 +171,7 @@ const steps = [
     {
         id: 'Step 5',
         name: 'Location & Home Setup',
-        fields: ['location', 'homeSetup'],
+        fields: [], // Complex validation, handled on final submit
     },
     {
         id: 'Step 6',
@@ -224,6 +230,12 @@ export default function BecomeAHostPage() {
         smoking: false,
         maxGuests: 4,
         accessibility: '',
+        familyFriendly: false,
+        elevator: false,
+        airConditioning: false,
+        wifi: false,
+        publicTransportNearby: false,
+        taxiNearby: false,
       },
       compliance: {
         guidelinesAccepted: false,
@@ -414,4 +426,3 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
-

@@ -155,7 +155,13 @@
             "maxGuests": { "type": "number" },
             "pets": { "type": "boolean" },
             "smoking": { "type": "boolean" },
-            "accessibility": { "type": "string" }
+            "accessibility": { "type": "string" },
+            "familyFriendly": { "type": "boolean", "description": "Indicates if the location is suitable for children." },
+            "elevator": { "type": "boolean", "description": "Indicates if there is an elevator in the building." },
+            "airConditioning": { "type": "boolean", "description": "Indicates if air conditioning is available." },
+            "taxiNearby": { "type": "boolean", "description": "Indicates if there is a taxi station nearby." },
+            "publicTransportNearby": { "type": "boolean", "description": "Indicates if public transport is easily accessible." },
+            "wifi": { "type": "boolean", "description": "Indicates if WiFi is available for guests." }
           }
         },
         "compliance": {
@@ -240,7 +246,13 @@
             "maxGuests": { "type": "number" },
             "pets": { "type": "boolean" },
             "smoking": { "type": "boolean" },
-            "accessibility": { "type": "string" }
+            "accessibility": { "type": "string" },
+            "familyFriendly": { "type": "boolean", "description": "Indicates if the location is suitable for children." },
+            "elevator": { "type": "boolean", "description": "Indicates if there is an elevator in the building." },
+            "airConditioning": { "type": "boolean", "description": "Indicates if air conditioning is available." },
+            "taxiNearby": { "type": "boolean", "description": "Indicates if there is a taxi station nearby." },
+            "publicTransportNearby": { "type": "boolean", "description": "Indicates if public transport is easily accessible." },
+            "wifi": { "type": "boolean", "description": "Indicates if WiFi is available for guests." }
           }
         },
         "experience": {
