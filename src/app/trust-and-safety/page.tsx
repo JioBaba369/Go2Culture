@@ -1,7 +1,8 @@
 
-import { ShieldCheck, MessageCircle, Lock, UserCheck, Search, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, MessageCircle, Lock, UserCheck, Search, ShieldAlert, Banknote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function TrustAndSafetyPage() {
     return (
@@ -37,6 +38,27 @@ export default function TrustAndSafetyPage() {
                     </div>
                 </div>
 
+                <Card className="bg-muted/50">
+                    <CardHeader className="text-center">
+                        <div className="flex justify-center mb-4">
+                             <Banknote className="h-12 w-12 text-primary" />
+                        </div>
+                        <CardTitle className="font-headline text-3xl">Insurance Framework</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 text-center max-w-2xl mx-auto">
+                        <p className="text-muted-foreground">To maintain a safe and sustainable platform, it's important for all users to understand their responsibilities regarding insurance.</p>
+                        <div>
+                            <h4 className="font-semibold text-foreground">For Hosts</h4>
+                            <p className="text-sm text-muted-foreground">You are required to have your own adequate insurance coverage. This typically includes homeowner's or renter's insurance that covers commercial or business activities. Please review your policy or speak with your provider to ensure you are covered for hosting paying guests. Go2Culture does **not** provide primary liability insurance for hosts.</p>
+                        </div>
+                         <div>
+                            <h4 className="font-semibold text-foreground">For Guests</h4>
+                            <p className="text-sm text-muted-foreground">We strongly recommend that all guests purchase their own travel insurance to cover unforeseen circumstances, such as travel disruptions, medical emergencies, or cancellations.</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground pt-4">Go2Culture is a platform that connects people. We are not an insurance provider and do not cover damages, losses, or injuries that may occur during an experience.</p>
+                    </CardContent>
+                </Card>
+
                 <div className="bg-card p-8 rounded-lg text-center">
                      <ShieldAlert className="h-12 w-12 text-destructive mx-auto mb-4" />
                      <h2 className="font-headline text-3xl font-bold">Need Help?</h2>
@@ -48,12 +70,6 @@ export default function TrustAndSafetyPage() {
                       </Button>
                 </div>
 
-                <div className="text-center pt-8">
-                    <h2 className="font-headline text-3xl font-bold">Our Commitment</h2>
-                    <p className="mt-4 text-muted-foreground text-lg max-w-3xl mx-auto">
-                        We are continuously working to make our platform safer. From data privacy to community education, our goal is to create a space where everyone feels welcome and secure.
-                    </p>
-                </div>
             </div>
         </div>
     );

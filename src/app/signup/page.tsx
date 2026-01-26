@@ -59,6 +59,7 @@ export default function SignupPage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         profilePhotoId: 'guest-1', // Default placeholder
+        termsAccepted: true,
       });
 
       toast({ title: "Account Created!", description: "Welcome to Go2Culture. Start exploring experiences or apply to be a host." });
@@ -139,6 +140,17 @@ export default function SignupPage() {
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
+            <p className="px-8 text-center text-xs text-muted-foreground">
+                By clicking continue, you agree to our{" "}
+                <Link href="/terms" className="underline hover:text-primary">
+                    Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="underline hover:text-primary">
+                    Privacy Policy
+                </Link>
+                .
+            </p>
           </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}

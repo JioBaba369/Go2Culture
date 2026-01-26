@@ -32,14 +32,15 @@ service cloud.firestore {
       allow get: if true;
       allow list: if isAdmin(); 
       allow create: if isOwner(userId);
+      // Allow users to update their own profile, including termsAccepted
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin(); // Only Admin should delete users
 
       match /hosts/{hostId} {
         allow get: if true;
         allow list: if isOwner(userId) || isAdmin();
-        allow create: if isOwner(userId) || isAdmin();
-        allow update, delete: if isOwner(userId) || isAdmin();
+        // Allow hosts to update their own compliance fields
+        allow create, update, delete: if isOwner(userId) || isAdmin();
       }
       
       match /wishlist/{experienceId} {
@@ -66,7 +67,8 @@ service cloud.firestore {
       allow get: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid || isAdmin());
       // List requires a query filter by guestId or hostId to be secure, or be an admin
       allow list: if isAdmin() || (isSignedIn() && request.query.limit <= 50 && (request.query.where.guestId == request.auth.uid || request.query.where.hostId == request.auth.uid));
-      allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
+      // User must agree to terms to book
+      allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.termsAccepted == true;
       allow update: if isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid || isAdmin());
       allow delete: if isAdmin(); // Prevent users from wiping transaction history
     }

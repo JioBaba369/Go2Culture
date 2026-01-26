@@ -1,5 +1,4 @@
 
-
 export type User = {
   id: string;
   role: 'guest' | 'host' | 'both';
@@ -29,6 +28,7 @@ export type User = {
   status: 'active' | 'suspended' | 'deleted';
   createdAt: any; // Allow ServerTimestamp
   updatedAt: any; // Allow ServerTimestamp
+  termsAccepted?: boolean;
 };
 
 export type ComplianceFields = {
@@ -43,6 +43,7 @@ export type ComplianceFields = {
   guidelinesAccepted: boolean;
   contractAccepted?: boolean;
   responsibilitiesAccepted?: boolean;
+  insurancePolicyAccepted?: boolean;
 };
 
 export type Host = {

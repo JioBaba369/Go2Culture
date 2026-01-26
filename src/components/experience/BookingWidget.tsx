@@ -1,12 +1,13 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebase } from '@/firebase';
-import { doc, collection, runTransaction, serverTimestamp, getDoc, increment } from 'firebase/firestore';
+import { useFirebase, useUser } from '@/firebase';
+import { doc, collection, runTransaction, serverTimestamp, getDoc, increment, updateDoc } from 'firebase/firestore';
 import { format } from 'date-fns';
-import { Experience, Host, Coupon, Booking, User } from '@/lib/types';
+import { Experience, Host, Coupon, Booking, User as UserType } from '@/lib/types';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -18,6 +19,8 @@ import { cn } from '@/lib/utils';
 import { Star, Loader2, Tag, CheckCircle, Calendar as CalendarIcon, Users, Gift, Zap } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '../ui/checkbox';
+import Link from 'next/link';
 
 interface BookingWidgetProps {
     experience: Experience;
@@ -27,6 +30,7 @@ interface BookingWidgetProps {
 export function BookingWidget({ experience, host }: BookingWidgetProps) {
   const [date, setDate] = useState<Date | undefined>();
   const [numberOfGuests, setNumberOfGuests] = useState(1);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [isGifting, setIsGifting] = useState(false);
   const [couponCode, setCouponCode] = useState('');
@@ -93,6 +97,11 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       toast({ variant: 'destructive', title: 'No date selected', description: `Please select a date for your ${isGift ? 'gift' : 'booking'}.` });
       return;
     }
+
+     if (!agreedToTerms) {
+      toast({ variant: 'destructive', title: 'Agreement Required', description: 'You must agree to the terms and guest policy.' });
+      return;
+    }
     
     isGift ? setIsGifting(true) : setIsBooking(true);
 
@@ -130,6 +139,13 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         };
 
         transaction.set(newBookingRef, bookingData);
+
+        // Update user's termsAccepted field if it's not already set
+        const userRef = doc(firestore, 'users', user.uid);
+        const userSnap = await transaction.get(userRef);
+        if (userSnap.exists() && !userSnap.data().termsAccepted) {
+            transaction.update(userRef, { termsAccepted: true });
+        }
       });
 
       toast({
@@ -169,6 +185,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
   
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
   const totalPrice = basePrice - discountAmount;
+  const canBook = date && agreedToTerms && !(isBooking || isGifting);
 
   return (
     <div className="p-6 space-y-4 border rounded-xl shadow-lg bg-card">
@@ -273,8 +290,18 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     <span>Total</span>
                     <span>${totalPrice.toFixed(2)}</span>
                 </div>
+
+                <div className="flex items-start space-x-2">
+                    <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} />
+                    <label
+                        htmlFor="terms"
+                        className="text-xs text-muted-foreground leading-snug"
+                    >
+                        I agree to the <Link href="/terms" className="underline hover:text-primary">Guest Policy</Link> and <Link href="/terms" className="underline hover:text-primary">Terms of Service</Link>.
+                    </label>
+                </div>
                 
-                <Button size="lg" className="w-full" disabled={!date || isBooking || isGifting} onClick={() => handleBookingAction(false)}>
+                <Button size="lg" className="w-full" disabled={!canBook} onClick={() => handleBookingAction(false)}>
                     {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : (experience.instantBook ? 'Book' : 'Request to Book')}
                 </Button>
 
@@ -283,7 +310,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">OR</span></div>
                 </div>
 
-                <Button size="lg" className="w-full" variant="outline" disabled={!date || isBooking || isGifting} onClick={() => handleBookingAction(true)}>
+                <Button size="lg" className="w-full" variant="outline" disabled={!canBook} onClick={() => handleBookingAction(true)}>
                     {isGifting ? <Loader2 className="animate-spin h-5 w-5"/> : <Gift className="h-5 w-5"/>}
                     Gift this experience
                 </Button>

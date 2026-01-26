@@ -96,6 +96,10 @@
           "enum": ["active", "suspended", "deleted"],
           "description": "The status of the user's account."
         },
+        "termsAccepted": {
+            "type": "boolean",
+            "description": "Indicates if the user has accepted the platform's terms and conditions."
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -182,7 +186,9 @@
             "foodBusinessLicense": { "type": "boolean" },
             "foodSafetySupervisor": { "type": "boolean" },
             "foodBusinessNotification": { "type": "boolean" },
-            "guidelinesAccepted": { "type": "boolean" }
+            "guidelinesAccepted": { "type": "boolean" },
+            "contractAccepted": { "type": "boolean" },
+            "insurancePolicyAccepted": { "type": "boolean" }
           }
         },
         "rating": {
