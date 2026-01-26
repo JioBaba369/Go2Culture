@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, forwardRef } from "react";
@@ -9,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus } from "lucide-react";
+import { Star, Users, MapPin, Utensils, Home, Wind, Accessibility, Loader2, AlertTriangle, Award, Trophy, Tag, CheckCircle, Calendar as CalendarIcon, Baby, ArrowUpFromLine, AirVent, Wifi, Car, Bus, Gift } from "lucide-react";
 import { countries, suburbs, localAreas } from "@/lib/location-data";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, where, limit, runTransaction, getDoc, serverTimestamp, increment } from "firebase/firestore";
@@ -80,6 +81,7 @@ export default function ExperienceDetailPage() {
   const [date, setDate] = useState<Date | undefined>();
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
+  const [isGifting, setIsGifting] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -248,6 +250,94 @@ export default function ExperienceDetailPage() {
       });
     } finally {
       setIsBooking(false);
+    }
+  };
+
+  const handleGiftBooking = async () => {
+    if (!user) {
+      toast({ variant: 'destructive', title: 'Please log in', description: 'You must be logged in to gift an experience.' });
+      router.push(`/login?redirect=/experiences/${experienceId}`);
+      return;
+    }
+
+    if (experience && user.uid === experience.userId) {
+        toast({
+            variant: "destructive",
+            title: "Action Not Allowed",
+            description: "You cannot gift your own experience.",
+        });
+        return;
+    }
+
+    if (!date) {
+      toast({ variant: 'destructive', title: 'No date selected', description: 'Please select a date for the gift.' });
+      return;
+    }
+
+    setIsGifting(true);
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
+        
+        if (appliedCoupon) {
+          const couponRef = doc(firestore, 'coupons', appliedCoupon.id);
+          const couponSnap = await transaction.get(couponRef);
+          if (!couponSnap.exists()) throw new Error("Coupon no longer exists.");
+          
+          const coupon = { id: couponSnap.id, ...couponSnap.data() } as Coupon;
+          if (!coupon.isActive || (coupon.usageLimit && coupon.timesUsed >= coupon.usageLimit)) {
+            toast({ variant: 'destructive', title: 'Coupon Invalid', description: `Coupon "${appliedCoupon.id}" could not be applied.` });
+          } else {
+            transaction.update(couponRef, { timesUsed: increment(1) });
+          }
+        }
+        
+        const newBookingRef = doc(collection(firestore, 'bookings'));
+        
+        const bookingData: Partial<Booking> = {
+          guestId: user.uid,
+          experienceId: experience!.id,
+          experienceTitle: experience!.title,
+          hostId: experience!.hostId,
+          hostName: host!.name,
+          bookingDate: date,
+          numberOfGuests: numberOfGuests,
+          totalPrice: basePrice - discountAmount,
+          status: 'Confirmed', // Instant booking for gifts
+          isGift: true,
+          createdAt: serverTimestamp(),
+        };
+
+        if (appliedCoupon) {
+            bookingData.couponId = appliedCoupon.id;
+        }
+
+        if (discountAmount > 0) {
+            bookingData.discountAmount = discountAmount;
+        }
+
+        transaction.set(newBookingRef, bookingData);
+      });
+
+      toast({
+        title: 'Gift Purchased!',
+        description: `You've successfully booked "${experience!.title}" as a gift. You can now share it with your friend.`,
+      });
+      setDate(undefined);
+      setNumberOfGuests(1);
+      setCouponCode('');
+      setAppliedCoupon(null);
+      setDiscountAmount(0);
+
+    } catch (error: any) {
+      console.error('Gifting failed:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Gifting Failed',
+        description: error.message || 'Could not complete your gift purchase. Please try again.',
+      });
+    } finally {
+      setIsGifting(false);
     }
   };
 
@@ -588,20 +678,41 @@ export default function ExperienceDetailPage() {
                         </div>
 
                         <Separator/>
-
-                        <Button 
-                            size="lg" 
-                            className="w-full"
-                            disabled={!date || isBooking}
-                            onClick={handleBooking}
-                        >
-                            {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
-                        </Button>
                         
                         <div className="flex justify-between items-center text-lg font-semibold">
                             <span>Total</span>
                             <span>${totalPrice.toFixed(2)}</span>
                         </div>
+                        
+                        <Button 
+                            size="lg" 
+                            className="w-full"
+                            disabled={!date || isBooking || isGifting}
+                            onClick={handleBooking}
+                        >
+                            {isBooking ? <Loader2 className="animate-spin h-5 w-5"/> : 'Request to Book'}
+                        </Button>
+
+                        <div className="relative flex items-center justify-center my-2">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-card px-2 text-muted-foreground">OR</span>
+                            </div>
+                        </div>
+
+                        <Button 
+                            size="lg" 
+                            className="w-full"
+                            variant="outline"
+                            disabled={!date || isBooking || isGifting}
+                            onClick={handleGiftBooking}
+                        >
+                            {isGifting ? <Loader2 className="animate-spin h-5 w-5"/> : <Gift className="h-5 w-5"/>}
+                            Gift this experience
+                        </Button>
+
                         <p className="text-xs text-center text-muted-foreground">You won't be charged until the host confirms</p>
                     </div>
                 )}

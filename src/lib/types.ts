@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   role: 'guest' | 'host' | 'both';
@@ -179,6 +180,7 @@ export type Booking = {
   createdAt: any; // Allow ServerTimestamp
   couponId?: string;
   discountAmount?: number;
+  isGift?: boolean;
 };
 
 export type WishlistItem = {
