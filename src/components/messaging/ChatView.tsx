@@ -51,6 +51,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // 1. Fetch conversation and booking in parallel
   const conversationRef = useMemoFirebase(() => (firestore && conversationId ? doc(firestore, 'conversations', conversationId) : null), [firestore, conversationId]);
@@ -71,10 +72,10 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   
   const messagesQuery = useMemoFirebase(
     () =>
-      firestore && user && conversationId
-        ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId), where('participants', 'array-contains', user.uid))
+      firestore && conversationId
+        ? query(collection(firestore, 'messages'), where('bookingId', '==', conversationId))
         : null,
-    [firestore, user, conversationId]
+    [firestore, conversationId]
   );
   
   const { data: messagesData, isLoading: areMessagesLoading } = useCollection<Message>(messagesQuery);
@@ -95,7 +96,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
   });
   
   const otherParticipantInfo = useMemo(() => {
-    if (conversation && otherParticipantId && conversation.participantInfo) {
+    if (conversation && otherParticipantId && conversation.participantInfo && conversation.participantInfo[otherParticipantId]) {
       return conversation.participantInfo[otherParticipantId];
     }
     if (otherParticipant) {
@@ -159,7 +160,10 @@ export function ChatView({ conversationId }: { conversationId: string }) {
     try {
       await sendMessage(firestore, currentUser, recipient, booking, values.messageText);
       form.setValue('messageText', '');
-      setTimeout(() => scrollToBottom('smooth'), 50);
+      setTimeout(() => {
+          scrollToBottom('smooth');
+          inputRef.current?.focus();
+      }, 50);
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to send message', description: e.message });
     }
@@ -231,6 +235,7 @@ export function ChatView({ conversationId }: { conversationId: string }) {
                 <FormItem className="flex-1">
                   <FormControl>
                     <Textarea
+                      ref={inputRef}
                       placeholder="Type a message..."
                       className="min-h-10 resize-none"
                       rows={1}
