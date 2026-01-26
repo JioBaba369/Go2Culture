@@ -18,8 +18,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe } from 'lucide-react';
-import { User } from '@/lib/types';
+import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck } from 'lucide-react';
+import { User, Host } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -27,6 +27,10 @@ import Link from 'next/link';
 import { countries } from '@/lib/location-data';
 import { getFlagFromCountryCode } from '@/lib/format';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { ExperienceCard } from '@/components/experience-card';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -70,6 +74,10 @@ const getUsernameFromUrl = (url: string | undefined): string => {
   }
 };
 
+const languages = [
+  "Afrikaans", "Albanian", "Amharic", "Arabic", "Armenian", "Azerbaijani", "Basque", "Belarusian", "Bengali", "Bosnian", "Bulgarian", "Catalan", "Cebuano", "Chichewa", "Chinese (Simplified)", "Chinese (Traditional)", "Corsican", "Croatian", "Czech", "Danish", "Dutch", "English", "Esperanto", "Estonian", "Filipino", "Finnish", "French", "Frisian", "Galician", "Georgian", "German", "Greek", "Gujarati", "Haitian Creole", "Hausa", "Hawaiian", "Hebrew", "Hindi", "Hmong", "Hungarian", "Icelandic", "Igbo", "Indonesian", "Irish", "Italian", "Japanese", "Javanese", "Kannada", "Kazakh", "Khmer", "Korean", "Kurdish (Kurmanji)", "Kyrgyz", "Lao", "Latin", "Latvian", "Lithuanian", "Luxembourgish", "Macedonian", "Malagasy", "Malay", "Malayalam", "Maltese", "Maori", "Marathi", "Mongolian", "Myanmar (Burmese)", "Nepali", "Norwegian", "Pashto", "Persian", "Polish", "Portuguese", "Punjabi", "Romanian", "Russian", "Samoan", "Scots Gaelic", "Serbian", "Sesotho", "Shona", "Sindhi", "Sinhala", "Slovak", "Slovenian", "Somali", "Spanish", "Sundanese", "Swahili", "Swedish", "Tajik", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", "Urdu", "Uzbek", "Vietnamese", "Welsh", "Xhosa", "Yiddish", "Yoruba", "Zulu", "Other"
+];
+
 export default function ProfilePage() {
   const { user, isUserLoading, auth, firestore } = useFirebase();
   const router = useRouter();
@@ -85,6 +93,17 @@ export default function ProfilePage() {
   }, [firestore, user]);
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
+  
+  // Fetch Host document (if the user is a host)
+  const hostRef = useMemoFirebase(() => (firestore && user ? doc(firestore, 'users', user.uid, 'hosts', user.uid) : null), [firestore, user]);
+  const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
+
+  // Fetch user's experiences
+  const experiencesQuery = useMemoFirebase(
+    () => (firestore && user ? query(collection(firestore, 'experiences'), where('userId', '==', user.uid), where('status', '==', 'live')) : null),
+    [firestore, user]
+  );
+  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -207,7 +226,7 @@ export default function ProfilePage() {
     }
   }
 
-  const isLoading = isUserLoading || isProfileLoading;
+  const isLoading = isUserLoading || isProfileLoading || isHostLoading;
 
   if (isLoading) {
     return (
@@ -255,6 +274,8 @@ export default function ProfilePage() {
   
   const userImage = PlaceHolderImages.find(p => p.id === userProfile?.profilePhotoId);
   const countryName = userProfile.location?.country ? countries.find(c => c.id === userProfile.location.country)?.name : '';
+  const isHost = userProfile.role === 'host' || userProfile.role === 'both';
+
 
   const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
     host: "secondary",
@@ -271,8 +292,31 @@ export default function ProfilePage() {
               <AvatarFallback className="text-3xl">{userProfile?.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-              <h1 className="text-3xl font-headline font-bold">Welcome back, {userProfile.fullName.split(' ')[0]}</h1>
-              <p className="text-muted-foreground">Manage your account settings and personal information.</p>
+            <div className="flex items-center gap-2">
+              <h1 className="font-headline text-4xl font-bold">{userProfile.fullName}</h1>
+              {isHost && host?.verification?.idVerified && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <ShieldCheck className="h-7 w-7 text-green-600" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Verified Host</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 mt-1">
+              {userProfile.brandName && <p className="text-lg text-muted-foreground">{userProfile.brandName}</p>}
+              {userProfile.location?.country && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                      {userProfile.brandName && <span className="text-sm mx-1">•</span>}
+                      {getFlagFromCountryCode(userProfile.location.country)}
+                      <span>From {countryName}</span>
+                  </div>
+              )}
+            </div>
           </div>
         </div>
          <Button asChild variant="outline">
@@ -284,41 +328,42 @@ export default function ProfilePage() {
       </div>
 
        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="md:col-span-2 space-y-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Personal Information</CardTitle>
-                        <CardDescription>Update your public name and contact details.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="fullName"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Full Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Your full name" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="brandName"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Brand Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Your public brand name (optional)" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
+        <div className="md:col-span-2 space-y-8">
+          <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                  <Card>
+                      <CardHeader>
+                          <CardTitle>Personal Information</CardTitle>
+                          <CardDescription>Update your public name and contact details.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                          <FormField
+                              control={form.control}
+                              name="fullName"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Full Name</FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="Your full name" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={form.control}
+                              name="brandName"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Brand Name</FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="Your public brand name (optional)" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                           <FormField
                             control={form.control}
                             name="nativeLanguage"
                             render={({ field }) => (
@@ -329,178 +374,181 @@ export default function ProfilePage() {
                                         <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="english">English</SelectItem>
-                                        <SelectItem value="spanish">Spanish</SelectItem>
-                                        <SelectItem value="french">French</SelectItem>
-                                        <SelectItem value="german">German</SelectItem>
-                                        <SelectItem value="italian">Italian</SelectItem>
-                                        <SelectItem value="mandarin">Mandarin</SelectItem>
-                                        <SelectItem value="hindi">Hindi</SelectItem>
-                                        <SelectItem value="arabic">Arabic</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
+                                        {languages.map((lang) => (
+                                            <SelectItem key={lang} value={lang.toLowerCase()}>{lang}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
                             </FormItem>
                             )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Phone Number</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Your phone number" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                           <FormField
-                            control={form.control}
-                            name="location.country"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Country</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select country..." />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
+                          />
+                          <FormField
+                              control={form.control}
+                              name="phone"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Phone Number</FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="Your phone number" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                          <div className="grid grid-cols-2 gap-4">
                             <FormField
-                            control={form.control}
-                            name="location.city"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>City</FormLabel>
-                                <FormControl><Input placeholder="Your city" {...field} /></FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                        </div>
-                        <FormField
-                            control={form.control}
-                            name="website"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Website</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://your-website.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                </Card>
+                              control={form.control}
+                              name="location.country"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Country</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                      <FormControl>
+                                      <SelectTrigger>
+                                          <SelectValue placeholder="Select country..." />
+                                      </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                      {countries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                      </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                              />
+                              <FormField
+                              control={form.control}
+                              name="location.city"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>City</FormLabel>
+                                  <FormControl><Input placeholder="Your city" {...field} /></FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                              />
+                          </div>
+                          <FormField
+                              control={form.control}
+                              name="website"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Website</FormLabel>
+                                  <FormControl>
+                                      <Input placeholder="https://your-website.com" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                      </CardContent>
+                  </Card>
 
-                <Card>
-                    <CardHeader>
-                    <CardTitle>Social Media</CardTitle>
-                    <CardDescription>Link your social media profiles. Enter your handle only.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="socialMedia.twitter"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>X</FormLabel>
-                                <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                    <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                        <Twitter className="h-5 w-5" />
-                                    </div>
-                                    <span className="shrink-0 text-muted-foreground">https://x.com/</span>
-                                    <FormControl>
-                                        <Input
-                                        placeholder="your_handle"
-                                        {...field}
-                                        className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                        />
-                                    </FormControl>
-                                </div>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="socialMedia.instagram"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Instagram</FormLabel>
-                                <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                    <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                        <Instagram className="h-5 w-5" />
-                                    </div>
-                                    <span className="shrink-0 text-muted-foreground">https://instagram.com/</span>
-                                    <FormControl>
-                                        <Input
-                                        placeholder="your_handle"
-                                        {...field}
-                                        className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                        />
-                                    </FormControl>
-                                </div>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="socialMedia.facebook"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Facebook</FormLabel>
-                                <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                                    <div className="grid h-full place-items-center px-3 text-muted-foreground">
-                                        <Facebook className="h-5 w-5" />
-                                    </div>
-                                    <span className="shrink-0 text-muted-foreground">https://facebook.com/</span>
-                                    <FormControl>
-                                        <Input
-                                        placeholder="your_handle"
-                                        {...field}
-                                        className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
-                                        />
-                                    </FormControl>
-                                </div>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </CardContent>
-                    <CardFooter>
-                         <Button type="submit" disabled={profileSaveState === 'saving' || !form.formState.isDirty}>
-                            {profileSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {profileSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
-                            {profileSaveState === 'saved' ? 'Saved!' : 'Save Profile Changes'}
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </form>
-        </Form>
+                  <Card>
+                      <CardHeader>
+                      <CardTitle>Social Media</CardTitle>
+                      <CardDescription>Link your social media profiles. Enter your handle only.</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                          <FormField
+                              control={form.control}
+                              name="socialMedia.twitter"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>X</FormLabel>
+                                  <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                      <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                          <Twitter className="h-5 w-5" />
+                                      </div>
+                                      <span className="shrink-0 text-muted-foreground">https://x.com/</span>
+                                      <FormControl>
+                                          <Input
+                                          placeholder="your_handle"
+                                          {...field}
+                                          className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                          />
+                                      </FormControl>
+                                  </div>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={form.control}
+                              name="socialMedia.instagram"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Instagram</FormLabel>
+                                  <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                      <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                          <Instagram className="h-5 w-5" />
+                                      </div>
+                                      <span className="shrink-0 text-muted-foreground">https://instagram.com/</span>
+                                      <FormControl>
+                                          <Input
+                                          placeholder="your_handle"
+                                          {...field}
+                                          className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                          />
+                                      </FormControl>
+                                  </div>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={form.control}
+                              name="socialMedia.facebook"
+                              render={({ field }) => (
+                                  <FormItem>
+                                  <FormLabel>Facebook</FormLabel>
+                                  <div className="group flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                                      <div className="grid h-full place-items-center px-3 text-muted-foreground">
+                                          <Facebook className="h-5 w-5" />
+                                      </div>
+                                      <span className="shrink-0 text-muted-foreground">https://facebook.com/</span>
+                                      <FormControl>
+                                          <Input
+                                          placeholder="your_handle"
+                                          {...field}
+                                          className="h-full w-full border-0 bg-transparent p-2 shadow-none focus-visible:ring-0"
+                                          />
+                                      </FormControl>
+                                  </div>
+                                  <FormMessage />
+                                  </FormItem>
+                              )}
+                          />
+                      </CardContent>
+                      <CardFooter>
+                          <Button type="submit" disabled={profileSaveState === 'saving' || !form.formState.isDirty}>
+                              {profileSaveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                              {profileSaveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
+                              {profileSaveState === 'saved' ? 'Saved!' : 'Save Profile Changes'}
+                          </Button>
+                      </CardFooter>
+                  </Card>
+              </form>
+          </Form>
+
+          {areExperiencesLoading ? <Skeleton className="h-80 w-full" /> : experiences && experiences.length > 0 && (
+              <div className="space-y-4">
+                  <h2 className="font-headline text-2xl font-semibold">Your Experiences</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {experiences.map(exp => <ExperienceCard key={exp.id} experience={exp} />)}
+                  </div>
+              </div>
+            )}
+        </div>
       
         <div className="md:col-span-1 space-y-8">
             <Card>
                 <CardHeader>
                 <CardTitle>Account Information</CardTitle>
-                <CardDescription>This information is private and not shared with other users.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid sm:grid-cols-2 md:grid-cols-1 gap-4">
+                    <div className="grid gap-4">
                         <div>
                             <Label>Email Address</Label>
                             <p className="text-muted-foreground">{userProfile.email}</p>
@@ -515,15 +563,6 @@ export default function ProfilePage() {
                             <Label>Member Since</Label>
                             <p className="text-muted-foreground">{userProfile.createdAt?.toDate ? format(userProfile.createdAt.toDate(), 'PPP') : 'N/A'}</p>
                         </div>
-                        {userProfile.location?.country && countryName && (
-                        <div>
-                            <Label>Country</Label>
-                            <p className="text-muted-foreground flex items-center gap-2">
-                                {getFlagFromCountryCode(userProfile.location.country)}
-                                {countryName}
-                            </p>
-                        </div>
-                        )}
                     </div>
                 </CardContent>
             </Card>
