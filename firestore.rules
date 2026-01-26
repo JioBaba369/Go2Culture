@@ -86,7 +86,8 @@ service cloud.firestore {
     /* ───────────── Bookings ───────────── */
 
     match /bookings/{bookingId} {
-      allow get, update: if isBookingParticipant(resource.data) || isAdmin();
+      allow get: if isBookingParticipant(resource.data) || isAdmin();
+      allow update: if isBookingParticipant(resource.data) || isAdmin();
       // list is allowed for any signed-in user.
       // The client query MUST enforce filtering by guestId or hostId.
       allow list: if isSignedIn() || isAdmin();
@@ -114,7 +115,7 @@ service cloud.firestore {
     /* ───────────── Messages ───────────── */
 
     match /messages/{messageId} {
-      allow get: if isAdmin() || isParticipant(resource.data);
+      allow get: if isParticipant(resource.data) || isAdmin();
       // list is allowed for any signed-in user.
       // The client query MUST enforce filtering.
       allow list: if isSignedIn() || isAdmin();
@@ -135,7 +136,7 @@ service cloud.firestore {
     /* ───────────── Conversations ───────────── */
 
     match /conversations/{conversationId} {
-      allow get: if isAdmin() || isParticipant(resource.data);
+      allow get: if isParticipant(resource.data) || isAdmin();
       // A user can list conversations they are a participant in.
       // The client-side query MUST enforce this.
       allow list: if isSignedIn() || isAdmin();
