@@ -52,7 +52,7 @@ export function Step2HostProfile({ hostingStyleOptions }: Step2HostProfileProps)
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cultural Background</FormLabel>
-              <FormDescription>E.g., "Italian-Australian", "Cantonese", "Nigerian", "Māori"</FormDescription>
+              <FormDescription>E.g., "Italian", "Cantonese", "Nigerian", "Māori"</FormDescription>
               <FormControl><Input {...field} /></FormControl>
               <FormMessage />
             </FormItem>
@@ -64,6 +64,7 @@ export function Step2HostProfile({ hostingStyleOptions }: Step2HostProfileProps)
           render={({ field }) => (
             <FormItem>
               <FormLabel>Languages Spoken</FormLabel>
+              <FormDescription>Enter the languages you speak, separated by commas.</FormDescription>
               <FormControl><Input {...field} placeholder="e.g., English, Spanish, Italian" /></FormControl>
               <FormMessage />
             </FormItem>

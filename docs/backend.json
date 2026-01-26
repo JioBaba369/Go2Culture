@@ -227,7 +227,7 @@
           "properties": {
             "profilePhotoId": { "type": "string" },
             "bio": { "type": "string" },
-            "languages": { "type": "array", "items": { "type": "string" } },
+            "languages": { "type": "string" },
             "culturalBackground": { "type": "string" },
             "hostingStyles": { "type": "array", "items": { "type": "string" } }
           }
