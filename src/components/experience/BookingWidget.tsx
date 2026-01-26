@@ -165,22 +165,6 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       isGift ? setIsGifting(false) : setIsBooking(false);
     }
   };
-
-  const disabledDays = (day: Date): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (day < today) return true;
-
-    if (experience.availability.days && experience.availability.days.length > 0) {
-        if (!experience.availability.days.includes(format(day, 'EEEE'))) return true;
-    }
-    
-    if (host?.blockedDates?.includes(format(day, 'yyyy-MM-dd'))) {
-      return true;
-    }
-
-    return false;
-  };
   
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
   const totalPrice = basePrice - discountAmount;
@@ -219,7 +203,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     <BookingDatePicker
                         value={date}
                         onChange={setDate}
-                        disabled={disabledDays}
+                        availableDays={experience.availability.days}
+                        blockedDates={host?.blockedDates}
                     />
                 </div>
 

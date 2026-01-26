@@ -1,8 +1,7 @@
-
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
+import { format, isBefore, startOfDay } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import type { Matcher } from 'react-day-picker';
 
@@ -18,14 +17,36 @@ import {
 type Props = {
   value?: Date
   onChange: (date: Date | undefined) => void
-  disabled?: Matcher | Matcher[]
+  availableDays?: string[];
+  blockedDates?: string[];
 }
 
 export function BookingDatePicker({
   value,
   onChange,
-  disabled,
+  availableDays = [],
+  blockedDates = [],
 }: Props) {
+  
+  const disabledMatcher = (day: Date): boolean => {
+    // Disable past dates
+    if (isBefore(day, startOfDay(new Date()))) {
+      return true;
+    }
+
+    // Disable dates not in the host's availability
+    if (availableDays.length > 0) {
+        if (!availableDays.includes(format(day, 'EEEE'))) return true;
+    }
+    
+    // Disable dates specifically blocked by the host
+    if (blockedDates.includes(format(day, 'yyyy-MM-dd'))) {
+      return true;
+    }
+
+    return false;
+  }
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -46,7 +67,7 @@ export function BookingDatePicker({
           mode="single"
           selected={value}
           onSelect={onChange}
-          disabled={disabled}
+          disabled={disabledMatcher}
           initialFocus
         />
       </PopoverContent>
