@@ -1,13 +1,19 @@
 
 'use client';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, MapPin, Code, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Briefcase, MapPin, Code } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import { Job } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 const iconMap: Record<string, React.ElementType> = {
     Engineering: Code,
@@ -35,33 +41,44 @@ export default function CareersPage() {
 
             <div className="max-w-4xl mx-auto mt-12">
                 <h2 className="font-headline text-3xl font-bold">Current Openings</h2>
-                <div className="mt-6 space-y-4">
+                <div className="mt-6">
                     {isLoading && (
-                        <>
-                            <Skeleton className="h-24 w-full" />
-                            <Skeleton className="h-24 w-full" />
-                        </>
+                        <div className="space-y-4">
+                            <Skeleton className="h-28 w-full" />
+                            <Skeleton className="h-28 w-full" />
+                        </div>
                     )}
                     {!isLoading && openPositions && openPositions.length > 0 ? (
-                        openPositions.map((position) => {
-                            const Icon = iconMap[position.department] || iconMap.Default;
-                            return (
-                                <Card key={position.id}>
-                                    <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                        <div className="flex-grow">
-                                            <CardTitle className="text-xl">{position.title}</CardTitle>
-                                            <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 mt-2">
-                                                <span className="flex items-center gap-2"><Icon className="h-4 w-4" /> {position.department}</span>
-                                                <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {position.location}</span>
-                                            </CardDescription>
-                                        </div>
-                                        <Button asChild className="w-full md:w-auto">
-                                            <Link href={`/contact?subject=Application for ${encodeURIComponent(position.title)}`}>Apply Now</Link>
-                                        </Button>
-                                    </CardHeader>
-                                </Card>
-                            );
-                        })
+                        <Accordion type="single" collapsible className="w-full space-y-4">
+                            {openPositions.map((position) => {
+                                const Icon = iconMap[position.department] || iconMap.Default;
+                                return (
+                                    <AccordionItem value={position.id} key={position.id} asChild>
+                                        <Card>
+                                            <AccordionTrigger className="w-full p-6 text-left hover:no-underline">
+                                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+                                                    <div className="flex-grow text-left">
+                                                        <h3 className="text-xl font-semibold">{position.title}</h3>
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
+                                                            <span className="flex items-center gap-2"><Icon className="h-4 w-4" /> {position.department}</span>
+                                                            <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {position.location}</span>
+                                                        </div>
+                                                    </div>
+                                                    <Button asChild className="w-full md:w-auto mt-4 md:mt-0" onClick={(e) => e.stopPropagation()}>
+                                                        <Link href={`/contact?subject=Application for ${encodeURIComponent(position.title)}`}>Apply Now</Link>
+                                                    </Button>
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent>
+                                                <div className="px-6 pb-6 prose-sm max-w-none text-muted-foreground whitespace-pre-line">
+                                                    {position.description}
+                                                </div>
+                                            </AccordionContent>
+                                        </Card>
+                                    </AccordionItem>
+                                );
+                            })}
+                        </Accordion>
                     ) : (
                         !isLoading && (
                             <Card className="text-center py-12">
