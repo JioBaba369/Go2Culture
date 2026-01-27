@@ -532,3 +532,5 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
+
+    
