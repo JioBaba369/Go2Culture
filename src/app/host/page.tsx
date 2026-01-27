@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,18 +13,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow, isFuture, isPast } from "date-fns";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "@/components/ui/skeleton";
-import dynamic from "next/dynamic";
 import React from "react";
-
-const BookingsChart = dynamic(() => import('@/components/host/dashboard-charts').then(mod => mod.BookingsChart), {
-  ssr: false,
-  loading: () => <Skeleton className="h-80" />
-});
-const EarningsChart = dynamic(() => import('@/components/host/dashboard-charts').then(mod => mod.EarningsChart), {
-  ssr: false,
-  loading: () => <Skeleton className="h-80" />
-});
-
 
 function ActivityItem({ activity }: { activity: any }) {
     const { firestore } = useFirebase();
@@ -130,28 +120,16 @@ export default function HostDashboardPage() {
 
     const confirmedBookings = bookings?.filter(b => b.status === 'Confirmed') || [];
     const upcomingConfirmed = confirmedBookings.filter(b => isFuture(b.bookingDate.toDate()));
-    const pastConfirmed = confirmedBookings.filter(b => isPast(b.bookingDate.toDate()));
     const pendingBookings = bookings?.filter(b => b.status === 'Pending' && isFuture(b.bookingDate.toDate())) || [];
 
-    const totalPayouts = pastConfirmed.reduce((sum, b) => sum + b.totalPrice, 0);
     const upcomingEarnings = upcomingConfirmed.reduce((sum, b) => sum + b.totalPrice, 0);
-    const potentialEarnings = pendingBookings.reduce((sum, b) => sum + b.totalPrice, 0);
-    const totalGuestsHosted = pastConfirmed.reduce((sum, b) => sum + b.numberOfGuests, 0);
 
-    const averageRating = experiences && experiences.length > 0 && experiences.reduce((acc, exp) => acc + exp.rating.count, 0) > 0
-        ? experiences.reduce((acc, exp) => acc + exp.rating.average * exp.rating.count, 0) / experiences.reduce((acc, exp) => acc + exp.rating.count, 0)
-        : 0;
-
-    const totalReviews = experiences?.reduce((sum, e) => sum + e.rating.count, 0) || 0;
-    
     const nextBooking = upcomingConfirmed.sort((a,b) => a.bookingDate.toDate().getTime() - b.bookingDate.toDate().getTime())[0];
 
     const stats = [
-        { title: "Total Payouts", value: `$${totalPayouts.toFixed(2)}`, icon: DollarSign, description: `From ${pastConfirmed.length} completed bookings.` },
+        { title: "Pending Requests", value: pendingBookings.length, icon: Hourglass, description: `Awaiting your confirmation.` },
         { title: "Upcoming Earnings", value: `$${upcomingEarnings.toFixed(2)}`, icon: CalendarCheck, description: `From ${upcomingConfirmed.length} future bookings.` },
-        { title: "Pending Requests", value: pendingBookings.length, icon: Hourglass, description: `Worth $${potentialEarnings.toFixed(2)}` },
-        { title: "Total Guests Hosted", value: totalGuestsHosted, icon: Users, description: 'Across all completed experiences.'},
-        { title: "Average Rating", value: isNaN(averageRating) ? 'N/A' : averageRating.toFixed(2), icon: Star, description: `Across ${totalReviews} reviews.` },
+        { title: "Live Experiences", value: experiences?.filter(exp => exp.status === 'live').length || 0, icon: Utensils, description: 'Currently visible to guests.'},
     ];
     
     const recentActivities = [
@@ -165,8 +143,8 @@ export default function HostDashboardPage() {
 
             {nextBooking && <NextBookingCard booking={nextBooking} />}
             
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                {isLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-28" />) :
+             <div className="grid gap-4 md:grid-cols-3">
+                {isLoading ? Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-28" />) :
                 stats.map((stat) => (
                 <Card key={stat.title}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -179,11 +157,6 @@ export default function HostDashboardPage() {
                     </CardContent>
                 </Card>
                 ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <BookingsChart bookings={bookings || []} />
-                <EarningsChart bookings={bookings || []} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
