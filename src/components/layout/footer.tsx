@@ -20,6 +20,9 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               “Experience culture the way locals live it — around the table, at home, together.”
             </p>
+            <p className="text-sm text-muted-foreground font-bold">
+              “Delicious food, rich culture, good health and peace in the community.”
+            </p>
           </div>
           <div>
             <h3 className="font-semibold font-headline">Discover</h3>
