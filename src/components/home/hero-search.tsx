@@ -26,7 +26,7 @@ export function HeroSearch() {
 
   return (
     <div className="mt-8 bg-transparent w-full max-w-lg">
-      <div className="flex bg-background rounded-full border shadow-lg h-auto w-full overflow-hidden items-center pr-2">
+      <div className="flex bg-background rounded-full border h-auto w-full overflow-hidden items-center pr-2">
         <div className="relative flex-grow">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
             <Input
@@ -38,7 +38,7 @@ export function HeroSearch() {
                 className="h-16 w-full border-none bg-transparent pl-14 pr-4 text-base focus-visible:ring-0"
             />
         </div>
-        <Button onClick={handleSearch} size="lg" className="h-12 rounded-full bg-primary hover:bg-primary/90 text-base font-semibold px-8">
+        <Button onClick={handleSearch} size="lg" className="h-12 rounded-full font-semibold px-8">
           Search
         </Button>
       </div>
