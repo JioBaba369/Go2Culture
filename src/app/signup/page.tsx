@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -21,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { createNotification } from '@/lib/notification-actions';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function SignupPage() {
   const auth = useAuth();
@@ -32,6 +32,9 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [isOver18, setIsOver18] = useState(false);
 
   const handleSignup = async () => {
     if (!firstName || !lastName || !email || !password) {
@@ -42,6 +45,15 @@ export default function SignupPage() {
       });
       return;
     }
+    if (!agreedToTerms || !agreedToPrivacy || !isOver18) {
+      toast({
+        variant: "destructive",
+        title: "Agreements Required",
+        description: "Please accept the terms and policies and confirm you are over 18.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -63,7 +75,7 @@ export default function SignupPage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         profilePhotoId: 'guest-1', // Default placeholder
-        termsAccepted: true,
+        termsAccepted: agreedToTerms && agreedToPrivacy,
       });
 
       // Create notification for email verification
@@ -148,21 +160,47 @@ export default function SignupPage() {
                   disabled={isLoading}
                 />
             </div>
-            <Button onClick={handleSignup} className="w-full" disabled={isLoading}>
+            
+            <div className="space-y-3 pt-2">
+                <div className="flex items-start space-x-2">
+                    <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} disabled={isLoading} />
+                    <div className="grid gap-1.5 leading-none">
+                        <label
+                        htmlFor="terms"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                        I agree to the <Link href="/terms" className="underline hover:text-primary">Terms of Service</Link>
+                        </label>
+                    </div>
+                </div>
+                 <div className="flex items-start space-x-2">
+                    <Checkbox id="privacy" checked={agreedToPrivacy} onCheckedChange={(checked) => setAgreedToPrivacy(checked as boolean)} disabled={isLoading} />
+                    <div className="grid gap-1.5 leading-none">
+                        <label
+                        htmlFor="privacy"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                        I agree to the <Link href="/privacy" className="underline hover:text-primary">Privacy Policy</Link>
+                        </label>
+                    </div>
+                </div>
+                 <div className="flex items-start space-x-2">
+                    <Checkbox id="age" checked={isOver18} onCheckedChange={(checked) => setIsOver18(checked as boolean)} disabled={isLoading} />
+                    <div className="grid gap-1.5 leading-none">
+                        <label
+                        htmlFor="age"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                        I confirm I am 18 years or older
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <Button onClick={handleSignup} className="w-full" disabled={isLoading || !agreedToTerms || !agreedToPrivacy || !isOver18}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
-            <p className="px-8 text-center text-xs text-muted-foreground">
-                By clicking continue, you agree to our{" "}
-                <Link href="/terms" className="underline hover:text-primary">
-                    Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="underline hover:text-primary">
-                    Privacy Policy
-                </Link>
-                .
-            </p>
           </div>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
