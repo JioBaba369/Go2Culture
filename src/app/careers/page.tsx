@@ -1,8 +1,7 @@
-
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, MapPin, Code } from 'lucide-react';
+import { Briefcase, MapPin, Code, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
@@ -13,7 +12,16 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const iconMap: Record<string, React.ElementType> = {
     Engineering: Code,
@@ -22,6 +30,76 @@ const iconMap: Record<string, React.ElementType> = {
     Default: Briefcase,
 };
 
+const applicationSchema = z.object({
+    name: z.string().min(2, "Please enter your name."),
+    email: z.string().email("Please enter a valid email address."),
+    coverLetter: z.string().min(50, "Please write a cover letter of at least 50 characters."),
+});
+
+type ApplicationFormValues = z.infer<typeof applicationSchema>;
+
+function ApplicationForm({ job, onFinished }: { job: Job, onFinished: () => void }) {
+    const { toast } = useToast();
+    const form = useForm<ApplicationFormValues>({
+        resolver: zodResolver(applicationSchema),
+        defaultValues: { name: '', email: '', coverLetter: '' },
+    });
+
+    function onSubmit(values: ApplicationFormValues) {
+        // In a real application, this would submit the data to a backend service.
+        console.log("Application Submitted:", { ...values, jobTitle: job.title });
+        toast({
+            title: "Application Sent!",
+            description: `Your application for ${job.title} has been submitted.`,
+        });
+        onFinished();
+    }
+    
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="coverLetter"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Cover Letter</FormLabel>
+                            <FormControl><Textarea rows={5} placeholder="Tell us why you'd be a great fit for this role and for Go2Culture..." {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">
+                  {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                  Submit Application
+                </Button>
+            </form>
+        </Form>
+    );
+}
+
 export default function CareersPage() {
     const firestore = useFirestore();
     const jobsQuery = useMemoFirebase(
@@ -29,6 +107,7 @@ export default function CareersPage() {
         [firestore]
     );
     const { data: openPositions, isLoading } = useCollection<Job>(jobsQuery);
+    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
     return (
         <div className="py-12">
@@ -64,9 +143,22 @@ export default function CareersPage() {
                                                             <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {position.location}</span>
                                                         </div>
                                                     </div>
-                                                    <Button asChild className="w-full md:w-auto mt-4 md:mt-0" onClick={(e) => e.stopPropagation()}>
-                                                        <Link href={`/contact?subject=Application for ${encodeURIComponent(position.title)}`}>Apply Now</Link>
-                                                    </Button>
+                                                    <Dialog open={selectedJob?.id === position.id} onOpenChange={(isOpen) => !isOpen && setSelectedJob(null)}>
+                                                        <DialogTrigger asChild>
+                                                            <Button className="w-full md:w-auto mt-4 md:mt-0" onClick={(e) => { e.stopPropagation(); setSelectedJob(position); }}>
+                                                                Apply Now
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Apply for {position.title}</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Submit your application to Go2Culture. We're excited to hear from you.
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <ApplicationForm job={position} onFinished={() => setSelectedJob(null)} />
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent>
