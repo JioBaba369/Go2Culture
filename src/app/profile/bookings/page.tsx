@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -248,6 +249,7 @@ function BookingCard({ booking, actor, onAction, hasReviewed, isReviewCheckLoadi
                     <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Review: {experience.title}</DialogTitle>
+                        <DialogDescription>Share your thoughts on the experience to help other guests.</DialogDescription>
                     </DialogHeader>
                     <ReviewForm booking={booking} actor={actor} onFinished={() => { setReviewFormOpen(false); onAction(); }} />
                     </DialogContent>
