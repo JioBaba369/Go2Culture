@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,7 +28,7 @@ function ReferredUserRow({ referredUser }: { referredUser: ReferredUser }) {
     const userProfileRef = useMemoFirebase(() => (firestore ? doc(firestore, 'users', referredUser.id) : null), [firestore, referredUser.id]);
     const { data: userProfile, isLoading } = useDoc<User>(userProfileRef);
 
-    const userImage = PlaceHolderImages.find(p => p.id === userProfile?.profilePhotoId);
+    const userImage = userProfile ? PlaceHolderImages.find(p => p.id === userProfile.profilePhotoId) : null;
     
     if (isLoading) {
         return <TableRow><TableCell colSpan={3}><Skeleton className="h-10" /></TableCell></TableRow>
@@ -40,7 +40,7 @@ function ReferredUserRow({ referredUser }: { referredUser: ReferredUser }) {
                 <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9">
                         {userImage && <AvatarImage src={userImage.imageUrl} alt={referredUser.fullName} />}
-                        <AvatarFallback>{referredUser.fullName.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{referredUser.fullName ? referredUser.fullName.charAt(0) : '?'}</AvatarFallback>
                     </Avatar>
                     <span className="font-medium">{referredUser.fullName}</span>
                 </div>
@@ -51,7 +51,7 @@ function ReferredUserRow({ referredUser }: { referredUser: ReferredUser }) {
                 </span>
             </TableCell>
             <TableCell className="text-right">
-                {referredUser.createdAt.toDate ? format(referredUser.createdAt.toDate(), 'PPP') : 'N/A'}
+                {referredUser.createdAt?.toDate ? format(referredUser.createdAt.toDate(), 'PPP') : 'N/A'}
             </TableCell>
         </TableRow>
     )
@@ -73,7 +73,7 @@ export default function ReferralsPage() {
     );
     const { data: referredUsers, isLoading: areReferredUsersLoading } = useCollection<ReferredUser>(referredUsersQuery);
 
-    const referralCode = user ? user.uid.substring(0, 8).toUpperCase() : '';
+    const referralCode = useMemo(() => user ? user.uid.substring(0, 8).toUpperCase() : '', [user]);
     const referralLink = `https://go2culture.com/signup?ref=${referralCode}`;
 
     const copyToClipboard = () => {
@@ -97,7 +97,7 @@ export default function ReferralsPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-headline font-bold">Invite a Friend, Share an Experience</h1>
+                <h1 className="text-3xl font-headline font-bold">Referrals & Credits</h1>
                 <p className="text-muted-foreground">Share the gift of culture. When your friend completes their first experience, you both get a $10 credit.</p>
             </div>
 
@@ -113,7 +113,7 @@ export default function ReferralsPage() {
                 </Card>
                  <Card>
                     <CardHeader>
-                        <CardTitle>Invite someone who would value this.</CardTitle>
+                        <CardTitle>Invite someone who would value this experience.</CardTitle>
                         <CardDescription>
                             Give friends $10 off their first booking. After they attend, you'll get $10 credit.
                         </CardDescription>
@@ -198,6 +198,6 @@ export default function ReferralsPage() {
                     </Table>
                 </CardContent>
             </Card>
-
         </div>
-     
+    );
+}
