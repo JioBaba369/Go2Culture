@@ -20,6 +20,7 @@ import { Star, Loader2, Tag, CheckCircle, Users, Gift, Zap } from 'lucide-react'
 import { Checkbox } from '../ui/checkbox';
 import Link from 'next/link';
 import { BookingDatePicker } from '../ui/booking-date-picker';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 interface BookingWidgetProps {
     experience: Experience;
@@ -225,7 +226,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             </div>
             <div className="flex items-center gap-2">
                 {experience.instantBook && (
-                    <Badge variant="success" className="gap-1">
+                    <Badge variant="default" className="gap-1">
                         <Zap className="h-4 w-4" /> Instant Book
                     </Badge>
                 )}
@@ -239,9 +240,12 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         <Separator />
         
         {user?.uid === experience.userId ? (
-            <div className="text-center text-sm text-muted-foreground p-4 bg-muted rounded-md">
-                This is your experience. You cannot book it.
-            </div>
+            <Alert>
+                <AlertTitle>This is Your Experience</AlertTitle>
+                <AlertDescription>
+                You cannot book your own experience. You can view it as a guest to see how it looks.
+                </AlertDescription>
+            </Alert>
         ) : (
             <div className="flex flex-col space-y-4">
                 <div className="space-y-2">
@@ -276,11 +280,11 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     <div className="flex gap-2">
                         <Input id="coupon" placeholder="Enter code" value={couponCode} onChange={e => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
                         <Button variant="outline" onClick={handleApplyCoupon} disabled={!!appliedCoupon}>
-                            {appliedCoupon ? <CheckCircle className="h-5 w-5 text-success" /> : 'Apply'}
+                            {appliedCoupon ? <CheckCircle className="h-5 w-5 text-green-500" /> : 'Apply'}
                         </Button>
                     </div>
                     {couponError && <p className="text-xs text-destructive">{couponError}</p>}
-                    {appliedCoupon && <p className="text-xs text-success font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
+                    {appliedCoupon && <p className="text-xs text-green-600 font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
                 </div>
 
                 <div className="space-y-1 text-sm pt-2">
@@ -293,7 +297,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                         <span>${serviceFee.toFixed(2)}</span>
                     </div>
                     {discountAmount > 0 && (
-                        <div className="flex justify-between text-success">
+                        <div className="flex justify-between text-green-600">
                             <span>Coupon Discount</span>
                             <span>-${discountAmount.toFixed(2)}</span>
                         </div>

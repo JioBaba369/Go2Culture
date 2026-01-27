@@ -4,110 +4,74 @@
 
 @layer base {
   :root {
-    /* Brand Foundations */
-    --gc-ocean: 199 33% 20%; /* #1F3A44 */
-    --gc-earth: 18 54% 47%; /* #B65C3A */
-    --gc-sky: 202 33% 94%; /* #E9F1F4 */
-    --gc-sage: 145 11% 47%; /* #6F8572 */
-    --gc-cloud: 0 0% 100%; /* #FFFFFF */
-    --gc-border: 202 20% 87%; /* #D9E1E4 */
-    --gc-muted-text: 208 3% 43%; /* #6B6F72 */
-
-    /* Semantic UI Colours */
-    --gc-success: var(--gc-sage);
-    --gc-warning: 34 52% 64%; /* #D4A373 */
-    --gc-error: 2 45% 48%; /* #B24A44 */
-    --gc-info: 201 28% 61%; /* #7FA6B8 */
-
-    /* Light Mode Theme Mapping */
-    --background: var(--gc-sky);
-    --foreground: var(--gc-ocean);
-    --card: var(--gc-cloud);
-    --card-foreground: var(--gc-ocean);
-    --popover: var(--gc-cloud);
-    --popover-foreground: var(--gc-ocean);
-    --primary: var(--gc-earth);
-    --primary-foreground: var(--gc-cloud);
-    --secondary: var(--gc-ocean);
-    --secondary-foreground: var(--gc-cloud);
-    --muted: 202 33% 96%; /* #F3F7F9, derived from sky */
-    --muted-foreground: var(--gc-muted-text);
-    --accent: var(--gc-earth);
-    --accent-foreground: var(--gc-cloud);
-    --destructive: var(--gc-error);
-    --destructive-foreground: var(--gc-cloud);
-    
-    --success: var(--gc-success);
-    --warning: var(--gc-warning);
-    --info: var(--gc-info);
-
-    --border: var(--gc-border);
-    --input: var(--gc-border);
-    --ring: var(--gc-earth);
-    --radius: 0.8rem;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 210 40% 50%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 210 40% 9.8%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 210 40% 46.1%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 210 40% 9.8%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 76.2% 36.3%;
+    --warning: 47.9 95.8% 53.1%;
+    --info: 210 40% 50%;
+    --border: 210 40% 89.8%;
+    --input: 210 40% 89.8%;
+    --ring: 210 40% 9.8%;
+    --radius: 0.5rem;
 
     /* Custom Sidebar vars */
-    --sidebar-background: var(--gc-cloud);
-    --sidebar-foreground: var(--gc-ocean);
-    --sidebar-primary: var(--gc-earth);
-    --sidebar-primary-foreground: var(--gc-cloud);
-    --sidebar-accent: 202 33% 96%; /* Alt bg */
-    --sidebar-accent-foreground: var(--gc-earth);
-    --sidebar-border: var(--gc-border);
-    --sidebar-ring: var(--gc-earth);
+    --sidebar-background: 210 40% 98%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 210 40% 50%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 94.1%;
+    --sidebar-accent-foreground: 210 40% 9.8%;
+    --sidebar-border: 210 40% 89.8%;
+    --sidebar-ring: 210 40% 9.8%;
   }
 
   .dark {
-    /* Brand Foundations - values are the same */
-    --gc-ocean: 199 33% 20%;
-    --gc-earth: 18 54% 47%;
-    --gc-sky: 202 33% 94%;
-    --gc-sage: 145 11% 47%;
-    --gc-cloud: 0 0% 100%;
-    --gc-border: 198 29% 24%;
-    --gc-muted-text: 201 16% 82%;
-
-    /* Semantic UI Colours - values are the same */
-    --gc-success: 145 11% 47%;
-    --gc-warning: 34 52% 64%;
-    --gc-error: 2 45% 48%;
-    --gc-info: 201 28% 61%;
-    
-    /* Dark Mode Theme Mapping */
-    --background: 199 47% 11%; /* #0F2027 */
-    --foreground: var(--gc-sky);
-    --card: 198 38% 17%; /* #1C343D */
-    --card-foreground: var(--gc-sky);
-    --popover: 198 38% 17%;
-    --popover-foreground: var(--gc-sky);
-    --primary: var(--gc-earth);
-    --primary-foreground: var(--gc-sky);
-    --secondary: var(--gc-sage);
-    --secondary-foreground: var(--gc-sky);
-    --muted: 198 39% 14%; /* Surface #162C33 */
-    --muted-foreground: var(--gc-muted-text);
-    --accent: var(--gc-earth);
-    --accent-foreground: var(--gc-sky);
-    --destructive: var(--gc-error);
-    --destructive-foreground: var(--gc-sky);
-
-    --success: var(--gc-success);
-    --warning: var(--gc-warning);
-    --info: var(--gc-info);
-
-    --border: var(--gc-border);
-    --input: var(--gc-border);
-    --ring: var(--gc-earth);
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 210 40% 9.8%;
+    --secondary: 210 40% 15.9%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 210 40% 15.9%;
+    --muted-foreground: 210 40% 64.9%;
+    --accent: 210 40% 15.9%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 142.1 76.2% 36.3%;
+    --warning: 47.9 95.8% 53.1%;
+    --info: 210 40% 50%;
+    --border: 210 40% 15.9%;
+    --input: 210 40% 15.9%;
+    --ring: 210 40% 98%;
 
     /* Custom Sidebar vars for dark mode */
-    --sidebar-background: 198 39% 14%; /* Surface */
-    --sidebar-foreground: var(--gc-sky);
-    --sidebar-primary: var(--gc-earth);
-    --sidebar-primary-foreground: var(--gc-sky);
-    --sidebar-accent: 198 38% 20%; /* Slightly lighter than card */
-    --sidebar-accent-foreground: var(--gc-sky);
-    --sidebar-border: var(--gc-border);
-    --sidebar-ring: var(--gc-earth);
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 210 40% 9.8%;
+    --sidebar-accent: 210 40% 15.9%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 210 40% 15.9%;
+    --sidebar-ring: 210 40% 98%;
   }
 }
 

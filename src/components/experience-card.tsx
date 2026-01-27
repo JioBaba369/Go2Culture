@@ -10,7 +10,6 @@ import { Star, MapPin, Utensils } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { countries, suburbs } from "@/lib/location-data";
 import { WishlistButton } from "./wishlist-button";
-import { getFlagEmoji, getFlagFromCountryCode } from "@/lib/format";
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -48,8 +47,8 @@ function ExperienceCardContent({ experience }: ExperienceCardProps) {
         <div className="flex-grow">
           <div className="flex items-start justify-between">
             <Link href={`/experiences/${experience.id}`} className="block">
-              <h3 className="font-headline font-semibold text-lg leading-tight hover:underline">
-                {getFlagFromCountryCode(experience.location.country)} {experience.title}
+              <h3 className="font-semibold text-lg leading-tight hover:underline">
+                {experience.title}
               </h3>
             </Link>
           </div>
@@ -59,7 +58,7 @@ function ExperienceCardContent({ experience }: ExperienceCardProps) {
           </div>
           <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
             <Utensils className="h-4 w-4 shrink-0" />
-            <span>{getFlagEmoji(experience.menu.cuisine)} {experience.menu.cuisine}</span>
+            <span>{experience.menu.cuisine}</span>
           </div>
           {experience.hostName && (
             <Link href={`/users/${experience.userId}`} className="group/host">

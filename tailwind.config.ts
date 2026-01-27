@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['var(--font-pt-sans)'],
-        headline: ['var(--font-playfair-display)'],
+        sans: ['var(--font-sans)'],
+        headline: ['var(--font-sans)'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -66,11 +66,6 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        ocean: 'hsl(var(--gc-ocean))',
-        earth: 'hsl(var(--gc-earth))',
-        sky: 'hsl(var(--gc-sky))',
-        sage: 'hsl(var(--gc-sage))',
-        cloud: 'hsl(var(--gc-cloud))',
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
           foreground: 'hsl(var(--sidebar-foreground))',
