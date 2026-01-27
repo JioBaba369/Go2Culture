@@ -40,7 +40,8 @@ export async function sendMessage(
 
   // 2. Create or update the conversation document
   const conversationRef = doc(firestore, 'conversations', booking.id);
-  const conversationData: Omit<Conversation, 'readBy' | 'id'> & { readBy: { [key: string]: any }, id: string } = {
+  // This type helps ensure we are building the correct shape for the batch write.
+  const conversationData: Omit<Conversation, 'id'> & { id: string } = {
     id: booking.id,
     bookingId: booking.id,
     participants: [currentUser.id, recipient.id],
@@ -63,19 +64,16 @@ export async function sendMessage(
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
+    // `readBy` should be a map, with the user's ID as a key.
     readBy: { [currentUser.id]: serverTimestamp() },
   };
 
   // Using set with merge: true will create if not exists, and update if it does.
-  // When updating, it only overwrites fields provided in the data object.
-  // For nested maps like `readBy`, you might need to use dot notation for partial updates if you don't want to overwrite the whole map.
-  // However, for creating/updating the `lastMessage` and the sender's read status, this is sufficient.
   batch.set(conversationRef, conversationData, { merge: true });
-  
+
   // 3. Add rate limit update
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
   batch.set(rateLimitRef, { lastMessageAt: serverTimestamp() }, { merge: true });
-
 
   try {
     await batch.commit();
