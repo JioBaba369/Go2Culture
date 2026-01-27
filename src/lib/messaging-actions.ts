@@ -10,13 +10,9 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import type { Booking, Message, User } from '@/lib/types';
+import type { Booking, Conversation, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 
-/**
- * Sends a message and updates the conversation metadata.
- * Assumes the conversation document already exists.
- */
 export async function sendMessage(
   firestore: Firestore,
   currentUser: User,
@@ -42,19 +38,18 @@ export async function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Update the parent conversation document
+  // 2. Update the conversation document
   const conversationRef = doc(firestore, 'conversations', booking.id);
-  const conversationUpdate = {
+  const conversationData = {
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    // Use dot notation to update only the current user's read timestamp in the map
     [`readBy.${currentUser.id}`]: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
-  batch.update(conversationRef, conversationUpdate);
+  batch.update(conversationRef, conversationData);
 
   // 3. Add rate limit update to the same batch
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
@@ -76,11 +71,9 @@ export async function sendMessage(
       new FirestorePermissionError({
         path: `batch write (conversations/${booking.id}, messages, rateLimits)`,
         operation: 'write',
-        requestResourceData: { newMessage, conversationUpdate },
+        requestResourceData: { newMessage, conversationData },
       })
     );
     throw serverError;
   }
 }
-
-    

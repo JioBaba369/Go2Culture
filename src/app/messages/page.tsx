@@ -34,7 +34,7 @@ function ConversationListItem({ conversation, isSelected }: { conversation: Conv
   
   if (!otherParticipantId || !user) return null;
   
-  const otherParticipantInfo = conversation.participantInfo[otherParticipantId];
+  const otherParticipantInfo = conversation.participantInfo[otherParticipantInfo];
   const lastMessage = conversation.lastMessage;
   
   const myReadTimestamp = conversation.readBy?.[user.uid]?.toDate();
@@ -366,5 +366,3 @@ export default function MessagesPage() {
         </div>
     );
 }
-
-    
