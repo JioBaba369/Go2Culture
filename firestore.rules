@@ -13,12 +13,12 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      // In production, this would be a custom claim, not a hardcoded UID.
+      // In production, this would be a custom claim.
       return isSignedIn() && request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
     }
 
     function isParticipant(conversationId) {
-        return request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+      return request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
     }
 
     function canSendMessage() {
@@ -31,10 +31,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSelf(userId) || isAdmin();
       allow create: if isSelf(userId);
+      // Client cannot change role or status
       allow update: if isSelf(userId)
-        && !('role' in request.resource.data)
-        && !('status' in request.resource.data);
-      allow delete: if isAdmin();
+        && !('role' in request.resource.data.diff(resource.data).affectedKeys())
+        && !('status' in request.resource.data.diff(resource.data).affectedKeys());
+      allow delete: if false; // Use soft deletes
 
       match /hosts/{hostId} {
         allow read: if true;
@@ -57,11 +58,10 @@ service cloud.firestore {
 
     /* ───────────────── Host Applications ───────────────── */
     match /hostApplications/{applicationId} {
-      allow create: if isSignedIn()
-        && request.resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow read: if isAdmin() || resource.data.userId == request.auth.uid;
       allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if false; // Use status changes, don't delete
     }
 
     /* ───────────────── Experiences ───────────────── */
@@ -69,7 +69,7 @@ service cloud.firestore {
       allow read: if resource.data.status == 'live' || isAdmin() || (isSignedIn() && isSelf(resource.data.hostId));
       allow create: if isSignedIn() && request.resource.data.hostId == request.auth.uid;
       allow update: if isSignedIn() && isSelf(resource.data.hostId);
-      allow delete: if isAdmin() || (isSignedIn() && isSelf(resource.data.hostId));
+      allow delete: if false; // Soft delete by updating status to 'archived'
     }
 
     /* ───────────────── Bookings ───────────────── */
@@ -77,19 +77,20 @@ service cloud.firestore {
         allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
         allow read: if isSignedIn() && (request.auth.uid == resource.data.guestId || request.auth.uid == resource.data.hostId) || isAdmin();
         
-        allow update: if 
-          // Prevent immutable fields from being changed
-          !('pricing' in request.resource.data.diff(resource.data).affectedKeys()) &&
-          !('policySnapshot' in request.resource.data.diff(resource.data).affectedKeys()) &&
-          (
-            // Guest can cancel
-            (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
-            // Host can confirm
-            (isSelf(resource.data.hostId) && request.resource.data.status == "Confirmed") ||
-            // Either participant can request a reschedule
-            (isSelf(resource.data.guestId) || isSelf(resource.data.hostId))
-          );
-        allow delete: if isAdmin();
+        allow update: if (
+            // Prevent immutable fields from being changed after creation
+            !("pricing" in request.resource.data.diff(resource.data).affectedKeys()) &&
+            !("policySnapshot" in request.resource.data.diff(resource.data).affectedKeys()) &&
+            (
+                // Guest can cancel their own booking
+                (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
+                // Host can confirm a booking
+                (isSelf(resource.data.hostId) && request.resource.data.status == "Confirmed" && resource.data.status == "Pending") ||
+                // Either participant can request/respond to reschedule
+                (isSelf(resource.data.guestId) || isSelf(resource.data.hostId))
+            )
+        );
+        allow delete: if false;
     }
 
     /* ───────────────── Reviews ───────────────── */
@@ -97,7 +98,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
       allow update: if (isSignedIn() && isSelf(resource.data.guestId)) || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if false;
     }
 
     /* ───────────────── Conversations & Messages ───────────────── */
@@ -129,7 +130,9 @@ service cloud.firestore {
     }
     
     match /reports/{reportId} {
-      allow read, write: if isAdmin();
+      allow read, update: if isAdmin();
+      allow create: if isSignedIn();
+      allow delete: if false;
     }
 
     match /auditLogs/{logId} {

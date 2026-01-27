@@ -13,7 +13,7 @@
         "role": {
           "type": "string",
           "enum": ["guest", "host", "both"],
-          "description": "The role of the user within the platform."
+          "description": "The role of the user within the platform. Server-controlled."
         },
         "fullName": {
           "type": "string",
@@ -111,7 +111,11 @@
         "status": {
           "type": "string",
           "enum": ["active", "suspended", "deleted"],
-          "description": "The status of the user's account."
+          "description": "The status of the user's account. Server-controlled."
+        },
+        "suspensionReason": {
+            "type": "string",
+            "description": "Reason for suspension, if applicable. Set by admin."
         },
         "termsAccepted": {
             "type": "boolean",
@@ -136,6 +140,11 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp for soft deletion."
         }
       },
       "required": ["id", "role", "fullName", "email", "status", "createdAt", "updatedAt"]
@@ -435,7 +444,7 @@
           "items": { "type": "string" },
           "description": "A list of items guests should bring (e.g., 'An appetite!', 'Your own beverage')."
         },
-        "status": { "type": "string", "enum": ["draft", "live", "paused"] },
+        "status": { "type": "string", "enum": ["draft", "live", "paused", "archived"] },
         "instantBook": { "type": "boolean" },
         "rating": {
           "type": "object",
@@ -444,7 +453,8 @@
             "count": { "type": "number" }
           }
         },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "deletedAt": { "type": "string", "format": "date-time", "description": "Timestamp for soft deletion." }
       },
       "required": ["id", "hostId", "userId", "hostName", "hostProfilePhotoId", "title", "category", "description", "durationMinutes", "menu", "pricing", "availability", "location", "photos", "status", "rating", "createdAt"]
     },
@@ -462,7 +472,7 @@
         "bookingDate": { "type": "string", "format": "date-time" },
         "numberOfGuests": { "type": "number" },
         "totalPrice": { "type": "number" },
-        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled"] },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Cancelled", "Completed"] },
         "cancellationReason": { "type": "string" },
         "couponId": { "type": "string" },
         "discountAmount": { "type": "number" },
@@ -476,9 +486,30 @@
                 "status": { "type": "string", "enum": ["pending", "accepted", "declined"], "description": "The status of the reschedule request." },
                 "createdAt": { "type": "string", "format": "date-time", "description": "When the request was made." }
             }
-        }
+        },
+        "pricing": {
+            "type": "object",
+            "description": "Immutable price snapshot at time of booking.",
+            "properties": {
+                "basePrice": { "type": "number" },
+                "guests": { "type": "number" },
+                "serviceFee": { "type": "number" },
+                "total": { "type": "number" },
+                "currency": { "type": "string", "enum": ["AUD", "NZD", "USD"] }
+            }
+        },
+        "policySnapshot": {
+            "type": "object",
+            "description": "Immutable policy snapshot at time of booking.",
+            "properties": {
+                "cancellationPolicy": { "type": "string" },
+                "refundWindowHours": { "type": "number" }
+            }
+        },
+        "guestAcknowledgedRisks": { "type": "boolean" },
+        "acknowledgedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status"]
+      "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status", "pricing", "policySnapshot"]
     },
     "Review": {
       "title": "Review",
@@ -601,30 +632,31 @@
       "description": "Represents a report filed against a user, experience, or review.",
       "properties": {
         "id": { "type": "string" },
+        "reporterId": { "type": "string" },
         "targetType": { "type": "string", "enum": ["Review", "Experience", "User"] },
         "targetId": { "type": "string" },
-        "reason": { "type": "string" },
-        "reportedBy": { "type": "string" },
-        "reportedUserLink": { "type": "string" },
+        "reason": { "type": "string", "enum": ["safety", "fraud", "harassment", "food_hygiene", "other"] },
+        "description": { "type": "string" },
         "date": { "type": "string", "format": "date-time" },
-        "status": { "type": "string", "enum": ["Open", "In Progress", "Resolved"] }
+        "status": { "type": "string", "enum": ["Open", "In Progress", "Resolved", "Dismissed"] }
       },
-      "required": ["id", "targetType", "targetId", "reason", "reportedBy", "date", "status"]
+      "required": ["id", "reporterId", "targetType", "targetId", "reason", "description", "date", "status"]
     },
-    "AdminLog": {
-      "title": "AdminLog",
+    "AuditLog": {
+      "title": "AuditLog",
       "type": "object",
       "description": "Represents a log entry for actions performed by administrators.",
       "properties": {
         "id": { "type": "string" },
-        "adminId": { "type": "string", "description": "Reference to User." },
+        "actorId": { "type": "string", "description": "Reference to User." },
+        "actorRole": { "type": "string" },
         "action": { "type": "string" },
-        "affectedEntity": { "type": "string" },
-        "affectedEntityId": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "details": { "type": "string" }
+        "targetType": { "type": "string" },
+        "targetId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "metadata": { "type": "object" }
       },
-      "required": ["id", "adminId", "action", "affectedEntity", "affectedEntityId", "timestamp"]
+      "required": ["id", "actorId", "action", "targetType", "targetId", "createdAt"]
     },
     "Coupon": {
       "title": "Coupon",
@@ -709,8 +741,8 @@
       "schema": { "$ref": "#/entities/Report" },
       "description": "Stores user-submitted reports and system flags for admin review."
     },
-    "/admin_logs/{adminLogId}": {
-      "schema": { "$ref": "#/entities/AdminLog" },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
       "description": "Stores logs of actions performed by administrators."
     },
     "/coupons/{couponId}": {

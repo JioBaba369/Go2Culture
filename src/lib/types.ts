@@ -31,12 +31,14 @@ export type User = {
     city?: string;
   }
   status: 'active' | 'suspended' | 'deleted';
+  suspensionReason?: string;
   createdAt: any; // Allow ServerTimestamp
   updatedAt: any; // Allow ServerTimestamp
   termsAccepted?: boolean;
   referralCode?: string;
   referralCredit?: number;
   referredBy?: string;
+  deletedAt?: any; // Allow ServerTimestamp
 };
 
 export type ComplianceFields = {
@@ -50,7 +52,7 @@ export type ComplianceFields = {
   foodBusinessNotification?: boolean;
   guidelinesAccepted: boolean;
   contractAccepted?: boolean;
-  insuranceAcknowledged?: boolean; // New compliance field
+  insuranceAcknowledged?: boolean; 
   responsibilitiesAccepted?: boolean;
   insurancePolicyAccepted?: boolean;
   agreeToFoodSafety?: boolean;
@@ -163,7 +165,7 @@ export type Experience = {
   };
   inclusions?: string[];
   whatToBring?: string[];
-  status: 'draft' | 'live' | 'paused';
+  status: 'draft' | 'live' | 'paused' | 'archived';
   instantBook?: boolean;
   rating: {
     average: number;
@@ -171,6 +173,7 @@ export type Experience = {
   };
   createdAt: any; // Allow ServerTimestamp
   updatedAt?: any;
+  deletedAt?: any; // For soft deletes
 };
 
 
@@ -214,10 +217,11 @@ export type Booking = {
     serviceFee: number;
     total: number;
     currency: string;
-  },
+  };
   policySnapshot: {
     cancellationPolicy: string;
-  },
+    refundWindowHours: number;
+  };
   guestAcknowledgedRisks?: boolean;
   acknowledgedAt?: any;
 };
@@ -270,8 +274,6 @@ export type Notification = {
   createdAt: any; // Allow ServerTimestamp
 };
 
-
-// A denormalized type for the admin application view
 export type HostApplication = {
   id: string;
   userId: string;
@@ -295,10 +297,6 @@ export type HostApplication = {
       tripadvisor?: string;
       other?: string;
     };
-    // Kept for data consistency even if not in the form
-    languages?: string;
-    culturalBackground?: string;
-    availabilityPreference?: 'weekdays' | 'weekends' | 'not-sure';
   };
 
   verification: {
@@ -329,8 +327,6 @@ export type HostApplication = {
     taxiNearby?: boolean;
     publicTransportNearby?: boolean;
     wifi?: boolean;
-    wowFactors?: string[];
-    spaceDescription?: string;
   };
 
   experience: {
@@ -362,13 +358,16 @@ export type HostApplication = {
 
 export type Report = {
   id: string;
+  reporterId: string;
+  reportedUserId?: string;
+  bookingId?: string;
+  experienceId?: string;
   targetType: 'Review' | 'Experience' | 'User';
   targetId: string;
-  reason: string;
-  reportedBy: string;
-  reportedUserLink: string | null;
-  date: any; // Allow ServerTimestamp
-  status: 'Open' | 'In Progress' | 'Resolved';
+  reason: 'safety' | 'fraud' | 'harassment' | 'food_hygiene' | 'other';
+  description: string;
+  status: 'Open' | 'In Progress' | 'Resolved' | 'Dismissed';
+  createdAt: any;
 };
 
 export type Coupon = {
