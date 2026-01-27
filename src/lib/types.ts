@@ -280,7 +280,7 @@ export type Conversation = {
 export type Notification = {
   id: string;
   userId: string;
-  type: 'BOOKING_CONFIRMED' | 'BOOKING_REQUESTED' | 'BOOKING_CANCELLED' | 'NEW_MESSAGE' | 'HOST_APPROVED' | 'REVIEW_RECEIVED' | 'GENERIC_ALERT' | 'RESCHEDULE_REQUEST' | 'RESCHEDULE_RESPONSE';
+  type: 'BOOKING_CONFIRMED' | 'BOOKING_REQUESTED' | 'BOOKING_CANCELLED' | 'NEW_MESSAGE' | 'HOST_APPROVED' | 'REVIEW_RECEIVED' | 'GENERIC_ALERT' | 'RESCHEDULE_REQUEST' | 'RESCHEDULE_RESPONSE' | 'NEW_REFERRAL';
   entityId: string; // e.g., bookingId, reviewId
   isRead: boolean;
   createdAt: any; // Allow ServerTimestamp
@@ -390,6 +390,14 @@ export type AuditLog = {
     metadata?: Record<string, any>;
     createdAt: any; // Allow ServerTimestamp
 }
+
+export type ReferredUser = {
+    id: string; // The UID of the referred user
+    fullName: string;
+    profilePhotoId?: string;
+    status: 'joined' | 'booking_completed' | 'credit_awarded';
+    createdAt: any;
+};
 
 export type Job = {
   id: string;
