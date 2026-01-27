@@ -134,8 +134,8 @@ export default function CareersPage() {
                                 return (
                                     <AccordionItem value={position.id} key={position.id} asChild>
                                         <Card>
-                                            <AccordionTrigger className="w-full p-6 text-left hover:no-underline">
-                                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
+                                             <div className="flex items-center w-full p-6">
+                                                <AccordionTrigger className="flex-grow p-0 text-left hover:no-underline justify-start">
                                                     <div className="flex-grow text-left">
                                                         <h3 className="text-xl font-semibold">{position.title}</h3>
                                                         <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
@@ -143,24 +143,24 @@ export default function CareersPage() {
                                                             <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {position.location}</span>
                                                         </div>
                                                     </div>
-                                                    <Dialog open={selectedJob?.id === position.id} onOpenChange={(isOpen) => !isOpen && setSelectedJob(null)}>
-                                                        <DialogTrigger asChild>
-                                                            <Button className="w-full md:w-auto mt-4 md:mt-0" onClick={(e) => { e.stopPropagation(); setSelectedJob(position); }}>
-                                                                Apply Now
-                                                            </Button>
-                                                        </DialogTrigger>
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>Apply for {position.title}</DialogTitle>
-                                                                <DialogDescription>
-                                                                    Submit your application to Go2Culture. We're excited to hear from you.
-                                                                </DialogDescription>
-                                                            </DialogHeader>
-                                                            <ApplicationForm job={position} onFinished={() => setSelectedJob(null)} />
-                                                        </DialogContent>
-                                                    </Dialog>
-                                                </div>
-                                            </AccordionTrigger>
+                                                </AccordionTrigger>
+                                                <Dialog open={selectedJob?.id === position.id} onOpenChange={(isOpen) => !isOpen && setSelectedJob(null)}>
+                                                    <DialogTrigger asChild>
+                                                        <Button className="ml-4 shrink-0" onClick={() => setSelectedJob(position)}>
+                                                            Apply Now
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>Apply for {position.title}</DialogTitle>
+                                                            <DialogDescription>
+                                                                Submit your application to Go2Culture. We're excited to hear from you.
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <ApplicationForm job={position} onFinished={() => setSelectedJob(null)} />
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
                                             <AccordionContent>
                                                 <div className="px-6 pb-6 prose-sm max-w-none text-muted-foreground whitespace-pre-line">
                                                     {position.description}
