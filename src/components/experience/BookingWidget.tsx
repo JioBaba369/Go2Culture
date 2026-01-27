@@ -1,13 +1,15 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
-import { doc, collection, runTransaction, serverTimestamp, getDoc, increment, updateDoc } from 'firebase/firestore';
-import { format } from 'date-fns';
+import { doc, collection, runTransaction, serverTimestamp, getDoc, increment } from 'firebase/firestore';
 import { Experience, Host, Coupon, Booking } from '@/lib/types';
 import { createNotification } from '@/lib/notification-actions';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -85,7 +87,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
     }
   };
 
-  const handleBookingAction = async (isGift: boolean) => {
+  const handleBookingAction = (isGift: boolean) => {
     if (!user) {
       toast({ variant: 'destructive', title: 'Please log in', description: `You must be logged in to ${isGift ? 'gift' : 'book'} an experience.` });
       router.push(`/login?redirect=/experiences/${experience.id}`);
@@ -109,81 +111,84 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
     
     isGift ? setIsGifting(true) : setIsBooking(true);
 
-    try {
-      await runTransaction(firestore, async (transaction) => {
-        const userRef = doc(firestore, 'users', user.uid);
-        const couponRef = appliedCoupon ? doc(firestore, 'coupons', appliedCoupon.id) : null;
-        
-        const userSnapPromise = transaction.get(userRef);
-        const couponSnapPromise = couponRef ? transaction.get(couponRef) : Promise.resolve(null);
-        
-        const [userSnap, couponSnap] = await Promise.all([userSnapPromise, couponSnapPromise]);
-        
-        const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
-        let finalDiscountAmount = 0;
-        let isValidCoupon = false;
+    let bookingDataForTransaction: Partial<Booking> = {};
 
-        if (couponRef && couponSnap && couponSnap.exists()) {
-            const couponData = couponSnap.data() as Coupon;
-            if (couponData.isActive && (!couponData.usageLimit || couponData.timesUsed < couponData.usageLimit)) {
-                if (!couponData.minSpend || basePrice >= couponData.minSpend) {
-                    finalDiscountAmount = couponData.discountType === 'fixed'
-                        ? couponData.discountValue
-                        : basePrice * (couponData.discountValue / 100);
-                    isValidCoupon = true;
-                }
-            }
-        }
-        
-        const serviceFee = basePrice * 0.15; // Example 15% service fee
-        const finalPrice = basePrice + serviceFee - finalDiscountAmount;
-
-        const newBookingRef = doc(collection(firestore, 'bookings'));
-        const bookingData: Partial<Booking> = {
-          guestId: user.uid,
-          experienceId: experience!.id,
-          experienceTitle: experience!.title,
-          hostId: experience!.hostId,
-          hostName: host!.name,
-          bookingDate: date,
-          numberOfGuests: numberOfGuests,
-          totalPrice: finalPrice,
-          status: isGift || experience?.instantBook ? 'Confirmed' : 'Pending',
-          isGift: isGift,
-          createdAt: serverTimestamp(),
-          payment: {
-            intentId: '',
-            status: 'requires_payment',
-          },
-          pricing: {
-            basePrice: basePrice,
-            guests: numberOfGuests,
-            serviceFee: serviceFee,
-            total: finalPrice,
-            currency: 'AUD', // Assuming AUD
-          },
-          policySnapshot: {
-            cancellationPolicy: 'flexible', // Example policy
-            refundWindowHours: 48,
-            hostIsIndependent: true,
-            platformIsMarketplace: true,
-            guestAcceptedAt: serverTimestamp(),
-          },
-          ...(isValidCoupon && appliedCoupon && { couponId: appliedCoupon.id }),
-          ...(isValidCoupon && { discountAmount: finalDiscountAmount }),
-        };
-
-        transaction.set(newBookingRef, bookingData as Booking);
-
-        if (isValidCoupon && couponRef) {
-            transaction.update(couponRef, { timesUsed: increment(1) });
-        }
-        
-        if (userSnap.exists() && !userSnap.data().termsAccepted) {
-            transaction.update(userRef, { termsAccepted: true });
-        }
-      });
+    runTransaction(firestore, async (transaction) => {
+      const userRef = doc(firestore, 'users', user.uid);
+      const couponRef = appliedCoupon ? doc(firestore, 'coupons', appliedCoupon.id) : null;
       
+      const userSnapPromise = transaction.get(userRef);
+      const couponSnapPromise = couponRef ? transaction.get(couponRef) : Promise.resolve(null);
+      
+      const [userSnap, couponSnap] = await Promise.all([userSnapPromise, couponSnapPromise]);
+      
+      const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
+      let finalDiscountAmount = 0;
+      let isValidCoupon = false;
+
+      if (couponRef && couponSnap && couponSnap.exists()) {
+          const couponData = couponSnap.data() as Coupon;
+          if (couponData.isActive && (!couponData.usageLimit || couponData.timesUsed < couponData.usageLimit)) {
+              if (!couponData.minSpend || basePrice >= couponData.minSpend) {
+                  finalDiscountAmount = couponData.discountType === 'fixed'
+                      ? couponData.discountValue
+                      : basePrice * (couponData.discountValue / 100);
+                  isValidCoupon = true;
+              }
+          }
+      }
+      
+      const serviceFee = basePrice * 0.15; // Example 15% service fee
+      const finalPrice = basePrice + serviceFee - finalDiscountAmount;
+
+      const newBookingRef = doc(collection(firestore, 'bookings'));
+      const bookingData: Partial<Booking> = {
+        guestId: user.uid,
+        experienceId: experience!.id,
+        experienceTitle: experience!.title,
+        hostId: experience!.hostId,
+        hostName: host!.name,
+        bookingDate: date,
+        numberOfGuests: numberOfGuests,
+        totalPrice: finalPrice,
+        status: isGift || experience?.instantBook ? 'Confirmed' : 'Pending',
+        isGift: isGift,
+        createdAt: serverTimestamp(),
+        payment: {
+          intentId: '',
+          status: 'requires_payment',
+        },
+        pricing: {
+          basePrice: basePrice,
+          guests: numberOfGuests,
+          serviceFee: serviceFee,
+          total: finalPrice,
+          currency: 'AUD', // Assuming AUD
+        },
+        policySnapshot: {
+          cancellationPolicy: 'flexible', // Example policy
+          refundWindowHours: 48,
+          hostIsIndependent: true,
+          platformIsMarketplace: true,
+          guestAcceptedAt: serverTimestamp(),
+        },
+        ...(isValidCoupon && appliedCoupon && { couponId: appliedCoupon.id }),
+        ...(isValidCoupon && { discountAmount: finalDiscountAmount }),
+      };
+      
+      bookingDataForTransaction = bookingData;
+
+      transaction.set(newBookingRef, bookingData as Booking);
+
+      if (isValidCoupon && couponRef) {
+          transaction.update(couponRef, { timesUsed: increment(1) });
+      }
+      
+      if (userSnap.exists() && !userSnap.data().termsAccepted) {
+          transaction.update(userRef, { termsAccepted: true });
+      }
+    })
+    .then(async () => {
       if (appliedCoupon && discountAmount > 0 && !(await getDoc(doc(firestore, 'coupons', appliedCoupon.id))).data()?.isActive) {
            toast({ variant: 'destructive', title: 'Coupon Invalid', description: `Coupon "${appliedCoupon.id}" could not be applied.` });
       }
@@ -193,8 +198,6 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         description: isGift ? `You've successfully gifted "${experience!.title}".` : (experience?.instantBook ? `Your booking for "${experience!.title}" is confirmed.` : `Your request for "${experience!.title}" has been sent.`),
       });
 
-      // Send notification to host
-      const bookingStatus = isGift || experience?.instantBook ? 'new booking' : 'booking request';
       await createNotification(
         firestore,
         experience.hostId,
@@ -208,12 +211,17 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       setAppliedCoupon(null);
       setDiscountAmount(0);
 
-    } catch (error: any) {
-      console.error('Booking/Gifting failed:', error);
-      toast({ variant: 'destructive', title: 'Action Failed', description: error.message || 'Could not complete your request. Please try again.'});
-    } finally {
+    })
+    .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: `bookings`,
+            operation: 'create',
+            requestResourceData: bookingDataForTransaction,
+        }));
+    })
+    .finally(() => {
       isGift ? setIsGifting(false) : setIsBooking(false);
-    }
+    });
   };
   
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
