@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, Suspense, useEffect } from 'react';
@@ -16,7 +15,7 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
@@ -35,19 +34,16 @@ function DiscoverPageContent() {
   const searchParams = useSearchParams();
   const firestore = useFirestore();
 
-  const { data: allExperiences, isLoading: areExperiencesLoading } = useCollection<Experience>(
-    useMemoFirebase(() => (firestore ? collection(firestore, 'experiences') : null), [firestore])
+  const experiencesQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'experiences'), where('status', '==', 'live')) : null),
+    [firestore]
   );
+  const { data: liveExperiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
 
-  const liveExperiences = useMemo(() => {
-    if (!allExperiences) return [];
-    return allExperiences.filter(exp => exp.status === 'live');
-  }, [allExperiences]);
-
-  const allCuisines = useMemo(() => [...new Set(liveExperiences.map(e => e.menu.cuisine))].sort(), [liveExperiences]);
-  const allDietary = useMemo(() => [...new Set(liveExperiences.flatMap(e => e.menu.dietary || []))].sort(), [liveExperiences]);
-  const allCategories = useMemo(() => [...new Set(liveExperiences.map(e => e.category))].sort(), [liveExperiences]);
-  const maxPrice = useMemo(() => liveExperiences.length > 0 ? Math.ceil(Math.max(...liveExperiences.map(e => e.pricing.pricePerGuest)) / 5) * 5 : 150, [liveExperiences]);
+  const allCuisines = useMemo(() => liveExperiences ? [...new Set(liveExperiences.map(e => e.menu.cuisine))].sort() : [], [liveExperiences]);
+  const allDietary = useMemo(() => liveExperiences ? [...new Set(liveExperiences.flatMap(e => e.menu.dietary || []))].sort() : [], [liveExperiences]);
+  const allCategories = useMemo(() => liveExperiences ? [...new Set(liveExperiences.map(e => e.category))].sort() : [], [liveExperiences]);
+  const maxPrice = useMemo(() => liveExperiences && liveExperiences.length > 0 ? Math.ceil(Math.max(...liveExperiences.map(e => e.pricing.pricePerGuest)) / 5) * 5 : 150, [liveExperiences]);
 
   const searchQuery = searchParams.get('q')?.toLowerCase();
   const [cuisine, setCuisine] = useState(searchParams.get('cuisine') || 'all');
@@ -276,7 +272,7 @@ function DiscoverPageContent() {
             </div>
           )}
 
-          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {liveExperiences.length || 0} unique experiences.</p>
+          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {liveExperiences?.length || 0} unique experiences.</p>
           {areExperiencesLoading ? (
              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
