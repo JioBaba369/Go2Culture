@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
 import { doc, collection, runTransaction, serverTimestamp, getDoc, increment } from 'firebase/firestore';
-import { Experience, Host, Coupon, Booking } from '@/lib/types';
+import { Experience, Host, Coupon, Booking, User, Conversation } from '@/lib/types';
 import { createNotification } from '@/lib/notification-actions';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -121,6 +121,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       const couponSnapPromise = couponRef ? transaction.get(couponRef) : Promise.resolve(null);
       
       const [userSnap, couponSnap] = await Promise.all([userSnapPromise, couponSnapPromise]);
+      const currentUser = { id: userSnap.id, ...userSnap.data() } as User;
       
       const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
       let finalDiscountAmount = 0;
@@ -179,6 +180,35 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       bookingDataForTransaction = bookingData;
 
       transaction.set(newBookingRef, bookingData as Booking);
+      
+      // If it's an instant book or a gift, create the conversation atomically
+      if (isGift || experience?.instantBook) {
+        const conversationRef = doc(firestore, 'conversations', newBookingRef.id);
+        const conversationData: Conversation = {
+            id: newBookingRef.id,
+            bookingId: newBookingRef.id,
+            participants: [user.uid, experience!.hostId],
+            participantInfo: {
+                [user.uid]: {
+                    fullName: currentUser.fullName,
+                    profilePhotoId: currentUser.profilePhotoId || 'guest-1',
+                },
+                [experience!.hostId]: {
+                    fullName: host.name,
+                    profilePhotoId: host.profilePhotoId || 'guest-1',
+                },
+            },
+            bookingInfo: {
+                experienceTitle: experience.title,
+                experienceId: experience.id,
+            },
+            readBy: {},
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        };
+        transaction.set(conversationRef, conversationData);
+      }
+
 
       if (isValidCoupon && couponRef) {
           transaction.update(couponRef, { timesUsed: increment(1) });
@@ -201,7 +231,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       await createNotification(
         firestore,
         experience.hostId,
-        'BOOKING_REQUESTED',
+        isGift || experience?.instantBook ? 'BOOKING_CONFIRMED' : 'BOOKING_REQUESTED',
         'new-booking'
       );
 
@@ -320,7 +350,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                 
                 <div className="flex justify-between items-center text-lg font-semibold">
                     <span>Total</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>${totalPrice.toFixed(2)} AUD</span>
                 </div>
 
                 <div className="space-y-3 pt-2">
