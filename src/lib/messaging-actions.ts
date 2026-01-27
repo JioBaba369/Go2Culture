@@ -7,12 +7,17 @@ import {
   collection,
   writeBatch,
   serverTimestamp,
+  updateDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import type { Booking, Conversation, Message, User } from '@/lib/types';
+import type { Booking, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 
+/**
+ * Sends a message and updates the conversation metadata.
+ * Assumes the conversation document already exists.
+ */
 export async function sendMessage(
   firestore: Firestore,
   currentUser: User,
@@ -38,40 +43,21 @@ export async function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Create or update the conversation document
+  // 2. Update the parent conversation document
   const conversationRef = doc(firestore, 'conversations', booking.id);
-  // This type helps ensure we are building the correct shape for the batch write.
-  const conversationData: Omit<Conversation, 'id'> & { id: string } = {
-    id: booking.id,
-    bookingId: booking.id,
-    participants: [currentUser.id, recipient.id],
-    participantInfo: {
-      [currentUser.id]: {
-        fullName: currentUser.fullName,
-        profilePhotoId: currentUser.profilePhotoId || 'guest-1',
-      },
-      [recipient.id]: {
-        fullName: recipient.fullName,
-        profilePhotoId: recipient.profilePhotoId || 'guest-1',
-      },
-    },
-    bookingInfo: {
-      experienceTitle: booking.experienceTitle,
-      experienceId: booking.experienceId,
-    },
+  const conversationUpdate = {
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    // `readBy` should be a map, with the user's ID as a key.
-    readBy: { [currentUser.id]: serverTimestamp() },
+    // Use dot notation to update only the current user's read timestamp in the map
+    [`readBy.${currentUser.id}`]: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   };
+  batch.update(conversationRef, conversationUpdate);
 
-  // Using set with merge: true will create if not exists, and update if it does.
-  batch.set(conversationRef, conversationData, { merge: true });
-
-  // 3. Add rate limit update
+  // 3. Add rate limit update to the same batch
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
   batch.set(rateLimitRef, { lastMessageAt: serverTimestamp() }, { merge: true });
 
@@ -89,9 +75,9 @@ export async function sendMessage(
     errorEmitter.emit(
       'permission-error',
       new FirestorePermissionError({
-        path: `batch write (messages, conversations/${booking.id})`,
+        path: `batch write (conversations/${booking.id}, messages, rateLimits)`,
         operation: 'write',
-        requestResourceData: { newMessage, conversationData },
+        requestResourceData: { newMessage, conversationUpdate },
       })
     );
     throw serverError;

@@ -218,8 +218,7 @@ export type Message = {
 };
 
 export type Conversation = {
-  id: string; // This will be the bookingId
-  bookingId: string;
+  bookingId: string; // The ID of the booking this conversation is associated with.
   participants: string[];
   participantInfo: {
     [key: string]: {
@@ -231,12 +230,14 @@ export type Conversation = {
     experienceTitle: string;
     experienceId: string;
   };
-  lastMessage: {
+  lastMessage?: {
     text: string;
     timestamp: any;
     senderId: string;
   };
   readBy: { [key: string]: any };
+  createdAt: any;
+  updatedAt?: any;
 };
 
 export type Notification = {
