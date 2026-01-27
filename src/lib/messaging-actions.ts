@@ -12,6 +12,7 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import type { Booking, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
+import { logAudit } from './audit-actions';
 
 export async function sendMessage(
   firestore: Firestore,
@@ -57,6 +58,8 @@ export async function sendMessage(
 
   try {
     await batch.commit();
+
+    await logAudit(firestore, { actor: currentUser, action: 'SEND_MESSAGE', target: { type: 'conversation', id: booking.id }, metadata: { messageLength: messageText.trim().length }});
 
     // After message is sent successfully, create notification for the recipient
     await createNotification(

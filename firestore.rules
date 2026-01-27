@@ -4,170 +4,120 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /* ───────────────── Helpers ───────────────── */
-
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      return isSignedIn()
-        && request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
     }
     
-    function isParticipant(data) {
-      return isSignedIn()
-        && data.participants is list
-        && request.auth.uid in data.participants;
+    function isAdmin() {
+      // In production, this would be a custom claim, not a hardcoded UID.
+      return isSignedIn() && request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
+    }
+
+    function isParticipant(conversationId) {
+        return request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
     }
 
     function canSendMessage() {
+      let lastMessageTime = get(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat).data.lastMessageAt;
       return !exists(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat)
-        || request.time >
-           get(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat)
-             .data.lastMessageAt + duration.value(1, "s");
-    }
-
-    function isBookingParticipant(data) {
-      return isSignedIn()
-        && (request.auth.uid == data.guestId
-            || request.auth.uid == data.hostId);
-    }
-    
-    function isQueryingOwnConversations() {
-      // Ensure the query filters for conversations where the user is a participant.
-      return request.query.where[0][0] == 'participants'
-        && request.query.where[0][1] == 'array-contains'
-        && request.query.where[0][2] == request.auth.uid;
-    }
-
-    function onlyChanges(fields) {
-      return request.resource.data
-        .diff(resource.data)
-        .affectedKeys()
-        .hasOnly(fields);
-    }
-    
-    function isQueryingOwnBookings() {
-        return (request.query.where[0][0] == 'guestId' && request.query.where[0][2] == request.auth.uid) 
-            || (request.query.where[0][0] == 'hostId' && request.query.where[0][2] == request.auth.uid);
+        || request.time > lastMessageTime + duration.value(1, "s");
     }
 
     /* ───────────────── Users ───────────────── */
-
     match /users/{userId} {
-      allow read: if true;
-      allow list: if isAdmin();
-      allow create: if isOwner(userId);
-      allow update: if (isOwner(userId) && !('role' in request.resource.data) && !('status' in request.resource.data)) || isAdmin();
+      allow read: if isSelf(userId) || isAdmin();
+      allow create: if isSelf(userId);
+      allow update: if isSelf(userId)
+        && !('role' in request.resource.data)
+        && !('status' in request.resource.data);
       allow delete: if isAdmin();
 
       match /hosts/{hostId} {
         allow read: if true;
-        allow write: if isOwner(userId) || isAdmin();
+        allow write: if isSelf(userId) || isAdmin();
       }
 
       match /wishlist/{experienceId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isSelf(userId);
       }
 
       match /notifications/{notificationId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isSelf(userId);
       }
       
       match /rateLimits/{document=**} {
-        allow read, write: if isOwner(userId);
+        allow write: if isSelf(userId);
+        allow read: if isSelf(userId);
       }
     }
 
     /* ───────────────── Host Applications ───────────────── */
-
     match /hostApplications/{applicationId} {
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
       allow read: if isAdmin() || resource.data.userId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     /* ───────────────── Experiences ───────────────── */
-
     match /experiences/{experienceId} {
-      allow read: if resource.data.status == 'live' || isAdmin() || (isSignedIn() && resource.data.hostId == request.auth.uid);
+      allow read: if resource.data.status == 'live' || isAdmin() || (isSignedIn() && isSelf(resource.data.hostId));
       allow create: if isSignedIn() && request.resource.data.hostId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.hostId == request.auth.uid;
-      allow delete: if isAdmin() || (isSignedIn() && resource.data.hostId == request.auth.uid);
+      allow update: if isSignedIn() && isSelf(resource.data.hostId);
+      allow delete: if isAdmin() || (isSignedIn() && isSelf(resource.data.hostId));
     }
 
     /* ───────────────── Bookings ───────────────── */
-
     match /bookings/{bookingId} {
-      allow get: if isBookingParticipant(resource.data) || isAdmin();
-      allow list: if isAdmin() || isQueryingOwnBookings();
-      allow create: if isSignedIn()
-        && request.resource.data.guestId == request.auth.uid
-        && get(/databases/$(database)/documents/users/$(request.auth.uid))
-            .data.termsAccepted == true;
-
-      allow update: if 
-        (
-          isBookingParticipant(resource.data) &&
+        allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
+        allow read: if isSignedIn() && (request.auth.uid == resource.data.guestId || request.auth.uid == resource.data.hostId) || isAdmin();
+        
+        allow update: if 
+          // Prevent immutable fields from being changed
+          !('pricing' in request.resource.data.diff(resource.data).affectedKeys()) &&
+          !('policySnapshot' in request.resource.data.diff(resource.data).affectedKeys()) &&
           (
-            (request.resource.data.status == 'Cancelled' && resource.data.guestId == request.auth.uid) ||
-            (request.resource.data.status == 'Confirmed' && resource.data.hostId == request.auth.uid) ||
-            onlyChanges(['rescheduleRequest', 'updatedAt'])
-          )
-        ) || isAdmin();
-      allow delete: if isAdmin();
+            // Guest can cancel
+            (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
+            // Host can confirm
+            (isSelf(resource.data.hostId) && request.resource.data.status == "Confirmed") ||
+            // Either participant can request a reschedule
+            (isSelf(resource.data.guestId) || isSelf(resource.data.hostId))
+          );
+        allow delete: if isAdmin();
     }
 
     /* ───────────────── Reviews ───────────────── */
-
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
-      allow update: if isSignedIn() && (resource.data.guestId == request.auth.uid || isAdmin());
+      allow update: if (isSignedIn() && isSelf(resource.data.guestId)) || isAdmin();
       allow delete: if isAdmin();
     }
 
-    /* ───────────────── Conversations ───────────────── */
+    /* ───────────────── Conversations & Messages ───────────────── */
+    match /conversations/{conversationId} {
+      allow read, list: if isParticipant(conversationId) || isAdmin();
+      allow create: if false; // Server-only creation
+      allow update: if isParticipant(conversationId) 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy', 'updatedAt'])
+                    && request.resource.data.readBy[request.auth.uid] is timestamp;
+    }
 
-    match /conversations/{bookingId} {
-      allow get: if isParticipant(resource.data) || isAdmin();
-      allow list: if isAdmin() || isQueryingOwnConversations();
-      allow create: if isSignedIn()
-          && request.resource.data.bookingId == bookingId
-          && let booking = get(/databases/$(database)/documents/bookings/$(bookingId))
-          && booking.exists() && booking.data.status == 'Confirmed'
-          && request.auth.uid == booking.data.hostId
-          && request.resource.data.participants.hasAll([booking.data.guestId, booking.data.hostId]);
-
-      allow update: if isAdmin() || (
-          isSignedIn()
-          && isParticipant(resource.data)
-          && onlyChanges(["lastMessage", "readBy", "updatedAt"])
-          && request.resource.data.readBy[request.auth.uid] is timestamp
-      );
-      
-      allow delete: if isAdmin();
-
-      /* ───────── Messages Subcollection ───────── */
-      match /messages/{messageId} {
-        allow get, list: if isParticipant(get(/databases/$(database)/documents/conversations/$(bookingId)).data) || isAdmin();
-        
-        allow create: if isSignedIn()
-          && canSendMessage()
-          && request.resource.data.senderId == request.auth.uid
-          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(bookingId)).data.participants;
-
+    match /conversations/{conversationId}/messages/{messageId} {
+        allow read, list: if isParticipant(conversationId) || isAdmin();
+        allow create: if canSendMessage() 
+                    && request.resource.data.senderId == request.auth.uid
+                    && isParticipant(conversationId);
         allow update, delete: if false;
-      }
     }
 
-
-    /* ───────────────── Sponsors & Coupons ───────────────── */
-
+    /* ───────────────── Admin & System Collections ───────────────── */
     match /sponsors/{sponsorId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -175,20 +125,16 @@ service cloud.firestore {
 
     match /coupons/{couponId} {
       allow get: if isSignedIn();
-      allow list, create, delete: if isAdmin();
-      allow update: if isAdmin()
-        || (isSignedIn()
-            && onlyChanges(["timesUsed"]));
+      allow list, create, delete, update: if isAdmin();
     }
-
-    /* ───────────────── Admin Only ───────────────── */
-
+    
     match /reports/{reportId} {
       allow read, write: if isAdmin();
     }
 
-    match /admin_logs/{adminLogId} {
-      allow read, write: if false;
+    match /auditLogs/{logId} {
+        allow read: if isAdmin();
+        allow write: if false; // Server-only writes
     }
   }
 }

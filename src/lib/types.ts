@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   role: 'guest' | 'host' | 'both';
@@ -49,6 +50,7 @@ export type ComplianceFields = {
   foodBusinessNotification?: boolean;
   guidelinesAccepted: boolean;
   contractAccepted?: boolean;
+  insuranceAcknowledged?: boolean; // New compliance field
   responsibilitiesAccepted?: boolean;
   insurancePolicyAccepted?: boolean;
   agreeToFoodSafety?: boolean;
@@ -194,7 +196,7 @@ export type Booking = {
   bookingDate: any; // Allow ServerTimestamp
   numberOfGuests: number;
   totalPrice: number;
-  status: 'Pending' | 'Confirmed' | 'Cancelled';
+  status: 'Pending' | 'Confirmed' | 'Cancelled' | 'Completed';
   cancellationReason?: string;
   rescheduleRequest?: {
     requestedBy: string;
@@ -206,6 +208,18 @@ export type Booking = {
   couponId?: string;
   discountAmount?: number;
   isGift?: boolean;
+  pricing: {
+    basePrice: number;
+    guests: number;
+    serviceFee: number;
+    total: number;
+    currency: string;
+  },
+  policySnapshot: {
+    cancellationPolicy: string;
+  },
+  guestAcknowledgedRisks?: boolean;
+  acknowledgedAt?: any;
 };
 
 export type WishlistItem = {
@@ -377,3 +391,14 @@ export type Sponsor = {
   isActive: boolean;
   createdAt: any;
 };
+
+export type AuditLog = {
+    id: string;
+    actorId: string;
+    actorRole: 'guest' | 'host' | 'both' | 'admin' | 'system';
+    action: string;
+    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message';
+    targetId: string;
+    metadata?: Record<string, any>;
+    createdAt: any; // Allow ServerTimestamp
+}

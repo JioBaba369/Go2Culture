@@ -1,13 +1,15 @@
 
 'use client';
 import { Firestore, collection, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
-import type { Booking, Review } from './types';
+import type { Booking, Review, User } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { createNotification } from './notification-actions';
+import { logAudit } from './audit-actions';
 
 export async function submitReview(
   firestore: Firestore,
+  actor: User,
   booking: Booking,
   rating: number,
   comment: string
@@ -28,18 +30,16 @@ export async function submitReview(
 
   const reviewsColRef = collection(firestore, 'reviews');
   try {
-    await addDoc(reviewsColRef, reviewData);
+    const newReviewRef = await addDoc(reviewsColRef, reviewData);
     
+    await logAudit(firestore, { actor, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
+
     await createNotification(
       firestore,
       booking.hostId,
       `You received a new ${rating}-star review for "${booking.experienceTitle}"!`,
       `/experiences/${booking.experienceId}`
     );
-    // In a real-world scenario, a Cloud Function would trigger here
-    // to update the average ratings on the Experience and Host documents.
-    // We are not implementing that aggregation on the client-side to maintain
-    // security and data integrity.
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: reviewsColRef.path,
@@ -53,6 +53,7 @@ export async function submitReview(
 // Function for a guest to cancel their own booking
 export async function cancelBookingByGuest(
   firestore: Firestore,
+  actor: User,
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
@@ -65,6 +66,8 @@ export async function cancelBookingByGuest(
     const booking = bookingSnap.data() as Booking;
 
     await updateDoc(bookingRef, updatedData);
+
+    await logAudit(firestore, { actor, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'guest' } });
 
     await createNotification(
         firestore,
@@ -84,8 +87,8 @@ export async function cancelBookingByGuest(
 
 export async function requestReschedule(
   firestore: Firestore,
+  actor: User,
   bookingId: string,
-  guestName: string,
   newDate: Date
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
@@ -105,10 +108,13 @@ export async function requestReschedule(
 
   try {
     await updateDoc(bookingRef, updatedData as any);
+    
+    await logAudit(firestore, { actor, action: 'REQUEST_RESCHEDULE', target: { type: 'booking', id: bookingId }, metadata: { newDate: newDate.toISOString() }});
+
     await createNotification(
       firestore,
       booking.hostId,
-      `${guestName} requested to reschedule "${booking.experienceTitle}".`,
+      `${actor.fullName} requested to reschedule "${booking.experienceTitle}".`,
       '/host/bookings'
     );
   } catch (serverError) {

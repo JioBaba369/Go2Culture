@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Check, ShieldCheck, DollarSign, ExternalLink, Loader2 } from 'lucide-react';
+import { Check, ShieldCheck, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -28,12 +28,12 @@ export default function HostContractPage() {
   const [agreedToInsurance, setAgreedToInsurance] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const alreadyAgreed = host?.compliance?.contractAccepted;
+  const alreadyAgreed = host?.compliance?.contractAccepted && host?.compliance?.insuranceAcknowledged;
 
   useEffect(() => {
     if (host?.compliance) {
         setAgreedToContract(host.compliance.contractAccepted || false);
-        setAgreedToInsurance(host.compliance.contractAccepted || false); // If contract is accepted, assume insurance was too.
+        setAgreedToInsurance(host.compliance.insuranceAcknowledged || false);
     }
   }, [host]);
 
@@ -45,6 +45,7 @@ export default function HostContractPage() {
     try {
         await updateDoc(hostRef, {
             'compliance.contractAccepted': true,
+            'compliance.insuranceAcknowledged': true,
         });
         toast({ title: "Agreement Saved", description: "Thank you for confirming your host responsibilities." });
     } catch (error: any) {
@@ -98,7 +99,7 @@ export default function HostContractPage() {
              <div className="flex items-start space-x-3 p-4 border rounded-md has-[:disabled]:opacity-70">
                 <Checkbox id="agree-insurance" checked={agreedToInsurance} onCheckedChange={(c) => setAgreedToInsurance(c as boolean)} disabled={alreadyAgreed} />
                  <Label htmlFor="agree-insurance" className="flex-1 cursor-pointer">
-                    I acknowledge and agree to the platform's <Link href="/trust-and-safety" className="text-primary underline hover:text-primary/80">Insurance Framework</Link>, and I confirm that I am responsible for maintaining my own adequate insurance coverage.
+                    I acknowledge and agree to the platform's <Link href="/trust-and-safety" className="text-primary underline hover:text-primary/80">Insurance Framework</Link>, and I confirm that I am responsible for maintaining my own adequate insurance coverage for my hosting activities.
                 </Label>
             </div>
         </CardContent>

@@ -14,6 +14,7 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { Experience, Booking, Conversation, User } from './types';
 import { createNotification } from './notification-actions';
+import { logAudit } from './audit-actions';
 
 export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'userId' | 'createdAt' | 'rating' | 'hostName' | 'hostProfilePhotoId'>>;
 
@@ -40,6 +41,7 @@ export async function updatePayoutSettings(
 // Function to confirm a booking and create the associated conversation
 export async function confirmBooking(
   firestore: Firestore,
+  host: User, // Actor
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
@@ -51,15 +53,13 @@ export async function confirmBooking(
     }
     const booking = { id: bookingSnap.id, ...bookingSnap.data() } as Booking;
 
-    // Fetch host and guest profiles to create participantInfo
-    const hostRef = doc(firestore, 'users', booking.hostId);
+    // Fetch guest profile to create participantInfo
     const guestRef = doc(firestore, 'users', booking.guestId);
-    const [hostSnap, guestSnap] = await Promise.all([getDoc(hostRef), getDoc(guestRef)]);
+    const guestSnap = await getDoc(guestRef);
 
-    if (!hostSnap.exists() || !guestSnap.exists()) {
-      throw new Error("Host or guest profile could not be found.");
+    if (!guestSnap.exists()) {
+      throw new Error("Guest profile could not be found.");
     }
-    const hostData = hostSnap.data() as User;
     const guestData = guestSnap.data() as User;
     
     // Start a batch write
@@ -69,7 +69,7 @@ export async function confirmBooking(
     batch.update(bookingRef, { status: 'Confirmed' });
 
     // 2. Create the conversation document
-    const conversationRef = doc(firestore, 'conversations', booking.id);
+    const conversationRef = doc(collection(firestore, 'conversations'), booking.id);
     const conversationData: Omit<Conversation, 'id'> = {
       bookingId: booking.id,
       participants: [booking.guestId, booking.hostId],
@@ -79,8 +79,8 @@ export async function confirmBooking(
           profilePhotoId: guestData.profilePhotoId || 'guest-1',
         },
         [booking.hostId]: {
-          fullName: hostData.fullName,
-          profilePhotoId: hostData.profilePhotoId || 'guest-1',
+          fullName: host.fullName,
+          profilePhotoId: host.profilePhotoId || 'guest-1',
         },
       },
       bookingInfo: {
@@ -95,6 +95,13 @@ export async function confirmBooking(
 
     // Commit the batch
     await batch.commit();
+
+    // Log the audit event
+    await logAudit(firestore, {
+        actor: host,
+        action: 'CONFIRM_BOOKING',
+        target: { type: 'booking', id: bookingId }
+    });
 
     // Send notification after successful commit
     await createNotification(
@@ -119,6 +126,7 @@ export async function confirmBooking(
 // Function for a host to cancel a booking
 export async function cancelBookingByHost(
   firestore: Firestore,
+  actor: User,
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
@@ -131,6 +139,8 @@ export async function cancelBookingByHost(
     const booking = bookingSnap.data() as Booking;
 
     await updateDoc(bookingRef, updatedData);
+    
+    await logAudit(firestore, { actor, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'host' } });
 
      await createNotification(
       firestore,
@@ -152,12 +162,14 @@ export async function cancelBookingByHost(
 // Function to pause an experience
 export async function pauseExperienceForHost(
   firestore: Firestore,
+  actor: User,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   const updatedData = { status: 'paused' };
   try {
     await updateDoc(expRef, updatedData);
+    await logAudit(firestore, { actor, action: 'PAUSE_EXPERIENCE', target: { type: 'experience', id: experienceId }});
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
@@ -171,12 +183,14 @@ export async function pauseExperienceForHost(
 // Function to start (make live) an experience
 export async function startExperienceForHost(
   firestore: Firestore,
+  actor: User,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   const updatedData = { status: 'live' };
   try {
     await updateDoc(expRef, updatedData);
+    await logAudit(firestore, { actor, action: 'START_EXPERIENCE', target: { type: 'experience', id: experienceId }});
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
@@ -190,6 +204,7 @@ export async function startExperienceForHost(
 // Function to update an experience
 export async function updateExperience(
   firestore: Firestore,
+  actor: User,
   experienceId: string,
   data: ExperienceUpdateData
 ) {
@@ -197,6 +212,7 @@ export async function updateExperience(
     const dataWithTimestamp = { ...data, updatedAt: serverTimestamp() };
     try {
         await updateDoc(expRef, dataWithTimestamp);
+        await logAudit(firestore, { actor, action: 'UPDATE_EXPERIENCE', target: { type: 'experience', id: experienceId }, metadata: { updatedFields: Object.keys(data) } });
     } catch(serverError) {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: expRef.path,
@@ -210,11 +226,13 @@ export async function updateExperience(
 // Function to delete an experience
 export async function deleteExperienceForHost(
   firestore: Firestore,
+  actor: User,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   try {
     await deleteDoc(expRef);
+    await logAudit(firestore, { actor, action: 'DELETE_EXPERIENCE', target: { type: 'experience', id: experienceId }});
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
@@ -226,6 +244,7 @@ export async function deleteExperienceForHost(
 
 export async function respondToReschedule(
   firestore: Firestore,
+  actor: User,
   bookingId: string,
   accepted: boolean
 ) {
@@ -256,6 +275,9 @@ export async function respondToReschedule(
 
   try {
     await updateDoc(bookingRef, updatedData);
+
+    await logAudit(firestore, { actor, action: accepted ? 'ACCEPT_RESCHEDULE' : 'DECLINE_RESCHEDULE', target: { type: 'booking', id: bookingId } });
+    
     await createNotification(
       firestore,
       booking.guestId,
