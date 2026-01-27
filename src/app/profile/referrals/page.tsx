@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -50,7 +51,7 @@ function ReferredUserRow({ referredUser }: { referredUser: ReferredUser }) {
                 </span>
             </TableCell>
             <TableCell className="text-right">
-                {referredUser.createdAt?.toDate ? format(referredUser.createdAt.toDate(), 'PPP') : 'N/A'}
+                {referredUser.createdAt.toDate ? format(referredUser.createdAt.toDate(), 'PPP') : 'N/A'}
             </TableCell>
         </TableRow>
     )
@@ -72,7 +73,7 @@ export default function ReferralsPage() {
     );
     const { data: referredUsers, isLoading: areReferredUsersLoading } = useCollection<ReferredUser>(referredUsersQuery);
 
-    const referralCode = user?.id.substring(0, 8).toUpperCase() || '';
+    const referralCode = user ? user.id.substring(0, 8).toUpperCase() : '';
     const referralLink = `https://go2culture.com/signup?ref=${referralCode}`;
 
     const copyToClipboard = () => {
@@ -201,3 +202,5 @@ export default function ReferralsPage() {
         </div>
     )
 }
+
+    
