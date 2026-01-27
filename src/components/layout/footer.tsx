@@ -17,7 +17,7 @@ export function Footer() {
           <div className="col-span-2 space-y-4">
             <Logo className="text-primary" />
              <p className="text-sm text-muted-foreground max-w-xs">
-              “Delicious food, rich culture, good health and peace in the community.”
+              “Airbnb changed where we sleep. Go2Culture changes where — and with whom — we eat.”
             </p>
           </div>
           <div>
