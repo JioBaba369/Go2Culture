@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import type { Booking, Message, User } from '@/lib/types';
+import type { Booking, Conversation, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 import { logAudit } from './audit-actions';
 
@@ -26,6 +26,7 @@ export async function sendMessage(
   }
 
   const batch = writeBatch(firestore);
+  const conversationRef = doc(firestore, 'conversations', booking.id);
 
   // 1. Create the new message document in the subcollection
   const messageRef = doc(collection(firestore, 'conversations', booking.id, 'messages'));
@@ -39,19 +40,40 @@ export async function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Update the conversation document
-  const conversationRef = doc(firestore, 'conversations', booking.id);
-  const conversationData = {
+  // 2. Create or update the conversation document. 
+  // Using set with merge:true allows this to work for the first message (creation)
+  // and subsequent messages (update).
+  const conversationData: Partial<Conversation> = {
+    id: booking.id, // Ensure ID is set on creation
+    bookingId: booking.id,
+    participants: [currentUser.id, recipient.id],
+    participantInfo: {
+      [currentUser.id]: {
+        fullName: currentUser.fullName,
+        profilePhotoId: currentUser.profilePhotoId || 'guest-1',
+      },
+      [recipient.id]: {
+        fullName: recipient.fullName,
+        profilePhotoId: recipient.profilePhotoId || 'guest-1',
+      },
+    },
+    bookingInfo: {
+      experienceTitle: booking.experienceTitle,
+      experienceId: booking.experienceId,
+    },
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    [`readBy.${currentUser.id}`]: serverTimestamp(),
+    readBy: {
+      [currentUser.id]: serverTimestamp(),
+    },
     updatedAt: serverTimestamp(),
   };
-  batch.update(conversationRef, conversationData);
-
+  // On first message, create the doc. On subsequent, merge fields.
+  batch.set(conversationRef, conversationData, { merge: true });
+  
   // 3. Add rate limit update to the same batch
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
   batch.set(rateLimitRef, { lastMessageAt: serverTimestamp() }, { merge: true });

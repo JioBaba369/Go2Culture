@@ -1,0 +1,155 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ───────────────── Helpers ───────────────── */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    
+    function isAdmin() {
+      // In production, this would be a custom claim.
+      return isSignedIn() && request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
+    }
+
+    // Checks if the requesting user is a participant in the BOOKING,
+    // which is the source of truth.
+    function isBookingParticipant(bookingId) {
+      let booking = get(/databases/$(database)/documents/bookings/$(bookingId)).data;
+      return booking != null && (request.auth.uid == booking.guestId || request.auth.uid == booking.hostId);
+    }
+    
+    function canSendMessage() {
+      let lastMessageTime = get(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat).data.lastMessageAt;
+      return !exists(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat)
+        || request.time > lastMessageTime + duration.value(1, "s");
+    }
+
+    /* ───────────────── Users ───────────────── */
+    match /users/{userId} {
+      allow read: if isSelf(userId) || isAdmin();
+      allow create: if isSelf(userId);
+      // Client cannot change role or status
+      allow update: if isSelf(userId)
+        && !('role' in request.resource.data.diff(resource.data).affectedKeys())
+        && !('status' in request.resource.data.diff(resource.data).affectedKeys());
+      allow delete: if false; // Use soft deletes
+
+      match /hosts/{hostId} {
+        allow read: if true;
+        allow write: if isSelf(userId) || isAdmin();
+      }
+
+      match /wishlist/{experienceId} {
+        allow read, write: if isSelf(userId);
+      }
+
+      match /notifications/{notificationId} {
+        allow read, write: if isSelf(userId);
+      }
+      
+      match /rateLimits/{document=**} {
+        allow write: if isSelf(userId);
+        allow read: if isSelf(userId);
+      }
+    }
+
+    /* ───────────────── Host Applications ───────────────── */
+    match /hostApplications/{applicationId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false; // Use status changes, don't delete
+    }
+
+    /* ───────────────── Experiences ───────────────── */
+    match /experiences/{experienceId} {
+      allow read: if resource.data.status == 'live' || isAdmin() || (isSignedIn() && isSelf(resource.data.hostId));
+      allow create: if isSignedIn() && request.resource.data.hostId == request.auth.uid;
+      allow update: if isSignedIn() && isSelf(resource.data.hostId);
+      allow delete: if false; // Soft delete by updating status to 'archived'
+    }
+
+    /* ───────────────── Bookings ───────────────── */
+    match /bookings/{bookingId} {
+        allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
+        allow read: if isSignedIn() && (request.auth.uid == resource.data.guestId || request.auth.uid == resource.data.hostId) || isAdmin();
+        
+        allow update: if (
+            // Prevent immutable fields from being changed after creation
+            !("pricing" in request.resource.data.diff(resource.data).affectedKeys()) &&
+            !("policySnapshot" in request.resource.data.diff(resource.data).affectedKeys()) &&
+            !("payment" in request.resource.data.diff(resource.data).affectedKeys()) &&
+            (
+                // Guest can cancel their own booking
+                (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
+                // Host can confirm a booking
+                (isSelf(resource.data.hostId) && request.resource.data.status == "Confirmed" && resource.data.status == "Pending") ||
+                // Either participant can request/respond to reschedule
+                (isSelf(resource.data.guestId) || isSelf(resource.data.hostId))
+            )
+        );
+        allow delete: if false;
+    }
+
+    /* ───────────────── Reviews ───────────────── */
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
+      allow update: if (isSignedIn() && isSelf(resource.data.guestId)) || isAdmin();
+      allow delete: if false;
+    }
+
+    /* ───────────────── Conversations & Messages ───────────────── */
+    match /conversations/{bookingId} {
+      allow read, list: if isBookingParticipant(bookingId) || isAdmin();
+
+      // This rule is updated to allow a client to create the conversation document,
+      // but only if they are a participant in the associated CONFIRMED booking.
+      // This is necessary to support instant bookings in a client-only environment.
+      allow create: if isBookingParticipant(bookingId)
+                    && get(/databases/$(database)/documents/bookings/$(bookingId)).data.status == 'Confirmed'
+                    && request.resource.data.id == bookingId;
+      
+      allow update: if isBookingParticipant(bookingId) 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy', 'updatedAt']);
+    }
+
+    match /conversations/{bookingId}/messages/{messageId} {
+        allow read, list: if isBookingParticipant(bookingId) || isAdmin();
+        
+        allow create: if canSendMessage() 
+                    && request.resource.data.senderId == request.auth.uid
+                    && isBookingParticipant(bookingId);
+                    
+        allow update, delete: if false;
+    }
+
+    /* ───────────────── Admin & System Collections ───────────────── */
+    match /sponsors/{sponsorId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /coupons/{couponId} {
+      allow get: if isSignedIn();
+      allow list, create, delete, update: if isAdmin();
+    }
+    
+    match /reports/{reportId} {
+      allow read, update: if isAdmin();
+      allow create: if isSignedIn();
+      allow delete: if false;
+    }
+
+    match /auditLogs/{logId} {
+        allow read: if isAdmin();
+        allow write: if false; // Server-only writes
+    }
+  }
+}
