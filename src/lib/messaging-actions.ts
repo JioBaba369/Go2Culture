@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -7,7 +6,6 @@ import {
   collection,
   writeBatch,
   serverTimestamp,
-  updateDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';

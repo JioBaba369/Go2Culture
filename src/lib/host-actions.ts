@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -8,10 +7,11 @@ import {
   serverTimestamp,
   deleteDoc,
   getDoc,
+  writeBatch,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { Experience, Booking } from './types';
+import { Experience, Booking, Conversation, User } from './types';
 import { createNotification } from './notification-actions';
 
 export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'userId' | 'createdAt' | 'rating' | 'hostName' | 'hostProfilePhotoId'>>;
@@ -36,22 +36,67 @@ export async function updatePayoutSettings(
   }
 }
 
-// Function to confirm a booking
+// Function to confirm a booking and create the associated conversation
 export async function confirmBooking(
   firestore: Firestore,
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
-  const updatedData = { status: 'Confirmed' };
+  
   try {
     const bookingSnap = await getDoc(bookingRef);
     if (!bookingSnap.exists()) {
       throw new Error("Booking not found!");
     }
-    const booking = bookingSnap.data() as Booking;
+    const booking = { id: bookingSnap.id, ...bookingSnap.data() } as Booking;
 
-    await updateDoc(bookingRef, updatedData);
+    // Fetch host and guest profiles to create participantInfo
+    const hostRef = doc(firestore, 'users', booking.hostId);
+    const guestRef = doc(firestore, 'users', booking.guestId);
+    const [hostSnap, guestSnap] = await Promise.all([getDoc(hostRef), getDoc(guestRef)]);
 
+    if (!hostSnap.exists() || !guestSnap.exists()) {
+      throw new Error("Host or guest profile could not be found.");
+    }
+    const hostData = hostSnap.data() as User;
+    const guestData = guestSnap.data() as User;
+    
+    // Start a batch write
+    const batch = writeBatch(firestore);
+
+    // 1. Update booking status
+    batch.update(bookingRef, { status: 'Confirmed' });
+
+    // 2. Create the conversation document
+    const conversationRef = doc(firestore, 'conversations', booking.id);
+    const conversationData: Conversation = {
+      bookingId: booking.id,
+      participants: [booking.guestId, booking.hostId],
+      participantInfo: {
+        [booking.guestId]: {
+          fullName: guestData.fullName,
+          profilePhotoId: guestData.profilePhotoId || 'guest-1',
+        },
+        [booking.hostId]: {
+          fullName: hostData.fullName,
+          profilePhotoId: hostData.profilePhotoId || 'guest-1',
+        },
+      },
+      bookingInfo: {
+        experienceTitle: booking.experienceTitle,
+        experienceId: booking.experienceId,
+      },
+      lastMessage: undefined, // No messages yet
+      readBy: {},
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    batch.set(conversationRef, conversationData);
+
+    // Commit the batch
+    await batch.commit();
+
+    // Send notification after successful commit
     await createNotification(
       firestore,
       booking.guestId,
@@ -59,14 +104,17 @@ export async function confirmBooking(
       '/profile/bookings'
     );
   } catch (serverError) {
+    // Note: A more specific error path might be needed depending on which part failed.
+    // For simplicity, we use the bookingRef path.
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: bookingRef.path,
-      operation: 'update',
-      requestResourceData: updatedData,
+      operation: 'write', // This is a batch write operation
+      requestResourceData: { status: 'Confirmed' },
     }));
     throw serverError;
   }
 }
+
 
 // Function for a host to cancel a booking
 export async function cancelBookingByHost(
