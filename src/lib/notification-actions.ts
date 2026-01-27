@@ -7,17 +7,18 @@ import {
   serverTimestamp,
   addDoc
 } from 'firebase/firestore';
+import type { Notification } from './types';
 
 export async function createNotification(
   firestore: Firestore,
   userId: string,
-  message: string,
-  link?: string
+  type: Notification['type'],
+  entityId: string,
 ) {
-    const notificationData = {
+    const notificationData: Omit<Notification, 'id'> = {
         userId,
-        message,
-        link: link || '#',
+        type,
+        entityId,
         isRead: false,
         createdAt: serverTimestamp()
     };

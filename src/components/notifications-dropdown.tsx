@@ -6,11 +6,73 @@ import { collection, query, orderBy, writeBatch, doc } from 'firebase/firestore'
 import type { Notification } from '@/lib/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck } from 'lucide-react';
+import { Bell, CheckCheck, MessageSquare, Star, CalendarCheck, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+
+function getNotificationDetails(notification: Notification): { icon: React.ElementType, message: string, link: string } {
+    const { type, entityId } = notification;
+
+    switch (type) {
+        case 'BOOKING_CONFIRMED':
+            return {
+                icon: CalendarCheck,
+                message: "A booking has been confirmed.",
+                link: `/profile/bookings`
+            };
+        case 'BOOKING_REQUESTED':
+             return {
+                icon: CalendarCheck,
+                message: "You have a new booking request.",
+                link: `/host/bookings`
+            };
+        case 'BOOKING_CANCELLED':
+            return {
+                icon: CalendarCheck,
+                message: "A booking has been cancelled.",
+                link: `/profile/bookings`
+            };
+        case 'NEW_MESSAGE':
+            return {
+                icon: MessageSquare,
+                message: "You have a new message.",
+                link: `/messages?id=${entityId}`
+            };
+        case 'HOST_APPROVED':
+            return {
+                icon: Star,
+                message: "Congratulations, you're now a host!",
+                link: '/host/experiences'
+            };
+        case 'REVIEW_RECEIVED':
+             return {
+                icon: Star,
+                message: "You've received a new review.",
+                link: `/experiences/${entityId}`
+            };
+        case 'RESCHEDULE_REQUEST':
+            return {
+                icon: CalendarCheck,
+                message: "You have a reschedule request.",
+                link: '/host/bookings'
+            };
+        case 'RESCHEDULE_RESPONSE':
+            return {
+                icon: CalendarCheck,
+                message: "A host has responded to your reschedule request.",
+                link: '/profile/bookings'
+            };
+        default:
+            return {
+                icon: AlertTriangle,
+                message: "You have a new notification.",
+                link: '/profile'
+            };
+    }
+}
+
 
 export function NotificationsDropdown() {
     const { user, firestore } = useFirebase();
@@ -69,18 +131,24 @@ export function NotificationsDropdown() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {notifications && notifications.length > 0 ? (
-                    notifications.map(notif => (
-                        <DropdownMenuItem key={notif.id} asChild className="cursor-pointer whitespace-normal">
-                           <Link href={notif.link || '#'}>
-                             <div className="flex flex-col gap-1 p-2">
-                                <p className={!notif.isRead ? 'font-semibold' : ''}>{notif.message}</p>
-                                <p className="text-xs text-muted-foreground">
-                                    {notif.createdAt?.toDate ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : 'just now'}
-                                </p>
-                            </div>
-                           </Link>
-                        </DropdownMenuItem>
-                    ))
+                    notifications.map(notif => {
+                        const { icon: Icon, message, link } = getNotificationDetails(notif);
+                        return (
+                            <DropdownMenuItem key={notif.id} asChild className="cursor-pointer whitespace-normal">
+                               <Link href={link}>
+                                 <div className="flex items-start gap-3 p-2">
+                                    <Icon className={`h-4 w-4 mt-1 flex-shrink-0 ${!notif.isRead ? 'text-primary' : 'text-muted-foreground'}`}/>
+                                    <div className="flex flex-col gap-1">
+                                        <p className={!notif.isRead ? 'font-semibold' : ''}>{message}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {notif.createdAt?.toDate ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : 'just now'}
+                                        </p>
+                                    </div>
+                                </div>
+                               </Link>
+                            </DropdownMenuItem>
+                        )
+                    })
                 ) : (
                     <div className="p-4 text-center text-sm text-muted-foreground">
                         All notifications loaded

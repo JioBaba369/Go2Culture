@@ -37,8 +37,8 @@ export async function submitReview(
     await createNotification(
       firestore,
       booking.hostId,
-      `You received a new ${rating}-star review for "${booking.experienceTitle}"!`,
-      `/experiences/${booking.experienceId}`
+      'REVIEW_RECEIVED',
+      booking.experienceId,
     );
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -57,7 +57,7 @@ export async function cancelBookingByGuest(
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
-  const updatedData = { status: 'Cancelled' };
+  const updatedData = { status: 'Cancelled', cancellationReason: 'Cancelled by guest' };
   try {
     const bookingSnap = await getDoc(bookingRef);
     if (!bookingSnap.exists()) {
@@ -72,8 +72,8 @@ export async function cancelBookingByGuest(
     await createNotification(
         firestore,
         booking.hostId,
-        `Your booking for "${booking.experienceTitle}" was cancelled by the guest.`,
-        '/host/bookings'
+        'BOOKING_CANCELLED',
+        booking.id
     );
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -114,8 +114,8 @@ export async function requestReschedule(
     await createNotification(
       firestore,
       booking.hostId,
-      `${actor.fullName} requested to reschedule "${booking.experienceTitle}".`,
-      '/host/bookings'
+      'RESCHEDULE_REQUEST',
+      booking.id
     );
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({

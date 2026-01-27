@@ -1,6 +1,5 @@
 
 
-
 export type User = {
   id: string;
   role: 'guest' | 'host' | 'both';
@@ -40,6 +39,7 @@ export type User = {
   referralCredit?: number;
   referredBy?: string;
   deletedAt?: any; // Allow ServerTimestamp
+  deletedBy?: 'user' | 'admin';
 };
 
 export type ComplianceFields = {
@@ -104,13 +104,15 @@ export type Host = {
     wifi?: boolean;
   };
   
-  compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean };
+  compliance: Partial<ComplianceFields>;
 
   rating: {
     average: number;
     count: number;
   };
   
+  hostScore?: number;
+
   blockedDates?: string[]; // yyyy-MM-dd format
   billingCountry?: string; // Two-letter ISO country code
 
@@ -176,6 +178,7 @@ export type Experience = {
   createdAt: any; // Allow ServerTimestamp
   updatedAt?: any;
   deletedAt?: any; // For soft deletes
+  deletedBy?: 'user' | 'admin';
 };
 
 
@@ -277,11 +280,12 @@ export type Conversation = {
 export type Notification = {
   id: string;
   userId: string;
-  message: string;
-  link?: string;
+  type: 'BOOKING_CONFIRMED' | 'BOOKING_REQUESTED' | 'BOOKING_CANCELLED' | 'NEW_MESSAGE' | 'HOST_APPROVED' | 'REVIEW_RECEIVED' | 'GENERIC_ALERT' | 'RESCHEDULE_REQUEST' | 'RESCHEDULE_RESPONSE';
+  entityId: string; // e.g., bookingId, reviewId
   isRead: boolean;
   createdAt: any; // Allow ServerTimestamp
 };
+
 
 export type HostApplication = {
   id: string;
@@ -338,21 +342,19 @@ export type HostApplication = {
     wifi?: boolean;
   };
 
-  compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean, agreeToFoodSafety?: boolean };
+  compliance: Partial<ComplianceFields>;
 };
 
 export type Report = {
   id: string;
   reporterId: string;
-  reportedUserId?: string;
-  bookingId?: string;
-  experienceId?: string;
+  reportedUserLink?: string | null;
   targetType: 'Review' | 'Experience' | 'User';
   targetId: string;
   reason: 'safety' | 'fraud' | 'harassment' | 'food_hygiene' | 'other';
-  description: string;
+  description?: string;
   status: 'Open' | 'In Progress' | 'Resolved' | 'Dismissed';
-  createdAt: any;
+  date: any;
 };
 
 export type Coupon = {
@@ -365,6 +367,7 @@ export type Coupon = {
   minSpend?: number;
   usageLimit?: number;
   timesUsed: number;
+  deletedAt?: any;
 };
 
 export type Sponsor = {
@@ -374,6 +377,7 @@ export type Sponsor = {
   website?: string;
   isActive: boolean;
   createdAt: any;
+  deletedAt?: any;
 };
 
 export type AuditLog = {
@@ -381,10 +385,8 @@ export type AuditLog = {
     actorId: string;
     actorRole: 'guest' | 'host' | 'both' | 'admin' | 'system';
     action: string;
-    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message';
+    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message' | 'report' | 'coupon' | 'sponsor';
     targetId: string;
     metadata?: Record<string, any>;
     createdAt: any; // Allow ServerTimestamp
 }
-
-    
