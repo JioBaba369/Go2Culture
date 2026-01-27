@@ -1,6 +1,6 @@
 
 import type { Metadata } from 'next';
-import { Inter, Poppins } from 'next/font/google';
+import { Playfair_Display, PT_Sans } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/header";
@@ -10,17 +10,18 @@ import { FirebaseClientProvider } from '@/firebase';
 import { CookieConsentBanner } from '@/components/cookie-consent-banner';
 import { cn } from '@/lib/utils';
 
-const inter = Inter({
+const ptSans = PT_Sans({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  weight: ['400', '700'],
+  variable: '--font-pt-sans',
 });
 
-const poppins = Poppins({
+const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
   display: 'swap',
-  weight: ['600', '700'],
-  variable: '--font-headline',
+  weight: ['400', '700', '900'],
+  variable: '--font-playfair-display',
 });
 
 export const metadata: Metadata = {
@@ -40,7 +41,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
       </head>
-      <body className={cn('antialiased', inter.variable, poppins.variable)}>
+      <body className={cn('antialiased', ptSans.variable, playfairDisplay.variable)}>
         <FirebaseClientProvider>
           <MainLayout header={<Header />} footer={<Footer />}>
             {children}
