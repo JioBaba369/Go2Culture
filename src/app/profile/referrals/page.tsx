@@ -73,7 +73,7 @@ export default function ReferralsPage() {
     );
     const { data: referredUsers, isLoading: areReferredUsersLoading } = useCollection<ReferredUser>(referredUsersQuery);
 
-    const referralCode = user ? user.id.substring(0, 8).toUpperCase() : '';
+    const referralCode = user ? user.uid.substring(0, 8).toUpperCase() : '';
     const referralLink = `https://go2culture.com/signup?ref=${referralCode}`;
 
     const copyToClipboard = () => {
@@ -200,7 +200,4 @@ export default function ReferralsPage() {
             </Card>
 
         </div>
-    )
-}
-
-    
+     
