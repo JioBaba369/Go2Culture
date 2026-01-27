@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -69,7 +70,7 @@ export async function confirmBooking(
 
     // 2. Create the conversation document
     const conversationRef = doc(firestore, 'conversations', booking.id);
-    const conversationData: Conversation = {
+    const conversationData: Omit<Conversation, 'id'> = {
       bookingId: booking.id,
       participants: [booking.guestId, booking.hostId],
       participantInfo: {
@@ -223,3 +224,5 @@ export async function deleteExperienceForHost(
     throw serverError;
   }
 }
+
+    

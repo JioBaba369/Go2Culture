@@ -203,8 +203,8 @@ export type Booking = {
 };
 
 export type WishlistItem = {
-  // The document ID is the experienceId. This type represents the data within the document.
-  createdAt: any; // Allow ServerTimestamp
+  id: string;
+  createdAt: any;
 };
 
 export type Message = {
@@ -218,7 +218,8 @@ export type Message = {
 };
 
 export type Conversation = {
-  bookingId: string; // The ID of the booking this conversation is associated with.
+  id: string; // Same as bookingId
+  bookingId: string;
   participants: string[];
   participantInfo: {
     [key: string]: {
@@ -235,7 +236,7 @@ export type Conversation = {
     timestamp: any;
     senderId: string;
   };
-  readBy: { [key: string]: any };
+  readBy: { [key: string]: any }; // Map of userId to timestamp
   createdAt: any;
   updatedAt?: any;
 };
@@ -370,3 +371,5 @@ export type Sponsor = {
   isActive: boolean;
   createdAt: any;
 };
+
+    

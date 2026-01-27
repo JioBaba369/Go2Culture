@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo, Suspense } from 'react';
@@ -88,20 +89,11 @@ function ConversationList({ selectedConversationId }: { selectedConversationId: 
     if (!user || !firestore) return null;
     const isAdmin = user.uid === ADMIN_UID;
     return isAdmin
-      ? query(collection(firestore, 'conversations'))
-      : query(collection(firestore, 'conversations'), where('participants', 'array-contains', user.uid));
+      ? query(collection(firestore, 'conversations'), orderBy('updatedAt', 'desc'))
+      : query(collection(firestore, 'conversations'), where('participants', 'array-contains', user.uid), orderBy('updatedAt', 'desc'));
   }, [user, firestore]);
 
-  const { data: conversationsData, isLoading } = useCollection<Conversation>(conversationsQuery);
-
-  const conversations = useMemo(() => {
-    if (!conversationsData) return [];
-    return [...conversationsData].sort((a, b) => {
-        const timeA = a.lastMessage?.timestamp?.toDate ? a.lastMessage.timestamp.toDate().getTime() : 0;
-        const timeB = b.lastMessage?.timestamp?.toDate ? b.lastMessage.timestamp.toDate().getTime() : 0;
-        return timeB - timeA;
-    });
-  }, [conversationsData]);
+  const { data: conversations, isLoading } = useCollection<Conversation>(conversationsQuery);
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-full"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
@@ -374,3 +366,5 @@ export default function MessagesPage() {
         </div>
     );
 }
+
+    
