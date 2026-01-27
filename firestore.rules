@@ -17,13 +17,13 @@ service cloud.firestore {
       return isSignedIn()
         && request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
     }
-
+    
     function isParticipant(data) {
       return isSignedIn()
         && data.participants is list
         && request.auth.uid in data.participants;
     }
-    
+
     function canSendMessage() {
       return !exists(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat)
         || request.time >
@@ -62,7 +62,7 @@ service cloud.firestore {
       allow read: if true;
       allow list: if isAdmin();
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      allow update: if (isOwner(userId) && !('role' in request.resource.data) && !('status' in request.resource.data)) || isAdmin();
       allow delete: if isAdmin();
 
       match /hosts/{hostId} {
@@ -86,20 +86,18 @@ service cloud.firestore {
     /* ───────────────── Host Applications ───────────────── */
 
     match /hostApplications/{applicationId} {
-      allow create: if isSignedIn()
-        && request.resource.data.userId == request.auth.uid;
-
-      allow read, update, delete: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
     }
 
     /* ───────────────── Experiences ───────────────── */
 
     match /experiences/{experienceId} {
-      allow read: if true;
-      allow create: if isSignedIn();
-
-      allow update, delete: if isSignedIn()
-        && (resource.data.hostId == request.auth.uid || isAdmin());
+      allow read: if resource.data.status == 'live' || isAdmin() || (isSignedIn() && resource.data.hostId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.hostId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.hostId == request.auth.uid;
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.hostId == request.auth.uid);
     }
 
     /* ───────────────── Bookings ───────────────── */
@@ -112,7 +110,15 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
             .data.termsAccepted == true;
 
-      allow update: if (isBookingParticipant(resource.data) && onlyChanges(['status', 'cancellationReason', 'rescheduleRequest', 'bookingDate', 'updatedAt'])) || isAdmin();
+      allow update: if 
+        (
+          isBookingParticipant(resource.data) &&
+          (
+            (request.resource.data.status == 'Cancelled' && resource.data.guestId == request.auth.uid) ||
+            (request.resource.data.status == 'Confirmed' && resource.data.hostId == request.auth.uid) ||
+            onlyChanges(['rescheduleRequest', 'updatedAt'])
+          )
+        ) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -120,25 +126,22 @@ service cloud.firestore {
 
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if isSignedIn()
-        && request.resource.data.guestId == request.auth.uid;
-      allow update: if isSignedIn()
-        && (resource.data.guestId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.guestId == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
     }
 
     /* ───────────────── Conversations ───────────────── */
 
-    match /conversations/{conversationId} {
-      allow get: if isAdmin() || isParticipant(resource.data);
+    match /conversations/{bookingId} {
+      allow get: if isParticipant(resource.data) || isAdmin();
       allow list: if isAdmin() || isQueryingOwnConversations();
       allow create: if isSignedIn()
-          && request.resource.data.bookingId is string
-          && let booking = get(/databases/$(database)/documents/bookings/$(request.resource.data.bookingId))
-          && booking.exists()
-          && request.resource.data.participants.hasAll([booking.data.guestId, booking.data.hostId])
-          && request.resource.data.participants.size() == 2
-          && request.resource.data.bookingId == conversationId;
+          && request.resource.data.bookingId == bookingId
+          && let booking = get(/databases/$(database)/documents/bookings/$(bookingId))
+          && booking.exists() && booking.data.status == 'Confirmed'
+          && request.auth.uid == booking.data.hostId
+          && request.resource.data.participants.hasAll([booking.data.guestId, booking.data.hostId]);
 
       allow update: if isAdmin() || (
           isSignedIn()
@@ -151,11 +154,12 @@ service cloud.firestore {
 
       /* ───────── Messages Subcollection ───────── */
       match /messages/{messageId} {
-        allow get, list: if isAdmin() || isParticipant(get(/databases/$(database)/documents/conversations/$(conversationId)).data);
+        allow get, list: if isParticipant(get(/databases/$(database)/documents/conversations/$(bookingId)).data) || isAdmin();
+        
         allow create: if isSignedIn()
-            && canSendMessage()
-            && request.resource.data.senderId == request.auth.uid
-            && request.resource.data.bookingId == conversationId;
+          && canSendMessage()
+          && request.resource.data.senderId == request.auth.uid
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(bookingId)).data.participants;
 
         allow update, delete: if false;
       }

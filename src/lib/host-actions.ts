@@ -87,7 +87,6 @@ export async function confirmBooking(
         experienceTitle: booking.experienceTitle,
         experienceId: booking.experienceId,
       },
-      lastMessage: undefined, // No messages yet
       readBy: {},
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -241,11 +240,17 @@ export async function respondToReschedule(
   if (accepted) {
     updatedData = {
       bookingDate: booking.rescheduleRequest.newDate,
-      'rescheduleRequest.status': 'accepted',
+      rescheduleRequest: {
+        ...booking.rescheduleRequest,
+        status: 'accepted',
+      },
     };
   } else {
     updatedData = {
-      'rescheduleRequest.status': 'declined',
+      rescheduleRequest: {
+        ...booking.rescheduleRequest,
+        status: 'declined',
+      },
     };
   }
 

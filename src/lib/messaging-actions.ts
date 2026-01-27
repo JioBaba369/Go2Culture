@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import type { Booking, Conversation, Message, User } from '@/lib/types';
+import type { Booking, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 
 export async function sendMessage(
@@ -69,7 +69,7 @@ export async function sendMessage(
     errorEmitter.emit(
       'permission-error',
       new FirestorePermissionError({
-        path: `batch write (conversations/${booking.id}, messages, rateLimits)`,
+        path: `batch write (messages, conversations/${booking.id})`,
         operation: 'write',
         requestResourceData: { newMessage, conversationData },
       })
