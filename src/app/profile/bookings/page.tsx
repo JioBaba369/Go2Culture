@@ -74,7 +74,7 @@ function StarRating({ field }: { field: any }) {
   );
 }
 
-function ReviewForm({ booking, onFinished }: { booking: Booking, onFinished: () => void }) {
+function ReviewForm({ booking, actor, onFinished }: { booking: Booking, actor: User, onFinished: () => void }) {
   const { firestore } = useFirebase();
   const { toast } = useToast();
   const form = useForm<ReviewFormValues>({
@@ -85,7 +85,7 @@ function ReviewForm({ booking, onFinished }: { booking: Booking, onFinished: () 
   async function onSubmit(values: ReviewFormValues) {
     if (!firestore) return;
     try {
-      await submitReview(firestore, booking, values.rating, values.comment);
+      await submitReview(firestore, actor, booking, values.rating, values.comment);
       toast({ title: 'Review Submitted!', description: 'Thank you for your feedback.' });
       onFinished();
     } catch (error: any) {
@@ -130,17 +130,17 @@ function ReviewForm({ booking, onFinished }: { booking: Booking, onFinished: () 
   );
 }
 
-function RescheduleForm({ booking, experience, host, onFinished }: { booking: Booking, experience: Experience, host: Host, onFinished: () => void }) {
-  const { firestore, user } = useFirebase();
+function RescheduleForm({ booking, experience, host, actor, onFinished }: { booking: Booking, experience: Experience, host: Host, actor: User, onFinished: () => void }) {
+  const { firestore } = useFirebase();
   const { toast } = useToast();
   const form = useForm<RescheduleFormValues>({
     resolver: zodResolver(rescheduleSchema),
   });
 
   async function onSubmit(values: RescheduleFormValues) {
-    if (!firestore || !user) return;
+    if (!firestore || !actor) return;
     try {
-      await requestReschedule(firestore, booking.id, user.displayName || 'A guest', values.newDate);
+      await requestReschedule(firestore, actor, booking.id, values.newDate);
       toast({ title: 'Reschedule Request Sent!', description: 'The host has been notified of your request.' });
       onFinished();
     } catch (error: any) {
@@ -182,7 +182,7 @@ function RescheduleForm({ booking, experience, host, onFinished }: { booking: Bo
 }
 
 
-function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: { booking: Booking, onAction: () => void, hasReviewed: boolean, isReviewCheckLoading: boolean }) {
+function BookingCard({ booking, actor, onAction, hasReviewed, isReviewCheckLoading }: { booking: Booking, actor: User | null, onAction: () => void, hasReviewed: boolean, isReviewCheckLoading: boolean }) {
   const { firestore } = useFirebase();
   const [isReviewFormOpen, setReviewFormOpen] = useState(false);
   const [isRescheduleOpen, setRescheduleOpen] = useState(false);
@@ -201,9 +201,10 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
   const isCompleted = isPast(booking.bookingDate.toDate());
   
   const handleCancel = async () => {
+    if (!actor) return;
     setCancelling(true);
     try {
-      await cancelBookingByGuest(firestore, booking.id);
+      await cancelBookingByGuest(firestore, actor, booking.id);
       toast({ title: "Booking Cancelled", variant: 'destructive' });
       onAction();
     } catch(e) {
@@ -213,7 +214,7 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
   }
 
   if (isExperienceLoading || isHostUserLoading || isHostProfileLoading) return <Skeleton className="h-56 w-full" />;
-  if (!experience || !hostUser || !hostProfile) return null;
+  if (!experience || !hostUser || !hostProfile || !actor) return null;
 
   const image = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
 
@@ -249,7 +250,7 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
                     <DialogHeader>
                         <DialogTitle>Review: {experience.title}</DialogTitle>
                     </DialogHeader>
-                    <ReviewForm booking={booking} onFinished={() => { setReviewFormOpen(false); onAction(); }} />
+                    <ReviewForm booking={booking} actor={actor} onFinished={() => { setReviewFormOpen(false); onAction(); }} />
                     </DialogContent>
                 </Dialog>
                 )
@@ -281,7 +282,7 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
                           <DialogTitle>Request to Reschedule</DialogTitle>
                           <DialogDescription>Select a new date for "{experience.title}". The host will need to approve this change.</DialogDescription>
                       </DialogHeader>
-                      <RescheduleForm booking={booking} experience={experience} host={hostProfile} onFinished={() => { setRescheduleOpen(false); onAction(); }} />
+                      <RescheduleForm booking={booking} experience={experience} host={hostProfile} actor={actor} onFinished={() => { setRescheduleOpen(false); onAction(); }} />
                   </DialogContent>
               </Dialog>
             )}
@@ -412,7 +413,8 @@ export default function MyBookingsPage() {
           filteredBookings.map(booking => (
             <BookingCard 
                 key={booking.id} 
-                booking={booking} 
+                booking={booking}
+                actor={user}
                 onAction={handleAction} 
                 hasReviewed={reviewedBookingIds.includes(booking.id)}
                 isReviewCheckLoading={areReviewsLoading}
@@ -431,3 +433,5 @@ export default function MyBookingsPage() {
     </div>
   );
 }
+
+    

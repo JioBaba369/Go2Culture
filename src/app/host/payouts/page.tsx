@@ -173,7 +173,7 @@ export default function HostPayoutsSettingsPage() {
         
         try {
             // 1. Save the non-sensitive billingCountry to Firestore
-            await updatePayoutSettings(firestore, user.uid, user.uid, {
+            await updatePayoutSettings(firestore, user, user.uid, user.uid, {
                 billingCountry: values.billingCountry,
             });
 

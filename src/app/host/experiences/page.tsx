@@ -37,7 +37,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Experience } from '@/lib/types';
+import { Experience, User } from '@/lib/types';
 import { MoreHorizontal, Eye, Pause, Play, Edit, Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
@@ -82,14 +82,14 @@ export default function HostExperiencesPage() {
   const isLoading = isUserLoading || areExperiencesLoading;
 
   const handleToggleStatus = async (experience: Experience) => {
-    if (!firestore) return;
+    if (!firestore || !user) return;
     setIsToggling(experience.id);
     try {
       if (experience.status === 'live') {
-        await pauseExperienceForHost(firestore, experience.id);
+        await pauseExperienceForHost(firestore, user, experience.id);
         toast({ title: 'Experience Paused', description: `"${experience.title}" is no longer live.` });
       } else {
-        await startExperienceForHost(firestore, experience.id);
+        await startExperienceForHost(firestore, user, experience.id);
         toast({ title: 'Experience Live', description: `"${experience.title}" is now visible to guests.` });
       }
     } catch (error: any) {
@@ -104,10 +104,10 @@ export default function HostExperiencesPage() {
   };
 
   const handleDelete = async () => {
-    if (!experienceToDelete || !firestore) return;
+    if (!experienceToDelete || !firestore || !user) return;
     setIsDeleting(true);
     try {
-        await deleteExperienceForHost(firestore, experienceToDelete.id);
+        await deleteExperienceForHost(firestore, user, experienceToDelete.id);
         toast({ title: 'Experience Deleted', description: `"${experienceToDelete.title}" has been removed.`});
         setExperienceToDelete(null);
     } catch (error: any) {
@@ -341,3 +341,5 @@ export default function HostExperiencesPage() {
     </div>
   );
 }
+
+    

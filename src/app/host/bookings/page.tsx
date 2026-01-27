@@ -43,6 +43,7 @@ const statusVariantMap: Record<
 // This component fetches guest info for each booking row
 function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () => void }) {
   const firestore = useFirestore();
+  const { user: actor } = useUser();
   const guestRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'users', booking.guestId) : null),
     [firestore, booking.guestId]
@@ -52,9 +53,10 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
   const { toast } = useToast();
 
   const handleConfirm = async () => {
+    if (!actor) return;
     setProcessing('confirm');
     try {
-        await confirmBooking(firestore, booking.id);
+        await confirmBooking(firestore, actor, booking.id);
         toast({ title: "Booking Confirmed!", description: "The guest has been notified." });
         onAction();
     } catch (e) {
@@ -64,9 +66,10 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
   };
 
   const handleCancel = async () => {
+    if (!actor) return;
     setProcessing('cancel');
     try {
-        await cancelBookingByHost(firestore, booking.id);
+        await cancelBookingByHost(firestore, actor, booking.id);
         toast({ title: "Booking Cancelled", variant: "destructive" });
         onAction();
     } catch(e) {
@@ -76,9 +79,10 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
   }
 
   const handleRespondToReschedule = async (accept: boolean) => {
+    if (!actor) return;
     setProcessing('respond');
     try {
-        await respondToReschedule(firestore, booking.id, accept);
+        await respondToReschedule(firestore, actor, booking.id, accept);
         toast({ title: `Request ${accept ? 'Accepted' : 'Declined'}!` });
         onAction(); // refetch
     } catch(e) {
@@ -165,6 +169,7 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
 // This component fetches guest info for each mobile booking card
 function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onAction: () => void }) {
   const firestore = useFirestore();
+  const { user: actor } = useUser();
   const guestRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'users', booking.guestId) : null),
     [firestore, booking.guestId]
@@ -174,9 +179,10 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
   const [isProcessing, setProcessing] = useState<null | 'confirm' | 'cancel' | 'respond'>(null);
 
   const handleConfirm = async () => {
+    if (!actor) return;
     setProcessing('confirm');
     try {
-        await confirmBooking(firestore, booking.id);
+        await confirmBooking(firestore, actor, booking.id);
         toast({ title: "Booking Confirmed!", description: "The guest has been notified." });
         onAction();
     } catch (e) {
@@ -186,9 +192,10 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
   };
 
   const handleCancel = async () => {
+    if (!actor) return;
     setProcessing('cancel');
     try {
-        await cancelBookingByHost(firestore, booking.id);
+        await cancelBookingByHost(firestore, actor, booking.id);
         toast({ title: "Booking Cancelled", variant: "destructive" });
         onAction();
     } catch(e) {
@@ -198,9 +205,10 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
   }
 
   const handleRespondToReschedule = async (accept: boolean) => {
+    if (!actor) return;
     setProcessing('respond');
     try {
-        await respondToReschedule(firestore, booking.id, accept);
+        await respondToReschedule(firestore, actor, booking.id, accept);
         toast({ title: `Request ${accept ? 'Accepted' : 'Declined'}!` });
         onAction();
     } catch(e) {
@@ -389,3 +397,5 @@ export default function HostBookingsPage() {
     </div>
   );
 }
+
+    

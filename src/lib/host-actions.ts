@@ -20,6 +20,7 @@ export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'u
 
 export async function updatePayoutSettings(
   firestore: Firestore,
+  actor: User,
   hostId: string,
   userId: string,
   data: { billingCountry: string }
@@ -28,6 +29,7 @@ export async function updatePayoutSettings(
   const dataToUpdate = { ...data, updatedAt: serverTimestamp() };
   try {
     await updateDoc(hostRef, dataToUpdate);
+    await logAudit(firestore, { actor, action: 'UPDATE_PAYOUT_SETTINGS', target: { type: 'user', id: userId } });
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: hostRef.path,
@@ -293,3 +295,5 @@ export async function respondToReschedule(
     throw serverError;
   }
 }
+
+    

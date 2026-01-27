@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -73,7 +72,7 @@ const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 export default function EditExperiencePage() {
   const params = useParams();
   const router = useRouter();
-  const { firestore } = useFirebase();
+  const { firestore, user } = useFirebase();
   const { toast } = useToast();
   const experienceId = params.id as string;
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -188,7 +187,7 @@ export default function EditExperiencePage() {
 
 
   const onSubmit = async (data: ExperienceFormValues) => {
-    if (!firestore) return;
+    if (!firestore || !user) return;
     setSaveState('saving');
     try {
         const updateData: ExperienceUpdateData = {
@@ -206,7 +205,7 @@ export default function EditExperiencePage() {
             inclusions: data.inclusions?.split(',').map(s => s.trim()).filter(Boolean) || [],
             whatToBring: data.whatToBring?.split(',').map(s => s.trim()).filter(Boolean) || [],
         };
-        await updateExperience(firestore, experienceId, updateData);
+        await updateExperience(firestore, user, experienceId, updateData);
         toast({
             title: "Experience Updated!",
             description: "Your changes have been saved successfully.",
@@ -225,10 +224,10 @@ export default function EditExperiencePage() {
   };
   
   const onDelete = async () => {
-    if (!firestore) return;
+    if (!firestore || !user) return;
     setIsDeleting(true);
     try {
-      await deleteExperienceForHost(firestore, experienceId);
+      await deleteExperienceForHost(firestore, user, experienceId);
       toast({
         title: "Experience Deleted",
         description: `"${experience?.title}" has been permanently removed.`,
@@ -488,4 +487,4 @@ export default function EditExperiencePage() {
   );
 }
 
-
+    
