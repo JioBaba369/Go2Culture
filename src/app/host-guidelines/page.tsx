@@ -31,15 +31,15 @@ export default function HostGuidelinesPage() {
                      <li className="flex items-start gap-4">
                         <Shield className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                         <div>
-                            <h4 className="font-semibold text-foreground">Prioritize Safety & Hygiene</h4>
+                            <h4 className="font-semibold text-foreground">Prioritise Safety & Hygiene</h4>
                             <p>Maintain a clean and safe environment for your guests. You are solely responsible for complying with all local laws, including food safety and hygiene regulations. Disclose any potential allergens and house rules (e.g., pets, smoking) clearly in your listing.</p>
                         </div>
                     </li>
                      <li className="flex items-start gap-4">
                         <Calendar className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
                         <div>
-                            <h4 className="font-semibold text-foreground">Honor Your Commitments</h4>
-                            <p>Keep your calendar up to date and honor all confirmed bookings. Cancellations should only occur in cases of genuine emergencies, as they significantly impact guest plans and trust in the platform.</p>
+                            <h4 className="font-semibold text-foreground">Honour Your Commitments</h4>
+                            <p>Keep your calendar up to date and honour all confirmed bookings. Cancellations should only occur in cases of genuine emergencies, as they significantly impact guest plans and trust in the platform.</p>
                         </div>
                     </li>
                      <li className="flex items-start gap-4">
@@ -70,13 +70,13 @@ export default function HostGuidelinesPage() {
                 </ul>
 
                 <h2 className="font-headline text-2xl font-bold text-foreground pt-4">4. Content & Licensing</h2>
-                 <p>When you upload content (text, photos, videos) to Go2Culture, you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, display, and distribute this content for marketing and promotional purposes for the platform. You retain ownership of your content, but you affirm you have the rights to grant us this license.</p>
+                 <p>When you upload content (text, photos, videos) to Go2Culture, you grant us a worldwide, non-exclusive, royalty-free licence to use, reproduce, display, and distribute this content for marketing and promotional purposes for the platform. You retain ownership of your content, but you affirm you have the rights to grant us this licence.</p>
 
                  <h2 className="font-headline text-2xl font-bold text-foreground pt-4">5. Liability & Insurance</h2>
                  <p>You are responsible for your own conduct and the safety of your experience. By hosting, you agree to release and indemnify Go2Culture from any claims, damages, or liabilities arising from your experience. As stated in our <Link href="/trust-and-safety" className="text-primary hover:underline">Trust & Safety</Link> policy, hosts are required to maintain their own adequate insurance, such as homeowner's or renter's insurance that covers commercial hosting activities.</p>
 
                 <h2 className="font-headline text-2xl font-bold text-foreground pt-4">6. Termination</h2>
-                <p>You may unlist your experiences and cease hosting at any time. Go2Culture reserves the right to suspend or terminate your account and listings if you violate this Agreement, our Terms of Service, or fail to meet our community standards. You are still required to honor any bookings that were confirmed prior to termination.</p>
+                <p>You may unlist your experiences and cease hosting at any time. Go2Culture reserves the right to suspend or terminate your account and listings if you violate this Agreement, our Terms of Service, or fail to meet our community standards. You are still required to honour any bookings that were confirmed prior to termination.</p>
 
                  <div className="text-center pt-8 text-sm text-muted-foreground">
                     <p>Failure to adhere to this agreement may result in a warning, listing suspension, or permanent removal from the Go2Culture platform.</p>

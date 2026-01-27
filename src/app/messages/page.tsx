@@ -103,9 +103,9 @@ function ConversationList({ selectedConversationId }: { selectedConversationId: 
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-8">
         <MessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-xl font-semibold">You have no conversations</h2>
+        <h2 className="text-xl font-semibold">Your Inbox is Empty</h2>
         <p className="mt-2 text-muted-foreground max-w-xs">
-          Once a host confirms your booking, your conversations will appear here.
+          Once a host confirms your booking, your conversation will appear here.
         </p>
         <div className="mt-6 flex flex-col sm:flex-row gap-4">
           <Button asChild>
@@ -340,7 +340,7 @@ function MessagesPageContent() {
               <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 gap-4">
                 <MessageSquare className="h-16 w-16" />
                 <div className='max-w-xs'>
-                  <h2 className="text-xl font-semibold">Your Messages</h2>
+                  <h2 className="text-xl font-semibold">Your Inbox</h2>
                   <p>Choose a conversation from the list to start chatting.</p>
                 </div>
               </div>
@@ -359,7 +359,7 @@ function MessagesPageContent() {
 export default function MessagesPage() {
     return (
         <div className="py-8">
-            <h1 className="font-headline text-4xl font-bold mb-6">Messages</h1>
+            <h1 className="font-headline text-4xl font-bold mb-6">Inbox</h1>
             <Suspense fallback={<div className="flex h-[calc(100vh-12rem)] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
                 <MessagesPageContent />
             </Suspense>

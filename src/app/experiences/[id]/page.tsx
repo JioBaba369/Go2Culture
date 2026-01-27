@@ -1,3 +1,4 @@
+
 'use client';
 
 import { forwardRef, useState } from "react";
@@ -188,10 +189,10 @@ export default function ExperienceDetailPage() {
 
           {/* WHAT YOU'LL DO */}
           <div className="space-y-4">
-            <h3 className="font-headline text-2xl">What you'll do</h3>
+            <h3 className="font-headline text-2xl">What You'll Do</h3>
             <div className="flex items-start gap-4">
               <Utensils className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
-              <p>You'll be welcomed into {host.name}'s home for a truly local experience. Share stories, learn about their culture, and enjoy a delicious, authentic meal prepared with love.</p>
+              <p>You'll be welcomed into {host.name}'s home for an experience that's truly local. It's a chance to share stories, learn about their culture, and enjoy a delicious, authentic meal prepared with love.</p>
             </div>
           </div>
           <Separator />
@@ -200,7 +201,7 @@ export default function ExperienceDetailPage() {
           <div className="space-y-4">
             <h3 className="font-headline text-2xl flex items-center gap-3">
               <Utensils className="h-6 w-6 text-primary" />
-              On the Menu
+              What's on the Menu
             </h3>
             <p className="italic text-muted-foreground">"{experience.menu.description}"</p>
             <div className="flex flex-wrap gap-4">
@@ -215,19 +216,19 @@ export default function ExperienceDetailPage() {
           <div className="space-y-4">
             <h3 className="font-headline text-2xl flex items-center gap-3">
                 <AlertTriangle className="h-7 w-7 text-warning"/>
-                Allergen Information
+                A Note on Allergens
             </h3>
             <Alert variant="warning">
-              <AlertTitle className="font-bold">Important Notice</AlertTitle>
+              <AlertTitle className="font-bold">A Friendly Notice</AlertTitle>
               <AlertDescription className="space-y-4">
-                <p>Please be aware that this food is prepared in a home kitchen where allergens are handled, and cross-contact may occur. We cannot guarantee an allergen-free environment.</p>
+                <p>Please be aware that this food is prepared in a home kitchen where allergens may be present, and we can't guarantee an allergen-free environment.</p>
                 {experience.menu.allergens && (
                   <div className="p-4 bg-warning/10 rounded-md">
-                    <p className="font-semibold text-warning">Host-declared potential allergens:</p>
+                    <p className="font-semibold text-warning">The host has noted the following potential allergens:</p>
                     <p className="text-sm mt-2 whitespace-pre-line">{experience.menu.allergens}</p>
                   </div>
                 )}
-                <p className="font-semibold">Guests with food allergies or intolerances are strongly advised to contact the host before booking to discuss their specific needs.</p>
+                <p className="font-semibold">If you have any food allergies or intolerances, we strongly advise you to contact the host before booking to chat about your needs.</p>
               </AlertDescription>
             </Alert>
           </div>
@@ -235,7 +236,7 @@ export default function ExperienceDetailPage() {
 
           {/* HOME SETUP */}
           <div className="space-y-4">
-            <h3 className="font-headline text-2xl">About your host's home</h3>
+            <h3 className="font-headline text-2xl">About Your Host's Home</h3>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <AmenityItem icon={Home}>{host.homeSetup.homeType} with {host.homeSetup.seating} seating</AmenityItem>
                 {host.homeSetup.pets && <AmenityItem icon={Dog}>Pets are welcome</AmenityItem>}
@@ -291,7 +292,7 @@ export default function ExperienceDetailPage() {
           {host.profile.achievements && host.profile.achievements.length > 0 && (
             <>
               <div className="space-y-4">
-                <h3 className="font-headline text-2xl">Host Achievements</h3>
+                <h3 className="font-headline text-2xl">From the Host</h3>
                 <div className="flex flex-wrap gap-2">
                   {host.profile.achievements.map((achievement) => (
                     <Badge key={achievement} variant="outline" className="text-base font-normal py-1">
@@ -309,13 +310,13 @@ export default function ExperienceDetailPage() {
           <div className="space-y-4">
             <h3 className="font-headline text-2xl flex items-center gap-3">
               <MapPin className="h-6 w-6 text-primary" />
-              Where you'll be
+              Where You'll Be
             </h3>
             <div className="text-muted-foreground">{localAreaName}, {suburbName}, {countryName}</div>
             <div className="relative aspect-video w-full rounded-lg bg-muted mt-2">
                 <ExperienceMap locationQuery={`${localAreaName}, {suburbName}, ${countryName}`} />
             </div>
-            <p className="text-sm text-muted-foreground">This is an approximate location. The exact address is provided after booking.</p>
+            <p className="text-sm text-muted-foreground">This is an approximate location to give you an idea. The exact address is provided after you book.</p>
           </div>
           <Separator />
           

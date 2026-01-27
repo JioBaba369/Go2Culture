@@ -61,7 +61,7 @@ export function FeaturedCitiesSection() {
 
     return (
         <section>
-            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Featured Cities</h2>
+            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Explore Our Cities</h2>
             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto text-center">Discover authentic experiences in our most popular destinations.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
             {isLoading ? (

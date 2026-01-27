@@ -47,7 +47,7 @@ function ContactForm() {
     console.log(values);
     toast({
       title: "Message Sent!",
-      description: "Thanks for reaching out. We'll get back to you shortly.",
+      description: "Thanks for reaching out! We'll get back to you as soon as we can.",
     });
     form.reset({name: '', email: '', subject: subjectFromQuery || '', message: ''});
   }
@@ -55,8 +55,8 @@ function ContactForm() {
   return (
       <Card>
           <CardHeader>
-              <CardTitle>Send us a Message</CardTitle>
-              <CardDescription>Directly contact our support team.</CardDescription>
+              <CardTitle>Send a Message</CardTitle>
+              <CardDescription>The best way to contact our support team.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -66,7 +66,7 @@ function ContactForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>Your Full Name</FormLabel>
                       <FormControl>
                         <Input placeholder="John Doe" {...field} />
                       </FormControl>
@@ -96,7 +96,7 @@ function ContactForm() {
                         <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value} disabled={!!subjectFromQuery}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a reason for contacting us" />
+                              <SelectValue placeholder="What can we help you with?" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -104,10 +104,10 @@ function ContactForm() {
                              <SelectItem value={subjectFromQuery}>{subjectFromQuery}</SelectItem>
                           ) : (
                             <>
-                              <SelectItem value="General Inquiry">General Inquiry</SelectItem>
-                              <SelectItem value="Booking Help">Booking Help</SelectItem>
-                              <SelectItem value="Hosting Question">Hosting Question</SelectItem>
-                              <SelectItem value="Feedback & Suggestions">Feedback & Suggestions</SelectItem>
+                              <SelectItem value="General Inquiry">General Question</SelectItem>
+                              <SelectItem value="Booking Help">Help with a Booking</SelectItem>
+                              <SelectItem value="Hosting Question">A Question About Hosting</SelectItem>
+                              <SelectItem value="Feedback & Suggestions">Feedback and Suggestions</SelectItem>
                             </>
                           )}
                         </SelectContent>
@@ -123,13 +123,13 @@ function ContactForm() {
                     <FormItem>
                       <FormLabel>Message</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Tell us more..." className="min-h-[120px]" {...field} />
+                        <Textarea placeholder="How can we help?..." className="min-h-[120px]" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Send Message</Button>
+                <Button type="submit">Send Your Message</Button>
               </form>
             </Form>
           </CardContent>
@@ -141,16 +141,16 @@ export default function ContactPage() {
   return (
     <div className="py-12">
       <div className="text-center">
-        <h1 className="font-headline text-4xl md:text-5xl font-bold">Contact Us</h1>
+        <h1 className="font-headline text-4xl md:text-5xl font-bold">Get in Touch</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-          Have a question or feedback? We'd love to hear from you.
+          Have a question or some feedback for us? We'd love to hear from you.
         </p>
       </div>
 
       <div className="max-w-6xl mx-auto mt-12 grid md:grid-cols-2 gap-12">
         <div>
-           <h2 className="font-headline text-3xl font-bold">Get in Touch</h2>
-           <p className="text-muted-foreground mt-2">Fill out the form, and our team will get back to you within 24 hours.</p>
+           <h2 className="font-headline text-3xl font-bold">How to Reach Us</h2>
+           <p className="text-muted-foreground mt-2">Fill out the form below, and our friendly team will get back to you within 24 hours.</p>
             <div className="mt-8 space-y-4">
                 <div className="flex items-center gap-4">
                     <Mail className="h-6 w-6 text-primary" />
@@ -166,7 +166,7 @@ export default function ContactPage() {
                 </div>
             </div>
         </div>
-        <Suspense fallback={<Card><CardHeader><CardTitle>Send us a Message</CardTitle><CardDescription>Directly contact our support team.</CardDescription></CardHeader><CardContent><p>Loading form...</p></CardContent></Card>}>
+        <Suspense fallback={<Card><CardHeader><CardTitle>Send a Message</CardTitle><CardDescription>The best way to contact our support team.</CardDescription></CardHeader><CardContent><p>Loading form...</p></CardContent></Card>}>
           <ContactForm />
         </Suspense>
       </div>

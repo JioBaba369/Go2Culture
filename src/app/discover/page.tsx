@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, Suspense, useEffect } from 'react';
@@ -240,9 +241,9 @@ function DiscoverPageContent() {
   return (
     <div className="py-12">
       <div className="text-center">
-        <h1 className="font-headline text-4xl md:text-5xl font-bold">Discover Experiences</h1>
+        <h1 className="font-headline text-4xl md:text-5xl font-bold">Discover Your Next Experience</h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-          Find your next unforgettable cultural dining experience.
+          Find your next unforgettable meal and connection.
         </p>
       </div>
       
@@ -258,11 +259,11 @@ function DiscoverPageContent() {
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" className="w-full">
-                  <Filter className="mr-2 h-4 w-4" /> Show Filters
+                  <Filter className="mr-2 h-4 w-4" /> Filters
                 </Button>
               </SheetTrigger>
               <SheetContent className="overflow-y-auto">
-                <SheetHeader><SheetTitle>Filter Results</SheetTitle></SheetHeader>
+                <SheetHeader><SheetTitle>Filter Experiences</SheetTitle></SheetHeader>
                 <div className="mt-4">{filtersJsx}</div>
               </SheetContent>
             </Sheet>
@@ -275,7 +276,7 @@ function DiscoverPageContent() {
             </div>
           )}
 
-          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {liveExperiences.length || 0} experiences.</p>
+          <p className="text-muted-foreground mb-4">Showing {filteredExperiences.length} of {liveExperiences.length || 0} unique experiences.</p>
           {areExperiencesLoading ? (
              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -294,8 +295,8 @@ function DiscoverPageContent() {
             </div>
           ) : (
             <Card className="flex flex-col items-center justify-center text-center p-12 h-96">
-                <h3 className="text-xl font-semibold">No Experiences Found</h3>
-                <p className="text-muted-foreground mt-2">Try adjusting your filters to find more results.</p>
+                <h3 className="text-xl font-semibold">No Experiences Matched</h3>
+                <p className="text-muted-foreground mt-2">Try adjusting your filters or broadening your search to find more results.</p>
             </Card>
           )}
         </main>

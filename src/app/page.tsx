@@ -60,10 +60,10 @@ export default function Home() {
       <section className="bg-card rounded-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
         <div className="md:w-1/2">
           <Award className="h-12 w-12 text-accent mb-4"/>
-          <h2 className="font-headline text-3xl md:text-4xl font-semibold">Share Your Culture. Become a Host.</h2>
-          <p className="mt-4 text-muted-foreground max-w-xl">Open your home to travelers and locals, share your passion for food and culture, and earn on your own schedule. Join our global community of hosts today.</p>
+          <h2 className="font-headline text-3xl md:text-4xl font-semibold">Share Your Story. Become a Host.</h2>
+          <p className="mt-4 text-muted-foreground max-w-xl">Open your door to travellers and locals, share your passion for food and culture, and earn an income on your own terms. Join our global community of hosts and start sharing your story.</p>
           <Button size="lg" className="mt-6" asChild>
-            <Link href="/become-a-host">Learn More & Apply</Link>
+            <Link href="/become-a-host">Learn More About Hosting</Link>
           </Button>
         </div>
         <div className="w-full md:w-1/2 h-64 md:h-80 relative rounded-lg overflow-hidden">

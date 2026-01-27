@@ -12,21 +12,21 @@ export function HowItWorksSection() {
                 <Search className="h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold font-headline">Discover</h3>
-                <p className="text-muted-foreground mt-2">Find unique cultural experiences hosted by passionate locals in their homes.</p>
+                <p className="text-muted-foreground mt-2">Find one-of-a-kind cultural experiences hosted by passionate locals in their own homes.</p>
             </div>
             <div className="flex flex-col items-center">
                 <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                 <HomeIcon className="h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold font-headline">Book Securely</h3>
-                <p className="text-muted-foreground mt-2">Choose your date, book your seat, and connect with your host through our trusted platform.</p>
+                <p className="text-muted-foreground mt-2">Pick a date, book your spot, and get to know your host through our secure platform.</p>
             </div>
             <div className="flex flex-col items-center">
                 <div className="bg-primary/10 text-primary rounded-full p-4 mb-4">
                 <Users className="h-8 w-8" />
                 </div>
                 <h3 className="text-xl font-bold font-headline">Experience</h3>
-                <p className="text-muted-foreground mt-2">Share a meal, stories, and traditions. It's more than travel, it's connection.</p>
+                <p className="text-muted-foreground mt-2">Share a meal, swap stories, and create memories. This is more than just travel—it’s connection.</p>
             </div>
             </div>
         </section>

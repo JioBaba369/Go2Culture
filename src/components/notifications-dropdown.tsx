@@ -19,7 +19,7 @@ function getNotificationDetails(notification: Notification): { icon: React.Eleme
         case 'BOOKING_CONFIRMED':
             return {
                 icon: CalendarCheck,
-                message: "A booking has been confirmed.",
+                message: "A booking has been confirmed. Your host is waiting!",
                 link: `/profile/bookings`
             };
         case 'BOOKING_REQUESTED':
@@ -43,7 +43,7 @@ function getNotificationDetails(notification: Notification): { icon: React.Eleme
         case 'HOST_APPROVED':
             return {
                 icon: Star,
-                message: "Congratulations, you're now a host!",
+                message: "Congratulations, you're now a host! Time to share your story.",
                 link: '/host/experiences'
             };
         case 'REVIEW_RECEIVED':
@@ -55,7 +55,7 @@ function getNotificationDetails(notification: Notification): { icon: React.Eleme
         case 'RESCHEDULE_REQUEST':
             return {
                 icon: CalendarCheck,
-                message: "You have a reschedule request.",
+                message: "A guest has requested to reschedule.",
                 link: '/host/bookings'
             };
         case 'RESCHEDULE_RESPONSE':
@@ -151,7 +151,7 @@ export function NotificationsDropdown() {
                     })
                 ) : (
                     <div className="p-4 text-center text-sm text-muted-foreground">
-                        All notifications loaded
+                        No new notifications right now.
                     </div>
                 )}
             </DropdownMenuContent>

@@ -295,5 +295,3 @@ export async function respondToReschedule(
     throw serverError;
   }
 }
-
-    

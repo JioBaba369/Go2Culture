@@ -65,12 +65,12 @@ const formSchema = z.object({
 type OnboardingFormValues = z.infer<typeof formSchema>;
 
 const steps = [
-    { id: 'Step 1', name: 'Experience Basics' },
-    { id: 'Step 2', name: 'About You' },
-    { id: 'Step 3', name: 'Location & Home Setup' },
-    { id: 'Step 4', name: 'Menu & Pricing' },
-    { id: 'Step 5', name: 'Media Upload' },
-    { id: 'Step 6', name: 'Final Review & Terms' },
+    { id: 'Step 1', name: 'The Experience' },
+    { id: 'Step 2', name: 'Your Story' },
+    { id: 'Step 3', name: 'Your Place' },
+    { id: 'Step 4', name: 'The Food' },
+    { id: 'Step 5', name: 'Photos' },
+    { id: 'Step 6', name: 'Final Details' },
 ];
 
 function HostApplicationStatus({ application }: { application: HostApplication }) {
@@ -358,19 +358,19 @@ export default function BecomeAHostPage() {
     return (
       <div className="flex flex-col items-center justify-center text-center py-20">
         <PartyPopper className="h-16 w-16 text-green-500 mb-4" />
-        <h1 className="font-headline text-4xl font-bold">Congratulations! Your application has been sent!</h1>
+        <h1 className="font-headline text-4xl font-bold">Congratulations! Your story is on its way to us.</h1>
         <p className="mt-4 text-muted-foreground max-w-2xl">
-          Our Community Team will review your application and keep you updated via email.
+          Our community team will carefully read your application and be in touch via email soon.
         </p>
         <Card className="mt-8 text-left max-w-md">
             <CardHeader>
-                <CardTitle>What's next?</CardTitle>
+                <CardTitle>What happens next?</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
-                <p><strong>Wait for Approval:</strong> Our team reviews every application for quality.</p>
-                <p><strong>Get the Green Light:</strong> Receive a formal welcome and dashboard access.</p>
-                <p><strong>Create Your Experience:</strong> Build your profile and describe your unique culture.</p>
-                <p><strong>Go Live:</strong> Update your calendar and start hosting!</p>
+                <p><strong>We Read Your Story:</strong> Our team personally reviews every application.</p>
+                <p><strong>You're Approved:</strong> You'll get a formal welcome and access to your Host Dashboard.</p>
+                <p><strong>Refine Your Listing:</strong> Add photos and fine-tune the details of your experience.</p>
+                <p><strong>Go Live:</strong> Open up your calendar and get ready to welcome your first guests!</p>
             </CardContent>
         </Card>
       </div>
@@ -380,9 +380,9 @@ export default function BecomeAHostPage() {
   return (
     <div className="py-12">
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="font-headline text-4xl md:text-5xl font-bold">Host Application</h1>
+        <h1 className="font-headline text-4xl md:text-5xl font-bold">Share Your Story</h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Join our community of hosts by completing the {steps.length} steps below.
+          We're excited to hear your story. Just follow these {steps.length} steps to start your journey as a host.
         </p>
       </div>
 
@@ -396,10 +396,10 @@ export default function BecomeAHostPage() {
 
             {currentStep === 0 && (
                 <Card>
-                    <CardHeader><CardTitle>1. Experience Basics</CardTitle><CardDescription>Tell us about the experience you want to create.</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>1. The Experience</CardTitle><CardDescription>Tell us about the experience you want to create.</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
                          <FormField control={methods.control} name="category" render={({ field }) => (
-                            <FormItem><FormLabel>What is the category of your experience?</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category..."/></SelectTrigger></FormControl><SelectContent>
+                            <FormItem><FormLabel>What kind of experience are you creating?</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a category..."/></SelectTrigger></FormControl><SelectContent>
                                 <SelectItem value="In-Home Dining">In-Home Dining</SelectItem>
                                 <SelectItem value="Cooking Class">Cooking Class</SelectItem>
                                 <SelectItem value="Special Event">Special Event</SelectItem>
@@ -409,13 +409,13 @@ export default function BecomeAHostPage() {
                             </SelectContent></Select><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="experienceTitle" render={({ field }) => (
-                            <FormItem><FormLabel>Give your experience a title</FormLabel><FormControl><Input placeholder="e.g., Authentic Pasta Making with Nonna's Recipes" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>What's the name of your experience?</FormLabel><FormControl><Input placeholder="e.g., Authentic Pasta Making with Nonna's Recipes" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="experienceDescription" render={({ field }) => (
-                            <FormItem><FormLabel>Describe the experience</FormLabel><FormDescription>What should guests expect? What is the atmosphere? Why is it special?</FormDescription><FormControl><Textarea rows={5} {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Tell us about your experience</FormLabel><FormDescription>What should guests expect? What is the atmosphere? Why is it special?</FormDescription><FormControl><Textarea rows={5} {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="durationMinutes" render={({ field }) => (
-                            <FormItem><FormLabel>Estimated duration (in minutes)</FormLabel><FormControl><Input type="number" placeholder="e.g., 180" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>How long will it run for (in minutes)?</FormLabel><FormControl><Input type="number" placeholder="e.g., 180" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                     </CardContent>
                 </Card>
@@ -423,19 +423,19 @@ export default function BecomeAHostPage() {
 
             {currentStep === 1 && (
                  <Card>
-                    <CardHeader><CardTitle>2. About You</CardTitle><CardDescription>Help guests get to know their future host.</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>2. Your Story</CardTitle><CardDescription>Help guests get to know their future host.</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
                         <FormField control={methods.control} name="hostingExperienceLevel" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>Which best describes you?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="passionate" /></FormControl><FormLabel className="font-normal">I'm a passionate home cook</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="professional" /></FormControl><FormLabel className="font-normal">I'm a professional chef or have culinary training</FormLabel></FormItem>
+                            <FormItem className="space-y-3"><FormLabel>How would you describe yourself?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="passionate" /></FormControl><FormLabel className="font-normal">I'm a passionate home cook with a story to tell</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="professional" /></FormControl><FormLabel className="font-normal">I'm a professional chef with culinary training</FormLabel></FormItem>
                             </RadioGroup></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="expertise" render={({ field }) => (
-                            <FormItem><FormLabel>Describe your culinary background and expertise</FormLabel><FormDescription>E.g., "I learned to cook from my grandmother in Naples...", "I trained at Le Cordon Bleu...", "I've been hosting pop-up dinners for 5 years..."</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Tell us about your background and what makes your cooking special</FormLabel><FormDescription>E.g., "I learned to cook from my grandmother in Naples...", "I trained at Le Cordon Bleu...", "I've been hosting pop-up dinners for 5 years..."</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                          <FormField control={methods.control} name="bio" render={({ field }) => (
-                            <FormItem><FormLabel>Your Host Bio</FormLabel><FormDescription>Tell guests a little about yourself, your story, and your passion for your culture.</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Your Story</FormLabel><FormDescription>Help guests get to know you. What's your story? What drives your passion for your culture?</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                     </CardContent>
                 </Card>
@@ -443,13 +443,13 @@ export default function BecomeAHostPage() {
 
             {currentStep === 2 && (
                 <Card>
-                    <CardHeader><CardTitle>3. Location & Home Setup</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>3. Your Place</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
                         <FormField control={methods.control} name="hostingLocation" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>Where will you host?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="My home" /></FormControl><FormLabel className="font-normal">My home</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Event space" /></FormControl><FormLabel className="font-normal">A rented space</FormLabel></FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Other" /></FormControl><FormLabel className="font-normal">Other</FormLabel></FormItem>
+                            <FormItem className="space-y-3"><FormLabel>Where will the experience take place?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="My home" /></FormControl><FormLabel className="font-normal">At my place</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Event space" /></FormControl><FormLabel className="font-normal">In a rented space</FormLabel></FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Other" /></FormControl><FormLabel className="font-normal">Somewhere else</FormLabel></FormItem>
                             </RadioGroup></FormControl><FormMessage /></FormItem>
                         )}/>
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -469,16 +469,16 @@ export default function BecomeAHostPage() {
                             )} />
                         </div>
                         <FormField control={methods.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Street Address</FormLabel><FormDescription>The exact address is only shared after a booking is confirmed.</FormDescription><FormControl><Input placeholder="e.g., 123 Main St" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Your street address</FormLabel><FormDescription>Don't worry, we'll only share the exact address after a booking is confirmed.</FormDescription><FormControl><Input placeholder="e.g., 123 Main St" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={methods.control} name="postcode" render={({ field }) => (
                             <FormItem><FormLabel>Postcode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                          <FormField control={methods.control} name="maxGuests" render={({ field }) => (
-                            <FormItem><FormLabel>Maximum number of guests</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>How many guests can you welcome?</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="accessibility" render={({ field }) => (
-                            <FormItem><FormLabel>Accessibility Information</FormLabel><FormDescription>e.g., "Ground floor access", "Two steps to enter", "Elevator in building"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Anything to know about accessibility?</FormLabel><FormDescription>e.g., "Ground floor access", "Two steps to enter", "Elevator in building"</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                     </CardContent>
                 </Card>
@@ -486,16 +486,16 @@ export default function BecomeAHostPage() {
 
              {currentStep === 3 && (
                 <Card>
-                    <CardHeader><CardTitle>4. Menu & Pricing</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>4. The Food</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
                         <FormField control={methods.control} name="menuCuisine" render={({ field }) => (
-                            <FormItem><FormLabel>Cuisine Type</FormLabel><FormControl><Input placeholder="e.g., Italian, Thai, Lebanese" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>What type of cuisine will you be sharing?</FormLabel><FormControl><Input placeholder="e.g., Italian, Thai, Lebanese" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="menuDescription" render={({ field }) => (
-                            <FormItem><FormLabel>Describe your menu</FormLabel><FormDescription>What will you be serving your guests?</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Tell us about the delicious food you'll be serving.</FormLabel><FormDescription>What will you be serving your guests?</FormDescription><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="spiceLevel" render={({ field }) => (
-                            <FormItem className="space-y-3"><FormLabel>What is the spice level?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                            <FormItem className="space-y-3"><FormLabel>How spicy is the food?</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
                                 <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Mild" /></FormControl><FormLabel className="font-normal">Mild</FormLabel></FormItem>
                                 <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Medium" /></FormControl><FormLabel className="font-normal">Medium</FormLabel></FormItem>
                                 <FormItem className="flex items-center space-x-3 space-y-0"><FormControl><RadioGroupItem value="Spicy" /></FormControl><FormLabel className="font-normal">Spicy</FormLabel></FormItem>
@@ -505,7 +505,7 @@ export default function BecomeAHostPage() {
                             <FormItem><FormLabel>Dietary Options</FormLabel><FormDescription>List any dietary accommodations, separated by commas (e.g., Vegetarian, Gluten-Free).</FormDescription><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={methods.control} name="pricePerGuest" render={({ field }) => (
-                            <FormItem><FormLabel>Price per guest ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Your price per guest (AUD)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
                     </CardContent>
                 </Card>
@@ -513,9 +513,9 @@ export default function BecomeAHostPage() {
 
             {currentStep === 4 && (
                  <Card>
-                    <CardHeader><CardTitle>5. Media Upload</CardTitle><CardDescription>To build a trusted community, ensuring guests feel safe starts with your photos.</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>5. Photos</CardTitle><CardDescription>To build a community on trust, great photos help guests feel comfortable and excited.</CardDescription></CardHeader>
                     <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground">For now, we'll use placeholders. You'll be able to upload your own photos after your application is approved.</p>
+                        <p className="text-sm text-muted-foreground">We'll use some placeholder images for now. Once your application is approved, you can upload your own beautiful photos.</p>
                         <FormItem><FormLabel>Profile Picture</FormLabel><FormControl><Input type="file" disabled /></FormControl></FormItem>
                         <FormItem><FormLabel>Gallery (add a minimum of 4 photos)</FormLabel><FormControl><Input type="file" multiple disabled /></FormControl><FormDescription>Tip: High-quality photos of the location, dishes, and people enjoying themselves are key to attracting guests.</FormDescription></FormItem>
                     </CardContent>
@@ -524,7 +524,7 @@ export default function BecomeAHostPage() {
 
             {currentStep === 5 && (
                 <Card>
-                    <CardHeader><CardTitle>6. Final Review & Terms</CardTitle><CardDescription>Please review our terms and conditions before submitting.</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>6. Final Details</CardTitle><CardDescription>Just a few final details before you submit your application.</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
                         <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
                             <li><strong>Respect My Guests:</strong> I pledge to show no bias and foster an inclusive environment.</li>
@@ -558,7 +558,7 @@ export default function BecomeAHostPage() {
                     </Button>
                 ) : (
                     <Button type="submit" size="lg" disabled={isSubmitting}>
-                        {isSubmitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</>) : "Submit Application"}
+                        {isSubmitting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</>) : "Send My Application"}
                     </Button>
                 )}
             </div>
@@ -567,5 +567,3 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
-
-    

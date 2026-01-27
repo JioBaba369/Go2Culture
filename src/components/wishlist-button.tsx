@@ -38,7 +38,7 @@ export function WishlistButton({ experienceId, className }: WishlistButtonProps)
 
     if (!user) {
       toast({
-        title: 'Please log in',
+        title: 'Please Log In',
         description: 'You need to be logged in to save experiences to your wishlist.',
         variant: 'destructive',
       });

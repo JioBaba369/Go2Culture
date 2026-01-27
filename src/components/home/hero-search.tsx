@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -31,7 +32,7 @@ export function HeroSearch() {
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
             <Input
                 type="text"
-                placeholder="Search destinations, cuisines, or experiences..."
+                placeholder="Search by city, cuisine, or experience..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}

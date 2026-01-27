@@ -20,7 +20,7 @@ export function TestimonialsSection() {
 
     return (
         <section>
-            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">What Our Community is Saying</h2>
+            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Stories from Our Community</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 max-w-7xl mx-auto">
             {areReviewsLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
@@ -45,5 +45,3 @@ export function TestimonialsSection() {
         </section>
     );
 }
-
-    

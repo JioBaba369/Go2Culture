@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ReactNode } from 'react';
@@ -11,7 +12,7 @@ import React from 'react';
 const profileNavItems = [
   { href: '/profile', label: 'Account Settings', icon: User },
   { href: '/messages', label: 'Inbox', icon: MessageSquare },
-  { href: '/profile/bookings', label: 'My Reservations', icon: CalendarCheck },
+  { href: '/profile/bookings', label: 'My Bookings', icon: CalendarCheck },
   { href: '/profile/wishlist', label: 'My Wishlist', icon: Heart },
   { href: '/profile/referrals', label: 'Refer a Friend', icon: Wallet },
 ];

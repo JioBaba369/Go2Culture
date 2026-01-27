@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -14,7 +15,7 @@ const topSearches = [
 export function TopSearchesSection() {
     return (
         <section>
-            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Top Searches</h2>
+            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Popular Searches</h2>
             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto text-center">Get inspired by what others are looking for.</p>
             <div className="flex flex-wrap justify-center gap-4 mt-8">
                 {topSearches.map(search => (

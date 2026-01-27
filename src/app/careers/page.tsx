@@ -29,14 +29,14 @@ export default function CareersPage() {
     return (
         <div className="py-12">
             <div className="text-center">
-                <h1 className="font-headline text-4xl md:text-5xl font-bold">Work With Us</h1>
+                <h1 className="font-headline text-4xl md:text-5xl font-bold">Join Our Team</h1>
                 <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                    Join our mission to connect the world through food and culture. We're a passionate, remote-first team looking for talented people to help us grow.
+                    Help us on our mission to connect the world through food and culture. We're a passionate, remote-first team looking for talented people to help us build something special.
                 </p>
             </div>
 
             <div className="max-w-4xl mx-auto mt-12">
-                <h2 className="font-headline text-3xl font-bold">Open Positions</h2>
+                <h2 className="font-headline text-3xl font-bold">Current Openings</h2>
                 <div className="mt-6 space-y-4">
                     {openPositions.map((position) => (
                         <Card key={position.title}>
@@ -56,8 +56,8 @@ export default function CareersPage() {
                     ))}
                 </div>
                  <div className="text-center mt-12 bg-card p-8 rounded-lg">
-                    <h3 className="font-headline text-2xl font-bold">Don't see your role?</h3>
-                    <p className="mt-2 text-muted-foreground">We're always looking for great talent. Send us your resume and tell us how you can make a difference at Go2Culture.</p>
+                    <h3 className="font-headline text-2xl font-bold">Don't See the Right Fit?</h3>
+                    <p className="mt-2 text-muted-foreground">We're always looking for talented, passionate people. Send us your resume and tell us how you could make a difference at Go2Culture.</p>
                     <Button variant="outline" className="mt-4" asChild>
                         <Link href="/contact">Contact Us</Link>
                     </Button>
