@@ -508,7 +508,7 @@
                 "guests": { "type": "number" },
                 "serviceFee": { "type": "number" },
                 "total": { "type": "number" },
-                "currency": { "type": "string", "enum": ["AUD", "NZD", "USD"] }
+                "currency": { "type": "string", "enum": ["AUD"] }
             }
         },
         "policySnapshot": {
@@ -743,6 +743,10 @@
       "schema": { "$ref": "#/entities/Notification" },
       "description": "Stores user-specific notifications."
     },
+    "/users/{userId}/referredUsers/{referredUserId}": {
+      "schema": { "$ref": "#/entities/ReferredUser" },
+      "description": "Stores a list of users referred by this user. The document ID is the referredUserId."
+    },
     "/hostApplications/{applicationId}": {
       "schema": { "$ref": "#/entities/HostApplication" },
       "description": "Stores applications from users wanting to become hosts."
@@ -789,4 +793,3 @@
     }
   }
 }
-    
