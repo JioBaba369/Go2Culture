@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -134,36 +135,34 @@ export default function CareersPage() {
                                 return (
                                     <AccordionItem value={position.id} key={position.id} asChild>
                                         <Card>
-                                             <div className="flex items-center w-full p-6">
-                                                <AccordionTrigger className="flex-grow p-0 text-left hover:no-underline justify-start">
-                                                    <div className="flex-grow text-left">
-                                                        <h3 className="text-xl font-semibold">{position.title}</h3>
-                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
-                                                            <span className="flex items-center gap-2"><Icon className="h-4 w-4" /> {position.department}</span>
-                                                            <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {position.location}</span>
-                                                        </div>
+                                             <AccordionTrigger className="w-full p-6 text-left hover:no-underline">
+                                                <div className="flex-grow text-left">
+                                                    <h3 className="text-xl font-semibold">{position.title}</h3>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
+                                                        <span className="flex items-center gap-2"><Icon className="h-4 w-4" /> {position.department}</span>
+                                                        <span className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {position.location}</span>
                                                     </div>
-                                                </AccordionTrigger>
-                                                <Dialog open={selectedJob?.id === position.id} onOpenChange={(isOpen) => !isOpen && setSelectedJob(null)}>
-                                                    <DialogTrigger asChild>
-                                                        <Button className="ml-4 shrink-0" onClick={() => setSelectedJob(position)}>
-                                                            Apply Now
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>Apply for {position.title}</DialogTitle>
-                                                            <DialogDescription>
-                                                                Submit your application to Go2Culture. We're excited to hear from you.
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <ApplicationForm job={position} onFinished={() => setSelectedJob(null)} />
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </div>
+                                                </div>
+                                            </AccordionTrigger>
                                             <AccordionContent>
-                                                <div className="px-6 pb-6 prose-sm max-w-none text-muted-foreground whitespace-pre-line">
-                                                    {position.description}
+                                                <div className="px-6 pb-6 prose-sm max-w-none text-muted-foreground whitespace-pre-line space-y-6">
+                                                    <p>{position.description}</p>
+                                                    <Dialog open={selectedJob?.id === position.id} onOpenChange={(isOpen) => !isOpen && setSelectedJob(null)}>
+                                                        <DialogTrigger asChild>
+                                                            <Button onClick={() => setSelectedJob(position)}>
+                                                                Apply Now
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Apply for {position.title}</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Submit your application to Go2Culture. We're excited to hear from you.
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <ApplicationForm job={position} onFinished={() => setSelectedJob(null)} />
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </div>
                                             </AccordionContent>
                                         </Card>
