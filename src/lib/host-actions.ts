@@ -225,4 +225,44 @@ export async function deleteExperienceForHost(
   }
 }
 
-    
+export async function respondToReschedule(
+  firestore: Firestore,
+  bookingId: string,
+  accepted: boolean
+) {
+  const bookingRef = doc(firestore, 'bookings', bookingId);
+  const bookingSnap = await getDoc(bookingRef);
+  if (!bookingSnap.exists()) throw new Error("Booking not found");
+
+  const booking = bookingSnap.data() as Booking;
+  if (!booking.rescheduleRequest) throw new Error("No reschedule request found.");
+
+  let updatedData: any;
+  if (accepted) {
+    updatedData = {
+      bookingDate: booking.rescheduleRequest.newDate,
+      'rescheduleRequest.status': 'accepted',
+    };
+  } else {
+    updatedData = {
+      'rescheduleRequest.status': 'declined',
+    };
+  }
+
+  try {
+    await updateDoc(bookingRef, updatedData);
+    await createNotification(
+      firestore,
+      booking.guestId,
+      `Your reschedule request for "${booking.experienceTitle}" was ${accepted ? 'accepted' : 'declined'}.`,
+      '/profile/bookings'
+    );
+  } catch (serverError) {
+    errorEmitter.emit('permission-error', new FirestorePermissionError({
+      path: bookingRef.path,
+      operation: 'update',
+      requestResourceData: updatedData,
+    }));
+    throw serverError;
+  }
+}

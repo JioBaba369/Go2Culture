@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useMemo } from 'react';
 import {
@@ -25,9 +26,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useDoc } from '@/firebase/firestore/use-doc';
-import { cancelBookingByHost, confirmBooking } from '@/lib/host-actions';
+import { cancelBookingByHost, confirmBooking, respondToReschedule } from '@/lib/host-actions';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Loader2, MessageSquare, MoreHorizontal, X } from 'lucide-react';
+import { Check, Loader2, MessageSquare, Hourglass, X } from 'lucide-react';
 import Link from 'next/link';
 
 const statusVariantMap: Record<
@@ -47,7 +48,7 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
     [firestore, booking.guestId]
   );
   const { data: guest, isLoading } = useDoc<User>(guestRef);
-  const [isProcessing, setProcessing] = useState<null | 'confirm' | 'cancel'>(null);
+  const [isProcessing, setProcessing] = useState<null | 'confirm' | 'cancel' | 'respond'>(null);
   const { toast } = useToast();
 
   const handleConfirm = async () => {
@@ -74,6 +75,18 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
     setProcessing(null);
   }
 
+  const handleRespondToReschedule = async (accept: boolean) => {
+    setProcessing('respond');
+    try {
+        await respondToReschedule(firestore, booking.id, accept);
+        toast({ title: `Request ${accept ? 'Accepted' : 'Declined'}!` });
+        onAction(); // refetch
+    } catch(e) {
+        toast({ title: "Error", description: "Could not respond to request.", variant: "destructive" });
+    }
+    setProcessing(null);
+  }
+
   if (isLoading || !guest) {
     return (
       <TableRow>
@@ -87,6 +100,7 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
   const guestImage = PlaceHolderImages.find(p => p.id === guest.profilePhotoId);
 
   return (
+    <>
      <TableRow>
       <TableCell className="font-medium">{booking.experienceTitle}</TableCell>
       <TableCell>
@@ -128,6 +142,23 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
         </div>
       </TableCell>
     </TableRow>
+    {booking.rescheduleRequest?.status === 'pending' && (
+      <TableRow>
+          <TableCell colSpan={7} className="p-0">
+              <div className="bg-amber-50 dark:bg-amber-950 p-3 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                      <Hourglass className="h-4 w-4" />
+                      <span className="text-sm font-semibold">Reschedule requested for {format(booking.rescheduleRequest.newDate.toDate(), 'PPP')}</span>
+                  </div>
+                  <div className="flex gap-2">
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleRespondToReschedule(true)} disabled={isProcessing === 'respond'}>Accept</Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleRespondToReschedule(false)} disabled={isProcessing === 'respond'}>Decline</Button>
+                  </div>
+              </div>
+          </TableCell>
+      </TableRow>
+    )}
+    </>
   )
 }
 
@@ -140,7 +171,7 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
   );
   const { data: guest, isLoading } = useDoc<User>(guestRef);
   const { toast } = useToast();
-  const [isProcessing, setProcessing] = useState<null | 'confirm' | 'cancel'>(null);
+  const [isProcessing, setProcessing] = useState<null | 'confirm' | 'cancel' | 'respond'>(null);
 
   const handleConfirm = async () => {
     setProcessing('confirm');
@@ -162,6 +193,18 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
         onAction();
     } catch(e) {
         toast({ title: "Error", description: "Could not cancel booking.", variant: "destructive" });
+    }
+    setProcessing(null);
+  }
+
+  const handleRespondToReschedule = async (accept: boolean) => {
+    setProcessing('respond');
+    try {
+        await respondToReschedule(firestore, booking.id, accept);
+        toast({ title: `Request ${accept ? 'Accepted' : 'Declined'}!` });
+        onAction();
+    } catch(e) {
+        toast({ title: "Error", description: "Could not respond to request.", variant: "destructive" });
     }
     setProcessing(null);
   }
@@ -194,6 +237,18 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
           <span>{booking.bookingDate?.toDate ? format(booking.bookingDate.toDate(), 'PP') : 'N/A'}</span>
           <span className="font-bold text-foreground">${booking.totalPrice}</span>
         </div>
+        {booking.rescheduleRequest?.status === 'pending' && (
+           <div className="bg-amber-50 dark:bg-amber-950 p-3 flex flex-col gap-2 mt-4 rounded-md">
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                    <Hourglass className="h-4 w-4" />
+                    <span className="text-sm font-semibold">Reschedule requested for {format(booking.rescheduleRequest.newDate.toDate(), 'PPP')}</span>
+                </div>
+                <div className="flex gap-2">
+                    <Button size="sm" className="w-full bg-green-600 hover:bg-green-700" onClick={() => handleRespondToReschedule(true)} disabled={isProcessing === 'respond'}>Accept</Button>
+                    <Button size="sm" variant="destructive" className="w-full" onClick={() => handleRespondToReschedule(false)} disabled={isProcessing === 'respond'}>Decline</Button>
+                </div>
+            </div>
+        )}
       </CardContent>
       {booking.status === 'Pending' && isFuture(booking.bookingDate.toDate()) && (
         <CardContent className="p-4 border-t flex gap-2">

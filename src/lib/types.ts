@@ -196,6 +196,12 @@ export type Booking = {
   totalPrice: number;
   status: 'Pending' | 'Confirmed' | 'Cancelled';
   cancellationReason?: string;
+  rescheduleRequest?: {
+    requestedBy: string;
+    newDate: any; // Allow ServerTimestamp
+    status: 'pending' | 'accepted' | 'declined';
+    createdAt: any; // Allow ServerTimestamp
+  };
   createdAt: any; // Allow ServerTimestamp
   couponId?: string;
   discountAmount?: number;
@@ -371,5 +377,3 @@ export type Sponsor = {
   isActive: boolean;
   createdAt: any;
 };
-
-    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -9,19 +10,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format, isPast } from 'date-fns';
 
-import { Loader2, Star, ThumbsUp, MessageSquare, X } from 'lucide-react';
-import type { Booking, Experience, Review, User } from '@/lib/types';
+import { Loader2, Star, ThumbsUp, MessageSquare, X, Hourglass, CalendarIcon } from 'lucide-react';
+import type { Booking, Experience, Review, User, Host } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { submitReview, cancelBookingByGuest } from '@/lib/user-actions';
+import { submitReview, cancelBookingByGuest, requestReschedule } from '@/lib/user-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import {
@@ -33,8 +34,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { BookingDatePicker } from '@/components/ui/booking-date-picker';
 
 const reviewSchema = z.object({
   rating: z.number().min(1, 'Please select a rating.').max(5),
@@ -42,6 +43,10 @@ const reviewSchema = z.object({
 });
 type ReviewFormValues = z.infer<typeof reviewSchema>;
 
+const rescheduleSchema = z.object({
+  newDate: z.date({ required_error: "Please select a new date." }),
+});
+type RescheduleFormValues = z.infer<typeof rescheduleSchema>;
 
 function StarRating({ field }: { field: any }) {
   const [hover, setHover] = useState(0);
@@ -68,7 +73,6 @@ function StarRating({ field }: { field: any }) {
     </div>
   );
 }
-
 
 function ReviewForm({ booking, onFinished }: { booking: Booking, onFinished: () => void }) {
   const { firestore } = useFirebase();
@@ -126,18 +130,74 @@ function ReviewForm({ booking, onFinished }: { booking: Booking, onFinished: () 
   );
 }
 
+function RescheduleForm({ booking, experience, host, onFinished }: { booking: Booking, experience: Experience, host: Host, onFinished: () => void }) {
+  const { firestore, user } = useFirebase();
+  const { toast } = useToast();
+  const form = useForm<RescheduleFormValues>({
+    resolver: zodResolver(rescheduleSchema),
+  });
+
+  async function onSubmit(values: RescheduleFormValues) {
+    if (!firestore || !user) return;
+    try {
+      await requestReschedule(firestore, booking.id, user.displayName || 'A guest', values.newDate);
+      toast({ title: 'Reschedule Request Sent!', description: 'The host has been notified of your request.' });
+      onFinished();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Request Failed', description: error.message });
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="newDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Date</FormLabel>
+              <FormControl>
+                <BookingDatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    availableDays={experience.availability.days}
+                    blockedDates={host?.blockedDates}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <DialogFooter>
+          <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Send Request
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
+  );
+}
+
+
 function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: { booking: Booking, onAction: () => void, hasReviewed: boolean, isReviewCheckLoading: boolean }) {
   const { firestore } = useFirebase();
   const [isReviewFormOpen, setReviewFormOpen] = useState(false);
+  const [isRescheduleOpen, setRescheduleOpen] = useState(false);
   const [isCancelling, setCancelling] = useState(false);
   const { toast } = useToast();
   
   const experienceRef = useMemoFirebase(() => (firestore ? doc(firestore, 'experiences', booking.experienceId) : null), [firestore, booking.experienceId]);
   const { data: experience, isLoading: isExperienceLoading } = useDoc<Experience>(experienceRef);
   
-  const hostRef = useMemoFirebase(() => (firestore ? doc(firestore, 'users', booking.hostId) : null), [firestore, booking.hostId]);
-  const { data: host, isLoading: isHostLoading } = useDoc<User>(hostRef);
+  const hostUserRef = useMemoFirebase(() => (firestore ? doc(firestore, 'users', booking.hostId) : null), [firestore, booking.hostId]);
+  const { data: hostUser, isLoading: isHostUserLoading } = useDoc<User>(hostUserRef);
   
+  const hostProfileRef = useMemoFirebase(() => (firestore && hostUser ? doc(firestore, 'users', hostUser.id, 'hosts', hostUser.id) : null), [firestore, hostUser]);
+  const { data: hostProfile, isLoading: isHostProfileLoading } = useDoc<Host>(hostProfileRef);
+
   const isCompleted = isPast(booking.bookingDate.toDate());
   
   const handleCancel = async () => {
@@ -152,8 +212,8 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
     setCancelling(false);
   }
 
-  if (isExperienceLoading || isHostLoading) return <Skeleton className="h-56 w-full" />;
-  if (!experience || !host) return null;
+  if (isExperienceLoading || isHostUserLoading || isHostProfileLoading) return <Skeleton className="h-56 w-full" />;
+  if (!experience || !hostUser || !hostProfile) return null;
 
   const image = PlaceHolderImages.find(p => p.id === experience.photos.mainImageId);
 
@@ -173,11 +233,11 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
           <p><strong>Total Paid:</strong> ${booking.totalPrice.toFixed(2)}</p>
           <Badge>{booking.status}</Badge>
         </CardContent>
-        <CardFooter className="bg-muted/50 p-3 flex flex-wrap gap-2">
-            {isCompleted ? (
+        <CardFooter className="bg-muted/50 p-3 flex flex-wrap items-center gap-2">
+            {isCompleted && booking.status === 'Confirmed' ? (
                 isReviewCheckLoading ? <Skeleton className="h-10 w-32" /> :
                 hasReviewed ? (
-                <div className="flex items-center gap-2 text-green-600 font-semibold text-sm">
+                <div className="flex items-center gap-2 text-green-600 font-semibold text-sm p-2">
                     <ThumbsUp className="h-4 w-4" /> Reviewed
                 </div>
                 ) : (
@@ -193,12 +253,12 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
                     </DialogContent>
                 </Dialog>
                 )
-            ) : booking.status !== 'Cancelled' ? (
+            ) : booking.status !== 'Cancelled' && !booking.rescheduleRequest ? (
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="destructive" size="sm" disabled={isCancelling}>
                             {isCancelling ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <X className="mr-2 h-4 w-4"/>}
-                            Cancel Booking
+                            Cancel
                         </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -210,6 +270,33 @@ function BookingCard({ booking, onAction, hasReviewed, isReviewCheckLoading }: {
                     </AlertDialogContent>
                 </AlertDialog>
             ) : null}
+
+            {!isCompleted && booking.status === 'Confirmed' && !booking.rescheduleRequest && (
+              <Dialog open={isRescheduleOpen} onOpenChange={setRescheduleOpen}>
+                  <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">Reschedule</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                      <DialogHeader>
+                          <DialogTitle>Request to Reschedule</DialogTitle>
+                          <DialogDescription>Select a new date for "{experience.title}". The host will need to approve this change.</DialogDescription>
+                      </DialogHeader>
+                      <RescheduleForm booking={booking} experience={experience} host={hostProfile} onFinished={() => { setRescheduleOpen(false); onAction(); }} />
+                  </DialogContent>
+              </Dialog>
+            )}
+
+            {booking.rescheduleRequest?.status === 'pending' && (
+              <div className="flex items-center gap-2 text-sm text-amber-600 font-medium p-2">
+                  <Hourglass className="h-4 w-4" /> Reschedule request pending
+              </div>
+            )}
+             {booking.rescheduleRequest?.status === 'declined' && (
+              <div className="flex items-center gap-2 text-sm text-destructive font-medium p-2">
+                  <X className="h-4 w-4" /> Reschedule declined
+              </div>
+            )}
+
              <Button asChild variant="outline" size="sm">
                 <Link href={`/messages?id=${booking.id}`}>
                     <MessageSquare className="mr-2 h-4 w-4"/>

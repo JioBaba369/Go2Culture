@@ -112,7 +112,7 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
             .data.termsAccepted == true;
 
-      allow update: if isBookingParticipant(resource.data) || isAdmin();
+      allow update: if (isBookingParticipant(resource.data) && onlyChanges(['status', 'cancellationReason', 'rescheduleRequest', 'bookingDate', 'updatedAt'])) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -188,5 +188,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
