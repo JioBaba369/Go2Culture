@@ -61,8 +61,8 @@ export function FeaturedCitiesSection() {
 
     return (
         <section>
-            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Explore Our Cities</h2>
-            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto text-center">Discover authentic experiences in our most popular destinations.</p>
+            <h2 className="font-headline text-3xl md:text-4xl font-semibold text-center">Find Your Table</h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto text-center">Our hosts are waiting to welcome you in cities across Australia and beyond. Where will your next story begin?</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
             {isLoading ? (
                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-lg" />)
@@ -87,7 +87,7 @@ export function FeaturedCitiesSection() {
                                 <h3 className="font-headline text-2xl font-bold">
                                 {city.name}
                                 </h3>
-                                {count > 0 && <p className="text-sm font-medium">{count} {count > 1 ? 'experiences' : 'experience'}</p>}
+                                {count > 0 && <p className="text-sm font-medium">Home to {count} unique {count > 1 ? 'stories' : 'story'}</p>}
                             </div>
                         </Card>
                         </Link>
