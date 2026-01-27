@@ -1,3 +1,4 @@
+
 'use client';
 import {
   SidebarProvider,
@@ -25,6 +26,7 @@ import {
   Tag,
   Handshake,
   DollarSign,
+  Briefcase,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -43,6 +45,7 @@ const menuItems = [
   { href: '/admin/reports', label: 'Reports', icon: MessageSquareWarning },
   { href: '/admin/coupons', label: 'Coupons', icon: Tag },
   { href: '/admin/sponsors', label: 'Sponsors', icon: Handshake },
+  { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

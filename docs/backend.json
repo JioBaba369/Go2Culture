@@ -702,6 +702,22 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "logoUrl", "isActive", "createdAt"]
+    },
+    "Job": {
+      "title": "Job",
+      "type": "object",
+      "description": "Represents a job posting at Go2Culture.",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "department": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "department", "location", "isActive", "createdAt"]
     }
   },
   "auth": {
@@ -766,8 +782,11 @@
     "/sponsors/{sponsorId}": {
       "schema": { "$ref": "#/entities/Sponsor" },
       "description": "Stores information about sponsors and partners."
+    },
+    "/jobs/{jobId}": {
+      "schema": { "$ref": "#/entities/Job" },
+      "description": "Stores job postings for the careers page."
     }
   }
 }
-
     

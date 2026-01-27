@@ -125,6 +125,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /coupons/{couponId} {
       allow get: if isSignedIn();
       allow list, create, delete, update: if isAdmin();
@@ -142,5 +147,4 @@ service cloud.firestore {
     }
   }
 }
-
     

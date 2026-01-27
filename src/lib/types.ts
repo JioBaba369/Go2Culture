@@ -391,4 +391,14 @@ export type AuditLog = {
     createdAt: any; // Allow ServerTimestamp
 }
 
+export type Job = {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  description: string;
+  isActive: boolean;
+  createdAt: any;
+  updatedAt?: any;
+};
     
