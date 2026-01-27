@@ -65,8 +65,8 @@ export async function sendMessage(
     await createNotification(
       firestore,
       recipient.id,
-      `You have a new message from ${currentUser.fullName}`,
-      `/messages?id=${booking.id}`
+      'NEW_MESSAGE',
+      booking.id
     );
   } catch (serverError) {
     errorEmitter.emit(

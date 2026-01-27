@@ -15,6 +15,11 @@ export async function createNotification(
   type: Notification['type'],
   entityId: string,
 ) {
+    if (!userId || !type || !entityId) {
+        console.error("Missing required information to create a notification.");
+        return;
+    }
+    
     const notificationData: Omit<Notification, 'id'> = {
         userId,
         type,

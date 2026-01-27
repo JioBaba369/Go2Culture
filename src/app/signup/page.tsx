@@ -70,8 +70,8 @@ export default function SignupPage() {
       await createNotification(
         firestore,
         user.uid,
-        `${fullName}, please confirm your email address.`,
-        '/profile'
+        'GENERIC_ALERT',
+        user.uid
       );
 
       toast({ title: "Account Created!", description: "Welcome to Go2Culture. Please check your email to verify your account." });

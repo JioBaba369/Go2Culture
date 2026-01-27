@@ -69,7 +69,7 @@ export async function confirmBooking(
     batch.update(bookingRef, { status: 'Confirmed' });
 
     // 2. Create the conversation document
-    const conversationRef = doc(collection(firestore, 'conversations'), booking.id);
+    const conversationRef = doc(firestore, 'conversations', booking.id);
     const conversationData: Omit<Conversation, 'id'> = {
       bookingId: booking.id,
       participants: [booking.guestId, booking.hostId],
@@ -107,8 +107,8 @@ export async function confirmBooking(
     await createNotification(
       firestore,
       booking.guestId,
-      `Your booking for "${booking.experienceTitle}" has been confirmed!`,
-      '/profile/bookings'
+      'BOOKING_CONFIRMED',
+      booking.id
     );
   } catch (serverError) {
     // Note: A more specific error path might be needed depending on which part failed.
@@ -145,8 +145,8 @@ export async function cancelBookingByHost(
      await createNotification(
       firestore,
       booking.guestId,
-      `Your booking for "${booking.experienceTitle}" was cancelled by the host.`,
-      '/profile/bookings'
+      'BOOKING_CANCELLED',
+      booking.id
     );
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -281,8 +281,8 @@ export async function respondToReschedule(
     await createNotification(
       firestore,
       booking.guestId,
-      `Your reschedule request for "${booking.experienceTitle}" was ${accepted ? 'accepted' : 'declined'}.`,
-      '/profile/bookings'
+      'RESCHEDULE_RESPONSE',
+      booking.id
     );
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({

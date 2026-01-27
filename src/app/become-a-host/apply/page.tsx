@@ -289,13 +289,13 @@ export default function BecomeAHostPage() {
         compliance: { guidelinesAccepted: values.agreeToTerms },
       };
 
-      await addDoc(collection(firestore, 'hostApplications'), applicationData as any);
+      const newAppRef = await addDoc(collection(firestore, 'hostApplications'), applicationData as any);
       
       await createNotification(
         firestore,
         user.uid,
-        "We received your application and we can’t wait to review it!",
-        "/become-a-host/apply"
+        "GENERIC_ALERT",
+        newAppRef.id,
       );
 
       setSubmissionState('success');
