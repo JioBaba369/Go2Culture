@@ -225,7 +225,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             </div>
             <div className="flex items-center gap-2">
                 {experience.instantBook && (
-                    <Badge variant="default" className="gap-1 bg-olive text-olive-foreground">
+                    <Badge variant="success" className="gap-1">
                         <Zap className="h-4 w-4" /> Instant Book
                     </Badge>
                 )}

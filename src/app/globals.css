@@ -14,7 +14,7 @@
     --gc-muted-text: 208 3% 43%; /* #6B6F72 */
 
     /* Semantic UI Colours */
-    --gc-success: 145 11% 47%; /* Sage */
+    --gc-success: var(--gc-sage);
     --gc-warning: 34 52% 64%; /* #D4A373 */
     --gc-error: 2 45% 48%; /* #B24A44 */
     --gc-info: 201 28% 61%; /* #7FA6B8 */
