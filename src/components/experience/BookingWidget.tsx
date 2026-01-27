@@ -30,7 +30,9 @@ interface BookingWidgetProps {
 export function BookingWidget({ experience, host }: BookingWidgetProps) {
   const [date, setDate] = useState<Date | undefined>();
   const [numberOfGuests, setNumberOfGuests] = useState(1);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToLiability, setAgreedToLiability] = useState(false);
+  const [agreedToConduct, setAgreedToConduct] = useState(false);
+  const [agreedToServiceTerms, setAgreedToServiceTerms] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [isGifting, setIsGifting] = useState(false);
   const [couponCode, setCouponCode] = useState('');
@@ -41,6 +43,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
   const router = useRouter();
+  
+  const allTermsAgreed = agreedToLiability && agreedToConduct && agreedToServiceTerms;
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -98,8 +102,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       return;
     }
 
-     if (!agreedToTerms) {
-      toast({ variant: 'destructive', title: 'Agreement Required', description: 'You must agree to the liability and platform terms.' });
+     if (!allTermsAgreed) {
+      toast({ variant: 'destructive', title: 'Agreements Required', description: 'You must review and accept all terms before booking.' });
       return;
     }
     
@@ -215,7 +219,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
   const serviceFee = basePrice * 0.15; // Example 15% service fee, should come from config
   const totalPrice = basePrice + serviceFee - discountAmount;
-  const canBook = date && agreedToTerms && !(isBooking || isGifting);
+  const canBook = date && allTermsAgreed && !(isBooking || isGifting);
 
   return (
     <div className="p-6 space-y-4 border rounded-xl shadow-lg bg-card">
@@ -311,14 +315,34 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     <span>${totalPrice.toFixed(2)}</span>
                 </div>
 
-                <div className="flex items-start space-x-2">
-                    <Checkbox id="terms" checked={agreedToTerms} onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)} />
-                    <label
-                        htmlFor="terms"
-                        className="text-xs text-muted-foreground leading-snug"
-                    >
-                        I acknowledge the host is an independent operator and I agree to the <Link href="/trust-and-safety" className="underline hover:text-primary">Trust & Safety</Link> policy.
-                    </label>
+                <div className="space-y-3 pt-2">
+                    <div className="flex items-start space-x-2">
+                        <Checkbox id="liability" checked={agreedToLiability} onCheckedChange={(checked) => setAgreedToLiability(checked as boolean)} />
+                        <label
+                            htmlFor="liability"
+                            className="text-xs text-muted-foreground leading-snug"
+                        >
+                            I acknowledge the host is an independent operator and I agree to the platform's liability framework as outlined in the <Link href="/trust-and-safety" className="underline hover:text-primary">Trust & Safety</Link> policy.
+                        </label>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                        <Checkbox id="conduct" checked={agreedToConduct} onCheckedChange={(checked) => setAgreedToConduct(checked as boolean)} />
+                        <label
+                            htmlFor="conduct"
+                            className="text-xs text-muted-foreground leading-snug"
+                        >
+                            I have read and agree to follow the <Link href="/guest-guidelines" className="underline hover:text-primary">Guest Code of Conduct</Link>.
+                        </label>
+                    </div>
+                     <div className="flex items-start space-x-2">
+                        <Checkbox id="terms" checked={agreedToServiceTerms} onCheckedChange={(checked) => setAgreedToServiceTerms(checked as boolean)} />
+                        <label
+                            htmlFor="terms"
+                            className="text-xs text-muted-foreground leading-snug"
+                        >
+                            I agree to the Go2Culture <Link href="/terms" className="underline hover:text-primary">Terms of Service</Link> and <Link href="/privacy" className="underline hover:text-primary">Privacy Policy</Link>.
+                        </label>
+                    </div>
                 </div>
                 
                 <Button size="lg" className="w-full" disabled={!canBook} onClick={() => handleBookingAction(false)}>
