@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -194,8 +193,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       await createNotification(
         firestore,
         experience.hostId,
-        `You have a ${bookingStatus} from ${user.displayName} for "${experience.title}"!`,
-        '/host/bookings'
+        'BOOKING_REQUESTED',
+        'new-booking'
       );
 
       setDate(undefined);
@@ -226,7 +225,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             </div>
             <div className="flex items-center gap-2">
                 {experience.instantBook && (
-                    <Badge variant="default" className="gap-1 bg-blue-500 hover:bg-blue-600">
+                    <Badge variant="default" className="gap-1 bg-olive text-olive-foreground">
                         <Zap className="h-4 w-4" /> Instant Book
                     </Badge>
                 )}
@@ -277,11 +276,11 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     <div className="flex gap-2">
                         <Input id="coupon" placeholder="Enter code" value={couponCode} onChange={e => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
                         <Button variant="outline" onClick={handleApplyCoupon} disabled={!!appliedCoupon}>
-                            {appliedCoupon ? <CheckCircle className="h-5 w-5 text-green-600" /> : 'Apply'}
+                            {appliedCoupon ? <CheckCircle className="h-5 w-5 text-success" /> : 'Apply'}
                         </Button>
                     </div>
                     {couponError && <p className="text-xs text-destructive">{couponError}</p>}
-                    {appliedCoupon && <p className="text-xs text-green-600 font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
+                    {appliedCoupon && <p className="text-xs text-success font-medium flex items-center gap-1"><Tag className="h-3 w-3"/>Code "{appliedCoupon.id}" applied!</p>}
                 </div>
 
                 <div className="space-y-1 text-sm pt-2">
@@ -294,7 +293,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                         <span>${serviceFee.toFixed(2)}</span>
                     </div>
                     {discountAmount > 0 && (
-                        <div className="flex justify-between text-green-600">
+                        <div className="flex justify-between text-success">
                             <span>Coupon Discount</span>
                             <span>-${discountAmount.toFixed(2)}</span>
                         </div>
@@ -340,5 +339,3 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
     </div>
   );
 }
-
-    

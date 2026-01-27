@@ -1,4 +1,3 @@
-
 'use client';
 
 import { forwardRef, useState } from "react";
@@ -215,7 +214,7 @@ export default function ExperienceDetailPage() {
           {/* ALLERGENS */}
           <div className="space-y-4">
             <h3 className="font-headline text-2xl flex items-center gap-3">
-                <AlertTriangle className="h-7 w-7 text-amber-500"/>
+                <AlertTriangle className="h-7 w-7 text-warning"/>
                 Allergen Information
             </h3>
             <Alert variant="warning">
@@ -223,9 +222,9 @@ export default function ExperienceDetailPage() {
               <AlertDescription className="space-y-4">
                 <p>Please be aware that this food is prepared in a home kitchen where allergens are handled, and cross-contact may occur. We cannot guarantee an allergen-free environment.</p>
                 {experience.menu.allergens && (
-                  <div className="p-4 bg-amber-100/50 dark:bg-amber-900/50 rounded-md">
-                    <p className="font-semibold text-amber-950 dark:text-amber-200">Host-declared potential allergens:</p>
-                    <p className="text-sm mt-2 text-amber-800 dark:text-amber-300 whitespace-pre-line">{experience.menu.allergens}</p>
+                  <div className="p-4 bg-warning/10 rounded-md">
+                    <p className="font-semibold text-warning">Host-declared potential allergens:</p>
+                    <p className="text-sm mt-2 whitespace-pre-line">{experience.menu.allergens}</p>
                   </div>
                 )}
                 <p className="font-semibold">Guests with food allergies or intolerances are strongly advised to contact the host before booking to discuss their specific needs.</p>
@@ -260,7 +259,7 @@ export default function ExperienceDetailPage() {
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {experience.inclusions.map((item, index) => (
                   <li key={index} className="flex items-center gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <CheckCircle className="h-5 w-5 text-success flex-shrink-0" />
                   <span>{item}</span>
                   </li>
               ))}

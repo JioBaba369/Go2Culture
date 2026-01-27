@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -238,7 +237,7 @@ function BookingCard({ booking, actor, onAction, hasReviewed, isReviewCheckLoadi
             {isCompleted && booking.status === 'Confirmed' ? (
                 isReviewCheckLoading ? <Skeleton className="h-10 w-32" /> :
                 hasReviewed ? (
-                <div className="flex items-center gap-2 text-green-600 font-semibold text-sm p-2">
+                <div className="flex items-center gap-2 text-success font-semibold text-sm p-2">
                     <ThumbsUp className="h-4 w-4" /> Reviewed
                 </div>
                 ) : (
@@ -288,8 +287,8 @@ function BookingCard({ booking, actor, onAction, hasReviewed, isReviewCheckLoadi
             )}
 
             {booking.rescheduleRequest?.status === 'pending' && (
-              <div className="flex items-center gap-2 text-sm text-amber-600 font-medium p-2">
-                  <Hourglass className="h-4 w-4" /> Reschedule request pending
+              <div className="flex items-center gap-2 text-sm text-warning-foreground font-medium p-2">
+                  <Hourglass className="h-4 w-4 text-warning" /> Reschedule request pending
               </div>
             )}
              {booking.rescheduleRequest?.status === 'declined' && (
@@ -433,5 +432,3 @@ export default function MyBookingsPage() {
     </div>
   );
 }
-
-    

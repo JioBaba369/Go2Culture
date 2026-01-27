@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState, useMemo } from 'react';
 import {
@@ -130,10 +129,10 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
         <div className="flex items-center justify-end gap-2">
         {booking.status === 'Pending' && isFuture(booking.bookingDate.toDate()) ? (
             <>
-                <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50" onClick={handleConfirm} disabled={!!isProcessing} aria-label="Confirm">
+                <Button variant="ghost" size="icon" className="text-success hover:text-success/90 hover:bg-success/10" onClick={handleConfirm} disabled={!!isProcessing} aria-label="Confirm">
                     {isProcessing === 'confirm' ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4" />}
                 </Button>
-                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-red-50" onClick={handleCancel} disabled={!!isProcessing} aria-label="Cancel">
+                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/90 hover:bg-destructive/10" onClick={handleCancel} disabled={!!isProcessing} aria-label="Cancel">
                     {isProcessing === 'cancel' ? <Loader2 className="h-4 w-4 animate-spin"/> : <X className="h-4 w-4" />}
                 </Button>
             </>
@@ -149,13 +148,13 @@ function HostBookingRow({ booking, onAction }: { booking: Booking, onAction: () 
     {booking.rescheduleRequest?.status === 'pending' && (
       <TableRow>
           <TableCell colSpan={7} className="p-0">
-              <div className="bg-amber-50 dark:bg-amber-950 p-3 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                      <Hourglass className="h-4 w-4" />
+              <div className="bg-warning/10 p-3 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-warning-foreground">
+                      <Hourglass className="h-4 w-4 text-warning" />
                       <span className="text-sm font-semibold">Reschedule requested for {format(booking.rescheduleRequest.newDate.toDate(), 'PPP')}</span>
                   </div>
                   <div className="flex gap-2">
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleRespondToReschedule(true)} disabled={isProcessing === 'respond'}>Accept</Button>
+                      <Button size="sm" variant="secondary" onClick={() => handleRespondToReschedule(true)} disabled={isProcessing === 'respond'}>Accept</Button>
                       <Button size="sm" variant="destructive" onClick={() => handleRespondToReschedule(false)} disabled={isProcessing === 'respond'}>Decline</Button>
                   </div>
               </div>
@@ -246,13 +245,13 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
           <span className="font-bold text-foreground">${booking.totalPrice}</span>
         </div>
         {booking.rescheduleRequest?.status === 'pending' && (
-           <div className="bg-amber-50 dark:bg-amber-950 p-3 flex flex-col gap-2 mt-4 rounded-md">
-                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                    <Hourglass className="h-4 w-4" />
+           <div className="bg-warning/10 p-3 flex flex-col gap-2 mt-4 rounded-md">
+                <div className="flex items-center gap-2 text-warning-foreground">
+                    <Hourglass className="h-4 w-4 text-warning" />
                     <span className="text-sm font-semibold">Reschedule requested for {format(booking.rescheduleRequest.newDate.toDate(), 'PPP')}</span>
                 </div>
                 <div className="flex gap-2">
-                    <Button size="sm" className="w-full bg-green-600 hover:bg-green-700" onClick={() => handleRespondToReschedule(true)} disabled={isProcessing === 'respond'}>Accept</Button>
+                    <Button size="sm" variant="secondary" className="w-full" onClick={() => handleRespondToReschedule(true)} disabled={isProcessing === 'respond'}>Accept</Button>
                     <Button size="sm" variant="destructive" className="w-full" onClick={() => handleRespondToReschedule(false)} disabled={isProcessing === 'respond'}>Decline</Button>
                 </div>
             </div>
@@ -260,7 +259,7 @@ function HostBookingCardMobile({ booking, onAction }: { booking: Booking, onActi
       </CardContent>
       {booking.status === 'Pending' && isFuture(booking.bookingDate.toDate()) && (
         <CardContent className="p-4 border-t flex gap-2">
-            <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleConfirm} disabled={!!isProcessing}>
+            <Button className="w-full" variant="secondary" onClick={handleConfirm} disabled={!!isProcessing}>
                 {isProcessing === 'confirm' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4"/>} Confirm
             </Button>
             <Button variant="destructive" className="w-full" onClick={handleCancel} disabled={!!isProcessing}>
@@ -397,5 +396,3 @@ export default function HostBookingsPage() {
     </div>
   );
 }
-
-    

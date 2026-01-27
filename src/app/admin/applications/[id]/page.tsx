@@ -1,4 +1,3 @@
-
 'use client';
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
@@ -313,7 +312,7 @@ export default function ApplicationDetailPage() {
         <div className="flex gap-2 flex-wrap">
           {application.status === 'Pending' || application.status === 'Changes Needed' ? (
             <>
-              <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={isProcessing !== null}>
+              <Button variant="secondary" onClick={handleApprove} disabled={isProcessing !== null}>
                 {isProcessing === 'approve' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />} Approve
               </Button>
               <Button variant="outline" onClick={handleRequestChanges} disabled={isProcessing !== null}>
@@ -332,13 +331,13 @@ export default function ApplicationDetailPage() {
                   {isProcessing === 'pause' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <PauseCircle className="mr-2 h-4 w-4" />} Pause Experience
                 </Button>
               ) : (
-                <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleStartExperience} disabled={isProcessing !== null}>
+                <Button variant="secondary" onClick={handleStartExperience} disabled={isProcessing !== null}>
                   {isProcessing === 'start' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <PlayCircle className="mr-2 h-4 w-4" />} Make Experience Live
                 </Button>
               )}
             </>
           ) : application.status === 'Rejected' ? (
-             <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove} disabled={isProcessing !== null}>
+             <Button variant="secondary" onClick={handleApprove} disabled={isProcessing !== null}>
               {isProcessing === 'approve' ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Check className="mr-2 h-4 w-4" />} Re-Approve
             </Button>
           ) : null}
@@ -532,5 +531,3 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
-
-    

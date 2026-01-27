@@ -103,7 +103,7 @@ function UserProfilePage() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <ShieldCheck className="h-7 w-7 text-green-600" />
+                      <ShieldCheck className="h-7 w-7 text-success" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Verified Host</p>

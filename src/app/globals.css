@@ -1,72 +1,111 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 60 56% 93%; /* Light Beige */
-    --foreground: 24 10% 15%; /* Dark Brown/Black */
-    --card: 60 56% 97%;
-    --card-foreground: 24 10% 15%;
-    --popover: 60 56% 97%;
-    --popover-foreground: 24 10% 15%;
-    --primary: 24 100% 66%; /* Warm Orange */
-    --primary-foreground: 24 20% 98%;
-    --secondary: 24 95% 85%;
-    --secondary-foreground: 24 96% 30%;
-    --muted: 60 40% 90%;
-    --muted-foreground: 24 8% 45.1%;
-    --accent: 0 59% 41%; /* Deep Red */
-    --accent-foreground: 0 40% 98%;
-    --destructive: 0 59% 41%; /* Deep Red */
-    --destructive-foreground: 0 40% 98%;
-    --border: 60 20% 85%;
-    --input: 60 20% 85%;
-    --ring: 24 100% 66%; /* Warm Orange */
+    /* Brand Foundations */
+    --gc-ink: 0 0% 7%;
+    --gc-ember: 18 65% 48%;
+    --gc-sand: 36 47% 95%;
+    --gc-olive: 93 16% 42%;
+    --gc-border: 34 22% 87%;
+    --gc-muted-text: 0 0% 44%;
+
+    /* Semantic UI Colours */
+    --gc-success: 93 16% 42%; /* Olive */
+    --gc-warning: 30 48% 64%;
+    --gc-error: 1 45% 51%;
+    --gc-info: 31 8% 50%;
+
+    /* Light Mode Theme Mapping */
+    --background: var(--gc-sand);
+    --foreground: var(--gc-ink);
+    --card: 0 0% 100%; /* White */
+    --card-foreground: var(--gc-ink);
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--gc-ink);
+    --primary: var(--gc-ember);
+    --primary-foreground: 36 47% 98%; /* Off-white for high contrast on Ember */
+    --secondary: var(--gc-olive);
+    --secondary-foreground: 93 16% 95%;
+    --muted: 35 27% 92%; /* Alt bg #F1ECE6 */
+    --muted-foreground: var(--gc-muted-text);
+    --accent: var(--gc-ember); /* Using Ember as the main accent */
+    --accent-foreground: 36 47% 98%;
+    --destructive: var(--gc-error);
+    --destructive-foreground: 1 45% 95%;
+    
+    --success: var(--gc-success);
+    --warning: var(--gc-warning);
+    --info: var(--gc-info);
+
+    --border: var(--gc-border);
+    --input: var(--gc-border);
+    --ring: var(--gc-ember);
     --radius: 0.8rem;
 
     /* Custom Sidebar vars */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 210 10% 23%;
-    --sidebar-primary: 24 100% 66%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 24 95% 90%;
-    --sidebar-accent-foreground: 24 96% 30%;
-    --sidebar-border: 60 20% 85%;
-    --sidebar-ring: 24 100% 66%;
+    --sidebar-foreground: var(--gc-ink);
+    --sidebar-primary: var(--gc-ember);
+    --sidebar-primary-foreground: 36 47% 98%;
+    --sidebar-accent: 35 27% 92%; /* Alt bg */
+    --sidebar-accent-foreground: var(--gc-ember);
+    --sidebar-border: var(--gc-border);
+    --sidebar-ring: var(--gc-ember);
   }
 
   .dark {
-    --background: 20 10% 10%;
-    --foreground: 60 50% 90%;
-    --card: 20 10% 15%;
-    --card-foreground: 60 50% 90%;
-    --popover: 20 10% 15%;
-    --popover-foreground: 60 50% 90%;
-    --primary: 24 100% 66%; /* Warm Orange */
-    --primary-foreground: 20 10% 5%;
-    --secondary: 24 90% 25%;
-    --secondary-foreground: 24 90% 90%;
-    --muted: 20 10% 25%;
-    --muted-foreground: 60 20% 70%;
-    --accent: 0 70% 60%; /* Brighter Red */
-    --accent-foreground: 0 80% 98%;
-    --destructive: 0 70% 60%; /* Brighter Red */
-    --destructive-foreground: 0 80% 98%;
-    --border: 20 10% 25%;
-    --input: 20 10% 25%;
-    --ring: 24 100% 66%;
-     
+    /* Brand Foundations - values are the same */
+    --gc-ink: 0 0% 7%;
+    --gc-ember: 18 65% 48%;
+    --gc-sand: 36 47% 95%;
+    --gc-olive: 93 16% 42%;
+    --gc-border: 0 0% 16.5%; /* #2A2A2A */
+    --gc-muted-text: 36 19% 81%; /* #CFC7BE */
+
+    /* Semantic UI Colours - values are the same */
+    --gc-success: 93 16% 42%;
+    --gc-warning: 30 48% 64%;
+    --gc-error: 1 45% 51%;
+    --gc-info: 31 8% 50%;
+    
+    /* Dark Mode Theme Mapping */
+    --background: var(--gc-ink);
+    --foreground: var(--gc-sand);
+    --card: 0 0% 12.2%; /* #1F1F1F */
+    --card-foreground: var(--gc-sand);
+    --popover: 0 0% 12.2%;
+    --popover-foreground: var(--gc-sand);
+    --primary: var(--gc-ember);
+    --primary-foreground: 18 65% 95%;
+    --secondary: var(--gc-olive);
+    --secondary-foreground: 93 16% 95%;
+    --muted: 0 0% 10.2%; /* #1A1A1A Surface */
+    --muted-foreground: var(--gc-muted-text);
+    --accent: var(--gc-ember);
+    --accent-foreground: 18 65% 95%;
+    --destructive: var(--gc-error);
+    --destructive-foreground: 1 45% 95%;
+
+    --success: var(--gc-success);
+    --warning: var(--gc-warning);
+    --info: var(--gc-info);
+
+    --border: var(--gc-border);
+    --input: var(--gc-border);
+    --ring: var(--gc-ember);
+
     /* Custom Sidebar vars for dark mode */
-    --sidebar-background: 20 10% 15%;
-    --sidebar-foreground: 60 50% 90%;
-    --sidebar-primary: 24 100% 66%;
-    --sidebar-primary-foreground: 20 10% 5%;
-    --sidebar-accent: 24 90% 25%;
-    --sidebar-accent-foreground: 24 90% 90%;
-    --sidebar-border: 20 10% 25%;
-    --sidebar-ring: 24 100% 66%;
+    --sidebar-background: 0 0% 10.2%; /* Surface */
+    --sidebar-foreground: var(--gc-sand);
+    --sidebar-primary: var(--gc-ember);
+    --sidebar-primary-foreground: 18 65% 95%;
+    --sidebar-accent: 0 0% 14%; /* Slightly lighter than card */
+    --sidebar-accent-foreground: var(--gc-sand);
+    --sidebar-border: var(--gc-border);
+    --sidebar-ring: var(--gc-ember);
   }
 }
 
