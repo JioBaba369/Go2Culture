@@ -225,7 +225,10 @@
             "foodBusinessNotification": { "type": "boolean" },
             "guidelinesAccepted": { "type": "boolean" },
             "contractAccepted": { "type": "boolean" },
-            "insurancePolicyAccepted": { "type": "boolean" }
+            "insurancePolicyAccepted": { "type": "boolean" },
+            "hasPublicLiabilityInsurance": { "type": "boolean" },
+            "understandsFoodRegulations": { "type": "boolean" },
+            "acceptsIndependentHostStatus": { "type": "boolean" }
           }
         },
         "rating": {
@@ -487,6 +490,16 @@
                 "createdAt": { "type": "string", "format": "date-time", "description": "When the request was made." }
             }
         },
+        "payment": {
+          "type": "object",
+          "description": "Payment details for the booking.",
+          "properties": {
+            "intentId": { "type": "string" },
+            "status": { "type": "string", "enum": ["requires_payment", "paid", "refunded", "released"] },
+            "paidAt": { "type": "string", "format": "date-time" },
+            "releasedAt": { "type": "string", "format": "date-time" }
+          }
+        },
         "pricing": {
             "type": "object",
             "description": "Immutable price snapshot at time of booking.",
@@ -503,13 +516,14 @@
             "description": "Immutable policy snapshot at time of booking.",
             "properties": {
                 "cancellationPolicy": { "type": "string" },
-                "refundWindowHours": { "type": "number" }
+                "refundWindowHours": { "type": "number" },
+                "hostIsIndependent": { "type": "boolean" },
+                "platformIsMarketplace": { "type": "boolean" },
+                "guestAcceptedAt": { "type": "string", "format": "date-time" }
             }
-        },
-        "guestAcknowledgedRisks": { "type": "boolean" },
-        "acknowledgedAt": { "type": "string", "format": "date-time" }
+        }
       },
-      "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status", "pricing", "policySnapshot"]
+      "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status", "pricing", "policySnapshot", "payment"]
     },
     "Review": {
       "title": "Review",
@@ -755,3 +769,5 @@
     }
   }
 }
+
+    

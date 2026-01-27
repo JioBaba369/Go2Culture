@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -98,7 +99,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
     }
 
      if (!agreedToTerms) {
-      toast({ variant: 'destructive', title: 'Agreement Required', description: 'You must agree to the terms and guest policy.' });
+      toast({ variant: 'destructive', title: 'Agreement Required', description: 'You must agree to the liability and platform terms.' });
       return;
     }
     
@@ -130,12 +131,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             }
         }
         
-        if (appliedCoupon && !isValidCoupon) {
-            // The coupon becomes invalid at the time of transaction.
-            // We will proceed without it, and the user will be charged the full price.
-        }
-
-        const finalPrice = basePrice - finalDiscountAmount;
+        const serviceFee = basePrice * 0.15; // Example 15% service fee
+        const finalPrice = basePrice + serviceFee - finalDiscountAmount;
 
         const newBookingRef = doc(collection(firestore, 'bookings'));
         const bookingData: Partial<Booking> = {
@@ -150,11 +147,29 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
           status: isGift || experience?.instantBook ? 'Confirmed' : 'Pending',
           isGift: isGift,
           createdAt: serverTimestamp(),
+          payment: {
+            intentId: '',
+            status: 'requires_payment',
+          },
+          pricing: {
+            basePrice: basePrice,
+            guests: numberOfGuests,
+            serviceFee: serviceFee,
+            total: finalPrice,
+            currency: 'AUD', // Assuming AUD
+          },
+          policySnapshot: {
+            cancellationPolicy: 'flexible', // Example policy
+            refundWindowHours: 48,
+            hostIsIndependent: true,
+            platformIsMarketplace: true,
+            guestAcceptedAt: serverTimestamp(),
+          },
           ...(isValidCoupon && appliedCoupon && { couponId: appliedCoupon.id }),
           ...(isValidCoupon && { discountAmount: finalDiscountAmount }),
         };
 
-        transaction.set(newBookingRef, bookingData);
+        transaction.set(newBookingRef, bookingData as Booking);
 
         if (isValidCoupon && couponRef) {
             transaction.update(couponRef, { timesUsed: increment(1) });
@@ -198,7 +213,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
   };
   
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
-  const totalPrice = basePrice - discountAmount;
+  const serviceFee = basePrice * 0.15; // Example 15% service fee, should come from config
+  const totalPrice = basePrice + serviceFee - discountAmount;
   const canBook = date && agreedToTerms && !(isBooking || isGifting);
 
   return (
@@ -273,6 +289,10 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                         <span>${experience.pricing.pricePerGuest} x {numberOfGuests} guests</span>
                         <span>${basePrice.toFixed(2)}</span>
                     </div>
+                    <div className="flex justify-between text-muted-foreground">
+                        <span>Service fee</span>
+                        <span>${serviceFee.toFixed(2)}</span>
+                    </div>
                     {discountAmount > 0 && (
                         <div className="flex justify-between text-green-600">
                             <span>Coupon Discount</span>
@@ -294,7 +314,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                         htmlFor="terms"
                         className="text-xs text-muted-foreground leading-snug"
                     >
-                        I agree to the <Link href="/terms" className="underline hover:text-primary">Guest Policy</Link> and <Link href="/terms" className="underline hover:text-primary">Terms of Service</Link>.
+                        I acknowledge the host is an independent operator and I agree to the <Link href="/trust-and-safety" className="underline hover:text-primary">Trust & Safety</Link> policy.
                     </label>
                 </div>
                 
@@ -320,3 +340,5 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
     </div>
   );
 }
+
+    

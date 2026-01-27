@@ -81,6 +81,7 @@ service cloud.firestore {
             // Prevent immutable fields from being changed after creation
             !("pricing" in request.resource.data.diff(resource.data).affectedKeys()) &&
             !("policySnapshot" in request.resource.data.diff(resource.data).affectedKeys()) &&
+            !("payment" in request.resource.data.diff(resource.data).affectedKeys()) &&
             (
                 // Guest can cancel their own booking
                 (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
@@ -141,3 +142,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

@@ -1,5 +1,6 @@
 
 
+
 export type User = {
   id: string;
   role: 'guest' | 'host' | 'both';
@@ -52,9 +53,10 @@ export type ComplianceFields = {
   foodBusinessNotification?: boolean;
   guidelinesAccepted: boolean;
   contractAccepted?: boolean;
-  insuranceAcknowledged?: boolean; 
-  responsibilitiesAccepted?: boolean;
-  insurancePolicyAccepted?: boolean;
+  insurancePolicyAccepted?: boolean; 
+  hasPublicLiabilityInsurance?: boolean;
+  understandsFoodRegulations?: boolean;
+  acceptsIndependentHostStatus?: boolean;
   agreeToFoodSafety?: boolean;
 };
 
@@ -211,6 +213,12 @@ export type Booking = {
   couponId?: string;
   discountAmount?: number;
   isGift?: boolean;
+  payment: {
+    intentId: string;
+    status: 'requires_payment' | 'paid' | 'refunded' | 'released';
+    paidAt?: any;
+    releasedAt?: any;
+  };
   pricing: {
     basePrice: number;
     guests: number;
@@ -221,9 +229,10 @@ export type Booking = {
   policySnapshot: {
     cancellationPolicy: string;
     refundWindowHours: number;
+    hostIsIndependent: boolean;
+    platformIsMarketplace: boolean;
+    guestAcceptedAt: any;
   };
-  guestAcknowledgedRisks?: boolean;
-  acknowledgedAt?: any;
 };
 
 export type WishlistItem = {
@@ -329,30 +338,6 @@ export type HostApplication = {
     wifi?: boolean;
   };
 
-  experience: {
-    title: string;
-    description: string;
-    durationMinutes: number;
-    category: string;
-    
-    menu: {
-      cuisine: string;
-      description: string;
-      spiceLevel: 'Mild' | 'Medium' | 'Spicy';
-      allergens?: string;
-      dietary?: string[];
-    };
-
-    pricing: {
-      pricePerGuest: number;
-      maxGuests: number;
-    };
-    
-    photos: {
-      mainImageId: string;
-    }
-  };
-
   compliance: Partial<ComplianceFields> & { guidelinesAccepted: boolean, agreeToFoodSafety?: boolean };
 };
 
@@ -401,3 +386,5 @@ export type AuditLog = {
     metadata?: Record<string, any>;
     createdAt: any; // Allow ServerTimestamp
 }
+
+    
