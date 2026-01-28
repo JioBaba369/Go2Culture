@@ -3,7 +3,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /* ───────────────── Helpers ───────────────── */
+    /* ────────────────────────────────── */
+    /*           Helper Functions         */
+    /* ────────────────────────────────── */
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -13,15 +16,22 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      // In production, this would be a custom claim.
+      // In a production app, this should be a custom claim, not a hardcoded UID.
+      // For example: `return request.auth.token.admin == true;`
       return isSignedIn() && request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
     }
 
-    // Checks if the requesting user is a participant in the BOOKING,
-    // which is the source of truth.
     function isBookingParticipant(bookingId) {
       let booking = get(/databases/$(database)/documents/bookings/$(bookingId)).data;
-      return booking != null && (request.auth.uid == booking.guestId || request.auth.uid == booking.hostId);
+      return booking != null && (isSelf(booking.guestId) || isSelf(booking.hostId));
+    }
+    
+    function hasAttendedBooking(bookingId) {
+      let booking = get(/databases/$(database)/documents/bookings/$(bookingId)).data;
+      return booking != null &&
+             isSelf(booking.guestId) &&
+             booking.status == 'Confirmed' &&
+             booking.bookingDate < request.time;
     }
     
     function canSendMessage() {
@@ -30,107 +40,165 @@ service cloud.firestore {
         || request.time > lastMessageTime + duration.value(1, "s");
     }
 
-    /* ───────────────── Users ───────────────── */
+    /* ────────────────────────────────── */
+    /*           User Collections         */
+    /* ────────────────────────────────── */
+
     match /users/{userId} {
+      // Admins can read any user profile. Users can only read their own.
       allow read: if isSelf(userId) || isAdmin();
+      // A user can only create their own user document.
       allow create: if isSelf(userId);
-      // Client cannot change role or status
+      // Users can update their own profile, but cannot change their role or status.
       allow update: if isSelf(userId)
         && !('role' in request.resource.data.diff(resource.data).affectedKeys())
         && !('status' in request.resource.data.diff(resource.data).affectedKeys());
-      allow delete: if false; // Use soft deletes
+      // Soft deletes are handled by updating the `status` field, not direct deletion.
+      allow delete: if false;
 
+      // Host sub-collection for host-specific details.
       match /hosts/{hostId} {
+        // SECURITY NOTE: Host profiles are public to allow anonymous users to see details on experience pages.
         allow read: if true;
+        // Only the user themselves or an admin can create/update their host profile.
         allow write: if isSelf(userId) || isAdmin();
       }
 
+      // Users can manage their own wishlist.
       match /wishlist/{experienceId} {
         allow read, write: if isSelf(userId);
       }
+      
+      // Users can only read their own referral data.
+      match /referredUsers/{referredUserId} {
+        allow get, list: if isSelf(userId) || isAdmin();
+        // Writes are handled server-side to prevent fraud.
+        allow write: if false;
+      }
 
+      // Users can manage their own notifications.
       match /notifications/{notificationId} {
-        allow read, write: if isSelf(userId);
+        // A user can read, update (mark as read), and delete their own notifications.
+        allow read, update, delete: if isSelf(userId);
+        // Any signed-in user can create a notification for another user,
+        // as long as the notification is correctly addressed to that user.
+        // This is necessary for client-side actions like sending messages or confirming bookings.
+        allow create: if isSignedIn() && request.resource.data.userId == userId;
       }
       
+      // Used for rate-limiting client-side actions like sending messages.
       match /rateLimits/{document=**} {
-        allow write: if isSelf(userId);
-        allow read: if isSelf(userId);
+        allow read, write: if isSelf(userId);
       }
     }
 
-    /* ───────────────── Host Applications ───────────────── */
-    match /hostApplications/{applicationId} {
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow read: if isAdmin() || resource.data.userId == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if false; // Use status changes, don't delete
-    }
+    /* ────────────────────────────────── */
+    /*         Core App Collections       */
+    /* ────────────────────────────────── */
 
-    /* ───────────────── Experiences ───────────────── */
     match /experiences/{experienceId} {
-      allow read: if resource.data.status == 'live' || isAdmin() || (isSignedIn() && isSelf(resource.data.hostId));
-      allow create: if isSignedIn() && request.resource.data.hostId == request.auth.uid;
-      allow update: if isSignedIn() && isSelf(resource.data.hostId);
-      allow delete: if false; // Soft delete by updating status to 'archived'
-    }
-
-    /* ───────────────── Bookings ───────────────── */
-    match /bookings/{bookingId} {
-        allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
-        allow read: if isSignedIn() && (request.auth.uid == resource.data.guestId || request.auth.uid == resource.data.hostId) || isAdmin();
-        
-        allow update: if (
-            // Prevent immutable fields from being changed after creation
-            !("pricing" in request.resource.data.diff(resource.data).affectedKeys()) &&
-            !("policySnapshot" in request.resource.data.diff(resource.data).affectedKeys()) &&
-            !("payment" in request.resource.data.diff(resource.data).affectedKeys()) &&
-            (
-                // Guest can cancel their own booking
-                (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
-                // Host can confirm a booking
-                (isSelf(resource.data.hostId) && request.resource.data.status == "Confirmed" && resource.data.status == "Pending") ||
-                // Either participant can request/respond to reschedule
-                (isSelf(resource.data.guestId) || isSelf(resource.data.hostId))
-            )
-        );
-        allow delete: if false;
-    }
-
-    /* ───────────────── Reviews ───────────────── */
-    match /reviews/{reviewId} {
-      allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
-      allow update: if (isSignedIn() && isSelf(resource.data.guestId)) || isAdmin();
+      // Public can read live experiences. Owners and Admins can read any.
+      allow read: if resource.data.status == 'live' || (isSignedIn() && isSelf(resource.data.userId)) || isAdmin();
+      // Only a host (or admin) can create an experience for themselves.
+      allow create: if isSignedIn() && (isSelf(request.resource.data.userId) || isAdmin());
+      // Only the host who owns the experience (or an admin) can update it.
+      allow update: if isSignedIn() && (isSelf(resource.data.userId) || isAdmin());
+      // Soft delete by updating status to 'archived', don't allow hard delete.
       allow delete: if false;
     }
 
-    /* ───────────────── Conversations & Messages ───────────────── */
-    match /conversations/{bookingId} {
-      allow read, list: if isBookingParticipant(bookingId) || isAdmin();
+    match /bookings/{bookingId} {
+      // A user can only create a booking for themselves.
+      allow create: if isSelf(request.resource.data.guestId);
+      // Only participants of the booking or an admin can read it.
+      allow read: if isBookingParticipant(bookingId) || isAdmin();
+      
+      // Complex update logic to handle various state transitions securely.
+      allow update: if (isAdmin() || (isBookingParticipant(bookingId)
+          // Immutable fields check
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['pricing', 'policySnapshot', 'payment', 'guestId', 'hostId', 'experienceId'])
+          && (
+              // Guest can cancel their own booking.
+              (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
+              // Host can confirm a pending booking.
+              (isSelf(resource.data.hostId) && request.resource.data.status == "Confirmed" && resource.data.status == "Pending") ||
+              // Either participant can update the reschedule request.
+              ('rescheduleRequest' in request.resource.data.diff(resource.data).affectedKeys())
+          )
+      ));
+      allow delete: if false;
+    }
 
-      // This rule is updated to allow a client to create the conversation document,
-      // but only if they are a participant in the associated CONFIRMED booking.
-      // This is necessary to support instant bookings in a client-only environment.
+    match /reviews/{reviewId} {
+      // Reviews are public.
+      allow read: if true;
+      // A guest can only create a review for a booking they attended.
+      allow create: if isSignedIn() && 
+                     isSelf(request.resource.data.guestId) &&
+                     hasAttendedBooking(request.resource.data.bookingId);
+      // A guest can update their own review. Admin can also moderate.
+      allow update: if (isSignedIn() && isSelf(resource.data.guestId)) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /stories/{storyId} {
+      // Public can read approved stories. Authors/admins can read any status.
+      allow read: if resource.data.status == 'approved' || (isSignedIn() && isSelf(resource.data.authorId)) || isAdmin();
+      // Users can submit stories in 'pending' state.
+      allow create: if isSignedIn() && isSelf(request.resource.data.authorId) && request.resource.data.status == 'pending';
+      // Only admins can approve/reject stories.
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /* ────────────────────────────────── */
+    /*        Messaging Collections       */
+    /* ────────────────────────────────── */
+
+    match /conversations/{bookingId} {
+      // Only participants or admin can list/read conversations.
+      allow read, list: if isBookingParticipant(bookingId) || isAdmin();
+      // Conversation is created atomically when booking is confirmed.
       allow create: if isBookingParticipant(bookingId)
                     && get(/databases/$(database)/documents/bookings/$(bookingId)).data.status == 'Confirmed'
                     && request.resource.data.id == bookingId;
       
-      allow update: if isBookingParticipant(bookingId) 
-                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy', 'updatedAt']);
+      // Participants can update `lastMessage`, `readBy`, `updatedAt`, and `participantInfo`.
+      allow update: if (isBookingParticipant(bookingId) || isAdmin())
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy', 'updatedAt', 'participantInfo']);
     }
 
     match /conversations/{bookingId}/messages/{messageId} {
+        // Only participants or admin can read messages.
         allow read, list: if isBookingParticipant(bookingId) || isAdmin();
-        
+        // A participant can send a message, with rate limiting.
         allow create: if canSendMessage() 
-                    && request.resource.data.senderId == request.auth.uid
+                    && isSelf(request.resource.data.senderId)
                     && isBookingParticipant(bookingId);
-                    
+        // Messages are immutable.
         allow update, delete: if false;
     }
 
-    /* ───────────────── Admin & System Collections ───────────────── */
+    /* ────────────────────────────────── */
+    /*     Admin & System Collections     */
+    /* ────────────────────────────────── */
+    
+    match /hostApplications/{applicationId} {
+      allow create: if isSignedIn() && isSelf(request.resource.data.userId);
+      allow read: if isAdmin() || (isSignedIn() && isSelf(resource.data.userId));
+      allow update, delete: if isAdmin();
+    }
+
+    match /platformSettings/{settingId} {
+        allow read: if true;
+        allow write: if isAdmin();
+    }
+
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
     match /sponsors/{sponsorId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -138,18 +206,19 @@ service cloud.firestore {
 
     match /coupons/{couponId} {
       allow get: if isSignedIn();
-      allow list, create, delete, update: if isAdmin();
+      allow list, create, update, delete: if isAdmin();
     }
     
     match /reports/{reportId} {
-      allow read, update: if isAdmin();
       allow create: if isSignedIn();
+      allow read, update: if isAdmin();
       allow delete: if false;
     }
 
     match /auditLogs/{logId} {
         allow read: if isAdmin();
-        allow write: if false; // Server-only writes
+        // SECURITY NOTE: Allowing admin-write from client to support logging without server-side functions in this project.
+        allow write: if isAdmin();
     }
   }
 }
