@@ -5,74 +5,74 @@
  
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 20 50% 98%;
+    --foreground: 20 10% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 20 10% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
+    --popover-foreground: 20 10% 15%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 94%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted: 210 20% 94%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: 30 90% 60%;
+    --accent-foreground: 20 10% 15%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
     --success: 142.1 76.2% 36.3%;
     --warning: 47.9 95.8% 53.1%;
     --info: 210 40% 50%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 24 95% 53%;
     --radius: 0.75rem;
 
      /* Custom Sidebar vars */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222.2 84% 4.9%;
-    --sidebar-primary: 221.2 83.2% 53.3%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 210 40% 96.1%;
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 221.2 83.2% 53.3%;
+    --sidebar-background: 20 50% 98%;
+    --sidebar-foreground: 20 10% 15%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 90% 96%;
+    --sidebar-accent-foreground: 24 95% 53%;
+    --sidebar-border: 210 20% 88%;
+    --sidebar-ring: 24 95% 53%;
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --background: 20 10% 12%;
+    --foreground: 20 5% 95%;
+    --card: 20 10% 12%;
+    --card-foreground: 20 5% 95%;
+    --popover: 20 10% 12%;
+    --popover-foreground: 20 5% 95%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 20 10% 20%;
+    --secondary-foreground: 20 5% 95%;
+    --muted: 20 10% 20%;
+    --muted-foreground: 20 5% 65%;
+    --accent: 30 90% 60%;
+    --accent-foreground: 20 10% 15%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
     --success: 142.1 76.2% 36.3%;
     --warning: 47.9 95.8% 53.1%;
     --info: 210 40% 50%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: 20 10% 25%;
+    --input: 20 10% 25%;
+    --ring: 24 95% 53%;
 
     /* Custom Sidebar vars for dark mode */
-    --sidebar-background: 222.2 84% 4.9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 221.2 83.2% 53.3%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 212.7 93.5% 59.2%;
+    --sidebar-background: 20 10% 12%;
+    --sidebar-foreground: 20 5% 95%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 10% 20%;
+    --sidebar-accent-foreground: 24 95% 53%;
+    --sidebar-border: 20 10% 25%;
+    --sidebar-ring: 24 95% 53%;
   }
 }
  

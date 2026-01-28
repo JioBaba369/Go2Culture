@@ -8,17 +8,16 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { FirebaseClientProvider } from '@/firebase';
 import { CookieConsentBanner } from '@/components/cookie-consent-banner';
 import { cn } from '@/lib/utils';
-import { Playfair_Display, PT_Sans } from 'next/font/google';
+import { Lora, Inter } from 'next/font/google';
 
-const playfair = Playfair_Display({
+const lora = Lora({
   subsets: ['latin'],
   variable: '--font-headline',
 });
 
-const ptSans = PT_Sans({
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
-  weight: ['400', '700'],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('antialiased font-sans', playfair.variable, ptSans.variable)}>
+      <body className={cn('antialiased font-sans', lora.variable, inter.variable)}>
         <FirebaseClientProvider>
           <MainLayout header={<Header />} footer={<Footer />}>
             {children}
