@@ -37,14 +37,11 @@ export async function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Create or update the conversation document
+  // 2. Update the parent conversation document
   const conversationRef = doc(firestore, 'conversations', booking.id);
   
-  // This data will be merged into an existing document or used to create a new one.
   const conversationUpdateData = {
-    id: booking.id,
-    bookingId: booking.id,
-    participants: [currentUser.id, recipient.id],
+    // Denormalized data can be updated on each message to keep it fresh
     participantInfo: {
       [currentUser.id]: {
         fullName: currentUser.fullName,
@@ -55,30 +52,19 @@ export async function sendMessage(
         profilePhotoId: recipient.profilePhotoId || 'guest-1',
       },
     },
-    bookingInfo: {
-      experienceTitle: booking.experienceTitle,
-      experienceId: booking.experienceId,
-    },
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
     updatedAt: serverTimestamp(),
+    // Use dot notation to update only the current user's read status
+    [`readBy.${currentUser.id}`]: serverTimestamp(),
   };
 
-  // Use set with merge to create the doc if it doesn't exist,
-  // or update it if it does. `createdAt` will only be set once.
-  batch.set(conversationRef, {
-    ...conversationUpdateData,
-    createdAt: serverTimestamp(),
-  }, { merge: true });
-
-  // Separately update the `readBy` map to avoid overwriting it.
-  // This uses dot notation to update a specific field in the map.
-  batch.update(conversationRef, {
-      [`readBy.${currentUser.id}`]: serverTimestamp()
-  });
+  // Use update instead of set({ merge: true }) to avoid violating security rules
+  // that prevent modification of immutable fields like 'participants' or 'bookingInfo'.
+  batch.update(conversationRef, conversationUpdateData);
 
 
   try {
