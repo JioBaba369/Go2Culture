@@ -1,4 +1,3 @@
-
 'use client';
 import Link from "next/link";
 import { Logo } from "@/components/logo";
@@ -47,7 +46,6 @@ export function Footer() {
               <li><Link href="/careers" className="text-muted-foreground hover:text-foreground">Careers</Link></li>
               <li><Link href="/press" className="text-muted-foreground hover:text-foreground">Press</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link></li>
-              <li><Link href="/all-pages" className="text-muted-foreground hover:text-foreground">All Pages</Link></li>
             </ul>
           </div>
         </div>
