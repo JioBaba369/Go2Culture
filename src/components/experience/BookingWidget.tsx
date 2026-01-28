@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, collection, runTransaction, serverTimestamp, getDoc, increment } from 'firebase/firestore';
+import { doc, collection, runTransaction, serverTimestamp, getDoc, increment, setDoc } from 'firebase/firestore';
 import { Experience, Host, Coupon, Booking, User, Conversation, PlatformSetting } from '@/lib/types';
 import { createNotification } from '@/lib/notification-actions';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -114,6 +114,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
     isGift ? setIsGifting(true) : setIsBooking(true);
 
     let bookingDataForTransaction: Partial<Booking> = {};
+    const newBookingRef = doc(collection(firestore, 'bookings'));
 
     runTransaction(firestore, async (transaction) => {
       const userRef = doc(firestore, 'users', user.uid);
@@ -127,8 +128,6 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       if (!userSnap.exists()) {
         throw new Error("Current user profile not found.");
       }
-
-      const currentUser = { id: userSnap.id, ...userSnap.data() } as User;
       
       const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
       let finalDiscountAmount = 0;
@@ -150,7 +149,6 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       const serviceFee = basePrice * (serviceFeePercentage / 100);
       const finalPrice = basePrice + serviceFee - finalDiscountAmount;
 
-      const newBookingRef = doc(collection(firestore, 'bookings'));
       const bookingData: Partial<Booking> = {
         guestId: user.uid,
         experienceId: experience!.id,
@@ -189,9 +187,22 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
 
       transaction.set(newBookingRef, bookingData as Booking);
       
-      // If it's an instant book or a gift, create the conversation atomically
+      if (isValidCoupon && couponRef) {
+          transaction.update(couponRef, { timesUsed: increment(1) });
+      }
+      
+      if (userSnap.exists() && !userSnap.data().termsAccepted) {
+          transaction.update(userRef, { termsAccepted: true });
+      }
+
+      return { userSnap };
+    })
+    .then(async ({ userSnap }) => {
+      // After transaction succeeds, create conversation if needed
       if (isGift || experience?.instantBook) {
         const conversationRef = doc(firestore, 'conversations', newBookingRef.id);
+        const currentUser = { id: userSnap.id, ...userSnap.data() } as User;
+
         const conversationData: Conversation = {
             id: newBookingRef.id,
             bookingId: newBookingRef.id,
@@ -219,19 +230,9 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
         };
-        transaction.set(conversationRef, conversationData);
+        await setDoc(conversationRef, conversationData);
       }
 
-
-      if (isValidCoupon && couponRef) {
-          transaction.update(couponRef, { timesUsed: increment(1) });
-      }
-      
-      if (userSnap.exists() && !userSnap.data().termsAccepted) {
-          transaction.update(userRef, { termsAccepted: true });
-      }
-    })
-    .then(async () => {
       if (appliedCoupon && discountAmount > 0 && !(await getDoc(doc(firestore, 'coupons', appliedCoupon.id))).data()?.isActive) {
            toast({ variant: 'destructive', title: 'Coupon Invalid', description: `Coupon "${appliedCoupon.id}" could not be applied.` });
       }
@@ -245,7 +246,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         firestore,
         experience.hostId,
         isGift || experience?.instantBook ? 'BOOKING_CONFIRMED' : 'BOOKING_REQUESTED',
-        'new-booking'
+        newBookingRef.id
       );
 
       setDate(undefined);
