@@ -1,14 +1,15 @@
 'use client';
 import { Firestore, collection, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
-import type { Booking, Review, User } from './types';
+import type { Booking, Review, User as AppUser } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { createNotification } from './notification-actions';
 import { logAudit } from './audit-actions';
+import type { User as AuthUser } from 'firebase/auth';
 
 export async function submitReview(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   booking: Booking,
   rating: number,
   comment: string
@@ -29,9 +30,13 @@ export async function submitReview(
 
   const reviewsColRef = collection(firestore, 'reviews');
   try {
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+    
     const newReviewRef = await addDoc(reviewsColRef, reviewData);
     
-    await logAudit(firestore, { actor, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
+    await logAudit(firestore, { actor: actorProfile, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
 
     await createNotification(
       firestore,
@@ -52,7 +57,7 @@ export async function submitReview(
 // Function for a guest to cancel their own booking
 export async function cancelBookingByGuest(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
@@ -64,9 +69,13 @@ export async function cancelBookingByGuest(
     }
     const booking = bookingSnap.data() as Booking;
 
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+
     await updateDoc(bookingRef, updatedData);
 
-    await logAudit(firestore, { actor, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'guest' } });
+    await logAudit(firestore, { actor: actorProfile, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'guest' } });
 
     await createNotification(
         firestore,
@@ -86,7 +95,7 @@ export async function cancelBookingByGuest(
 
 export async function requestReschedule(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   bookingId: string,
   newDate: Date
 ) {
@@ -106,9 +115,13 @@ export async function requestReschedule(
   const updatedData = { rescheduleRequest };
 
   try {
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+
     await updateDoc(bookingRef, updatedData as any);
     
-    await logAudit(firestore, { actor, action: 'REQUEST_RESCHEDULE', target: { type: 'booking', id: bookingId }, metadata: { newDate: newDate.toISOString() }});
+    await logAudit(firestore, { actor: actorProfile, action: 'REQUEST_RESCHEDULE', target: { type: 'booking', id: bookingId }, metadata: { newDate: newDate.toISOString() }});
 
     await createNotification(
       firestore,

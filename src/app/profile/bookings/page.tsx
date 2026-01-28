@@ -8,9 +8,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format, isPast } from 'date-fns';
+import type { User as AuthUser } from 'firebase/auth';
 
 import { Loader2, Star, ThumbsUp, MessageSquare, X, Hourglass, CalendarIcon } from 'lucide-react';
-import type { Booking, Experience, Review, User, Host } from '@/lib/types';
+import type { Booking, Experience, Review, User as AppUser, Host } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,7 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { submitReview, cancelBookingByGuest, requestReschedule } from '@/lib/actions/user/booking-actions';
+import { submitReview, cancelBookingByGuest, requestReschedule } from '@/lib/user-actions';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import {
@@ -33,7 +34,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { BookingDatePicker } from '@/components/ui/booking-date-picker';
 
@@ -74,7 +74,7 @@ function StarRating({ field }: { field: any }) {
   );
 }
 
-function ReviewForm({ booking, actor, onFinished }: { booking: Booking, actor: User, onFinished: () => void }) {
+function ReviewForm({ booking, actor, onFinished }: { booking: Booking, actor: AuthUser, onFinished: () => void }) {
   const { firestore } = useFirebase();
   const { toast } = useToast();
   const form = useForm<ReviewFormValues>({
@@ -130,7 +130,7 @@ function ReviewForm({ booking, actor, onFinished }: { booking: Booking, actor: U
   );
 }
 
-function RescheduleForm({ booking, experience, host, actor, onFinished }: { booking: Booking, experience: Experience, host: Host, actor: User, onFinished: () => void }) {
+function RescheduleForm({ booking, experience, host, actor, onFinished }: { booking: Booking, experience: Experience, host: Host, actor: AuthUser, onFinished: () => void }) {
   const { firestore } = useFirebase();
   const { toast } = useToast();
   const form = useForm<RescheduleFormValues>({
@@ -182,7 +182,7 @@ function RescheduleForm({ booking, experience, host, actor, onFinished }: { book
 }
 
 
-function BookingCard({ booking, actor, onAction, hasReviewed, isReviewCheckLoading }: { booking: Booking, actor: User | null, onAction: () => void, hasReviewed: boolean, isReviewCheckLoading: boolean }) {
+function BookingCard({ booking, actor, onAction, hasReviewed, isReviewCheckLoading }: { booking: Booking, actor: AuthUser | null, onAction: () => void, hasReviewed: boolean, isReviewCheckLoading: boolean }) {
   const { firestore } = useFirebase();
   const [isReviewFormOpen, setReviewFormOpen] = useState(false);
   const [isRescheduleOpen, setRescheduleOpen] = useState(false);
@@ -193,7 +193,7 @@ function BookingCard({ booking, actor, onAction, hasReviewed, isReviewCheckLoadi
   const { data: experience, isLoading: isExperienceLoading } = useDoc<Experience>(experienceRef);
   
   const hostUserRef = useMemoFirebase(() => (firestore ? doc(firestore, 'users', booking.hostId) : null), [firestore, booking.hostId]);
-  const { data: hostUser, isLoading: isHostUserLoading } = useDoc<User>(hostUserRef);
+  const { data: hostUser, isLoading: isHostUserLoading } = useDoc<AppUser>(hostUserRef);
   
   const hostProfileRef = useMemoFirebase(() => (firestore && hostUser ? doc(firestore, 'users', hostUser.id, 'hosts', hostUser.id) : null), [firestore, hostUser]);
   const { data: hostProfile, isLoading: isHostProfileLoading } = useDoc<Host>(hostProfileRef);

@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -12,15 +11,16 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { Experience, Booking, Conversation, User } from './types';
+import type { Experience, Booking, Conversation, User as AppUser } from './types';
 import { createNotification } from './notification-actions';
 import { logAudit } from './audit-actions';
+import type { User as AuthUser } from 'firebase/auth';
 
 export type ExperienceUpdateData = Partial<Omit<Experience, 'id' | 'hostId' | 'userId' | 'createdAt' | 'rating' | 'hostName' | 'hostProfilePhotoId'>>;
 
 export async function updatePayoutSettings(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   hostId: string,
   userId: string,
   data: { billingCountry: string }
@@ -28,8 +28,12 @@ export async function updatePayoutSettings(
   const hostRef = doc(firestore, 'users', userId, 'hosts', hostId);
   const dataToUpdate = { ...data, updatedAt: serverTimestamp() };
   try {
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+
     await updateDoc(hostRef, dataToUpdate);
-    await logAudit(firestore, { actor, action: 'UPDATE_PAYOUT_SETTINGS', target: { type: 'user', id: userId } });
+    await logAudit(firestore, { actor: actorProfile, action: 'UPDATE_PAYOUT_SETTINGS', target: { type: 'user', id: userId } });
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: hostRef.path,
@@ -43,7 +47,7 @@ export async function updatePayoutSettings(
 // Function to confirm a booking and create the associated conversation
 export async function confirmBooking(
   firestore: Firestore,
-  host: User, // Actor
+  hostAuth: AuthUser, // Actor is an AuthUser
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
@@ -55,15 +59,21 @@ export async function confirmBooking(
     }
     const booking = { id: bookingSnap.id, ...bookingSnap.data() } as Booking;
 
-    // Fetch guest profile to create participantInfo
+    // Fetch guest and host AppUser profiles from firestore
     const guestRef = doc(firestore, 'users', booking.guestId);
-    const guestSnap = await getDoc(guestRef);
+    const hostRef = doc(firestore, 'users', booking.hostId);
+    const [guestSnap, hostSnap] = await Promise.all([getDoc(guestRef), getDoc(hostRef)]);
+
 
     if (!guestSnap.exists()) {
       throw new Error("Guest profile could not be found.");
     }
-    const guestData = guestSnap.data() as User;
-    
+    if (!hostSnap.exists()) {
+        throw new Error("Host profile could not be found.");
+    }
+    const guestData = guestSnap.data() as AppUser;
+    const hostData = hostSnap.data() as AppUser;
+
     // Start a batch write
     const batch = writeBatch(firestore);
 
@@ -82,8 +92,8 @@ export async function confirmBooking(
           profilePhotoId: guestData.profilePhotoId || 'guest-1',
         },
         [booking.hostId]: {
-          fullName: host.fullName,
-          profilePhotoId: host.profilePhotoId || 'guest-1',
+          fullName: hostData.fullName, // Use fetched profile
+          profilePhotoId: hostData.profilePhotoId || 'guest-1', // Use fetched profile
         },
       },
       bookingInfo: {
@@ -101,7 +111,7 @@ export async function confirmBooking(
 
     // Log the audit event
     await logAudit(firestore, {
-        actor: host,
+        actor: hostData, // Pass the full host profile
         action: 'CONFIRM_BOOKING',
         target: { type: 'booking', id: bookingId }
     });
@@ -129,7 +139,7 @@ export async function confirmBooking(
 // Function for a host to cancel a booking
 export async function cancelBookingByHost(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
@@ -141,9 +151,13 @@ export async function cancelBookingByHost(
     }
     const booking = bookingSnap.data() as Booking;
 
+     const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+     if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+     const actorProfile = actorProfileSnap.data() as AppUser;
+
     await updateDoc(bookingRef, updatedData);
     
-    await logAudit(firestore, { actor, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'host' } });
+    await logAudit(firestore, { actor: actorProfile, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'host' } });
 
      await createNotification(
       firestore,
@@ -165,14 +179,18 @@ export async function cancelBookingByHost(
 // Function to pause an experience
 export async function pauseExperienceForHost(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   const updatedData = { status: 'paused' };
   try {
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+
     await updateDoc(expRef, updatedData);
-    await logAudit(firestore, { actor, action: 'PAUSE_EXPERIENCE', target: { type: 'experience', id: experienceId }});
+    await logAudit(firestore, { actor: actorProfile, action: 'PAUSE_EXPERIENCE', target: { type: 'experience', id: experienceId }});
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
@@ -186,14 +204,18 @@ export async function pauseExperienceForHost(
 // Function to start (make live) an experience
 export async function startExperienceForHost(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   const updatedData = { status: 'live' };
   try {
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+
     await updateDoc(expRef, updatedData);
-    await logAudit(firestore, { actor, action: 'START_EXPERIENCE', target: { type: 'experience', id: experienceId }});
+    await logAudit(firestore, { actor: actorProfile, action: 'START_EXPERIENCE', target: { type: 'experience', id: experienceId }});
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
@@ -207,15 +229,19 @@ export async function startExperienceForHost(
 // Function to update an experience
 export async function updateExperience(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   experienceId: string,
   data: ExperienceUpdateData
 ) {
     const expRef = doc(firestore, 'experiences', experienceId);
     const dataWithTimestamp = { ...data, updatedAt: serverTimestamp() };
     try {
+        const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+        if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+        const actorProfile = actorProfileSnap.data() as AppUser;
+
         await updateDoc(expRef, dataWithTimestamp);
-        await logAudit(firestore, { actor, action: 'UPDATE_EXPERIENCE', target: { type: 'experience', id: experienceId }, metadata: { updatedFields: Object.keys(data) } });
+        await logAudit(firestore, { actor: actorProfile, action: 'UPDATE_EXPERIENCE', target: { type: 'experience', id: experienceId }, metadata: { updatedFields: Object.keys(data) } });
     } catch(serverError) {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: expRef.path,
@@ -229,13 +255,17 @@ export async function updateExperience(
 // Function to delete an experience
 export async function deleteExperienceForHost(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   try {
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+
     await deleteDoc(expRef);
-    await logAudit(firestore, { actor, action: 'DELETE_EXPERIENCE', target: { type: 'experience', id: experienceId }});
+    await logAudit(firestore, { actor: actorProfile, action: 'DELETE_EXPERIENCE', target: { type: 'experience', id: experienceId }});
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
@@ -247,7 +277,7 @@ export async function deleteExperienceForHost(
 
 export async function respondToReschedule(
   firestore: Firestore,
-  actor: User,
+  actorAuth: AuthUser,
   bookingId: string,
   accepted: boolean
 ) {
@@ -277,9 +307,13 @@ export async function respondToReschedule(
   }
 
   try {
+    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+    const actorProfile = actorProfileSnap.data() as AppUser;
+
     await updateDoc(bookingRef, updatedData);
 
-    await logAudit(firestore, { actor, action: accepted ? 'ACCEPT_RESCHEDULE' : 'DECLINE_RESCHEDULE', target: { type: 'booking', id: bookingId } });
+    await logAudit(firestore, { actor: actorProfile, action: accepted ? 'ACCEPT_RESCHEDULE' : 'DECLINE_RESCHEDULE', target: { type: 'booking', id: bookingId } });
     
     await createNotification(
       firestore,

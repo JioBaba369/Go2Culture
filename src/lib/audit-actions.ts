@@ -2,10 +2,10 @@
 'use client';
 
 import { Firestore, collection, serverTimestamp, addDoc } from 'firebase/firestore';
-import type { User, AuditLog } from './types';
+import type { User as AppUser, AuditLog } from './types';
 
 type AuditLogPayload = {
-    actor: User;
+    actor: AppUser;
     action: string;
     target: { type: AuditLog['targetType']; id: string; };
     metadata?: Record<string, any>;
