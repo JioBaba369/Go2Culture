@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -7,7 +6,7 @@ import {
   CardTitle,
   CardDescription,
   CardFooter,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +22,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,7 +75,7 @@ export default function HostExperiencesPage() {
       user && firestore
         ? query(collection(firestore, 'experiences'), where('userId', '==', user.uid))
         : null,
-    [user, firestore]
+    [user, firestore, isToggling, isDeleting]
   );
   const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
   const isLoading = isUserLoading || areExperiencesLoading;
@@ -133,7 +132,7 @@ export default function HostExperiencesPage() {
             </div>
         </TableCell>
         <TableCell className="font-medium">{experience.title}</TableCell>
-        <TableCell>${experience.pricing.pricePerGuest}</TableCell>
+        <TableCell>${experience.pricing.pricePerGuest.toFixed(2)}</TableCell>
         <TableCell>
           {experience.createdAt?.toDate
             ? format(experience.createdAt.toDate(), 'PP')
@@ -158,7 +157,7 @@ export default function HostExperiencesPage() {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-9 w-9" disabled={isTogglingThis}>
-                            {isTogglingThis ? <Skeleton className="h-4 w-4 rounded-full" /> : <MoreHorizontal className="h-4 w-4" />}
+                            {isTogglingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                             <span className="sr-only">Actions</span>
                         </Button>
                     </DropdownMenuTrigger>
@@ -202,7 +201,7 @@ export default function HostExperiencesPage() {
                     </div>
                     <div className="flex-grow">
                         <h3 className="font-semibold leading-tight">{experience.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">${experience.pricing.pricePerGuest} / person</p>
+                        <p className="text-sm text-muted-foreground mt-1">${experience.pricing.pricePerGuest.toFixed(2)} / person</p>
                         <div className="mt-2">
                             <Badge variant={statusVariantMap[experience.status]} className="capitalize">
                                 {experience.status}
@@ -221,7 +220,7 @@ export default function HostExperiencesPage() {
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-9 w-9" disabled={isTogglingThis}>
-                        {isTogglingThis ? <Skeleton className="h-4 w-4 rounded-full" /> : <MoreHorizontal className="h-4 w-4" />}
+                        {isTogglingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                         <span className="sr-only">Actions</span>
                     </Button>
                     </DropdownMenuTrigger>
@@ -341,5 +340,3 @@ export default function HostExperiencesPage() {
     </div>
   );
 }
-
-    
