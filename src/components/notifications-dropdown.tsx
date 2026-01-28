@@ -6,7 +6,7 @@ import { collection, query, orderBy, writeBatch, doc } from 'firebase/firestore'
 import type { Notification } from '@/lib/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, MessageSquare, Star, CalendarCheck, AlertTriangle } from 'lucide-react';
+import { Bell, CheckCheck, MessageSquare, Star, CalendarCheck, AlertTriangle, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -63,6 +63,18 @@ function getNotificationDetails(notification: Notification): { icon: React.Eleme
                 icon: CalendarCheck,
                 message: "A host has responded to your reschedule request.",
                 link: '/profile/bookings'
+            };
+        case 'NEW_REFERRAL':
+            return {
+                icon: Users,
+                message: "A friend has joined using your referral link!",
+                link: '/profile/referrals'
+            };
+        case 'EMAIL_VERIFICATION_PENDING':
+            return {
+                icon: AlertTriangle,
+                message: "Please verify your email address to complete your registration.",
+                link: '/profile'
             };
         default:
             return {

@@ -22,6 +22,14 @@ service cloud.firestore {
       return booking != null && (request.auth.uid == booking.guestId || request.auth.uid == booking.hostId);
     }
     
+    function hasAttendedBooking(bookingId) {
+      let booking = get(/databases/$(database)/documents/bookings/$(bookingId)).data;
+      return booking != null &&
+             booking.guestId == request.auth.uid &&
+             booking.status == 'Confirmed' &&
+             booking.bookingDate < request.time;
+    }
+    
     function canSendMessage() {
       let lastMessageTime = get(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat).data.lastMessageAt;
       return !exists(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat)
@@ -39,7 +47,7 @@ service cloud.firestore {
       allow delete: if false; // Use soft deletes
 
       match /hosts/{hostId} {
-        allow read: if true;
+        allow read: if isSelf(userId) || isAdmin(); // Restricted read access
         allow write: if isSelf(userId) || isAdmin();
       }
 
@@ -98,7 +106,9 @@ service cloud.firestore {
     /* ───────────────── Reviews ───────────────── */
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.guestId == request.auth.uid;
+      allow create: if isSignedIn() && 
+                     request.resource.data.guestId == request.auth.uid &&
+                     hasAttendedBooking(request.resource.data.bookingId);
       allow update: if (isSignedIn() && isSelf(resource.data.guestId)) || isAdmin();
       allow delete: if false;
     }
@@ -115,9 +125,6 @@ service cloud.firestore {
     match /conversations/{bookingId} {
       allow read, list: if isBookingParticipant(bookingId) || isAdmin();
 
-      // This rule is updated to allow a client to create the conversation document,
-      // but only if they are a participant in the associated CONFIRMED booking.
-      // This is necessary to support instant bookings in a client-only environment.
       allow create: if isBookingParticipant(bookingId)
                     && get(/databases/$(database)/documents/bookings/$(bookingId)).data.status == 'Confirmed'
                     && request.resource.data.id == bookingId;
@@ -137,6 +144,11 @@ service cloud.firestore {
     }
 
     /* ───────────────── Admin & System Collections ───────────────── */
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
     match /sponsors/{sponsorId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -159,5 +171,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

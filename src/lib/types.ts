@@ -280,7 +280,7 @@ export type Conversation = {
 export type Notification = {
   id: string;
   userId: string;
-  type: 'BOOKING_CONFIRMED' | 'BOOKING_REQUESTED' | 'BOOKING_CANCELLED' | 'NEW_MESSAGE' | 'HOST_APPROVED' | 'REVIEW_RECEIVED' | 'GENERIC_ALERT' | 'RESCHEDULE_REQUEST' | 'RESCHEDULE_RESPONSE' | 'NEW_REFERRAL';
+  type: 'BOOKING_CONFIRMED' | 'BOOKING_REQUESTED' | 'BOOKING_CANCELLED' | 'NEW_MESSAGE' | 'HOST_APPROVED' | 'REVIEW_RECEIVED' | 'GENERIC_ALERT' | 'RESCHEDULE_REQUEST' | 'RESCHEDULE_RESPONSE' | 'NEW_REFERRAL' | 'EMAIL_VERIFICATION_PENDING';
   entityId: string; // e.g., bookingId, reviewId
   isRead: boolean;
   createdAt: any; // Allow ServerTimestamp
@@ -385,7 +385,7 @@ export type AuditLog = {
     actorId: string;
     actorRole: 'guest' | 'host' | 'both' | 'admin' | 'system';
     action: string;
-    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message' | 'report' | 'coupon' | 'sponsor';
+    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message' | 'report' | 'coupon' | 'sponsor' | 'story' | 'job';
     targetId: string;
     metadata?: Record<string, any>;
     createdAt: any; // Allow ServerTimestamp
@@ -409,4 +409,14 @@ export type Job = {
   createdAt: any;
   updatedAt?: any;
 };
-    
+
+export type Story = {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorProfilePhotoId: string;
+  title: string;
+  content: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: any;
+};
