@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -37,9 +38,9 @@ service cloud.firestore {
 
     /* ───────────────── Users ───────────────── */
     match /users/{userId} {
-      allow read: if true;
+      allow read: if isSelf(userId) || isAdmin();
       allow create: if isSelf(userId);
-      // Client cannot change role or status, but can update their own profile.
+      // Client cannot change role or status
       allow update: if isSelf(userId)
         && !('role' in request.resource.data.diff(resource.data).affectedKeys())
         && !('status' in request.resource.data.diff(resource.data).affectedKeys());
@@ -52,6 +53,12 @@ service cloud.firestore {
 
       match /wishlist/{experienceId} {
         allow read, write: if isSelf(userId);
+      }
+      
+      match /referredUsers/{referredUserId} {
+        allow read: if isSelf(userId) || isAdmin();
+        allow create: if request.auth.uid == referredUserId; // A new user can create their own entry in a referrer's list
+        allow update, delete: if isAdmin();
       }
 
       match /notifications/{notificationId} {
