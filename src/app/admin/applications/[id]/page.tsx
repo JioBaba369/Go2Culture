@@ -48,6 +48,7 @@ import {
   BrainCircuit,
   Link as LinkIcon,
   CheckCircle,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
@@ -554,3 +555,4 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
+
