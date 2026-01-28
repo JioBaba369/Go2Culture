@@ -42,7 +42,7 @@ export default function Home() {
             Experience Authentic Food & Culture. Go where culture lives.
           </h1>
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-neutral-200 drop-shadow-md">
-            Experience authentic food and culture, right in someone's home.
+            Go where culture lives.
           </p>
           <HeroSearch />
         </div>
