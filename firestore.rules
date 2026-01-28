@@ -49,10 +49,10 @@ service cloud.firestore {
       allow read: if isSelf(userId) || isAdmin();
       // A user can only create their own user document.
       allow create: if isSelf(userId);
-      // Users can update their own profile, but cannot change their role or status.
-      allow update: if isSelf(userId)
+      // Users can update their own profile (but not role/status), and admins can update user profiles.
+      allow update: if (isSelf(userId)
         && !('role' in request.resource.data.diff(resource.data).affectedKeys())
-        && !('status' in request.resource.data.diff(resource.data).affectedKeys());
+        && !('status' in request.resource.data.diff(resource.data).affectedKeys())) || isAdmin();
       // Soft deletes are handled by updating the `status` field, not direct deletion.
       allow delete: if false;
 
@@ -81,8 +81,10 @@ service cloud.firestore {
       match /notifications/{notificationId} {
         // A user can read, update (mark as read), and delete their own notifications.
         allow read, update, delete: if isSelf(userId);
-        // Any signed-in user can create a notification for another user.
-        allow create: if isSignedIn();
+        // Any signed-in user can create a notification for another user,
+        // as long as the notification is correctly addressed to that user.
+        // This is necessary for client-side actions like sending messages or confirming bookings.
+        allow create: if isSignedIn() && request.resource.data.userId == userId;
       }
       
       // Used for rate-limiting client-side actions like sending messages.
