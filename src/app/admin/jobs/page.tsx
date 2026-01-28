@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Job } from "@/lib/types";
 import { format } from 'date-fns';
@@ -62,6 +62,7 @@ import { deleteJob, createOrUpdateJob } from "@/lib/job-actions";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Textarea } from '@/components/ui/textarea';
+import { ADMIN_UID } from '@/lib/auth';
 
 const jobSchema = z.object({
     id: z.string().optional(),
@@ -124,7 +125,7 @@ function JobForm({ job, onFinished }: { job?: Job, onFinished: () => void }) {
                     )} />
                 </div>
                 <FormField control={methods.control} name="description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} rows={5} placeholder="Describe the role and responsibilities..." /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea rows={5} placeholder="Describe the role and responsibilities..." {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                  <FormField control={methods.control} name="isActive" render={({ field }) => (
                     <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
@@ -146,7 +147,9 @@ function JobForm({ job, onFinished }: { job?: Job, onFinished: () => void }) {
 
 export default function AdminJobsPage() {
   const firestore = useFirestore();
-  const jobsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'jobs') : null, [firestore]);
+  const { user } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
+  const jobsQuery = useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'jobs') : null, [firestore, isAdmin]);
   const { data: jobs, isLoading } = useCollection<Job>(jobsQuery);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | undefined>(undefined);

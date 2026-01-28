@@ -63,7 +63,7 @@ export default function AdminUsersPage() {
   const { user } = useUser();
   const isAdmin = user?.uid === ADMIN_UID;
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'users') : null, [firestore, isAdmin]));
-  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(useMemoFirebase(() => (firestore && isAdmin ? collection(firestore, 'experiences') : null), [firestore, isAdmin]));
+  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'experiences') : null, [firestore, isAdmin]));
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'bookings') : null, [firestore, isAdmin]));
 
   const [searchTerm, setSearchTerm] = useState('');
