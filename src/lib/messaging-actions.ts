@@ -41,7 +41,6 @@ export async function sendMessage(
   const conversationRef = doc(firestore, 'conversations', booking.id);
   
   const conversationUpdateData = {
-    // Denormalized data can be updated on each message to keep it fresh
     participantInfo: {
       [currentUser.id]: {
         fullName: currentUser.fullName,
@@ -58,13 +57,14 @@ export async function sendMessage(
       senderId: currentUser.id,
     },
     updatedAt: serverTimestamp(),
-    // Use dot notation to update only the current user's read status
-    [`readBy.${currentUser.id}`]: serverTimestamp(),
+    readBy: {
+        [currentUser.id]: serverTimestamp()
+    }
   };
 
-  // Use update instead of set({ merge: true }) to avoid violating security rules
-  // that prevent modification of immutable fields like 'participants' or 'bookingInfo'.
-  batch.update(conversationRef, conversationUpdateData);
+  // Using set with merge: true will create if not exists, and update if it does.
+  // We only include the fields that are allowed to be updated.
+  batch.set(conversationRef, conversationUpdateData, { merge: true });
 
 
   try {

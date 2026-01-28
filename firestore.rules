@@ -79,7 +79,10 @@ service cloud.firestore {
 
       // Users can manage their own notifications.
       match /notifications/{notificationId} {
-        allow read, write: if isSelf(userId);
+        // A user can read, update (mark as read), and delete their own notifications.
+        allow read, update, delete: if isSelf(userId);
+        // Any signed-in user can create a notification for another user.
+        allow create: if isSignedIn();
       }
       
       // Used for rate-limiting client-side actions like sending messages.
