@@ -20,18 +20,27 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-const navItems = [
-    { href: '/host', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/host/bookings', label: 'Bookings', icon: CalendarCheck },
-    { href: '/host/calendar', label: 'Calendar', icon: Calendar },
-    { href: '/host/experiences', label: 'Experiences', icon: Utensils },
-    { href: '/host/payouts', label: 'Payouts', icon: DollarSign },
-    { href: '/host/contract', label: 'Host Contract', icon: FileText },
-];
+const menuSections = {
+    'Overview': [
+        { href: '/host', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+    'Management': [
+        { href: '/host/bookings', label: 'Bookings', icon: CalendarCheck },
+        { href: '/host/calendar', label: 'Calendar', icon: Calendar },
+        { href: '/host/experiences', label: 'Experiences', icon: Utensils },
+    ],
+    'Finance & Legal': [
+        { href: '/host/payouts', label: 'Payouts', icon: DollarSign },
+        { href: '/host/contract', label: 'Host Contract', icon: FileText },
+    ],
+};
+
 
 export default function HostLayout({ children }: { children: ReactNode }) {
     const pathname = usePathname();
@@ -80,21 +89,26 @@ export default function HostLayout({ children }: { children: ReactNode }) {
                     </div>
                 </SidebarHeader>
                 <SidebarContent>
-                    <SidebarMenu>
-                        {navItems.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                            <Link href={item.href}>
-                            <SidebarMenuButton
-                                isActive={pathname === item.href}
-                                tooltip={item.label}
-                            >
-                                <item.icon />
-                                <span>{item.label}</span>
-                            </SidebarMenuButton>
-                            </Link>
-                        </SidebarMenuItem>
-                        ))}
-                    </SidebarMenu>
+                    {Object.entries(menuSections).map(([section, items]) => (
+                        <SidebarGroup key={section}>
+                            <SidebarGroupLabel>{section}</SidebarGroupLabel>
+                            <SidebarMenu>
+                                {items.map((item) => (
+                                <SidebarMenuItem key={item.href}>
+                                    <Link href={item.href}>
+                                    <SidebarMenuButton
+                                        isActive={pathname === item.href}
+                                        tooltip={item.label}
+                                    >
+                                        <item.icon />
+                                        <span>{item.label}</span>
+                                    </SidebarMenuButton>
+                                    </Link>
+                                </SidebarMenuItem>
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroup>
+                    ))}
                 </SidebarContent>
                 <SidebarFooter>
                     <SidebarMenu>

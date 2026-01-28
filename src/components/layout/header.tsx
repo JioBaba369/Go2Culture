@@ -97,6 +97,12 @@ export function Header() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
+                     <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link href="/profile">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        <span>My Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link href="/messages">
                         <MessageSquare className="mr-2 h-4 w-4" />
@@ -106,37 +112,28 @@ export function Header() {
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link href="/profile/bookings">
                         <CalendarCheck className="mr-2 h-4 w-4" />
-                        <span>My Reservations</span>
+                        <span>My Bookings</span>
                       </Link>
                     </DropdownMenuItem>
                      <DropdownMenuItem asChild className="cursor-pointer">
                       <Link href="/profile/wishlist">
                         <Heart className="mr-2 h-4 w-4" />
-                        <span>My Wishlist</span>
+                        <span>Wishlist</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link href="/profile">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        <span>Account Settings</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link href="/profile/referrals">
-                        <Wallet className="mr-2 h-4 w-4" />
-                        <span>Refer a Friend</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    {isHost && (
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  {isHost && (
+                      <>
                       <DropdownMenuItem asChild className="cursor-pointer">
                           <Link href="/host">
                               <LayoutDashboard className="mr-2 h-4 w-4" />
                               <span>Host Dashboard</span>
                           </Link>
                       </DropdownMenuItem>
-                    )}
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
+                      <DropdownMenuSeparator />
+                      </>
+                  )}
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
@@ -191,9 +188,6 @@ export function Header() {
                       </Button>
                       <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
                         <Link href="/profile">Account Settings</Link>
-                      </Button>
-                      <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>
-                        <Link href="/profile/referrals">Refer a Friend</Link>
                       </Button>
                       {isHost && (
                          <Button variant="ghost" className="w-full justify-start text-lg font-medium" asChild>

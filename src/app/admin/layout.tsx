@@ -1,4 +1,3 @@
-
 'use client';
 import {
   SidebarProvider,
@@ -11,6 +10,8 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,6 +28,8 @@ import {
   Handshake,
   DollarSign,
   Briefcase,
+  Wallet,
+  BookUser,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -35,18 +38,29 @@ import { signOut } from 'firebase/auth';
 import React from 'react';
 import { ADMIN_UID } from '@/lib/auth';
 
-const menuItems = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/applications', label: 'Host Applications', icon: ClipboardList },
-  { href: '/admin/experiences', label: 'Experiences', icon: Utensils },
-  { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
-  { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/payouts', label: 'Payouts', icon: DollarSign },
-  { href: '/admin/reports', label: 'Reports', icon: MessageSquareWarning },
-  { href: '/admin/coupons', label: 'Coupons', icon: Tag },
-  { href: '/admin/sponsors', label: 'Sponsors', icon: Handshake },
-  { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
-];
+const menuSections = {
+  'Overview': [
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  ],
+  'Management': [
+    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/applications', label: 'Host Applications', icon: ClipboardList },
+    { href: '/admin/experiences', label: 'Experiences', icon: Utensils },
+    { href: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
+    { href: '/admin/reports', label: 'Reports', icon: MessageSquareWarning },
+  ],
+  'Finance & Growth': [
+    { href: '/admin/payouts', label: 'Payouts', icon: DollarSign },
+    { href: '/admin/referrals', label: 'Referrals', icon: Wallet },
+    { href: '/admin/coupons', label: 'Coupons', icon: Tag },
+  ],
+  'Platform': [
+    { href: '/admin/sponsors', label: 'Sponsors', icon: Handshake },
+    { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
+    { href: '/admin/stories', label: 'Stories', icon: BookUser },
+  ],
+};
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -90,21 +104,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu>
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <Link href={item.href}>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={item.label}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+          {Object.entries(menuSections).map(([section, items]) => (
+            <SidebarGroup key={section}>
+              <SidebarGroupLabel>{section}</SidebarGroupLabel>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <Link href={item.href}>
+                      <SidebarMenuButton
+                        isActive={pathname === item.href}
+                        tooltip={item.label}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
+          ))}
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
