@@ -130,7 +130,7 @@ function JobForm({ job, onFinished }: { job?: Job, onFinished: () => void }) {
                         <FormDescription>
                             Use HTML for formatting. E.g., &lt;h4&gt;Heading&lt;/h4&gt;, &lt;ul&gt;&lt;li&gt;Point 1&lt;/li&gt;&lt;/ul&gt;.
                         </FormDescription>
-                        <FormControl><Textarea rows={15} placeholder="Describe the role, responsibilities, skills, and offer..." {...field} /></FormControl>
+                        <FormControl><Textarea rows={15} placeholder="Purpose of Position, Key Tasks, Skills & Expertise , Our Offer" {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
