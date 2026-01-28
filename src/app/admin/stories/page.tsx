@@ -21,11 +21,12 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { collection, doc, updateDoc } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { Story } from "@/lib/types";
 import { format } from 'date-fns';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,6 +34,7 @@ import { MoreHorizontal, Loader2, Check, X, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ADMIN_UID } from "@/lib/auth";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { updateStoryStatus } from '@/lib/actions/admin/story-actions';
 
 const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
   pending: "secondary",
@@ -58,8 +60,7 @@ export default function AdminStoriesPage() {
     if (!firestore) return;
     setUpdatingStoryId(storyId);
     try {
-      const storyRef = doc(firestore, 'stories', storyId);
-      await updateDoc(storyRef, { status });
+      await updateStoryStatus(firestore, storyId, status);
       toast({
         title: "Story Status Updated",
         description: `The story has been ${status}.`
