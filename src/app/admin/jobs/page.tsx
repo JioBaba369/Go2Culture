@@ -196,7 +196,7 @@ export default function AdminJobsPage() {
                     <PlusCircle className="mr-2"/> Create Job
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-4xl">
                 <DialogHeader>
                     <DialogTitle>{selectedJob ? 'Edit Job' : 'Create New Job'}</DialogTitle>
                     <DialogDescription>{selectedJob ? `Editing "${selectedJob.title}".` : 'Fill out the details for the new job posting.'}</DialogDescription>
