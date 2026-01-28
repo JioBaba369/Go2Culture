@@ -255,6 +255,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       setAppliedCoupon(null);
       setDiscountAmount(0);
 
+      router.push('/profile/bookings');
     })
     .catch((serverError) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
