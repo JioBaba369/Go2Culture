@@ -141,7 +141,7 @@ service cloud.firestore {
                     && request.resource.data.id == bookingId;
       
       allow update: if isBookingParticipant(bookingId) 
-                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy', 'updatedAt']);
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy', 'updatedAt', 'participantInfo']);
     }
 
     match /conversations/{bookingId}/messages/{messageId} {

@@ -39,13 +39,9 @@ export async function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Create or update the conversation document. 
-  // Using set with merge:true allows this to work for the first message (creation)
-  // and subsequent messages (update).
-  const conversationData: Partial<Conversation> = {
-    id: booking.id, // Ensure ID is set on creation
-    bookingId: booking.id,
-    participants: [currentUser.id, recipient.id],
+  // 2. Prepare the update for the conversation document.
+  // This uses `update` to avoid overwriting the 'readBy' map and other fields.
+  const conversationUpdate = {
     participantInfo: {
       [currentUser.id]: {
         fullName: currentUser.fullName,
@@ -56,22 +52,16 @@ export async function sendMessage(
         profilePhotoId: recipient.profilePhotoId || 'guest-1',
       },
     },
-    bookingInfo: {
-      experienceTitle: booking.experienceTitle,
-      experienceId: booking.experienceId,
-    },
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    readBy: {
-      [currentUser.id]: serverTimestamp(),
-    },
     updatedAt: serverTimestamp(),
+    // Use dot notation to update only the current user's read status in the map
+    [`readBy.${currentUser.id}`]: serverTimestamp(),
   };
-  // On first message, create the doc. On subsequent, merge fields.
-  batch.set(conversationRef, conversationData, { merge: true });
+  batch.update(conversationRef, conversationUpdate);
   
   // 3. Add rate limit update to the same batch
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
@@ -95,7 +85,7 @@ export async function sendMessage(
       new FirestorePermissionError({
         path: `batch write (messages, conversations/${booking.id})`,
         operation: 'write',
-        requestResourceData: { newMessage, conversationData },
+        requestResourceData: { newMessage, conversationUpdate },
       })
     );
     throw serverError;
