@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { logAudit } from '../audit-actions';
+import { logAudit } from '@/lib/audit-actions';
 import { User } from '@/lib/types';
 import { ADMIN_UID } from '@/lib/auth';
 

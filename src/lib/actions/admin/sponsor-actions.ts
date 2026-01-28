@@ -12,7 +12,7 @@ import {
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { ADMIN_UID } from '@/lib/auth';
-import { logAudit } from '../audit-actions';
+import { logAudit } from '@/lib/audit-actions';
 import { User, Sponsor } from '@/lib/types';
 
 type SponsorFormData = Omit<Sponsor, 'id' | 'createdAt' | 'deletedAt'>;

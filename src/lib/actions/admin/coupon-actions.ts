@@ -11,7 +11,7 @@ import {
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { ADMIN_UID } from '@/lib/auth';
-import { logAudit } from '../audit-actions';
+import { logAudit } from '@/lib/audit-actions';
 import { User, Coupon } from '@/lib/types';
 
 type CouponFormData = Omit<Coupon, 'timesUsed' | 'createdAt' | 'updatedAt' | 'deletedAt'>;

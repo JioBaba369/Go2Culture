@@ -12,7 +12,7 @@ import {
 import { Job, User } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { logAudit } from '../audit-actions';
+import { logAudit } from '@/lib/audit-actions';
 import { ADMIN_UID } from '@/lib/auth';
 
 // Function to create or update a job posting
