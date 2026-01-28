@@ -385,7 +385,7 @@ export type AuditLog = {
     actorId: string;
     actorRole: 'guest' | 'host' | 'both' | 'admin' | 'system';
     action: string;
-    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message' | 'report' | 'coupon' | 'sponsor' | 'job' | 'story';
+    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message' | 'report' | 'coupon' | 'sponsor' | 'job' | 'story' | 'platformSettings';
     targetId: string;
     metadata?: Record<string, any>;
     createdAt: any; // Allow ServerTimestamp
@@ -419,4 +419,9 @@ export type Story = {
   content: string;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: any;
+};
+
+export type PlatformSetting = {
+  referralAmount: number;
+  updatedAt?: any;
 };

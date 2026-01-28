@@ -155,6 +155,11 @@ service cloud.firestore {
     }
 
     /* ───────────────── Admin & System Collections ───────────────── */
+    match /platformSettings/{settingId} {
+        allow read: if true;
+        allow write: if isAdmin();
+    }
+
     match /jobs/{jobId} {
       allow read: if true;
       allow write: if isAdmin();

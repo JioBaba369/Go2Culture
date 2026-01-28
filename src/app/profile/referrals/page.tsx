@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase';
 import { doc, collection, query } from 'firebase/firestore';
-import type { User, ReferredUser } from '@/lib/types';
+import type { User, ReferredUser, PlatformSetting } from '@/lib/types';
 import { Facebook, Twitter, Mail, Copy, Share2, Wallet, Users, Gift } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -73,15 +73,19 @@ export default function ReferralsPage() {
     );
     const { data: referredUsers, isLoading: areReferredUsersLoading } = useCollection<ReferredUser>(referredUsersQuery);
 
+    const settingsRef = useMemoFirebase(() => (firestore ? doc(firestore, 'platformSettings', 'config') : null), [firestore]);
+    const { data: settings, isLoading: areSettingsLoading } = useDoc<PlatformSetting>(settingsRef);
+
     const referralCode = useMemo(() => user ? user.uid.substring(0, 8).toUpperCase() : '', [user]);
     const referralLink = `https://go2culture.com/signup?ref=${referralCode}`;
+    const referralAmount = settings?.referralAmount || 10;
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(referralLink);
         toast({ title: 'Copied!', description: 'Your referral link has been copied to your clipboard.' });
     }
     
-    const isLoading = isUserLoading || isProfileLoading || areReferredUsersLoading;
+    const isLoading = isUserLoading || isProfileLoading || areReferredUsersLoading || areSettingsLoading;
     
     if (isLoading) {
         return (
@@ -98,7 +102,7 @@ export default function ReferralsPage() {
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-headline font-bold">Referrals & Credits</h1>
-                <p className="text-muted-foreground">Share the gift of culture. When your friend completes their first experience, you both get a $10 credit.</p>
+                <p className="text-muted-foreground">Share the gift of culture. When your friend completes their first experience, you both get a ${referralAmount} credit.</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
@@ -115,7 +119,7 @@ export default function ReferralsPage() {
                     <CardHeader>
                         <CardTitle>Invite someone who would value this experience.</CardTitle>
                         <CardDescription>
-                            Give friends $10 off their first booking. After they attend, you'll get $10 credit.
+                            Give friends ${referralAmount} off their first booking. After they attend, you'll get ${referralAmount} credit.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -132,12 +136,12 @@ export default function ReferralsPage() {
                                 </a>
                             </Button>
                              <Button variant="outline" size="icon" asChild>
-                                <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me on Go2Culture! Use my link to get $10 off your first experience.`)}&url=${encodeURIComponent(referralLink)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
+                                <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me on Go2Culture! Use my link to get $${referralAmount} off your first experience.`)}&url=${encodeURIComponent(referralLink)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
                                     <Twitter className="h-5 w-5" />
                                 </a>
                             </Button>
                             <Button variant="outline" size="icon" asChild>
-                                <a href={`mailto:?subject=You're invited to Go2Culture!&body=${encodeURIComponent(`Hey! I use Go2Culture to find authentic food experiences. Join with my link to get $10 off your first booking: ${referralLink}`)}`} aria-label="Share via Email">
+                                <a href={`mailto:?subject=You're invited to Go2Culture!&body=${encodeURIComponent(`Hey! I use Go2Culture to find authentic food experiences. Join with my link to get $${referralAmount} off your first booking: ${referralLink}`)}`} aria-label="Share via Email">
                                     <Mail className="h-5 w-5" />
                                 </a>
                             </Button>
@@ -158,15 +162,15 @@ export default function ReferralsPage() {
                     <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary font-bold text-xl mb-4">
                         <Gift className="h-6 w-6"/>
                     </div>
-                    <h3 className="text-xl font-bold font-headline">They Get $10</h3>
-                    <p className="text-muted-foreground mt-2 text-sm">Your friend gets $10 off their first booking when they sign up using your link.</p>
+                    <h3 className="text-xl font-bold font-headline">They Get ${referralAmount}</h3>
+                    <p className="text-muted-foreground mt-2 text-sm">Your friend gets ${referralAmount} off their first booking when they sign up using your link.</p>
                 </div>
                 <div className="flex flex-col items-center">
                     <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary font-bold text-xl mb-4">
                          <Wallet className="h-6 w-6"/>
                     </div>
-                    <h3 className="text-xl font-bold font-headline">You Get $10</h3>
-                    <p className="text-muted-foreground mt-2 text-sm">After your friend completes their first experience, you receive $10 credit in your account.</p>
+                    <h3 className="text-xl font-bold font-headline">You Get ${referralAmount}</h3>
+                    <p className="text-muted-foreground mt-2 text-sm">After your friend completes their first experience, you receive ${referralAmount} credit in your account.</p>
                 </div>
             </div>
 

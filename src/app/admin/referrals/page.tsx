@@ -1,4 +1,3 @@
-
 'use client';
 import { useMemo } from 'react';
 import {
@@ -16,19 +15,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { User, ReferredUser } from '@/lib/types';
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
+import { User, ReferredUser, PlatformSetting } from '@/lib/types';
 import { collection, query, where, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { useDoc } from '@/firebase/firestore/use-doc';
 import { ADMIN_UID } from '@/lib/auth';
 import { Gift, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
-function ReferralSummary({ users, isLoading }: { users: User[] | null, isLoading: boolean }) {
+function ReferralSummary({ users, settings, isLoading }: { users: User[] | null, settings: PlatformSetting | null, isLoading: boolean }) {
   const summary = useMemo(() => {
     if (!users) return { totalReferrals: 0, totalCreditAwarded: 0 };
 
@@ -37,6 +35,8 @@ function ReferralSummary({ users, isLoading }: { users: User[] | null, isLoading
 
     return { totalReferrals, totalCreditAwarded };
   }, [users]);
+  
+  const referralAmount = settings?.referralAmount || 10;
 
   if (isLoading) {
     return (
@@ -76,7 +76,7 @@ function ReferralSummary({ users, isLoading }: { users: User[] | null, isLoading
           <Gift className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">Give $10, Get $10</div>
+          <div className="text-2xl font-bold">Give ${referralAmount}, Get ${referralAmount}</div>
           <p className="text-xs text-muted-foreground">After first experience is completed.</p>
         </CardContent>
       </Card>
@@ -85,7 +85,7 @@ function ReferralSummary({ users, isLoading }: { users: User[] | null, isLoading
 }
 
 
-function ReferralRow({ referredUser }: { referredUser: ReferredUser }) {
+function ReferralRow({ referredUser }: { referredUser: User }) {
   const firestore = useFirestore();
 
   const referrerRef = useMemoFirebase(
@@ -138,7 +138,7 @@ function ReferralRow({ referredUser }: { referredUser: ReferredUser }) {
   )
 }
 
-function ReferralCardMobile({ referredUser }: { referredUser: ReferredUser }) {
+function ReferralCardMobile({ referredUser }: { referredUser: User }) {
   const firestore = useFirestore();
 
   const referrerRef = useMemoFirebase(
@@ -194,9 +194,12 @@ export default function AdminReferralsPage() {
     () => (firestore && isAdmin ? query(collection(firestore, 'users'), where('referredBy', '!=', null)) : null),
     [firestore, isAdmin]
   );
-  const { data: referredUsers, isLoading } = useCollection<User>(referredUsersQuery);
+  const { data: referredUsers, isLoading: areUsersLoading } = useCollection<User>(referredUsersQuery);
 
-  const finalIsLoading = isUserLoading || isLoading;
+  const settingsRef = useMemoFirebase(() => (firestore ? doc(firestore, 'platformSettings', 'config') : null), [firestore]);
+  const { data: settings, isLoading: areSettingsLoading } = useDoc<PlatformSetting>(settingsRef);
+
+  const isLoading = isUserLoading || areUsersLoading || areSettingsLoading;
 
   return (
     <div className="space-y-8">
@@ -207,11 +210,11 @@ export default function AdminReferralsPage() {
         </p>
       </div>
 
-      <ReferralSummary users={referredUsers} isLoading={finalIsLoading} />
+      <ReferralSummary users={referredUsers} settings={settings} isLoading={isLoading} />
       
        {/* Mobile View */}
         <div className="grid gap-4 md:hidden">
-             {finalIsLoading ? (
+             {isLoading ? (
                 Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)
             ) : referredUsers && referredUsers.length > 0 ? (
                 referredUsers.map(user => <ReferralCardMobile key={user.id} referredUser={user} />)
@@ -241,7 +244,7 @@ export default function AdminReferralsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {finalIsLoading ? (
+              {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell colSpan={3}><Skeleton className="h-10 w-full" /></TableCell>

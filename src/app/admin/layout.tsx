@@ -30,6 +30,7 @@ import {
   Briefcase,
   Wallet,
   BookUser,
+  Settings,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -55,6 +56,7 @@ const menuSections = {
     { href: '/admin/coupons', label: 'Coupons', icon: Tag },
   ],
   'Platform': [
+    { href: '/admin/settings', label: 'Settings', icon: Settings },
     { href: '/admin/sponsors', label: 'Sponsors', icon: Handshake },
     { href: '/admin/jobs', label: 'Jobs', icon: Briefcase },
     { href: '/admin/stories', label: 'Stories', icon: BookUser },

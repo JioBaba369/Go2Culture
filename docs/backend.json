@@ -686,7 +686,7 @@
         "actorId": { "type": "string", "description": "Reference to User." },
         "actorRole": { "type": "string" },
         "action": { "type": "string" },
-        "targetType": { "type": "string", "enum": ["user", "booking", "experience", "application", "review", "conversation", "message", "report", "coupon", "sponsor", "job", "story"] },
+        "targetType": { "type": "string", "enum": ["user", "booking", "experience", "application", "review", "conversation", "message", "report", "coupon", "sponsor", "job", "story", "platformSettings"] },
         "targetId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "metadata": { "type": "object" }
@@ -755,6 +755,17 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "authorId", "authorName", "title", "content", "status", "createdAt"]
+    },
+    "PlatformSetting": {
+      "title": "Platform Setting",
+      "description": "Stores global configuration for the platform, like referral amounts.",
+      "type": "object",
+      "properties": {
+        "referralAmount": {
+          "type": "number",
+          "description": "The dollar amount for referral credits (e.g., 10 for $10)."
+        }
+      }
     }
   },
   "auth": {
@@ -831,6 +842,10 @@
     "/jobs/{jobId}": {
       "schema": { "$ref": "#/entities/Job" },
       "description": "Stores job postings for the careers page."
+    },
+    "/platformSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/PlatformSetting" },
+      "description": "Stores global platform settings. Typically will only have one document, e.g., 'config'."
     }
   }
 }
