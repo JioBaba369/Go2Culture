@@ -11,7 +11,7 @@
     --card-foreground: 20 10% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 10% 15%;
-    --primary: 24 95% 53%;
+    --primary: 220 85% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 20% 94%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -26,18 +26,18 @@
     --info: 210 40% 50%;
     --border: 210 20% 88%;
     --input: 210 20% 88%;
-    --ring: 24 95% 53%;
+    --ring: 220 85% 55%;
     --radius: 0.75rem;
 
      /* Custom Sidebar vars */
     --sidebar-background: 20 50% 98%;
     --sidebar-foreground: 20 10% 15%;
-    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary: 220 85% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 30 90% 96%;
-    --sidebar-accent-foreground: 24 95% 53%;
+    --sidebar-accent-foreground: 220 85% 55%;
     --sidebar-border: 210 20% 88%;
-    --sidebar-ring: 24 95% 53%;
+    --sidebar-ring: 220 85% 55%;
   }
  
   .dark {
@@ -47,7 +47,7 @@
     --card-foreground: 20 5% 95%;
     --popover: 20 10% 12%;
     --popover-foreground: 20 5% 95%;
-    --primary: 24 95% 53%;
+    --primary: 220 85% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary: 20 10% 20%;
     --secondary-foreground: 20 5% 95%;
@@ -62,17 +62,17 @@
     --info: 210 40% 50%;
     --border: 20 10% 25%;
     --input: 20 10% 25%;
-    --ring: 24 95% 53%;
+    --ring: 220 85% 55%;
 
     /* Custom Sidebar vars for dark mode */
     --sidebar-background: 20 10% 12%;
     --sidebar-foreground: 20 5% 95%;
-    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary: 220 85% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 20 10% 20%;
-    --sidebar-accent-foreground: 24 95% 53%;
+    --sidebar-accent-foreground: 220 85% 55%;
     --sidebar-border: 20 10% 25%;
-    --sidebar-ring: 24 95% 53%;
+    --sidebar-ring: 220 85% 55%;
   }
 }
  
