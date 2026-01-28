@@ -129,6 +129,9 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       if (!hostUserSnap.exists()) {
         throw new Error("Host user profile not found.");
       }
+      if (!userSnap.exists()) {
+        throw new Error("Current user profile not found.");
+      }
 
       const currentUser = { id: userSnap.id, ...userSnap.data() } as User;
       const hostUser = { id: hostUserSnap.id, ...hostUserSnap.data() } as User;
@@ -212,6 +215,11 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
             bookingInfo: {
                 experienceTitle: experience.title,
                 experienceId: experience.id,
+            },
+            lastMessage: {
+                senderId: 'system',
+                text: isGift ? 'You have gifted this experience. You can now chat with the host.' : 'Your booking is confirmed! Feel free to coordinate details with your host.',
+                timestamp: serverTimestamp()
             },
             readBy: {},
             createdAt: serverTimestamp(),

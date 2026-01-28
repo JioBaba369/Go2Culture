@@ -101,6 +101,11 @@ export async function confirmBooking(
         experienceTitle: booking.experienceTitle,
         experienceId: booking.experienceId,
       },
+      lastMessage: {
+          senderId: 'system',
+          text: 'Your booking is confirmed! Feel free to coordinate details with your host.',
+          timestamp: serverTimestamp()
+      },
       readBy: {},
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

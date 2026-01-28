@@ -266,7 +266,7 @@ export type Conversation = {
     experienceTitle: string;
     experienceId: string;
   };
-  lastMessage?: {
+  lastMessage: {
     text: string;
     timestamp: any;
     senderId: string;
