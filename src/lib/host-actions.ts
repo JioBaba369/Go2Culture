@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -143,7 +144,7 @@ export async function cancelBookingByHost(
   bookingId: string
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
-  const updatedData = { status: 'Cancelled' };
+  const updatedData = { status: 'Cancelled', cancellationReason: 'Cancelled by host' };
   try {
      const bookingSnap = await getDoc(bookingRef);
     if (!bookingSnap.exists()) {
