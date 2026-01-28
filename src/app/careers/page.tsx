@@ -1,4 +1,3 @@
-
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -145,11 +144,11 @@ export default function CareersPage() {
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent>
-                                                <div className="px-6 pb-6 prose-sm max-w-none text-muted-foreground whitespace-pre-line space-y-6">
-                                                    <p>{position.description}</p>
+                                                <div className="px-6 pb-6 text-muted-foreground space-y-4">
+                                                    <div dangerouslySetInnerHTML={{ __html: position.description }} className="prose-h4:font-headline prose-h4:text-xl prose-h4:mb-2 prose-ul:list-disc prose-ul:pl-5 prose-li:mb-1" />
                                                     <Dialog open={selectedJob?.id === position.id} onOpenChange={(isOpen) => !isOpen && setSelectedJob(null)}>
                                                         <DialogTrigger asChild>
-                                                            <Button onClick={() => setSelectedJob(position)}>
+                                                            <Button onClick={() => setSelectedJob(position)} className="mt-6">
                                                                 Apply Now
                                                             </Button>
                                                         </DialogTrigger>

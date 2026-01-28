@@ -125,7 +125,14 @@ function JobForm({ job, onFinished }: { job?: Job, onFinished: () => void }) {
                     )} />
                 </div>
                 <FormField control={methods.control} name="description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea rows={5} placeholder="Describe the role and responsibilities..." {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormDescription>
+                            Use HTML for formatting. E.g., &lt;h4&gt;Heading&lt;/h4&gt;, &lt;ul&gt;&lt;li&gt;Point 1&lt;/li&gt;&lt;/ul&gt;.
+                        </FormDescription>
+                        <FormControl><Textarea rows={15} placeholder="Describe the role, responsibilities, skills, and offer..." {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
                 )} />
                  <FormField control={methods.control} name="isActive" render={({ field }) => (
                     <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
@@ -189,7 +196,7 @@ export default function AdminJobsPage() {
                     <PlusCircle className="mr-2"/> Create Job
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>{selectedJob ? 'Edit Job' : 'Create New Job'}</DialogTitle>
                     <DialogDescription>{selectedJob ? `Editing "${selectedJob.title}".` : 'Fill out the details for the new job posting.'}</DialogDescription>
