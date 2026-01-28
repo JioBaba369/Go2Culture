@@ -1,8 +1,8 @@
-# Go2Culture: Full Application Documentation
+# Go2Culture: A Feature-Complete Full-Stack Application
 
 Go2Culture is a web platform that brings travellers, migrants, and locals together through authentic cultural and dining experiences hosted in local homes. We believe the most meaningful connections don’t happen in commercial restaurants, but around a shared table—where stories are exchanged, traditions are honoured, and meals are cooked with love.
 
-This project was built with [Firebase Studio](https://firebase.google.com/studio).
+This project was built with [Firebase Studio](https://firebase.google.com/studio) and is now feature-complete.
 
 ---
 
@@ -108,11 +108,9 @@ The project follows a standard Next.js App Router structure with some key organi
 ` .
 ├── src
 │   ├── app/                # Main application routes (App Router)
-│   │   ├── (public)/       # Group for public-facing pages
 │   │   ├── admin/          # Routes for the Admin Dashboard
 │   │   ├── host/           # Routes for the Host Dashboard
 │   │   ├── profile/        # Routes for the user's profile section
-│   │   ├── api/            # API routes (if any)
 │   │   └── layout.tsx      # Root layout
 │   │   └── page.tsx        # Homepage
 │   ├── components/         # Reusable React components
@@ -127,7 +125,7 @@ The project follows a standard Next.js App Router structure with some key organi
 │   │   └── client-provider.tsx # Client-side wrapper for the provider
 │   ├── hooks/              # Custom React hooks (e.g., use-toast)
 │   ├── lib/                # Utility functions, actions, and type definitions
-│   │   ├── actions.ts      # Client-side functions that interact with Firestore
+│   │   ├── actions/        # Server Actions for client-side Firestore interaction
 │   │   ├── types.ts        # TypeScript type definitions for data models
 │   │   └── utils.ts        # General utility functions (e.g., cn)
 │   └── public/             # Static assets (images, fonts)
