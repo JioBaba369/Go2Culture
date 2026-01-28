@@ -55,17 +55,8 @@ export default function Home() {
       <TestimonialsSection />
       <FeaturedSponsorsSection />
 
-      <section className="bg-primary text-primary-foreground rounded-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-        <div className="md:w-1/2">
-          <Award className="h-12 w-12 text-accent mb-4"/>
-          <h2 className="font-headline text-3xl md:text-4xl font-bold">Share Your Story. Become a Host.</h2>
-          <p className="mt-4 text-primary-foreground/90 max-w-xl">Open your door to travellers and locals, share your passion for food and culture, and earn an income on your own terms. Join our global community of hosts and start sharing your story.</p>
-          <Button size="lg" variant="secondary" className="mt-6" asChild>
-            <Link href="/become-a-host">Learn More About Hosting</Link>
-          </Button>
-        </div>
-        <div className="w-full md:w-1/2 h-64 md:h-80 relative rounded-lg overflow-hidden">
-          {hostCtaImage &&
+      <section className="relative rounded-lg overflow-hidden p-8 md:p-12 flex flex-col items-center gap-8 min-h-[400px] justify-center text-center text-white">
+        {hostCtaImage && (
             <Image 
               src={hostCtaImage.imageUrl} 
               alt={hostCtaImage.description} 
@@ -74,7 +65,15 @@ export default function Home() {
               className="object-cover"
               data-ai-hint={hostCtaImage.imageHint}
             />
-          }
+        )}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative md:w-2/3">
+          <Award className="h-12 w-12 text-primary mx-auto mb-4"/>
+          <h2 className="font-headline text-3xl md:text-4xl font-bold">Share Your Story. Become a Host.</h2>
+          <p className="mt-4 text-white/90 max-w-xl mx-auto">Open your door to travellers and locals, share your passion for food and culture, and earn an income on your own terms. Join our global community of hosts and start sharing your story.</p>
+          <Button size="lg" variant="secondary" className="mt-6" asChild>
+            <Link href="/become-a-host">Learn More About Hosting</Link>
+          </Button>
         </div>
       </section>
     </div>

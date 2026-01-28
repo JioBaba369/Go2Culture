@@ -1,8 +1,33 @@
 
+'use client';
+
 import { ShieldCheck, MessageCircle, Lock, UserCheck, Search, ShieldAlert, Banknote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+
+const safetyFeatures = [
+    {
+        icon: UserCheck,
+        title: "Host & Guest Verification",
+        description: "We verify hosts through government ID and selfie checks. Guests also provide information to build a trusted community profile."
+    },
+    {
+        icon: Lock,
+        title: "Secure Payments",
+        description: "Our platform handles all transactions securely. Hosts are paid after the experience is completed, and guests are protected."
+    },
+    {
+        icon: MessageCircle,
+        title: "Secure Messaging",
+        description: "Communicate with your host or guest through our platform before your experience. Your contact details remain private until a booking is confirmed."
+    },
+    {
+        icon: Search,
+        title: "Smart Reviews",
+        description: "Our two-way review system ensures that both hosts and guests can share their feedback honestly, helping everyone make informed decisions."
+    }
+];
 
 export default function TrustAndSafetyPage() {
     return (
@@ -16,37 +41,30 @@ export default function TrustAndSafetyPage() {
 
             <div className="max-w-4xl mx-auto mt-12 space-y-12">
                 <div className="grid md:grid-cols-2 gap-8">
-                     <div className="flex flex-col items-center text-center">
-                        <UserCheck className="h-10 w-10 text-primary mb-4" />
-                        <h3 className="text-xl font-bold font-headline">Host & Guest Verification</h3>
-                        <p className="text-muted-foreground mt-2">We verify hosts through government ID and selfie checks. Guests also provide information to build a trusted community profile.</p>
-                    </div>
-                     <div className="flex flex-col items-center text-center">
-                        <Lock className="h-10 w-10 text-primary mb-4" />
-                        <h3 className="text-xl font-bold font-headline">Secure Payments</h3>
-                        <p className="text-muted-foreground mt-2">Our platform handles all transactions securely. Hosts are paid after the experience is completed, and guests are protected.</p>
-                    </div>
-                     <div className="flex flex-col items-center text-center">
-                        <MessageCircle className="h-10 w-10 text-primary mb-4" />
-                        <h3 className="text-xl font-bold font-headline">Secure Messaging</h3>
-                        <p className="text-muted-foreground mt-2">Communicate with your host or guest through our platform before your experience. Your contact details remain private until a booking is confirmed.</p>
-                    </div>
-                    <div className="flex flex-col items-center text-center">
-                        <Search className="h-10 w-10 text-primary mb-4" />
-                        <h3 className="text-xl font-bold font-headline">Smart Reviews</h3>
-                        <p className="text-muted-foreground mt-2">Our two-way review system ensures that both hosts and guests can share their feedback honestly, helping everyone make informed decisions.</p>
-                    </div>
+                     {safetyFeatures.map(feature => (
+                         <Card key={feature.title} className="text-center">
+                            <CardHeader className="items-center">
+                                <div className="bg-primary/10 text-primary p-4 rounded-full">
+                                    <feature.icon className="h-8 w-8" />
+                                </div>
+                                <CardTitle>{feature.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground">{feature.description}</p>
+                            </CardContent>
+                         </Card>
+                     ))}
                 </div>
 
                 <Card className="bg-muted/50">
-                    <CardHeader className="text-center">
+                    <CardHeader className="text-center items-center">
                         <div className="flex justify-center mb-4">
                              <Banknote className="h-12 w-12 text-primary" />
                         </div>
                         <CardTitle className="font-headline text-3xl">Insurance Framework</CardTitle>
+                         <CardDescription className="max-w-2xl">To maintain a safe and sustainable platform, it's important for all users to understand their responsibilities regarding insurance.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4 text-center max-w-2xl mx-auto">
-                        <p className="text-muted-foreground">To maintain a safe and sustainable platform, it's important for all users to understand their responsibilities regarding insurance.</p>
                         <div>
                             <h4 className="font-semibold text-foreground">For Hosts</h4>
                             <p className="text-sm text-muted-foreground">You are required to have your own adequate insurance coverage. This typically includes homeowner's or renter's insurance that covers commercial or business activities. Please review your policy or speak with your provider to ensure you are covered for hosting paying guests. Go2Culture does **not** provide primary liability insurance for hosts.</p>

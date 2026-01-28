@@ -8,6 +8,18 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { FirebaseClientProvider } from '@/firebase';
 import { CookieConsentBanner } from '@/components/cookie-consent-banner';
 import { cn } from '@/lib/utils';
+import { Playfair_Display, PT_Sans } from 'next/font/google';
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-headline',
+});
+
+const ptSans = PT_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['400', '700'],
+});
 
 export const metadata: Metadata = {
   title: 'Go2Culture - Experience Authentic Food & Culture.',
@@ -24,12 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
-      </head>
-      <body className={cn('antialiased font-sans')} style={{ '--font-sans': 'Inter, sans-serif', '--font-headline': 'Poppins, sans-serif' } as React.CSSProperties}>
+      <body className={cn('antialiased font-sans', playfair.variable, ptSans.variable)}>
         <FirebaseClientProvider>
           <MainLayout header={<Header />} footer={<Footer />}>
             {children}
