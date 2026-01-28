@@ -40,6 +40,7 @@ export function sendMessage(
   // 2. Update the parent conversation document
   const conversationRef = doc(firestore, 'conversations', booking.id);
   
+  // Use dot notation for readBy to avoid overwriting the other user's status.
   const conversationUpdateData = {
     participantInfo: {
       [currentUser.id]: {
@@ -57,14 +58,11 @@ export function sendMessage(
       senderId: currentUser.id,
     },
     updatedAt: serverTimestamp(),
-    readBy: {
-        [currentUser.id]: serverTimestamp()
-    }
+    [`readBy.${currentUser.id}`]: serverTimestamp() // Correctly update only the sender's read status
   };
 
-  // Using set with merge: true will create if not exists, and update if it does.
-  // We only include the fields that are allowed to be updated.
-  batch.set(conversationRef, conversationUpdateData, { merge: true });
+  // Use `update` to ensure the conversation document already exists.
+  batch.update(conversationRef, conversationUpdateData);
 
 
   return batch.commit()
@@ -89,5 +87,3 @@ export function sendMessage(
       throw serverError;
     });
 }
-
-    
