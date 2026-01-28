@@ -72,7 +72,8 @@ export async function confirmBooking(
 
     // 2. Create the conversation document
     const conversationRef = doc(firestore, 'conversations', booking.id);
-    const conversationData: Omit<Conversation, 'id'> = {
+    const conversationData: Conversation = {
+      id: booking.id,
       bookingId: booking.id,
       participants: [booking.guestId, booking.hostId],
       participantInfo: {
