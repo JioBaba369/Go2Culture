@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import { createNotification } from "@/lib/notification-actions";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 const formSchema = z.object({
   // Step 1: Experience Basics
@@ -239,84 +241,90 @@ export default function BecomeAHostPage() {
     }
     
     setIsSubmitting(true);
-    try {
-      const userDoc = userDocRef ? await getDoc(userDocRef) : null;
-      const userData = userDoc?.data();
+    
+    const userDoc = userDocRef ? await getDoc(userDocRef) : null;
+    const userData = userDoc?.data();
 
-      const applicationData: Partial<HostApplication> = {
-        userId: user.uid,
-        hostName: user.displayName,
-        status: 'Pending',
-        submittedDate: serverTimestamp(),
-        riskFlag: null,
-        profile: {
-          profilePhotoId: userData?.profilePhotoId || "guest-1",
-          bio: values.bio,
-          expertise: values.expertise,
-          hostingExperienceLevel: values.hostingExperienceLevel,
-          hostingStyles: [],
+    const applicationData: Partial<HostApplication> = {
+      userId: user.uid,
+      hostName: user.displayName,
+      status: 'Pending',
+      submittedDate: serverTimestamp(),
+      riskFlag: null,
+      profile: {
+        profilePhotoId: userData?.profilePhotoId || "guest-1",
+        bio: values.bio,
+        expertise: values.expertise,
+        hostingExperienceLevel: values.hostingExperienceLevel,
+        hostingStyles: [],
+      },
+      experience: {
+        category: values.category,
+        description: values.experienceDescription,
+        title: values.experienceTitle,
+        durationMinutes: values.durationMinutes,
+        menu: { 
+          cuisine: values.menuCuisine,
+          description: values.menuDescription, 
+          spiceLevel: values.spiceLevel,
+          dietary: values.menu.dietary ? values.menu.dietary.split(',').map(s => s.trim()).filter(Boolean) : [],
         },
-        experience: {
-          category: values.category,
-          description: values.experienceDescription,
-          title: values.experienceTitle,
-          durationMinutes: values.durationMinutes,
-          menu: { 
-            cuisine: values.menuCuisine,
-            description: values.menuDescription, 
-            spiceLevel: values.spiceLevel,
-            dietary: values.menu.dietary ? values.menu.dietary.split(',').map(s => s.trim()).filter(Boolean) : [],
-          },
-          pricing: { 
-            pricePerGuest: values.pricePerGuest,
-            maxGuests: values.maxGuests,
-          },
-          photos: { mainImageId: 'dining-area' },
-        },
-        homeSetup: {
-          homeType: values.hostingLocation,
-          seating: 'Table', 
+        pricing: { 
+          pricePerGuest: values.pricePerGuest,
           maxGuests: values.maxGuests,
-          pets: false, 
-          smoking: false,
-          accessibility: values.accessibility,
         },
-        location: {
-          country: values.country,
-          region: values.region || '',
-          suburb: values.suburb,
-          localArea: values.localArea || '',
-          address: values.address,
-          postcode: values.postcode,
-        },
-        verification: { idDocId: "admin-id", selfieId: "admin-selfie", status: 'Pending' },
-        compliance: { 
-            agreeToFoodSafety: values.agreeToFoodSafety,
-            guidelinesAccepted: values.agreeToGuidelines,
-            contractAccepted: values.agreeToContract,
-            insurancePolicyAccepted: values.agreeToInsurance,
-            acceptsIndependentHostStatus: values.agreeToIndependentStatus,
-        },
-      };
+        photos: { mainImageId: 'dining-area' },
+      },
+      homeSetup: {
+        homeType: values.hostingLocation,
+        seating: 'Table', 
+        maxGuests: values.maxGuests,
+        pets: false, 
+        smoking: false,
+        accessibility: values.accessibility,
+      },
+      location: {
+        country: values.country,
+        region: values.region || '',
+        suburb: values.suburb,
+        localArea: values.localArea || '',
+        address: values.address,
+        postcode: values.postcode,
+      },
+      verification: { idDocId: "admin-id", selfieId: "admin-selfie", status: 'Pending' },
+      compliance: { 
+          agreeToFoodSafety: values.agreeToFoodSafety,
+          guidelinesAccepted: values.agreeToGuidelines,
+          contractAccepted: values.agreeToContract,
+          insurancePolicyAccepted: values.agreeToInsurance,
+          acceptsIndependentHostStatus: values.agreeToIndependentStatus,
+      },
+    };
 
-      const newAppRef = await addDoc(collection(firestore, 'hostApplications'), applicationData as any);
-      
-      await createNotification(
-        firestore,
-        user.uid,
-        "GENERIC_ALERT",
-        newAppRef.id,
-      );
+    const hostAppsCollection = collection(firestore, 'hostApplications');
 
-      setSubmissionState('success');
-
-    } catch (error) {
-      console.error("Application submission error:", error);
-      toast({ variant: "destructive", title: "Submission Failed", description: "An unexpected error occurred. Please try again." });
-      setSubmissionState('error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    addDoc(hostAppsCollection, applicationData as any)
+      .then((newAppRef) => {
+        createNotification(
+          firestore,
+          user.uid,
+          "GENERIC_ALERT",
+          newAppRef.id,
+        );
+        setSubmissionState('success');
+      })
+      .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: hostAppsCollection.path,
+          operation: 'create',
+          requestResourceData: applicationData
+        }));
+        setSubmissionState('error');
+        toast({ variant: "destructive", title: "Submission Failed", description: "An unexpected error occurred. Please try again." });
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   }
   
   const isLoading = isUserLoading || isProfileLoading || areAppsLoading;
@@ -602,3 +610,5 @@ export default function BecomeAHostPage() {
     </div>
   );
 }
+
+    

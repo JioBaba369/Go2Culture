@@ -13,15 +13,15 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import type { Booking, Conversation, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 
-export async function sendMessage(
+export function sendMessage(
   firestore: Firestore,
   currentUser: User,
   recipient: User,
   booking: Booking,
   messageText: string
-) {
+): Promise<void> {
   if (!currentUser || !recipient || !booking || !messageText.trim()) {
-    throw new Error('Missing required information to send a message.');
+    return Promise.reject(new Error('Missing required information to send a message.'));
   }
 
   const batch = writeBatch(firestore);
@@ -67,25 +67,27 @@ export async function sendMessage(
   batch.set(conversationRef, conversationUpdateData, { merge: true });
 
 
-  try {
-    await batch.commit();
-
-    // After message is sent successfully, create notification for the recipient
-    await createNotification(
-      firestore,
-      recipient.id,
-      'NEW_MESSAGE',
-      booking.id
-    );
-  } catch (serverError) {
-    errorEmitter.emit(
-      'permission-error',
-      new FirestorePermissionError({
-        path: `batch write (messages, conversations/${booking.id})`,
-        operation: 'write',
-        requestResourceData: { newMessage, conversationUpdateData },
-      })
-    );
-    throw serverError;
-  }
+  return batch.commit()
+    .then(() => {
+      // After message is sent successfully, create notification for the recipient
+      return createNotification(
+        firestore,
+        recipient.id,
+        'NEW_MESSAGE',
+        booking.id
+      );
+    })
+    .catch((serverError) => {
+      errorEmitter.emit(
+        'permission-error',
+        new FirestorePermissionError({
+          path: `batch write (messages, conversations/${booking.id})`,
+          operation: 'write',
+          requestResourceData: { newMessage, conversationUpdateData },
+        })
+      );
+      throw serverError;
+    });
 }
+
+    

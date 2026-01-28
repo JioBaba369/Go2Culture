@@ -1,14 +1,16 @@
+
 'use client';
 import { Firestore, collection, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
-import type { Booking, Review, User } from '@/lib/types';
+import type { Booking, Review, User as AppUser } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { createNotification } from '@/lib/notification-actions';
 import { logAudit } from '@/lib/audit-actions';
+import type { User as AuthUser } from 'firebase/auth';
 
-export async function submitReview(
+export function submitReview(
   firestore: Firestore,
-  actor: User,
+  actor: AppUser,
   booking: Booking,
   rating: number,
   comment: string
@@ -28,23 +30,24 @@ export async function submitReview(
   };
 
   const reviewsColRef = collection(firestore, 'reviews');
-  try {
-    const newReviewRef = await addDoc(reviewsColRef, reviewData);
-    
-    await logAudit(firestore, { actor, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
-
-    await createNotification(
-      firestore,
-      booking.hostId,
-      'REVIEW_RECEIVED',
-      booking.experienceId,
-    );
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: reviewsColRef.path,
-      operation: 'create',
-      requestResourceData: reviewData,
-    }));
-    throw serverError;
-  }
+  return addDoc(reviewsColRef, reviewData)
+    .then((newReviewRef) => {
+      logAudit(firestore, { actor, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
+      createNotification(
+        firestore,
+        booking.hostId,
+        'REVIEW_RECEIVED',
+        booking.experienceId,
+      );
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: reviewsColRef.path,
+        operation: 'create',
+        requestResourceData: reviewData,
+      }));
+      throw serverError;
+    });
 }
+
+    
