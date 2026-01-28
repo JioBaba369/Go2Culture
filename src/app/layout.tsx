@@ -9,6 +9,7 @@ import { FirebaseClientProvider } from '@/firebase';
 import { CookieConsentBanner } from '@/components/cookie-consent-banner';
 import { cn } from '@/lib/utils';
 import { Lora, Inter } from 'next/font/google';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const lora = Lora({
   subsets: ['latin'],
@@ -34,15 +35,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={cn('antialiased font-sans', lora.variable, inter.variable)}>
-        <FirebaseClientProvider>
-          <MainLayout header={<Header />} footer={<Footer />}>
-            {children}
-          </MainLayout>
-          <Toaster />
-          <CookieConsentBanner />
-        </FirebaseClientProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <FirebaseClientProvider>
+            <MainLayout header={<Header />} footer={<Footer />}>
+              {children}
+            </MainLayout>
+            <Toaster />
+            <CookieConsentBanner />
+          </FirebaseClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

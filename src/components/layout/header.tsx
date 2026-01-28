@@ -23,6 +23,7 @@ import type { User } from "@/lib/types";
 import { ADMIN_UID } from "@/lib/auth";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import { ThemeToggle } from "../theme-toggle";
 
 const navLinks = [
   { href: "/discover", label: "Discover" },
@@ -70,6 +71,7 @@ export function Header() {
             )}
         </nav>
         <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
           {isUserLoading ? (
             <div className="h-10 w-24 bg-muted rounded-md animate-pulse" />
           ) : user ? (
