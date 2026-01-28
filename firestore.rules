@@ -183,7 +183,7 @@ service cloud.firestore {
 
     match /auditLogs/{logId} {
         allow read: if isAdmin();
-        allow write: if false; // Server-only writes
+        allow write: if isAdmin(); // WARNING: Allowing client-side writes.
     }
   }
 }
