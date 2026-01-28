@@ -9,6 +9,7 @@ import {
   deleteDoc,
   getDoc,
   writeBatch,
+  setDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -55,90 +56,88 @@ export async function confirmBooking(
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
   
-  const bookingSnap = await getDoc(bookingRef);
-  if (!bookingSnap.exists()) {
-    throw new Error("Booking not found!");
-  }
-  const booking = { id: bookingSnap.id, ...bookingSnap.data() } as Booking;
+  try {
+    const bookingSnap = await getDoc(bookingRef);
+    if (!bookingSnap.exists()) {
+      throw new Error("Booking not found!");
+    }
+    const booking = { id: bookingSnap.id, ...bookingSnap.data() } as Booking;
 
-  // Fetch guest and host AppUser profiles from firestore
-  const guestRef = doc(firestore, 'users', booking.guestId);
-  const hostRef = doc(firestore, 'users', booking.hostId);
-  const [guestSnap, hostSnap] = await Promise.all([getDoc(guestRef), getDoc(hostRef)]);
+    // Fetch guest and host AppUser profiles for logging, notifications, and conversation
+    const guestRef = doc(firestore, 'users', booking.guestId);
+    const hostRef = doc(firestore, 'users', booking.hostId);
+    const [guestSnap, hostSnap] = await Promise.all([getDoc(guestRef), getDoc(hostRef)]);
 
-  if (!guestSnap.exists()) {
-    throw new Error("Guest profile could not be found.");
-  }
-  if (!hostSnap.exists()) {
-      throw new Error("Host profile could not be found.");
-  }
-  const guestData = guestSnap.data() as AppUser;
-  const hostData = hostSnap.data() as AppUser;
+    if (!guestSnap.exists()) throw new Error("Guest profile could not be found.");
+    if (!hostSnap.exists()) throw new Error("Host profile could not be found.");
+    const guestData = guestSnap.data() as AppUser;
+    const hostData = hostSnap.data() as AppUser;
 
-  // Start a batch write
-  const batch = writeBatch(firestore);
+    // --- Start of Fix ---
+    // The original atomic batch write fails because security rules can't read
+    // the booking's 'Confirmed' status within the same transaction.
+    // We now perform sequential writes to ensure the booking is updated first.
 
-  // 1. Update booking status
-  batch.update(bookingRef, { status: 'Confirmed' });
+    // 1. Update booking status and wait for it to complete.
+    await updateDoc(bookingRef, { status: 'Confirmed' });
 
-  // 2. Create the conversation document
-  const conversationRef = doc(firestore, 'conversations', booking.id);
-  const conversationData: Conversation = {
-    id: booking.id,
-    bookingId: booking.id,
-    participants: [booking.guestId, booking.hostId],
-    participantInfo: {
-      [booking.guestId]: {
-        fullName: guestData.fullName,
-        profilePhotoId: guestData.profilePhotoId || 'guest-1',
-      },
-      [booking.hostId]: {
-        fullName: hostData.fullName, // Use fetched profile
-        profilePhotoId: hostData.profilePhotoId || 'guest-1', // Use fetched profile
-      },
-    },
-    bookingInfo: {
-      experienceTitle: booking.experienceTitle,
-      experienceId: booking.experienceId,
-    },
-    lastMessage: {
-        senderId: 'system',
-        text: 'Your booking is confirmed! Feel free to coordinate details with your host.',
-        timestamp: serverTimestamp()
-    },
-    readBy: {},
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  };
-  batch.set(conversationRef, conversationData);
+    // 2. Now that booking is confirmed, create the conversation.
+    // Check if it exists first to be idempotent.
+    const conversationRef = doc(firestore, 'conversations', booking.id);
+    const conversationSnap = await getDoc(conversationRef);
+    if (!conversationSnap.exists()) {
+        const conversationData: Conversation = {
+            id: booking.id,
+            bookingId: booking.id,
+            participants: [booking.guestId, booking.hostId],
+            participantInfo: {
+                [booking.guestId]: {
+                    fullName: guestData.fullName,
+                    profilePhotoId: guestData.profilePhotoId || 'guest-1',
+                },
+                [booking.hostId]: {
+                    fullName: hostData.fullName,
+                    profilePhotoId: hostData.profilePhotoId || 'guest-1',
+                },
+            },
+            bookingInfo: {
+                experienceTitle: booking.experienceTitle,
+                experienceId: booking.experienceId,
+            },
+            lastMessage: {
+                senderId: 'system',
+                text: 'Your booking is confirmed! Feel free to coordinate details with your host.',
+                timestamp: serverTimestamp()
+            },
+            readBy: {},
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        };
+        await setDoc(conversationRef, conversationData);
+    }
+    
+    // 3. Log audit and send notification after successful writes.
+    await logAudit(firestore, {
+        actor: hostData,
+        action: 'CONFIRM_BOOKING',
+        target: { type: 'booking', id: bookingId }
+    });
 
-  return batch.commit()
-    .then(() => {
-      // Log the audit event
-      logAudit(firestore, {
-          actor: hostData, // Pass the full host profile
-          action: 'CONFIRM_BOOKING',
-          target: { type: 'booking', id: bookingId }
-      });
+    await createNotification(
+      firestore,
+      booking.guestId,
+      'BOOKING_CONFIRMED',
+      booking.id
+    );
 
-      // Send notification after successful commit
-      createNotification(
-        firestore,
-        booking.guestId,
-        'BOOKING_CONFIRMED',
-        booking.id
-      );
-    })
-    .catch((serverError) => {
-      // Note: A more specific error path might be needed depending on which part failed.
-      // For simplicity, we use the bookingRef path.
+  } catch (serverError) {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: bookingRef.path,
-        operation: 'write', // This is a batch write operation
-        requestResourceData: { status: 'Confirmed' },
+        path: bookingRef.path, // Simplification for error context
+        operation: 'write',
+        requestResourceData: { bookingUpdate: { status: 'Confirmed' } },
       }));
       throw serverError;
-    });
+  }
 }
 
 
