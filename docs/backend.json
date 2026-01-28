@@ -149,6 +149,19 @@
       },
       "required": ["id", "role", "fullName", "email", "status", "createdAt", "updatedAt"]
     },
+    "ReferredUser": {
+      "title": "Referred User",
+      "description": "Represents a user who was referred by the parent user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The UID of the user who was referred." },
+        "fullName": { "type": "string" },
+        "profilePhotoId": { "type": "string" },
+        "status": { "type": "string", "enum": ["joined", "booking_completed", "credit_awarded"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "fullName", "status", "createdAt"]
+    },
     "Host": {
       "title": "Host",
       "type": "object",
@@ -508,7 +521,7 @@
                 "guests": { "type": "number" },
                 "serviceFee": { "type": "number" },
                 "total": { "type": "number" },
-                "currency": { "type": "string", "enum": ["AUD"] }
+                "currency": { "type": "string", "enum": ["AUD", "NZD", "USD"] }
             }
         },
         "policySnapshot": {
@@ -703,21 +716,21 @@
       },
       "required": ["id", "name", "logoUrl", "isActive", "createdAt"]
     },
-    "Job": {
-      "title": "Job",
+    "Story": {
+      "title": "Story",
       "type": "object",
-      "description": "Represents a job posting at Go2Culture.",
+      "description": "Represents a user-submitted story about their cultural experience.",
       "properties": {
         "id": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorProfilePhotoId": { "type": "string" },
         "title": { "type": "string" },
-        "department": { "type": "string" },
-        "location": { "type": "string" },
-        "description": { "type": "string" },
-        "isActive": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        "content": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "title", "department", "location", "isActive", "createdAt"]
+      "required": ["id", "authorId", "authorName", "title", "content", "status", "createdAt"]
     }
   },
   "auth": {
@@ -787,9 +800,11 @@
       "schema": { "$ref": "#/entities/Sponsor" },
       "description": "Stores information about sponsors and partners."
     },
-    "/jobs/{jobId}": {
-      "schema": { "$ref": "#/entities/Job" },
-      "description": "Stores job postings for the careers page."
+    "/stories/{storyId}": {
+      "schema": { "$ref": "#/entities/Story" },
+      "description": "Stores user-submitted stories for admin review and public display."
     }
   }
 }
+
+    
