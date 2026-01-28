@@ -55,22 +55,11 @@ export default function Home() {
       <TestimonialsSection />
       <FeaturedSponsorsSection />
 
-      <section className="relative rounded-lg overflow-hidden p-8 md:p-12 flex flex-col items-center gap-8 min-h-[400px] justify-center text-center text-white">
-        {hostCtaImage && (
-            <Image 
-              src={hostCtaImage.imageUrl} 
-              alt={hostCtaImage.description} 
-              fill 
-              sizes="100vw"
-              className="object-cover"
-              data-ai-hint={hostCtaImage.imageHint}
-            />
-        )}
-        <div className="absolute inset-0 bg-black/50" />
+      <section className="bg-primary text-primary-foreground rounded-lg p-8 md:p-12 flex flex-col items-center gap-8 min-h-[400px] justify-center text-center">
         <div className="relative md:w-2/3">
-          <Award className="h-12 w-12 text-primary mx-auto mb-4"/>
+          <Award className="h-12 w-12 text-primary-foreground mx-auto mb-4"/>
           <h2 className="font-headline text-3xl md:text-4xl font-bold">Share Your Story. Become a Host.</h2>
-          <p className="mt-4 text-white/90 max-w-xl mx-auto">Open your door to travellers and locals, share your passion for food and culture, and earn an income on your own terms. Join our global community of hosts and start sharing your story.</p>
+          <p className="mt-4 text-primary-foreground/90 max-w-xl mx-auto">Open your door to travellers and locals, share your passion for food and culture, and earn an income on your own terms. Join our global community of hosts and start sharing your story.</p>
           <Button size="lg" variant="secondary" className="mt-6" asChild>
             <Link href="/become-a-host">Learn More About Hosting</Link>
           </Button>
