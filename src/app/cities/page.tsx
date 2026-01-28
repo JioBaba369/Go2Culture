@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { suburbs } from '@/lib/location-data';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Experience } from '@/lib/types';
 import { useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,7 +31,7 @@ export default function CitiesPage() {
     const firestore = useFirestore();
 
     const { data: experiences, isLoading } = useCollection<Experience>(
-        useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore])
+        useMemoFirebase(() => firestore ? query(collection(firestore, 'experiences'), where('status', '==', 'live')) : null, [firestore])
     );
     
     const featuredCities = useMemo(() => {
@@ -88,4 +88,3 @@ export default function CitiesPage() {
     );
 }
 
-    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, Suspense, useEffect } from 'react';
@@ -34,11 +35,9 @@ function DiscoverPageContent() {
   const searchParams = useSearchParams();
   const firestore = useFirestore();
 
-  const experiencesQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'experiences'), where('status', '==', 'live')) : null),
-    [firestore]
+  const { data: liveExperiences, isLoading: areExperiencesLoading } = useCollection<Experience>(
+    useMemoFirebase(() => (firestore ? query(collection(firestore, 'experiences'), where('status', '==', 'live')) : null), [firestore])
   );
-  const { data: liveExperiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
 
   const allCuisines = useMemo(() => liveExperiences ? [...new Set(liveExperiences.map(e => e.menu.cuisine))].sort() : [], [liveExperiences]);
   const allDietary = useMemo(() => liveExperiences ? [...new Set(liveExperiences.flatMap(e => e.menu.dietary || []))].sort() : [], [liveExperiences]);
