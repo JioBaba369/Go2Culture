@@ -17,7 +17,7 @@ import { logAudit } from '@/lib/audit-actions';
 import { ADMIN_UID } from '../../auth';
 
 // Function to approve a host application
-export async function approveApplication(
+export function approveApplication(
   firestore: Firestore,
   application: HostApplication
 ) {
@@ -136,70 +136,70 @@ export async function approveApplication(
     }
   });
 
-  try {
-    await batch.commit();
-
-    await logAudit(firestore, { actor: { id: ADMIN_UID, role: 'admin' } as User, action: 'APPROVE_APPLICATION', target: { type: 'application', id: application.id } });
-
-    await createNotification(
+  return batch.commit()
+    .then(() => {
+      logAudit(firestore, { actor: { id: ADMIN_UID, role: 'admin' } as User, action: 'APPROVE_APPLICATION', target: { type: 'application', id: application.id } });
+      createNotification(
         firestore,
         application.userId,
         'HOST_APPROVED',
         experienceRef.id,
       );
-
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: appRef.path, // Use the application ref path for context
-        operation: 'write', // Batch write is a 'write' operation
-        requestResourceData: {
-          applicationUpdate: { status: 'Approved' },
-          newHost,
-          newExperience: newExperienceData,
-          userUpdate: { role: 'both' },
-        }
-     }));
-     // re-throw the original error to be caught by the UI component
-     throw serverError;
-  }
+    })
+    .catch ((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: appRef.path, // Use the application ref path for context
+          operation: 'write', // Batch write is a 'write' operation
+          requestResourceData: {
+            applicationUpdate: { status: 'Approved' },
+            newHost,
+            newExperience: newExperienceData,
+            userUpdate: { role: 'both' },
+          }
+      }));
+      // re-throw the original error to be caught by the UI component
+      throw serverError;
+    });
 }
 
 // Function to reject an application
-export async function rejectApplication(
+export function rejectApplication(
   firestore: Firestore,
   applicationId: string
 ) {
   const appRef = doc(firestore, 'hostApplications', applicationId);
   const updatedData = { status: 'Rejected' };
-  try {
-    await updateDoc(appRef, updatedData);
-    await logAudit(firestore, { actor: { id: ADMIN_UID, role: 'admin' } as User, action: 'REJECT_APPLICATION', target: { type: 'application', id: applicationId } });
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: appRef.path,
-      operation: 'update',
-      requestResourceData: updatedData,
-    }));
-    throw serverError;
-  }
+  return updateDoc(appRef, updatedData)
+    .then(() => {
+      logAudit(firestore, { actor: { id: ADMIN_UID, role: 'admin' } as User, action: 'REJECT_APPLICATION', target: { type: 'application', id: applicationId } });
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: appRef.path,
+        operation: 'update',
+        requestResourceData: updatedData,
+      }));
+      throw serverError;
+    });
 }
 
 // Function to request changes for an application
-export async function requestChangesForApplication(
+export function requestChangesForApplication(
   firestore: Firestore,
   applicationId: string
 ) {
   const appRef = doc(firestore, 'hostApplications', applicationId);
   const updatedData = { status: 'Changes Needed' };
-  try {
-    await updateDoc(appRef, updatedData);
-     await logAudit(firestore, { actor: { id: ADMIN_UID, role: 'admin' } as User, action: 'REQUEST_CHANGES_APPLICATION', target: { type: 'application', id: applicationId } });
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: appRef.path,
-      operation: 'update',
-      requestResourceData: updatedData,
-    }));
-    throw serverError;
-  }
+  return updateDoc(appRef, updatedData)
+    .then(() => {
+      logAudit(firestore, { actor: { id: ADMIN_UID, role: 'admin' } as User, action: 'REQUEST_CHANGES_APPLICATION', target: { type: 'application', id: applicationId } });
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: appRef.path,
+        operation: 'update',
+        requestResourceData: updatedData,
+      }));
+      throw serverError;
+    });
 }

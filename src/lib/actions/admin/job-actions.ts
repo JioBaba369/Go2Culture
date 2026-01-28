@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -16,7 +17,7 @@ import { logAudit } from '@/lib/audit-actions';
 import { ADMIN_UID } from '@/lib/auth';
 
 // Function to create or update a job posting
-export async function createOrUpdateJob(
+export function createOrUpdateJob(
   firestore: Firestore,
   data: Partial<Omit<Job, 'id' | 'createdAt' | 'updatedAt'>>,
   jobId?: string
@@ -25,48 +26,51 @@ export async function createOrUpdateJob(
   if (jobId) {
     jobRef = doc(firestore, 'jobs', jobId);
     const updatedData = { ...data, updatedAt: serverTimestamp() };
-    try {
-      await updateDoc(jobRef, updatedData as any);
-      await logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'UPDATE_JOB', target: { type: 'job', id: jobId } });
-    } catch (serverError) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: jobRef.path,
-        operation: 'update',
-        requestResourceData: updatedData,
-      }));
-      throw serverError;
-    }
+    return updateDoc(jobRef, updatedData as any)
+      .then(() => {
+        logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'UPDATE_JOB', target: { type: 'job', id: jobId } });
+      })
+      .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: jobRef.path,
+          operation: 'update',
+          requestResourceData: updatedData,
+        }));
+        throw serverError;
+      });
   } else {
     jobRef = doc(collection(firestore, 'jobs'));
     const newData = { ...data, id: jobRef.id, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
-    try {
-      await setDoc(jobRef, newData);
-      await logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'CREATE_JOB', target: { type: 'job', id: newData.id } });
-    } catch (serverError) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: jobRef.path,
-        operation: 'create',
-        requestResourceData: newData,
-      }));
-      throw serverError;
-    }
+    return setDoc(jobRef, newData)
+      .then(() => {
+        logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'CREATE_JOB', target: { type: 'job', id: newData.id } });
+      })
+      .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: jobRef.path,
+          operation: 'create',
+          requestResourceData: newData,
+        }));
+        throw serverError;
+      });
   }
 }
 
 // Function to delete a job posting
-export async function deleteJob(
+export function deleteJob(
   firestore: Firestore,
   jobId: string
 ) {
   const jobRef = doc(firestore, 'jobs', jobId);
-  try {
-    await deleteDoc(jobRef);
-    await logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'DELETE_JOB', target: { type: 'job', id: jobId } });
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: jobRef.path,
-      operation: 'delete',
-    }));
-    throw serverError;
-  }
+  return deleteDoc(jobRef)
+    .then(() => {
+      logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'DELETE_JOB', target: { type: 'job', id: jobId } });
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: jobRef.path,
+        operation: 'delete',
+      }));
+      throw serverError;
+    });
 }

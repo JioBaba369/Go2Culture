@@ -1,3 +1,4 @@
+
 'use client';
 import { Firestore, collection, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
 import type { Booking, Review, User as AppUser } from './types';
@@ -29,29 +30,29 @@ export async function submitReview(
   };
 
   const reviewsColRef = collection(firestore, 'reviews');
-  try {
-    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
-    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
-    const actorProfile = actorProfileSnap.data() as AppUser;
-    
-    const newReviewRef = await addDoc(reviewsColRef, reviewData);
-    
-    await logAudit(firestore, { actor: actorProfile, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
+  
+  const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+  if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+  const actorProfile = actorProfileSnap.data() as AppUser;
 
-    await createNotification(
-      firestore,
-      booking.hostId,
-      'REVIEW_RECEIVED',
-      booking.experienceId,
-    );
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: reviewsColRef.path,
-      operation: 'create',
-      requestResourceData: reviewData,
-    }));
-    throw serverError;
-  }
+  return addDoc(reviewsColRef, reviewData)
+    .then((newReviewRef) => {
+      logAudit(firestore, { actor: actorProfile, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
+      createNotification(
+        firestore,
+        booking.hostId,
+        'REVIEW_RECEIVED',
+        booking.experienceId,
+      );
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: reviewsColRef.path,
+        operation: 'create',
+        requestResourceData: reviewData,
+      }));
+      throw serverError;
+    });
 }
 
 // Function for a guest to cancel their own booking
@@ -62,35 +63,35 @@ export async function cancelBookingByGuest(
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
   const updatedData = { status: 'Cancelled', cancellationReason: 'Cancelled by guest' };
-  try {
-    const bookingSnap = await getDoc(bookingRef);
-    if (!bookingSnap.exists()) {
-        throw new Error("Booking not found!");
-    }
-    const booking = bookingSnap.data() as Booking;
-
-    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
-    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
-    const actorProfile = actorProfileSnap.data() as AppUser;
-
-    await updateDoc(bookingRef, updatedData);
-
-    await logAudit(firestore, { actor: actorProfile, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'guest' } });
-
-    await createNotification(
-        firestore,
-        booking.hostId,
-        'BOOKING_CANCELLED',
-        booking.id
-    );
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: bookingRef.path,
-      operation: 'update',
-      requestResourceData: updatedData,
-    }));
-    throw serverError;
+  
+  const bookingSnap = await getDoc(bookingRef);
+  if (!bookingSnap.exists()) {
+      throw new Error("Booking not found!");
   }
+  const booking = bookingSnap.data() as Booking;
+
+  const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+  if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+  const actorProfile = actorProfileSnap.data() as AppUser;
+
+  return updateDoc(bookingRef, updatedData)
+    .then(() => {
+      logAudit(firestore, { actor: actorProfile, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'guest' } });
+      createNotification(
+          firestore,
+          booking.hostId,
+          'BOOKING_CANCELLED',
+          booking.id
+      );
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: bookingRef.path,
+        operation: 'update',
+        requestResourceData: updatedData,
+      }));
+      throw serverError;
+    });
 }
 
 export async function requestReschedule(
@@ -114,27 +115,26 @@ export async function requestReschedule(
 
   const updatedData = { rescheduleRequest };
 
-  try {
-    const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
-    if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
-    const actorProfile = actorProfileSnap.data() as AppUser;
+  const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+  if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+  const actorProfile = actorProfileSnap.data() as AppUser;
 
-    await updateDoc(bookingRef, updatedData as any);
-    
-    await logAudit(firestore, { actor: actorProfile, action: 'REQUEST_RESCHEDULE', target: { type: 'booking', id: bookingId }, metadata: { newDate: newDate.toISOString() }});
-
-    await createNotification(
-      firestore,
-      booking.hostId,
-      'RESCHEDULE_REQUEST',
-      booking.id
-    );
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: bookingRef.path,
-      operation: 'update',
-      requestResourceData: updatedData,
-    }));
-    throw serverError;
-  }
+  return updateDoc(bookingRef, updatedData as any)
+    .then(() => {
+      logAudit(firestore, { actor: actorProfile, action: 'REQUEST_RESCHEDULE', target: { type: 'booking', id: bookingId }, metadata: { newDate: newDate.toISOString() }});
+      createNotification(
+        firestore,
+        booking.hostId,
+        'RESCHEDULE_REQUEST',
+        booking.id
+      );
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: bookingRef.path,
+        operation: 'update',
+        requestResourceData: updatedData,
+      }));
+      throw serverError;
+    });
 }

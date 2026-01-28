@@ -11,7 +11,7 @@ type AuditLogPayload = {
     metadata?: Record<string, any>;
 }
 
-export async function logAudit(firestore: Firestore, payload: AuditLogPayload) {
+export function logAudit(firestore: Firestore, payload: AuditLogPayload) {
     if (!firestore || !payload.actor) {
         console.error("Firestore or actor not available for audit logging.");
         return;
@@ -27,10 +27,9 @@ export async function logAudit(firestore: Firestore, payload: AuditLogPayload) {
         createdAt: serverTimestamp(),
     };
 
-    try {
-        await addDoc(collection(firestore, 'auditLogs'), auditData);
-    } catch (e) {
-        console.error("Failed to write audit log:", e);
-        // In a real app, you might want to send this error to a monitoring service.
-    }
+    addDoc(collection(firestore, 'auditLogs'), auditData)
+        .catch(e => {
+            console.error("Failed to write audit log:", e);
+            // In a real app, you might want to send this error to a monitoring service.
+        });
 }

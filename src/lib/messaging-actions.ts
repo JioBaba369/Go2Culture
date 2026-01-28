@@ -13,7 +13,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import type { Booking, Conversation, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 
-export async function sendMessage(
+export function sendMessage(
   firestore: Firestore,
   currentUser: User,
   recipient: User,
@@ -66,27 +66,25 @@ export async function sendMessage(
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
   batch.set(rateLimitRef, { lastMessageAt: serverTimestamp() }, { merge: true });
 
-  try {
-    await batch.commit();
-
-    // After message is sent successfully, create notification for the recipient
-    await createNotification(
-      firestore,
-      recipient.id,
-      'NEW_MESSAGE',
-      booking.id
-    );
-  } catch (serverError) {
-    errorEmitter.emit(
-      'permission-error',
-      new FirestorePermissionError({
-        path: `batch write (messages, conversations/${booking.id})`,
-        operation: 'write',
-        requestResourceData: { newMessage, conversationUpdate },
-      })
-    );
-    throw serverError;
-  }
+  return batch.commit()
+    .then(() => {
+        // After message is sent successfully, create notification for the recipient
+        createNotification(
+            firestore,
+            recipient.id,
+            'NEW_MESSAGE',
+            booking.id
+        );
+    })
+    .catch((serverError) => {
+        errorEmitter.emit(
+        'permission-error',
+        new FirestorePermissionError({
+            path: `batch write (messages, conversations/${booking.id})`,
+            operation: 'write',
+            requestResourceData: { newMessage, conversationUpdate },
+        })
+        );
+        throw serverError;
+    });
 }
-
-    
