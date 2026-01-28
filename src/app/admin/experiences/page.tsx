@@ -45,6 +45,7 @@ import {
   useDoc,
   useFirestore,
   useMemoFirebase,
+  useUser,
 } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,6 +54,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { pauseExperience, startExperience, deleteExperienceByAdmin } from '@/lib/admin-actions';
+import { ADMIN_UID } from '@/lib/auth';
 
 
 const statusVariantMap: Record<
@@ -134,7 +136,7 @@ function ExperienceRow({ experience, onActionStart, onActionEnd, setExperienceTo
           countries.find(c => c.id === experience.location.country)?.name,
         ].filter(Boolean).join(', ')}
       </TableCell>
-      <TableCell>${experience.pricing.pricePerGuest}</TableCell>
+      <TableCell>${experience.pricing.pricePerGuest.toFixed(2)}</TableCell>
       <TableCell>
         {experience.createdAt?.toDate
           ? format(experience.createdAt.toDate(), 'PP')
@@ -275,7 +277,7 @@ function ExperienceCardMobile({ experience, onActionStart, onActionEnd, setExper
           {experience.status}
         </Badge>
         <p className="text-sm font-bold">
-          ${experience.pricing.pricePerGuest}
+          ${experience.pricing.pricePerGuest.toFixed(2)}
         </p>
       </div>
     </Card>
@@ -284,14 +286,16 @@ function ExperienceCardMobile({ experience, onActionStart, onActionEnd, setExper
 
 export default function AdminExperiencesPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
   const { toast } = useToast();
   const [isActionRunning, setIsActionRunning] = React.useState(false);
   const [experienceToDelete, setExperienceToDelete] = React.useState<Experience | null>(null);
 
   const { data: experiences, isLoading } = useCollection<Experience>(
     useMemoFirebase(
-      () => (firestore ? collection(firestore, 'experiences') : null),
-      [firestore, isActionRunning] // Re-fetch when an action completes
+      () => (firestore && isAdmin ? collection(firestore, 'experiences') : null),
+      [firestore, isAdmin, isActionRunning] // Re-fetch when an action completes
     )
   );
 

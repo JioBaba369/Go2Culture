@@ -45,7 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { Sponsor } from "@/lib/types";
 import { format } from 'date-fns';
@@ -63,6 +63,7 @@ import { deleteSponsor } from "@/lib/admin-actions";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { ADMIN_UID } from "@/lib/auth";
 
 const sponsorSchema = z.object({
     id: z.string().optional(),
@@ -164,7 +165,9 @@ function SponsorForm({ sponsor, onFinished }: { sponsor?: Sponsor, onFinished: (
 
 export default function AdminSponsorsPage() {
   const firestore = useFirestore();
-  const sponsorsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'sponsors') : null, [firestore]);
+  const { user } = useUser();
+  const isAdmin = user?.uid === ADMIN_UID;
+  const sponsorsQuery = useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'sponsors') : null, [firestore, isAdmin]);
   const { data: sponsors, isLoading } = useCollection<Sponsor>(sponsorsQuery);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | undefined>(undefined);

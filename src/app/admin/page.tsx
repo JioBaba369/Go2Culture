@@ -126,9 +126,9 @@ export default function AdminDashboardPage() {
   const isAdmin = user?.uid === ADMIN_UID;
 
   const { data: hostApplications } = useCollection<HostApplication>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'hostApplications') : null, [firestore, isAdmin]));
-  const { data: experiences } = useCollection<Experience>(useMemoFirebase(() => firestore ? collection(firestore, 'experiences') : null, [firestore]));
+  const { data: experiences } = useCollection<Experience>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'experiences') : null, [firestore, isAdmin]));
   const { data: users } = useCollection<User>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'users') : null, [firestore, isAdmin]));
-  const { data: reviews } = useCollection<Review>(useMemoFirebase(() => firestore ? collection(firestore, 'reviews') : null, [firestore]));
+  const { data: reviews } = useCollection<Review>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'reviews') : null, [firestore, isAdmin]));
   const { data: bookings } = useCollection<Booking>(useMemoFirebase(() => (firestore && isAdmin) ? collection(firestore, 'bookings') : null, [firestore, isAdmin]));
 
   const totalBookings = bookings?.length || 0;
