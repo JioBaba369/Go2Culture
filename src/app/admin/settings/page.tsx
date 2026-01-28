@@ -1,11 +1,12 @@
+
 'use client';
 
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
@@ -14,10 +15,11 @@ import { PlatformSetting } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
 import { updateSettings } from '@/lib/actions/admin/settings-actions';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, DollarSign, Gift, Loader2 } from 'lucide-react';
 
 const settingsSchema = z.object({
   referralAmount: z.coerce.number().min(0, "Referral amount cannot be negative."),
+  serviceFeePercentage: z.coerce.number().min(0, "Service fee cannot be negative.").max(100, "Service fee cannot be over 100%."),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -34,13 +36,15 @@ export default function AdminSettingsPage() {
         resolver: zodResolver(settingsSchema),
         defaultValues: {
             referralAmount: 10,
+            serviceFeePercentage: 15,
         },
     });
 
     useEffect(() => {
         if (settings) {
             methods.reset({
-                referralAmount: settings.referralAmount || 10,
+                referralAmount: settings.referralAmount ?? 10,
+                serviceFeePercentage: settings.serviceFeePercentage ?? 15,
             });
         }
     }, [settings, methods]);
@@ -67,11 +71,16 @@ export default function AdminSettingsPage() {
                     <h1 className="text-3xl font-headline font-bold">Settings</h1>
                     <p className="text-muted-foreground">Manage global platform settings.</p>
                 </div>
-                <Card>
-                    <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
-                    <CardContent><Skeleton className="h-10 w-1/2" /></CardContent>
-                    <CardFooter><Skeleton className="h-10 w-24" /></CardFooter>
-                </Card>
+                 <div className="space-y-4">
+                    <Card>
+                        <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
+                        <CardContent><Skeleton className="h-10 w-1/2" /></CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
+                        <CardContent><Skeleton className="h-10 w-1/2" /></CardContent>
+                    </Card>
+                 </div>
             </div>
         )
     }
@@ -85,34 +94,58 @@ export default function AdminSettingsPage() {
 
              <FormProvider {...methods}>
                 <form onSubmit={methods.handleSubmit(onSubmit)}>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Referral Program</CardTitle>
-                            <CardDescription>Configure the referral reward amount.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <FormField
-                                control={methods.control}
-                                name="referralAmount"
-                                render={({ field }) => (
-                                    <FormItem className="max-w-sm">
-                                        <FormLabel>Referral Credit Amount ($)</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-                         <CardFooter>
-                            <Button type="submit" disabled={saveState !== 'idle' || !methods.formState.isDirty}>
+                    <div className="space-y-8">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><Gift/>Referral Program</CardTitle>
+                                <CardDescription>Configure the reward amount for the "Give $, Get $" referral program.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <FormField
+                                    control={methods.control}
+                                    name="referralAmount"
+                                    render={({ field }) => (
+                                        <FormItem className="max-w-sm">
+                                            <FormLabel>Referral Credit Amount ($)</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2"><DollarSign/>Financials</CardTitle>
+                                <CardDescription>Manage platform-wide financial settings like service fees.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                 <FormField
+                                    control={methods.control}
+                                    name="serviceFeePercentage"
+                                    render={({ field }) => (
+                                        <FormItem className="max-w-sm">
+                                            <FormLabel>Service Fee (%)</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" {...field} />
+                                            </FormControl>
+                                            <FormDescription>The percentage the platform takes from each booking's subtotal.</FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+                        <div className="flex justify-end">
+                             <Button type="submit" disabled={saveState !== 'idle' || !methods.formState.isDirty}>
                                 {saveState === 'saving' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {saveState === 'saved' && <Check className="mr-2 h-4 w-4" />}
-                                {saveState === 'saved' ? 'Saved!' : 'Save Settings'}
+                                {saveState === 'saved' ? 'Saved!' : 'Save All Settings'}
                             </Button>
-                        </CardFooter>
-                    </Card>
+                        </div>
+                    </div>
                 </form>
             </FormProvider>
         </div>

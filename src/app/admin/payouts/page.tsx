@@ -16,16 +16,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { Booking, User } from '@/lib/types';
-import { collection } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from '@/firebase';
+import { Booking, User, PlatformSetting } from '@/lib/types';
+import { collection, doc } from 'firebase/firestore';
 import { useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { isPast } from 'date-fns';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Banknote, DollarSign, TrendingUp } from 'lucide-react';
+import { Banknote, DollarSign, TrendingUp, Info } from 'lucide-react';
 import { ADMIN_UID } from '@/lib/auth';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type HostPayouts = {
   host: User;
@@ -36,22 +37,21 @@ type HostPayouts = {
   confirmedBookings: number;
 };
 
-function PayoutsSummary({ payouts, bookings, isLoading }: { payouts: HostPayouts[], bookings: Booking[] | null, isLoading: boolean }) {
+function PayoutsSummary({ payouts, bookings, isLoading, serviceFeePercentage }: { payouts: HostPayouts[], bookings: Booking[] | null, isLoading: boolean, serviceFeePercentage: number }) {
   const summary = useMemo(() => {
     if (!bookings || payouts.length === 0) return { totalPaid: 0, platformRevenue: 0, upcomingPayouts: 0 };
 
     const totalPaid = payouts.reduce((sum, p) => sum + p.totalEarnings, 0);
     const upcomingPayouts = payouts.reduce((sum, p) => sum + p.upcomingEarnings, 0);
     
-    // Assume platform takes a 15% commission on the total price of confirmed, past bookings
     const totalBookingValue = bookings
       .filter(b => b.status === 'Confirmed' && isPast(b.bookingDate.toDate()))
       .reduce((sum, b) => sum + b.totalPrice, 0);
     
-    const platformRevenue = totalBookingValue * 0.15;
+    const platformRevenue = totalBookingValue * (serviceFeePercentage / 100);
 
     return { totalPaid, platformRevenue, upcomingPayouts };
-  }, [payouts, bookings]);
+  }, [payouts, bookings, serviceFeePercentage]);
 
   if (isLoading) {
     return (
@@ -81,7 +81,7 @@ function PayoutsSummary({ payouts, bookings, isLoading }: { payouts: HostPayouts
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">${summary.platformRevenue.toFixed(2)}</div>
-          <p className="text-xs text-muted-foreground">Based on a 15% commission.</p>
+          <p className="text-xs text-muted-foreground">Based on a {serviceFeePercentage}% commission.</p>
         </CardContent>
       </Card>
        <Card>
@@ -139,20 +139,28 @@ export default function AdminPayoutsPage() {
   const { user, isUserLoading } = useUser();
   const isAdmin = user?.uid === ADMIN_UID;
 
-  const { data: users, isLoading: areUsersLoading } = useCollection<User>(
+   const { data: users, isLoading: areUsersLoading } = useCollection<User>(
     useMemoFirebase(() => (firestore && isAdmin ? collection(firestore, 'users') : null), [firestore, isAdmin])
   );
 
-  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(
+   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(
     useMemoFirebase(() => (firestore && isAdmin ? collection(firestore, 'bookings') : null), [firestore, isAdmin])
   );
 
-  const isLoading = isUserLoading || areUsersLoading || areBookingsLoading;
+   const { data: settings, isLoading: areSettingsLoading } = useDoc<PlatformSetting>(
+     useMemoFirebase(() => (firestore ? doc(firestore, 'platformSettings', 'config') : null), [firestore])
+   );
+
+  const isLoading = isUserLoading || areUsersLoading || areBookingsLoading || areSettingsLoading;
+
+  const serviceFeePercentage = settings?.serviceFeePercentage ?? 15;
 
   const hostPayouts = useMemo<HostPayouts[]>(() => {
     if (!users || !bookings) return [];
 
     const hosts = users.filter(u => u.role === 'host' || u.role === 'both');
+    const payoutPercentage = 1 - (serviceFeePercentage / 100);
+
     const bookingsByHost = bookings.reduce((acc, booking) => {
       if (!acc[booking.hostId]) {
         acc[booking.hostId] = [];
@@ -165,16 +173,16 @@ export default function AdminPayoutsPage() {
       const hostBookings = bookingsByHost[host.id] || [];
       
       const totalEarnings = hostBookings
-        .filter(b => b.status === 'Confirmed' && isPast(b.bookingDate.toDate()))
-        .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
+         .filter(b => b.status === 'Confirmed' && isPast(b.bookingDate.toDate()))
+         .reduce((sum, b) => sum + (b.totalPrice * payoutPercentage), 0);
 
       const upcomingEarnings = hostBookings
         .filter(b => b.status === 'Confirmed' && !isPast(b.bookingDate.toDate()))
-        .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
+        .reduce((sum, b) => sum + (b.totalPrice * payoutPercentage), 0);
         
       const pendingEarnings = hostBookings
         .filter(b => b.status === 'Pending')
-        .reduce((sum, b) => sum + (b.totalPrice * 0.85), 0);
+        .reduce((sum, b) => sum + (b.totalPrice * payoutPercentage), 0);
 
       return {
         host,
@@ -185,7 +193,7 @@ export default function AdminPayoutsPage() {
         confirmedBookings: hostBookings.filter(b => b.status === 'Confirmed').length,
       };
     }).sort((a, b) => b.totalEarnings - a.totalEarnings);
-  }, [users, bookings]);
+  }, [users, bookings, serviceFeePercentage]);
 
   return (
     <div className="space-y-8">
@@ -196,7 +204,13 @@ export default function AdminPayoutsPage() {
         </p>
       </div>
 
-      <PayoutsSummary payouts={hostPayouts} bookings={bookings} isLoading={isLoading} />
+      <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>Payout Calculation</AlertTitle>
+          <AlertDescription>Payouts are calculated as the total booking price minus the platform service fee of {serviceFeePercentage}%. They are considered "Paid Out" after the experience date has passed.</AlertDescription>
+      </Alert>
+
+      <PayoutsSummary payouts={hostPayouts} bookings={bookings} isLoading={isLoading} serviceFeePercentage={serviceFeePercentage} />
       
       {/* Mobile Card View */}
       <div className="grid gap-4 md:hidden">

@@ -758,12 +758,16 @@
     },
     "PlatformSetting": {
       "title": "Platform Setting",
-      "description": "Stores global configuration for the platform, like referral amounts.",
+      "description": "Stores global configuration for the platform, like referral amounts and service fees.",
       "type": "object",
       "properties": {
         "referralAmount": {
           "type": "number",
           "description": "The dollar amount for referral credits (e.g., 10 for $10)."
+        },
+        "serviceFeePercentage": {
+            "type": "number",
+            "description": "The service fee percentage the platform takes from bookings (e.g., 15 for 15%)."
         }
       }
     }

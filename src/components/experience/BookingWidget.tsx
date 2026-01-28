@@ -4,9 +4,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, collection, runTransaction, serverTimestamp, getDoc, increment } from 'firebase/firestore';
-import { Experience, Host, Coupon, Booking, User, Conversation } from '@/lib/types';
+import { Experience, Host, Coupon, Booking, User, Conversation, PlatformSetting } from '@/lib/types';
 import { createNotification } from '@/lib/notification-actions';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -43,6 +43,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
   const [couponError, setCouponError] = useState('');
   
   const { firestore, user } = useFirebase();
+  const settingsRef = useMemoFirebase(() => (firestore ? doc(firestore, 'platformSettings', 'config') : null), [firestore]);
+  const { data: settings } = useDoc<PlatformSetting>(settingsRef);
   const { toast } = useToast();
   const router = useRouter();
   
@@ -139,7 +141,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
           }
       }
       
-      const serviceFee = basePrice * 0.15; // Example 15% service fee
+      const serviceFeePercentage = settings?.serviceFeePercentage ?? 15;
+      const serviceFee = basePrice * (serviceFeePercentage / 100);
       const finalPrice = basePrice + serviceFee - finalDiscountAmount;
 
       const newBookingRef = doc(collection(firestore, 'bookings'));
@@ -255,7 +258,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
   };
   
   const basePrice = experience.pricing.pricePerGuest * numberOfGuests;
-  const serviceFee = basePrice * 0.15; // Example 15% service fee, should come from config
+  const serviceFeePercentage = settings?.serviceFeePercentage ?? 15;
+  const serviceFee = basePrice * (serviceFeePercentage / 100);
   const totalPrice = basePrice + serviceFee - discountAmount;
   const canBook = date && allTermsAgreed && !(isBooking || isGifting);
 

@@ -423,5 +423,6 @@ export type Story = {
 
 export type PlatformSetting = {
   referralAmount: number;
+  serviceFeePercentage?: number;
   updatedAt?: any;
 };
