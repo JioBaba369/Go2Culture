@@ -3,8 +3,8 @@ import { Firestore, doc, updateDoc, getDoc, serverTimestamp } from 'firebase/fir
 import type { Booking, User } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { createNotification } from '../notification-actions';
-import { logAudit } from '../audit-actions';
+import { createNotification } from '@/lib/notification-actions';
+import { logAudit } from '@/lib/audit-actions';
 
 
 // Function for a guest to cancel their own booking

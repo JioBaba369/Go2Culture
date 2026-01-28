@@ -3,8 +3,8 @@ import { Firestore, collection, addDoc, serverTimestamp, doc, updateDoc, getDoc 
 import type { Booking, Review, User } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { createNotification } from '../notification-actions';
-import { logAudit } from '../audit-actions';
+import { createNotification } from '@/lib/notification-actions';
+import { logAudit } from '@/lib/audit-actions';
 
 export async function submitReview(
   firestore: Firestore,
