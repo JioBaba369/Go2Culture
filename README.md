@@ -1,4 +1,3 @@
-
 # Go2Culture: Full Application Documentation
 
 Go2Culture is a web platform that brings travellers, migrants, and locals together through authentic cultural and dining experiences hosted in local homes. We believe the most meaningful connections don’t happen in commercial restaurants, but around a shared table—where stories are exchanged, traditions are honoured, and meals are cooked with love.
@@ -106,8 +105,7 @@ This section outlines the primary user journeys through the application, serving
 
 The project follows a standard Next.js App Router structure with some key organizational choices:
 
-```
-.
+` .
 ├── src
 │   ├── app/                # Main application routes (App Router)
 │   │   ├── (public)/       # Group for public-facing pages
@@ -137,7 +135,7 @@ The project follows a standard Next.js App Router structure with some key organi
 │   └── backend.json        # A JSON representation of the backend data schema
 ├── firestore.rules         # Firestore security rules
 └── tailwind.config.ts      # Tailwind CSS configuration
-```
+`
 
 ### Firebase Architecture
 
@@ -185,7 +183,7 @@ The security rules are designed with a "deny by default" principle. Key strategi
 -   **Secure Conversation Access**:
     *   A conversation can only be created if it corresponds to a valid booking and includes the correct guest and host.
     *   Users can only list conversations they are a participant in (`isQueryingOwnConversations`).
-    *   Users can only read/write messages within conversations they are a part of.
+    *   Users can only read/write messages within a conversation they are a part of.
 -   **Rate Limiting**: The `canSendMessage` function prevents a user from sending messages more than once per second to mitigate spam.
 -   **Scoped Updates**: Rules use `request.resource.data.diff(resource.data)` to ensure that users can only update specific, allowed fields on a document (e.g., a guest can only update a booking's `status` to "Cancelled").
 
@@ -201,13 +199,13 @@ The security rules are designed with a "deny by default" principle. Key strategi
 ### Running the Development Server
 
 1.  **Install dependencies**:
-    ```bash
+    `bash
     npm install
-    ```
+    `
 
 2.  **Run the development server**:
-    ```bash
+    `bash
     npm run dev
-    ```
+    `
 
 The application will be available at `http://localhost:9002`.

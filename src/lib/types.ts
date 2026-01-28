@@ -1,7 +1,8 @@
 
+
 export type User = {
   id: string;
-  role: 'guest' | 'host' | 'both';
+  role: 'guest' | 'host' | 'both' | 'admin';
   fullName: string;
   email: string;
   phone?: string;
@@ -384,7 +385,7 @@ export type AuditLog = {
     actorId: string;
     actorRole: 'guest' | 'host' | 'both' | 'admin' | 'system';
     action: string;
-    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message' | 'report' | 'coupon' | 'sponsor' | 'story' | 'job';
+    targetType: 'user' | 'booking' | 'experience' | 'application' | 'review' | 'conversation' | 'message' | 'report' | 'coupon' | 'sponsor' | 'job' | 'story';
     targetId: string;
     metadata?: Record<string, any>;
     createdAt: any; // Allow ServerTimestamp

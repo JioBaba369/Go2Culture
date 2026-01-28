@@ -45,11 +45,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { collection, doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { Job } from "@/lib/types";
 import { format } from 'date-fns';
 import { Skeleton } from "@/components/ui/skeleton";
-import { MoreHorizontal, PlusCircle, Edit, Trash2, Loader2, Briefcase } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Edit, Trash2, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,7 +60,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createOrUpdateJob, deleteJob } from "@/lib/actions/admin/job-actions";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { Textarea } from '@/components/ui/textarea';
 import { ADMIN_UID } from '@/lib/auth';
 

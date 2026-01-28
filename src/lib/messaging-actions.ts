@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -7,7 +6,6 @@ import {
   collection,
   writeBatch,
   serverTimestamp,
-  updateDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -41,19 +39,39 @@ export async function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Update the parent conversation document.
-  // This assumes the conversation doc is created when a booking is confirmed.
-  // We use dot notation to update the 'readBy' map without overwriting it.
-  const conversationUpdate = {
+  // 2. Create or update the conversation document. 
+  // Using set with merge:true allows this to work for the first message (creation)
+  // and subsequent messages (update).
+  const conversationData: Partial<Conversation> = {
+    id: booking.id, // Ensure ID is set on creation
+    bookingId: booking.id,
+    participants: [currentUser.id, recipient.id],
+    participantInfo: {
+      [currentUser.id]: {
+        fullName: currentUser.fullName,
+        profilePhotoId: currentUser.profilePhotoId || 'guest-1',
+      },
+      [recipient.id]: {
+        fullName: recipient.fullName,
+        profilePhotoId: recipient.profilePhotoId || 'guest-1',
+      },
+    },
+    bookingInfo: {
+      experienceTitle: booking.experienceTitle,
+      experienceId: booking.experienceId,
+    },
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    [`readBy.${currentUser.id}`]: serverTimestamp(),
+    readBy: {
+      [currentUser.id]: serverTimestamp(),
+    },
     updatedAt: serverTimestamp(),
   };
-  batch.update(conversationRef, conversationUpdate);
+  // On first message, create the doc. On subsequent, merge fields.
+  batch.set(conversationRef, conversationData, { merge: true });
   
   // 3. Add rate limit update to the same batch
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
@@ -77,7 +95,7 @@ export async function sendMessage(
       new FirestorePermissionError({
         path: `batch write (messages, conversations/${booking.id})`,
         operation: 'write',
-        requestResourceData: { newMessage, conversationUpdate },
+        requestResourceData: { newMessage, conversationData },
       })
     );
     throw serverError;
