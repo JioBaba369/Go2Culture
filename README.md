@@ -207,3 +207,69 @@ The security rules are designed with a "deny by default" principle. Key strategi
     `
 
 The application will be available at `http://localhost:9002`.
+
+---
+
+## 🗺️ Application Sitemap
+
+This section provides a list of all pages available in the application for easy navigation and reference.
+
+### Public Pages
+*   **/**: Homepage
+*   **/about**: About Us
+*   **/become-a-host**: Become a Host landing page
+*   **/careers**: Careers page listing open jobs
+*   **/cities**: Browse experiences by city
+*   **/contact**: Contact page
+*   **/cookies**: Cookie Policy
+*   **/cuisines**: Browse experiences by cuisine
+*   **/discover**: Main page for searching and filtering experiences
+*   **/experiences/[id]**: Detailed view of a single experience
+*   **/guest-guidelines**: Code of conduct for guests
+*   **/host-guidelines**: Code of conduct for hosts
+*   **/impact**: Page detailing the company's social impact
+*   **/press**: Press & Media page
+*   **/privacy**: Privacy Policy
+*   **/sponsors**: Page listing platform sponsors
+*   **/terms**: Terms of Service
+*   **/trust-and-safety**: Trust & Safety information
+*   **/users/[id]**: Public profile page for a user
+*   **/what-is-culture**: An explanation of the platform's philosophy
+
+### Authentication
+*   **/login**: User login
+*   **/signup**: User registration
+*   **/forgot-password**: Password reset
+
+### User Profile (Authenticated)
+*   **/profile**: Main user account settings page
+*   **/profile/bookings**: View personal booking history
+*   **/profile/referrals**: Referral management page
+*   **/profile/wishlist**: User's saved experiences
+*   **/messages**: User's inbox and chat interface
+
+### Host Dashboard (Authenticated Hosts)
+*   **/host**: Main dashboard for hosts
+*   **/host/bookings**: Manage bookings for their experiences
+*   **/host/calendar**: Manage availability
+*   **/host/contract**: View and sign host agreements
+*   **/host/experiences**: List and manage created experiences
+*   **/host/experiences/[id]/edit**: Edit an existing experience
+*   **/host/payouts**: Manage payout information
+
+### Admin Dashboard (Authenticated Admin)
+*   **/admin**: Main admin dashboard with analytics
+*   **/admin/applications**: Review and manage host applications
+*   **/admin/applications/[id]**: Detailed view of a single application
+*   **/admin/bookings**: View all bookings on the platform
+*   **/admin/coupons**: Create and manage discount coupons
+*   **/admin/experiences**: Manage all experiences on the platform
+*   **/admin/jobs**: Create and manage job postings
+*   **/admin/payouts**: View host payout information
+*   **/admin/referrals**: View all referral data
+*   **/admin/reports**: Manage user-submitted reports
+*   **/admin/settings**: Configure global platform settings
+*   **/admin/sponsors**: Manage platform sponsors
+*   **/admin/stories**: Review and approve user-submitted stories
+*   **/admin/users**: Manage all users
+*   **/admin/users/[id]/edit**: Edit a user's profile
