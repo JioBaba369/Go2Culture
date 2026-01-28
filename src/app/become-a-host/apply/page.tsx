@@ -58,8 +58,12 @@ const formSchema = z.object({
 
   // Step 5: Media - no fields
 
-  // Step 6: Final Review
-  agreeToTerms: z.boolean().refine(val => val === true, "You must agree to the terms."),
+  // Step 6: Final Review & Agreements
+  agreeToFoodSafety: z.boolean().refine(val => val === true, "You must acknowledge your food safety responsibilities."),
+  agreeToGuidelines: z.boolean().refine(val => val === true, "You must agree to the Host Code of Conduct."),
+  agreeToContract: z.boolean().refine(val => val === true, "You must agree to the Host Service Agreement."),
+  agreeToInsurance: z.boolean().refine(val => val === true, "You must acknowledge the insurance framework."),
+  agreeToIndependentStatus: z.boolean().refine(val => val === true, "You must acknowledge your independent status."),
 });
 
 type OnboardingFormValues = z.infer<typeof formSchema>;
@@ -70,7 +74,7 @@ const steps = [
     { id: 'Step 3', name: 'Your Place' },
     { id: 'Step 4', name: 'The Food' },
     { id: 'Step 5', name: 'Photos' },
-    { id: 'Step 6', name: 'Final Details' },
+    { id: 'Step 6', name: 'Agreements' },
 ];
 
 function HostApplicationStatus({ application }: { application: HostApplication }) {
@@ -286,7 +290,13 @@ export default function BecomeAHostPage() {
           postcode: values.postcode,
         },
         verification: { idDocId: "admin-id", selfieId: "admin-selfie", status: 'Pending' },
-        compliance: { guidelinesAccepted: values.agreeToTerms },
+        compliance: { 
+            agreeToFoodSafety: values.agreeToFoodSafety,
+            guidelinesAccepted: values.agreeToGuidelines,
+            contractAccepted: values.agreeToContract,
+            insurancePolicyAccepted: values.agreeToInsurance,
+            acceptsIndependentHostStatus: values.agreeToIndependentStatus,
+        },
       };
 
       const newAppRef = await addDoc(collection(firestore, 'hostApplications'), applicationData as any);
@@ -524,20 +534,45 @@ export default function BecomeAHostPage() {
 
             {currentStep === 5 && (
                 <Card>
-                    <CardHeader><CardTitle>6. Final Details</CardTitle><CardDescription>Just a few final details before you submit your application.</CardDescription></CardHeader>
+                    <CardHeader><CardTitle>6. Agreements</CardTitle><CardDescription>A few final checks to ensure a safe and transparent community.</CardDescription></CardHeader>
                     <CardContent className="space-y-6">
-                        <ul className="space-y-2 text-sm text-muted-foreground list-disc pl-5">
-                            <li><strong>Respect My Guests:</strong> I pledge to show no bias and foster an inclusive environment.</li>
-                            <li><strong>Safety First:</strong> I will put guests' care and safety as my number one priority.</li>
-                            <li><strong>Responsiveness:</strong> I will keep my calendar updated and respond quickly.</li>
-                            <li><strong>Price Parity:</strong> If offered elsewhere, I pledge pricing equivalence on Go2Culture.</li>
-                            <li><strong>Accuracy:</strong> I promise to offer the exact experience the guests booked.</li>
-                            <li><strong>Communication:</strong> I will communicate only through the Go2Culture platform to protect my host privileges.</li>
-                        </ul>
-                        <FormField control={methods.control} name="agreeToTerms" render={({ field }) => (
+                        <FormField control={methods.control} name="agreeToFoodSafety" render={({ field }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
                             <div className="space-y-1 leading-none">
-                                <FormLabel>I agree to the Go2Culture <Link href="/terms" className="underline hover:text-primary">terms and conditions</Link>.</FormLabel>
+                                <FormLabel>Food Safety Acknowledgement</FormLabel>
+                                <FormDescription>I understand that I am preparing food in a home kitchen and will uphold basic food hygiene standards. I will be transparent about ingredients and potential allergens.</FormDescription>
+                            </div>
+                            </FormItem>
+                        )}/>
+                         <FormField control={methods.control} name="agreeToGuidelines" render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
+                            <div className="space-y-1 leading-none">
+                                <FormLabel>Host Code of Conduct</FormLabel>
+                                <FormDescription>I have read and agree to follow the <Link href="/host-guidelines" target="_blank" className="underline hover:text-primary">Go2Culture Host Code of Conduct</Link>.</FormDescription>
+                            </div>
+                            </FormItem>
+                        )}/>
+                         <FormField control={methods.control} name="agreeToContract" render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
+                            <div className="space-y-1 leading-none">
+                                <FormLabel>Host Service Agreement</FormLabel>
+                                <FormDescription>I agree to the <Link href="/host-guidelines" target="_blank" className="underline hover:text-primary">Host Service Agreement</Link>, which covers my responsibilities, payment terms, and our platform's role as a marketplace.</FormDescription>
+                            </div>
+                            </FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="agreeToInsurance" render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
+                            <div className="space-y-1 leading-none">
+                                <FormLabel>Insurance Acknowledgement</FormLabel>
+                                <FormDescription>I acknowledge and agree to the platform's <Link href="/trust-and-safety" target="_blank" className="underline hover:text-primary">Insurance Framework</Link> and understand that I am responsible for my own insurance.</FormDescription>
+                            </div>
+                            </FormItem>
+                        )}/>
+                        <FormField control={methods.control} name="agreeToIndependentStatus" render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl>
+                            <div className="space-y-1 leading-none">
+                                <FormLabel>Independent Status</FormLabel>
+                                <FormDescription>I understand that I am an independent host, not an employee of Go2Culture, and am responsible for my own legal and tax obligations.</FormDescription>
                             </div>
                             </FormItem>
                         )}/>

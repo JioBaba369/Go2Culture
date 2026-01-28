@@ -1,3 +1,4 @@
+
 'use client';
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
@@ -46,6 +47,7 @@ import {
   Briefcase,
   BrainCircuit,
   Link as LinkIcon,
+  CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
@@ -60,14 +62,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { countries, regions, suburbs, localAreas } from "@/lib/location-data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
-function DetailItem({ icon: Icon, label, value, isLink = false }: { icon: React.ElementType, label: string, value: React.ReactNode, isLink?: boolean }) {
-    if (!value) return null;
+function DetailItem({ icon: Icon, label, value, isLink = false, children }: { icon: React.ElementType, label: string, value?: React.ReactNode, isLink?: boolean, children?: React.ReactNode }) {
+    if (!value && !children) return null;
     return (
         <div className="flex items-start gap-3">
             <Icon className="h-5 w-5 text-muted-foreground mt-1 flex-shrink-0" />
             <div>
                 <p className="font-semibold text-sm">{label}</p>
-                {isLink && typeof value === 'string' ? (
+                {children ? (
+                    <div className="text-muted-foreground">{children}</div>
+                ) : isLink && typeof value === 'string' ? (
                     <a href={value.startsWith('http') ? value : `mailto:${value}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:underline break-all">
                         {value}
                     </a>
@@ -287,6 +291,8 @@ export default function ApplicationDetailPage() {
   const experienceImage = PlaceHolderImages.find(p => p.id === application.experience.photos.mainImageId);
   const idDocImage = PlaceHolderImages.find(p => p.id === application.verification.idDocId);
   const selfieImage = PlaceHolderImages.find(p => p.id === application.verification.selfieId);
+  
+  const compliance = application.compliance || {};
 
   return (
     <div className="space-y-6">
@@ -346,11 +352,12 @@ export default function ApplicationDetailPage() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="experience">Experience</TabsTrigger>
           <TabsTrigger value="host">Host Details</TabsTrigger>
           <TabsTrigger value="verification">Verification</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
@@ -502,29 +509,44 @@ export default function ApplicationDetailPage() {
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><AlertTriangle /> Compliance Checks (AU)</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <p>Food Business Registered?</p>
-                            <p className="font-semibold">{application.compliance.foodBusinessRegistered ? 'Yes' : 'No'}</p>
-                        </div>
-                        {application.compliance.councilName && (
-                            <div className="flex items-center justify-between text-sm">
-                                <p>Council Name</p>
-                                <p className="font-semibold">{application.compliance.councilName}</p>
-                            </div>
-                        )}
-                        <div className="flex items-center justify-between text-sm">
-                            <p>Food Safety Training?</p>
-                            <p className="font-semibold">{application.compliance.foodSafetyTrainingCompleted ? 'Yes' : 'No'}</p>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </TabsContent>
+        
+        <TabsContent value="compliance" className="mt-6">
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><ShieldCheck /> Compliance & Agreements</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <DetailItem icon={compliance.agreeToFoodSafety ? CheckCircle : XCircle} label="Food Safety Acknowledged">
+                        <p className={compliance.agreeToFoodSafety ? 'text-success' : 'text-destructive'}>
+                            {compliance.agreeToFoodSafety ? 'Yes' : 'No'}
+                        </p>
+                    </DetailItem>
+                    <DetailItem icon={compliance.guidelinesAccepted ? CheckCircle : XCircle} label="Host Code of Conduct Agreed">
+                         <p className={compliance.guidelinesAccepted ? 'text-success' : 'text-destructive'}>
+                            {compliance.guidelinesAccepted ? 'Yes' : 'No'}
+                        </p>
+                    </DetailItem>
+                    <DetailItem icon={compliance.contractAccepted ? CheckCircle : XCircle} label="Service Agreement Agreed">
+                         <p className={compliance.contractAccepted ? 'text-success' : 'text-destructive'}>
+                            {compliance.contractAccepted ? 'Yes' : 'No'}
+                        </p>
+                    </DetailItem>
+                     <DetailItem icon={compliance.insurancePolicyAccepted ? CheckCircle : XCircle} label="Insurance Framework Acknowledged">
+                         <p className={compliance.insurancePolicyAccepted ? 'text-success' : 'text-destructive'}>
+                            {compliance.insurancePolicyAccepted ? 'Yes' : 'No'}
+                        </p>
+                    </DetailItem>
+                     <DetailItem icon={compliance.acceptsIndependentHostStatus ? CheckCircle : XCircle} label="Independent Status Acknowledged">
+                         <p className={compliance.acceptsIndependentHostStatus ? 'text-success' : 'text-destructive'}>
+                            {compliance.acceptsIndependentHostStatus ? 'Yes' : 'No'}
+                        </p>
+                    </DetailItem>
+                </CardContent>
+            </Card>
+        </TabsContent>
+
       </Tabs>
       <div className="mt-6">
         <Button asChild variant="outline"><Link href="/admin/applications">Back to Applications</Link></Button>
