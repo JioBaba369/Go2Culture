@@ -40,31 +40,29 @@ export async function sendMessage(
   batch.set(messageRef, newMessage);
 
   // 2. Prepare the update for the conversation document.
-  // This uses `set` with `merge:true` which will create the doc if it doesn't exist,
-  // and update it if it does. This is crucial for non-instant-book conversations.
   const conversationUpdate = {
-    participants: [currentUser.id, recipient.id], // Ensure participants are always present
-    participantInfo: {
-      [currentUser.id]: {
-        fullName: currentUser.fullName,
-        profilePhotoId: currentUser.profilePhotoId || 'guest-1',
-      },
-      [recipient.id]: {
-        fullName: recipient.fullName,
-        profilePhotoId: recipient.profilePhotoId || 'guest-1',
-      },
-    },
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
     updatedAt: serverTimestamp(),
-    // Use dot notation to update only the current user's read status in the map
+    // Update participant info in case a user's details have changed
+    [`participantInfo.${currentUser.id}`]: {
+        fullName: currentUser.fullName,
+        profilePhotoId: currentUser.profilePhotoId || 'guest-1',
+    },
+    [`participantInfo.${recipient.id}`]: {
+        fullName: recipient.fullName,
+        profilePhotoId: recipient.profilePhotoId || 'guest-1',
+    },
     [`readBy.${currentUser.id}`]: serverTimestamp(),
   };
-  batch.set(conversationRef, conversationUpdate, { merge: true });
-  
+
+  // Use `update` which supports dot notation and won't overwrite the entire `readBy` map.
+  // This assumes the conversation document has already been created, which happens upon booking confirmation.
+  batch.update(conversationRef, conversationUpdate);
+
   // 3. Add rate limit update to the same batch to enforce security rules
   const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
   batch.set(rateLimitRef, { lastMessageAt: serverTimestamp() }, { merge: true });
