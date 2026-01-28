@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -45,7 +44,6 @@ import {
   useDoc,
   useFirestore,
   useMemoFirebase,
-  useUser,
 } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,8 +51,7 @@ import { countries, suburbs } from '@/lib/location-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import React from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { pauseExperience, startExperience, deleteExperienceByAdmin } from '@/lib/admin-actions';
-import { ADMIN_UID } from '@/lib/auth';
+import { pauseExperience, startExperience, deleteExperienceByAdmin } from '@/lib/actions/admin/experience-actions';
 
 
 const statusVariantMap: Record<
@@ -286,16 +283,14 @@ function ExperienceCardMobile({ experience, onActionStart, onActionEnd, setExper
 
 export default function AdminExperiencesPage() {
   const firestore = useFirestore();
-  const { user } = useUser();
-  const isAdmin = user?.uid === ADMIN_UID;
   const { toast } = useToast();
   const [isActionRunning, setIsActionRunning] = React.useState(false);
   const [experienceToDelete, setExperienceToDelete] = React.useState<Experience | null>(null);
 
   const { data: experiences, isLoading } = useCollection<Experience>(
     useMemoFirebase(
-      () => (firestore && isAdmin ? collection(firestore, 'experiences') : null),
-      [firestore, isAdmin, isActionRunning] // Re-fetch when an action completes
+      () => (firestore ? collection(firestore, 'experiences') : null),
+      [firestore, isActionRunning] // Re-fetch when an action completes
     )
   );
 

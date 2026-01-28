@@ -46,7 +46,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { collection, doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { Sponsor } from "@/lib/types";
 import { format } from 'date-fns';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,7 +59,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { deleteSponsor } from "@/lib/admin-actions";
+import { createOrUpdateSponsor, deleteSponsor } from "@/lib/actions/admin/sponsor-actions";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -97,21 +97,8 @@ function SponsorForm({ sponsor, onFinished }: { sponsor?: Sponsor, onFinished: (
         setIsLoading(true);
 
         try {
-            if (sponsor) {
-                // Update existing sponsor
-                const sponsorRef = doc(firestore, 'sponsors', sponsor.id);
-                await updateDoc(sponsorRef, data);
-                toast({ title: "Sponsor Updated", description: `Sponsor "${data.name}" has been saved.` });
-            } else {
-                // Create new sponsor
-                const newSponsorRef = doc(collection(firestore, 'sponsors'));
-                await setDoc(newSponsorRef, { 
-                    ...data, 
-                    id: newSponsorRef.id,
-                    createdAt: serverTimestamp() 
-                });
-                toast({ title: "Sponsor Created", description: `Sponsor "${data.name}" has been added.` });
-            }
+            await createOrUpdateSponsor(firestore, data, sponsor?.id);
+            toast({ title: sponsor ? "Sponsor Updated" : "Sponsor Created", description: `Sponsor "${data.name}" has been saved.` });
             onFinished();
         } catch (error: any) {
             toast({

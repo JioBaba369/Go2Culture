@@ -65,7 +65,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { deleteCoupon } from "@/lib/admin-actions";
+import { createOrUpdateCoupon, deleteCoupon } from "@/lib/actions/admin/coupon-actions";
 import { ADMIN_UID } from "@/lib/auth";
 
 const couponSchema = z.object({
@@ -104,10 +104,9 @@ function CouponForm({ coupon, onFinished }: { coupon?: Coupon, onFinished: () =>
         setIsLoading(true);
 
         try {
-            const couponRef = doc(firestore, 'coupons', data.id);
             // Firestore doesn't support `undefined`, so we need to handle optional fields.
             const { expiresAt, ...restOfData } = data;
-            const couponData: Record<string, any> = { 
+            const couponData: any = { 
                 ...restOfData,
                 minSpend: data.minSpend || 0,
                 usageLimit: data.usageLimit || 0,
@@ -117,15 +116,9 @@ function CouponForm({ coupon, onFinished }: { coupon?: Coupon, onFinished: () =>
                 couponData.expiresAt = expiresAt;
             }
 
-            if (coupon) {
-                // Update existing coupon
-                await updateDoc(couponRef, couponData);
-                toast({ title: "Coupon Updated", description: `Coupon "${data.id}" has been saved.` });
-            } else {
-                // Create new coupon
-                await setDoc(couponRef, { ...couponData, timesUsed: 0 });
-                toast({ title: "Coupon Created", description: `Coupon "${data.id}" is now active.` });
-            }
+            await createOrUpdateCoupon(firestore, couponData, coupon?.id);
+            toast({ title: coupon ? "Coupon Updated" : "Coupon Created", description: `Coupon "${data.id}" has been saved.` });
+            
             onFinished();
         } catch (error: any) {
             toast({

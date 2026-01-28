@@ -9,14 +9,16 @@ import {
   deleteDoc,
   setDoc,
 } from 'firebase/firestore';
-import { Job } from './types';
+import { Job, User } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { logAudit } from '../audit-actions';
+import { ADMIN_UID } from '@/lib/auth';
 
 // Function to create or update a job posting
 export async function createOrUpdateJob(
   firestore: Firestore,
-  data: Partial<Omit<Job, 'id' | 'createdAt'>>,
+  data: Partial<Omit<Job, 'id' | 'createdAt' | 'updatedAt'>>,
   jobId?: string
 ) {
   let jobRef;
@@ -25,6 +27,7 @@ export async function createOrUpdateJob(
     const updatedData = { ...data, updatedAt: serverTimestamp() };
     try {
       await updateDoc(jobRef, updatedData as any);
+      await logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'UPDATE_JOB', target: { type: 'job', id: jobId } });
     } catch (serverError) {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: jobRef.path,
@@ -38,6 +41,7 @@ export async function createOrUpdateJob(
     const newData = { ...data, id: jobRef.id, createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
     try {
       await setDoc(jobRef, newData);
+      await logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'CREATE_JOB', target: { type: 'job', id: newData.id } });
     } catch (serverError) {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: jobRef.path,
@@ -57,6 +61,7 @@ export async function deleteJob(
   const jobRef = doc(firestore, 'jobs', jobId);
   try {
     await deleteDoc(jobRef);
+    await logAudit(firestore, { actor: {id: ADMIN_UID, role: 'admin'} as User, action: 'DELETE_JOB', target: { type: 'job', id: jobId } });
   } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: jobRef.path,

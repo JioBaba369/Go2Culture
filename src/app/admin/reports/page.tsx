@@ -33,7 +33,7 @@ import { collection } from "firebase/firestore";
 import { Report } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
-import { updateReportStatus } from "@/lib/admin-actions";
+import { updateReportStatus } from "@/lib/actions/admin/report-actions";
 import { useToast } from "@/hooks/use-toast";
 import { ADMIN_UID } from "@/lib/auth";
 

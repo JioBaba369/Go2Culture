@@ -58,7 +58,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
-import { deleteJob, createOrUpdateJob } from "@/lib/job-actions";
+import { createOrUpdateJob, deleteJob } from "@/lib/actions/admin/job-actions";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Textarea } from '@/components/ui/textarea';

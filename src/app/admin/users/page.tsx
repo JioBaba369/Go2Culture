@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -41,7 +40,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { updateUserByAdmin } from '@/lib/admin-actions';
+import { updateUserByAdmin } from '@/lib/actions/admin/user-actions';
 
 
 const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
