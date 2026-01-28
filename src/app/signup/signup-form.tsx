@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -18,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { createNotification } from '@/lib/notification-actions';
 
 export function SignupForm() {
@@ -52,41 +53,57 @@ export function SignupForm() {
       const fullName = `${firstName} ${lastName}`;
       await updateProfile(user, { displayName: fullName });
       
-      // Send verification email
       await sendEmailVerification(user);
 
       const userRef = doc(firestore, 'users', user.uid);
-      const userData = {
+      const referralCode = user.uid.substring(0, 8).toUpperCase();
+      
+      const userData: any = {
         id: user.uid,
-        role: 'guest', // All new users start as guests
+        role: 'guest',
         fullName,
         email: user.email,
         status: 'active',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        profilePhotoId: 'guest-1', // Default placeholder
+        profilePhotoId: 'guest-1',
         termsAccepted: true,
-        ...(refCode && { referredBy: refCode })
+        referralCode: referralCode,
+        referralCredit: 0,
       };
-      await setDoc(userRef, userData as any);
 
       if (refCode) {
-        const referredUserRef = doc(firestore, 'users', refCode, 'referredUsers', user.uid);
-        await setDoc(referredUserRef, {
-            id: user.uid,
-            fullName: fullName,
-            profilePhotoId: 'guest-1',
-            status: 'joined',
-            createdAt: serverTimestamp()
-        });
-        
-        await createNotification(
-            firestore,
-            refCode,
-            'NEW_REFERRAL',
-            user.uid
-        );
+        // Find the referrer by their referral code
+        const usersRef = collection(firestore, 'users');
+        const q = query(usersRef, where('referralCode', '==', refCode), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const referrer = querySnapshot.docs[0];
+          const referrerId = referrer.id;
+          userData.referredBy = referrerId;
+          
+          // Add this new user to the referrer's subcollection
+          const referredUserRef = doc(firestore, 'users', referrerId, 'referredUsers', user.uid);
+          await setDoc(referredUserRef, {
+              id: user.uid,
+              fullName: fullName,
+              profilePhotoId: 'guest-1',
+              status: 'joined',
+              createdAt: serverTimestamp()
+          });
+
+          // Notify the referrer
+          await createNotification(
+              firestore,
+              referrerId,
+              'NEW_REFERRAL',
+              user.uid
+          );
+        }
       }
+
+      await setDoc(userRef, userData);
 
       // Create notification for email verification
       await createNotification(
@@ -97,7 +114,7 @@ export function SignupForm() {
       );
 
       toast({ title: "Account Created!", description: "Welcome to Go2Culture. Please check your email to verify your account." });
-      router.push('/'); // Redirect to homepage after successful signup
+      router.push('/');
     } catch (error: any) {
       console.error(error);
       toast({
