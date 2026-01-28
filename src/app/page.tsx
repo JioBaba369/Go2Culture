@@ -9,14 +9,12 @@ import dynamic from "next/dynamic";
 import { HeroSearch } from "@/components/home/hero-search";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
-
 const HowItWorksSection = dynamic(() => import('@/components/home/how-it-works').then(mod => mod.HowItWorksSection));
 const FeaturedExperiencesSection = dynamic(() => import('@/components/home/featured-experiences').then(mod => mod.FeaturedExperiencesSection));
 const FeaturedCitiesSection = dynamic(() => import('@/components/home/featured-cities').then(mod => mod.FeaturedCitiesSection));
 const TopSearchesSection = dynamic(() => import('@/components/home/top-searches').then(mod => mod.TopSearchesSection));
 const TestimonialsSection = dynamic(() => import('@/components/home/testimonials').then(mod => mod.TestimonialsSection));
 const FeaturedSponsorsSection = dynamic(() => import('@/components/home/featured-sponsors').then(mod => mod.FeaturedSponsorsSection));
-
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero-1');
@@ -37,7 +35,7 @@ export default function Home() {
               data-ai-hint={heroImage.imageHint}
             />
           )}
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
           <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-lg">
@@ -57,12 +55,12 @@ export default function Home() {
       <TestimonialsSection />
       <FeaturedSponsorsSection />
 
-      <section className="bg-card rounded-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
+      <section className="bg-primary text-primary-foreground rounded-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
         <div className="md:w-1/2">
           <Award className="h-12 w-12 text-accent mb-4"/>
-          <h2 className="font-headline text-3xl md:text-4xl font-semibold">Share Your Story. Become a Host.</h2>
-          <p className="mt-4 text-muted-foreground max-w-xl">Open your door to travellers and locals, share your passion for food and culture, and earn an income on your own terms. Join our global community of hosts and start sharing your story.</p>
-          <Button size="lg" className="mt-6" asChild>
+          <h2 className="font-headline text-3xl md:text-4xl font-bold">Share Your Story. Become a Host.</h2>
+          <p className="mt-4 text-primary-foreground/90 max-w-xl">Open your door to travellers and locals, share your passion for food and culture, and earn an income on your own terms. Join our global community of hosts and start sharing your story.</p>
+          <Button size="lg" variant="secondary" className="mt-6" asChild>
             <Link href="/become-a-host">Learn More About Hosting</Link>
           </Button>
         </div>
