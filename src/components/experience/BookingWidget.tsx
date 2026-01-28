@@ -117,24 +117,18 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
 
     runTransaction(firestore, async (transaction) => {
       const userRef = doc(firestore, 'users', user.uid);
-      const hostUserRef = doc(firestore, 'users', experience.userId);
       const couponRef = appliedCoupon ? doc(firestore, 'coupons', appliedCoupon.id) : null;
       
       const userSnapPromise = transaction.get(userRef);
-      const hostUserSnapPromise = transaction.get(hostUserRef);
       const couponSnapPromise = couponRef ? transaction.get(couponRef) : Promise.resolve(null);
       
-      const [userSnap, hostUserSnap, couponSnap] = await Promise.all([userSnapPromise, hostUserSnapPromise, couponSnapPromise]);
+      const [userSnap, couponSnap] = await Promise.all([userSnapPromise, couponSnapPromise]);
       
-      if (!hostUserSnap.exists()) {
-        throw new Error("Host user profile not found.");
-      }
       if (!userSnap.exists()) {
         throw new Error("Current user profile not found.");
       }
 
       const currentUser = { id: userSnap.id, ...userSnap.data() } as User;
-      const hostUser = { id: hostUserSnap.id, ...hostUserSnap.data() } as User;
       
       const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
       let finalDiscountAmount = 0;
@@ -162,7 +156,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         experienceId: experience!.id,
         experienceTitle: experience!.title,
         hostId: experience!.hostId,
-        hostName: hostUser.fullName,
+        hostName: experience!.hostName,
         bookingDate: date,
         numberOfGuests: numberOfGuests,
         totalPrice: finalPrice,
@@ -208,8 +202,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     profilePhotoId: currentUser.profilePhotoId || 'guest-1',
                 },
                 [experience!.hostId]: {
-                    fullName: hostUser.fullName,
-                    profilePhotoId: hostUser.profilePhotoId || 'guest-1',
+                    fullName: experience.hostName,
+                    profilePhotoId: experience.hostProfilePhotoId || 'guest-1',
                 },
             },
             bookingInfo: {
