@@ -117,13 +117,21 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
 
     runTransaction(firestore, async (transaction) => {
       const userRef = doc(firestore, 'users', user.uid);
+      const hostUserRef = doc(firestore, 'users', experience.userId);
       const couponRef = appliedCoupon ? doc(firestore, 'coupons', appliedCoupon.id) : null;
       
       const userSnapPromise = transaction.get(userRef);
+      const hostUserSnapPromise = transaction.get(hostUserRef);
       const couponSnapPromise = couponRef ? transaction.get(couponRef) : Promise.resolve(null);
       
-      const [userSnap, couponSnap] = await Promise.all([userSnapPromise, couponSnapPromise]);
+      const [userSnap, hostUserSnap, couponSnap] = await Promise.all([userSnapPromise, hostUserSnapPromise, couponSnapPromise]);
+      
+      if (!hostUserSnap.exists()) {
+        throw new Error("Host user profile not found.");
+      }
+
       const currentUser = { id: userSnap.id, ...userSnap.data() } as User;
+      const hostUser = { id: hostUserSnap.id, ...hostUserSnap.data() } as User;
       
       const basePrice = experience!.pricing.pricePerGuest * numberOfGuests;
       let finalDiscountAmount = 0;
@@ -151,7 +159,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         experienceId: experience!.id,
         experienceTitle: experience!.title,
         hostId: experience!.hostId,
-        hostName: host!.name,
+        hostName: hostUser.fullName,
         bookingDate: date,
         numberOfGuests: numberOfGuests,
         totalPrice: finalPrice,
@@ -197,8 +205,8 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
                     profilePhotoId: currentUser.profilePhotoId || 'guest-1',
                 },
                 [experience!.hostId]: {
-                    fullName: host.name,
-                    profilePhotoId: host.profilePhotoId || 'guest-1',
+                    fullName: hostUser.fullName,
+                    profilePhotoId: hostUser.profilePhotoId || 'guest-1',
                 },
             },
             bookingInfo: {
