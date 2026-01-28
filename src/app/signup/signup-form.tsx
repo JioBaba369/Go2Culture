@@ -34,7 +34,7 @@ export function SignupForm() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = async () => {
+  const handleSignup = () => {
     if (!firstName || !lastName || !email || !password) {
       toast({
         variant: 'destructive',
@@ -46,85 +46,79 @@ export function SignupForm() {
     setIsLoading(true);
     const refCode = searchParams.get('ref');
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      const fullName = `${firstName} ${lastName}`;
-      await updateProfile(user, { displayName: fullName });
-      
-      await sendEmailVerification(user);
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        const fullName = `${firstName} ${lastName}`;
+        
+        await Promise.all([
+            updateProfile(user, { displayName: fullName }),
+            sendEmailVerification(user)
+        ]);
 
-      const userRef = doc(firestore, 'users', user.uid);
-      const referralCode = user.uid.substring(0, 8).toUpperCase();
-      
-      const userData: any = {
-        id: user.uid,
-        role: 'guest',
-        fullName,
-        email: user.email,
-        status: 'active',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        profilePhotoId: 'guest-1',
-        termsAccepted: true,
-        referralCode: referralCode,
-        referralCredit: 0,
-      };
+        const userRef = doc(firestore, 'users', user.uid);
+        const referralCode = user.uid.substring(0, 8).toUpperCase();
+        
+        const userData: any = {
+          id: user.uid,
+          role: 'guest',
+          fullName,
+          email: user.email,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          profilePhotoId: 'guest-1',
+          termsAccepted: true,
+          referralCode: referralCode,
+          referralCredit: 0,
+        };
 
-      if (refCode) {
-        // Find the referrer by their referral code
-        const usersRef = collection(firestore, 'users');
-        const q = query(usersRef, where('referralCode', '==', refCode), limit(1));
-        const querySnapshot = await getDocs(q);
+        if (refCode) {
+          const usersRef = collection(firestore, 'users');
+          const q = query(usersRef, where('referralCode', '==', refCode), limit(1));
+          const querySnapshot = await getDocs(q);
 
-        if (!querySnapshot.empty) {
-          const referrer = querySnapshot.docs[0];
-          const referrerId = referrer.id;
-          userData.referredBy = referrerId;
-          
-          // Add this new user to the referrer's subcollection
-          const referredUserRef = doc(firestore, 'users', referrerId, 'referredUsers', user.uid);
-          await setDoc(referredUserRef, {
-              id: user.uid,
-              fullName: fullName,
-              profilePhotoId: 'guest-1',
-              status: 'joined',
-              createdAt: serverTimestamp()
-          });
+          if (!querySnapshot.empty) {
+            const referrer = querySnapshot.docs[0];
+            const referrerId = referrer.id;
+            userData.referredBy = referrerId;
+            
+            const referredUserRef = doc(firestore, 'users', referrerId, 'referredUsers', user.uid);
+            await setDoc(referredUserRef, {
+                id: user.uid,
+                fullName: fullName,
+                profilePhotoId: 'guest-1',
+                status: 'joined',
+                createdAt: serverTimestamp()
+            });
 
-          // Notify the referrer
-          await createNotification(
-              firestore,
-              referrerId,
-              'NEW_REFERRAL',
-              user.uid
-          );
+            await createNotification(
+                firestore,
+                referrerId,
+                'NEW_REFERRAL',
+                user.uid
+            );
+          }
         }
-      }
 
-      await setDoc(userRef, userData);
-
-      // Create notification for email verification
-      await createNotification(
-        firestore,
-        user.uid,
-        'EMAIL_VERIFICATION_PENDING',
-        user.uid
-      );
-
-      toast({ title: "Account Created!", description: "Welcome to Go2Culture. Please check your email to verify your account." });
-      router.push('/');
-    } catch (error: any) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Signup Failed",
-        description: error.message || "Could not create your account. Please try again.",
+        await setDoc(userRef, userData);
+        await createNotification(firestore, user.uid, 'EMAIL_VERIFICATION_PENDING', user.uid);
+      })
+      .then(() => {
+        toast({ title: "Account Created!", description: "Welcome to Go2Culture. Please check your email to verify your account." });
+        router.push('/');
+      })
+      .catch((error: any) => {
+        console.error(error);
+        toast({
+          variant: "destructive",
+          title: "Signup Failed",
+          description: error.message || "Could not create your account. Please try again.",
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (

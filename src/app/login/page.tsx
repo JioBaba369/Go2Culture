@@ -27,28 +27,30 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     setIsLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: "Login Successful", description: "Welcome back!" });
-      router.push('/');
-    } catch (error: any) {
-      console.error(error);
-      let description = "An unexpected error occurred. Please try again.";
-      if (error.code === 'auth/invalid-credential') {
-        description = "Invalid email or password. Please try again, or sign up if you're a new user.";
-      } else {
-        description = error.message || "Please check your credentials and try again.";
-      }
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: description,
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        toast({ title: "Login Successful", description: "Welcome back!" });
+        router.push('/');
+      })
+      .catch((error: any) => {
+        console.error(error);
+        let description = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/invalid-credential') {
+          description = "Invalid email or password. Please try again, or sign up if you're a new user.";
+        } else {
+          description = error.message || "Please check your credentials and try again.";
+        }
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: description,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (

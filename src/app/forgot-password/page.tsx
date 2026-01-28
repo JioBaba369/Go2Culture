@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
-  const handleResetPassword = async () => {
+  const handleResetPassword = () => {
     if (!email) {
       toast({
         variant: "destructive",
@@ -36,27 +36,30 @@ export default function ForgotPasswordPage() {
     }
     setIsLoading(true);
     setIsSent(false);
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setIsSent(true);
-      toast({
-        title: "Password Reset Email Sent",
-        description: "Please check your inbox for instructions to reset your password.",
+    
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        setIsSent(true);
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Please check your inbox for instructions to reset your password.",
+        });
+      })
+      .catch((error: any) => {
+        console.error(error);
+        let description = "An unexpected error occurred. Please try again.";
+        if (error.code === 'auth/user-not-found') {
+          description = "No user found with this email address.";
+        }
+        toast({
+          variant: "destructive",
+          title: "Request Failed",
+          description: description,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-    } catch (error: any) {
-      console.error(error);
-      let description = "An unexpected error occurred. Please try again.";
-      if (error.code === 'auth/user-not-found') {
-        description = "No user found with this email address.";
-      }
-      toast({
-        variant: "destructive",
-        title: "Request Failed",
-        description: description,
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
