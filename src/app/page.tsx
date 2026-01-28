@@ -61,7 +61,7 @@ export default function Home() {
               src={hostCtaImage.imageUrl} 
               alt={hostCtaImage.description} 
               fill 
-              sizes="(max-width: 768px) 100vw, 50vw"
+              sizes="100vw"
               className="object-cover"
               data-ai-hint={hostCtaImage.imageHint}
             />

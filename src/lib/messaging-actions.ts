@@ -7,6 +7,7 @@ import {
   collection,
   writeBatch,
   serverTimestamp,
+  updateDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -40,8 +41,9 @@ export async function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Update the conversation document with the new last message and sender's read status.
-  // This uses dot notation to avoid overwriting the entire 'readBy' map.
+  // 2. Update the parent conversation document.
+  // This assumes the conversation doc is created when a booking is confirmed.
+  // We use dot notation to update the 'readBy' map without overwriting it.
   const conversationUpdate = {
     lastMessage: {
       text: messageText.trim(),
