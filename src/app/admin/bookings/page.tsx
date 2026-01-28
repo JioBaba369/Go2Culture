@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -33,6 +32,7 @@ const statusVariantMap: Record<
   Confirmed: 'default',
   Pending: 'secondary',
   Cancelled: 'destructive',
+  Completed: 'default',
 };
 
 // This component is needed to fetch guest info for each booking row without waterfalls in the main component

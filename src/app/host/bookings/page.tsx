@@ -37,6 +37,7 @@ const statusVariantMap: Record<
   Confirmed: 'default',
   Pending: 'secondary',
   Cancelled: 'destructive',
+  Completed: 'default',
 };
 
 // This component fetches guest info for each booking row
