@@ -7,11 +7,10 @@ import {
   collection,
   writeBatch,
   serverTimestamp,
-  updateDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import type { Booking, Message, User } from '@/lib/types';
+import type { Booking, Conversation, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 import { logAudit } from './audit-actions';
 

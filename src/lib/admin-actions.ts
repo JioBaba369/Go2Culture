@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -8,14 +9,13 @@ import {
   serverTimestamp,
   updateDoc,
   deleteDoc,
-  setDoc,
 } from 'firebase/firestore';
-import type { HostApplication, Host, Experience, User, Job } from './types';
+import type { HostApplication, Host, Experience, User } from './types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 // Function to approve a host application
-export function approveApplication(
+export async function approveApplication(
   firestore: Firestore,
   application: HostApplication
 ) {
@@ -132,7 +132,9 @@ export function approveApplication(
     }
   });
 
-  batch.commit().catch((serverError) => {
+  try {
+    await batch.commit();
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: appRef.path, // Use the application ref path for context
         operation: 'write', // Batch write is a 'write' operation
@@ -143,187 +145,172 @@ export function approveApplication(
           userUpdate: { role: 'both' },
         }
      }));
-  });
+     // re-throw the original error to be caught by the UI component
+     throw serverError;
+  }
 }
 
 // Function to reject an application
-export function rejectApplication(
+export async function rejectApplication(
   firestore: Firestore,
   applicationId: string
 ) {
   const appRef = doc(firestore, 'hostApplications', applicationId);
   const updatedData = { status: 'Rejected' };
-  updateDoc(appRef, updatedData).catch((serverError) => {
+  try {
+    await updateDoc(appRef, updatedData);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: appRef.path,
       operation: 'update',
       requestResourceData: updatedData,
     }));
-  });
+    throw serverError;
+  }
 }
 
 // Function to request changes for an application
-export function requestChangesForApplication(
+export async function requestChangesForApplication(
   firestore: Firestore,
   applicationId: string
 ) {
   const appRef = doc(firestore, 'hostApplications', applicationId);
   const updatedData = { status: 'Changes Needed' };
-  updateDoc(appRef, updatedData).catch((serverError) => {
+  try {
+    await updateDoc(appRef, updatedData);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: appRef.path,
       operation: 'update',
       requestResourceData: updatedData,
     }));
-  });
+    throw serverError;
+  }
 }
 
 // Function to pause an experience
-export function pauseExperience(
+export async function pauseExperience(
   firestore: Firestore,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   const updatedData = { status: 'paused' };
-  updateDoc(expRef, updatedData).catch((serverError) => {
+  try {
+    await updateDoc(expRef, updatedData);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
       operation: 'update',
       requestResourceData: updatedData,
     }));
-  });
+    throw serverError;
+  }
 }
 
 // Function to start (make live) an experience
-export function startExperience(
+export async function startExperience(
   firestore: Firestore,
   experienceId: string
 ) {
   const expRef = doc(firestore, 'experiences', experienceId);
   const updatedData = { status: 'live' };
-  updateDoc(expRef, updatedData).catch((serverError) => {
+  try {
+    await updateDoc(expRef, updatedData);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: expRef.path,
       operation: 'update',
       requestResourceData: updatedData,
     }));
-  });
+    throw serverError;
+  }
 }
 
 // Function to delete a coupon
-export function deleteCoupon(
+export async function deleteCoupon(
   firestore: Firestore,
   couponId: string
 ) {
   const couponRef = doc(firestore, 'coupons', couponId);
-  deleteDoc(couponRef).catch((serverError) => {
+  try {
+    await deleteDoc(couponRef);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: couponRef.path,
       operation: 'delete',
     }));
-  });
+    throw serverError;
+  }
 }
 
 // Function to delete a sponsor
-export function deleteSponsor(
+export async function deleteSponsor(
   firestore: Firestore,
   sponsorId: string
 ) {
   const sponsorRef = doc(firestore, 'sponsors', sponsorId);
-  deleteDoc(sponsorRef).catch((serverError) => {
+  try {
+    await deleteDoc(sponsorRef);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: sponsorRef.path,
       operation: 'delete',
     }));
-  });
+    throw serverError;
+  }
 }
 
 // Function for admin to update a user's details
-export function updateUserByAdmin(
+export async function updateUserByAdmin(
   firestore: Firestore,
   userId: string,
   data: { fullName: string; role: 'guest' | 'host' | 'both'; status: 'active' | 'suspended' | 'deleted' }
 ) {
   const userRef = doc(firestore, 'users', userId);
   const updatedData = { ...data, updatedAt: serverTimestamp() };
-  updateDoc(userRef, updatedData as any).catch((serverError) => {
+  try {
+    await updateDoc(userRef, updatedData as any);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: userRef.path,
       operation: 'update',
       requestResourceData: updatedData,
     }));
-  });
+    throw serverError;
+  }
 }
 
-export function updateReportStatus(
+export async function updateReportStatus(
   firestore: Firestore,
   reportId: string,
   status: 'Open' | 'In Progress' | 'Resolved'
 ) {
   const reportRef = doc(firestore, 'reports', reportId);
   const updatedData = { status };
-  updateDoc(reportRef, updatedData).catch((serverError) => {
+  try {
+    await updateDoc(reportRef, updatedData);
+  } catch (serverError) {
     errorEmitter.emit('permission-error', new FirestorePermissionError({
       path: reportRef.path,
       operation: 'update',
       requestResourceData: updatedData,
     }));
-  });
+    throw serverError;
+  }
 }
 
-export function deleteExperienceByAdmin(
+export async function deleteExperienceByAdmin(
     firestore: Firestore,
     experienceId: string
 ) {
     const expRef = doc(firestore, 'experiences', experienceId);
-    deleteDoc(expRef).catch((serverError) => {
+    try {
+        await deleteDoc(expRef);
+    } catch(serverError) {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
             path: expRef.path,
             operation: 'delete'
         }));
-    });
-}
-
-// Function to create or update a job posting
-export function createOrUpdateJob(
-  firestore: Firestore,
-  data: Partial<Omit<Job, 'id' | 'createdAt'>>,
-  jobId?: string
-) {
-  let jobRef;
-  if (jobId) {
-    jobRef = doc(firestore, 'jobs', jobId);
-    const updatedData = { ...data, updatedAt: serverTimestamp() };
-    updateDoc(jobRef, updatedData as any).catch((serverError) => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: jobRef.path,
-        operation: 'update',
-        requestResourceData: updatedData,
-      }));
-    });
-  } else {
-    jobRef = doc(collection(firestore, 'jobs'));
-    const newData = { ...data, id: jobRef.id, createdAt: serverTimestamp() };
-    setDoc(jobRef, newData).catch((serverError) => {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: jobRef.path,
-        operation: 'create',
-        requestResourceData: newData,
-      }));
-    });
-  }
-}
-
-// Function to delete a job posting
-export function deleteJob(
-  firestore: Firestore,
-  jobId: string
-) {
-  const jobRef = doc(firestore, 'jobs', jobId);
-  deleteDoc(jobRef).catch((serverError) => {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: jobRef.path,
-      operation: 'delete',
-    }));
-  });
+        throw serverError;
+    }
 }
