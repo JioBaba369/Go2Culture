@@ -59,6 +59,7 @@ service cloud.firestore {
       // Host sub-collection for host-specific details.
       match /hosts/{hostId} {
         // SECURITY NOTE: Host profiles are public to allow anonymous users to see details on experience pages.
+        // A more secure model would use a separate public-only collection.
         allow read: if true;
         // Only the user themselves or an admin can create/update their host profile.
         allow write: if isSelf(userId) || isAdmin();
