@@ -6,7 +6,7 @@ import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase'
 import { useRouter } from 'next/navigation';
 import { doc, updateDoc, serverTimestamp, collection, where, query } from 'firebase/firestore';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from 'firebase/auth';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
