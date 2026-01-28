@@ -33,7 +33,6 @@ export async function sendMessage(
     bookingId: booking.id,
     senderId: currentUser.id,
     receiverId: recipient.id,
-    participants: [currentUser.id, recipient.id],
     messageText: messageText.trim(),
     timestamp: serverTimestamp(),
   };
@@ -89,3 +88,5 @@ export async function sendMessage(
     throw serverError;
   }
 }
+
+    

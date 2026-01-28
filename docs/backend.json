@@ -577,14 +577,9 @@
         "receiverId": { "type": "string", "description": "Reference to User." },
         "bookingId": { "type": "string", "description": "Reference to Booking." },
         "messageText": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "participants": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Array containing the UIDs of sender and receiver for security rules."
-        }
+        "timestamp": { "type": "string", "format": "date-time" }
       },
-      "required": ["senderId", "receiverId", "bookingId", "messageText", "timestamp", "participants"]
+      "required": ["senderId", "receiverId", "bookingId", "messageText", "timestamp"]
     },
      "Conversation": {
       "title": "Conversation",
@@ -853,3 +848,5 @@
     }
   }
 }
+
+    

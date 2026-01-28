@@ -250,7 +250,6 @@ export type Message = {
   bookingId: string;
   messageText: string;
   timestamp: any; // Allow ServerTimestamp
-  participants: string[];
 };
 
 export type Conversation = {
@@ -426,3 +425,5 @@ export type PlatformSetting = {
   serviceFeePercentage?: number;
   updatedAt?: any;
 };
+
+    
