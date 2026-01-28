@@ -13,7 +13,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import type { Booking, Conversation, Message, User } from '@/lib/types';
 import { createNotification } from './notification-actions';
 
-export function sendMessage(
+export async function sendMessage(
   firestore: Firestore,
   currentUser: User,
   recipient: User,
@@ -25,7 +25,6 @@ export function sendMessage(
   }
 
   const batch = writeBatch(firestore);
-  const conversationRef = doc(firestore, 'conversations', booking.id);
 
   // 1. Create the new message document in the subcollection
   const messageRef = doc(collection(firestore, 'conversations', booking.id, 'messages'));
@@ -38,53 +37,58 @@ export function sendMessage(
   };
   batch.set(messageRef, newMessage);
 
-  // 2. Prepare the update for the conversation document.
-  const conversationUpdate = {
+  // 2. Create or update the conversation document
+  const conversationRef = doc(firestore, 'conversations', booking.id);
+  const conversationData: Conversation = {
+    id: booking.id,
+    participants: [currentUser.id, recipient.id],
+    participantInfo: {
+      [currentUser.id]: {
+        fullName: currentUser.fullName,
+        profilePhotoId: currentUser.profilePhotoId || 'guest-1',
+      },
+      [recipient.id]: {
+        fullName: recipient.fullName,
+        profilePhotoId: recipient.profilePhotoId || 'guest-1',
+      },
+    },
+    bookingInfo: {
+      experienceTitle: booking.experienceTitle,
+      experienceId: booking.experienceId,
+    },
     lastMessage: {
       text: messageText.trim(),
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    updatedAt: serverTimestamp(),
-    // Update participant info in case a user's details have changed
-    [`participantInfo.${currentUser.id}`]: {
-        fullName: currentUser.fullName,
-        profilePhotoId: currentUser.profilePhotoId || 'guest-1',
+    readBy: {
+        [currentUser.id]: serverTimestamp()
     },
-    [`participantInfo.${recipient.id}`]: {
-        fullName: recipient.fullName,
-        profilePhotoId: recipient.profilePhotoId || 'guest-1',
-    },
-    [`readBy.${currentUser.id}`]: serverTimestamp(),
   };
 
-  // Use `update` which supports dot notation and won't overwrite the entire `readBy` map.
-  // This assumes the conversation document has already been created, which happens upon booking confirmation.
-  batch.update(conversationRef, conversationUpdate);
+  // Using set with merge: true will create if not exists, and update if it does.
+  batch.set(conversationRef, conversationData, { merge: true });
 
-  // 3. Add rate limit update to the same batch to enforce security rules
-  const rateLimitRef = doc(firestore, `users/${currentUser.id}/rateLimits/chat`);
-  batch.set(rateLimitRef, { lastMessageAt: serverTimestamp() }, { merge: true });
+  try {
+    await batch.commit();
 
-  return batch.commit()
-    .then(() => {
-        // After message is sent successfully, create notification for the recipient
-        createNotification(
-            firestore,
-            recipient.id,
-            'NEW_MESSAGE',
-            booking.id
-        );
-    })
-    .catch((serverError) => {
-        errorEmitter.emit(
-        'permission-error',
-        new FirestorePermissionError({
-            path: `batch write (messages, conversations/${booking.id})`,
-            operation: 'write',
-            requestResourceData: { newMessage, conversationUpdate },
-        })
-        );
-        throw serverError;
-    });
+    // After message is sent successfully, create notification for the recipient
+    await createNotification(
+      firestore,
+      recipient.id,
+      'NEW_MESSAGE',
+      booking.id
+    );
+  } catch (serverError) {
+    errorEmitter.emit(
+      'permission-error',
+      new FirestorePermissionError({
+        path: `batch write (messages, conversations/${booking.id})`,
+        operation: 'write',
+        requestResourceData: { newMessage, conversationData },
+      })
+    );
+    throw serverError;
+  }
 }
+
