@@ -211,4 +211,3 @@ The security rules are designed with a "deny by default" principle. Key strategi
     ```
 
 The application will be available at `http://localhost:9002`.
-

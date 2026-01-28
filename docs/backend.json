@@ -12,7 +12,7 @@
         },
         "role": {
           "type": "string",
-          "enum": ["guest", "host", "both"],
+          "enum": ["guest", "host", "both", "admin"],
           "description": "The role of the user within the platform. Server-controlled."
         },
         "fullName": {
@@ -592,6 +592,7 @@
       "description": "Represents a message thread between users for a specific booking. The document ID is the bookingId.",
       "type": "object",
       "properties": {
+        "id": { "type": "string" },
         "bookingId": {
           "type": "string",
           "description": "The ID of the booking this conversation is associated with."
@@ -635,9 +636,17 @@
             "type": "string",
             "format": "date-time"
           }
+        },
+        "createdAt": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "updatedAt": {
+            "type": "string",
+            "format": "date-time"
         }
       },
-      "required": ["bookingId", "participants", "participantInfo", "lastMessage", "bookingInfo"]
+      "required": ["id", "bookingId", "participants", "participantInfo", "lastMessage", "bookingInfo", "createdAt", "updatedAt"]
     },
     "Notification": {
       "title": "Notification",
@@ -646,12 +655,12 @@
       "properties": {
         "id": { "type": "string" },
         "userId": { "type": "string" },
-        "message": { "type": "string" },
-        "link": { "type": "string", "format": "uri" },
+        "type": { "type": "string", "enum": ["BOOKING_CONFIRMED", "BOOKING_REQUESTED", "BOOKING_CANCELLED", "NEW_MESSAGE", "HOST_APPROVED", "REVIEW_RECEIVED", "GENERIC_ALERT", "RESCHEDULE_REQUEST", "RESCHEDULE_RESPONSE", "NEW_REFERRAL", "EMAIL_VERIFICATION_PENDING"] },
+        "entityId": { "type": "string" },
         "isRead": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "userId", "message", "isRead", "createdAt"]
+      "required": ["id", "userId", "type", "entityId", "isRead", "createdAt"]
     },
     "Report": {
       "title": "Report",
@@ -678,7 +687,7 @@
         "actorId": { "type": "string", "description": "Reference to User." },
         "actorRole": { "type": "string" },
         "action": { "type": "string" },
-        "targetType": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["user", "booking", "experience", "application", "review", "conversation", "message", "report", "coupon", "sponsor", "job", "story"] },
         "targetId": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "metadata": { "type": "object" }
@@ -715,6 +724,22 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "logoUrl", "isActive", "createdAt"]
+    },
+    "Job": {
+      "title": "Job",
+      "type": "object",
+      "description": "Represents a job posting at Go2Culture.",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "department": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "department", "location", "description", "isActive", "createdAt"]
     },
     "Story": {
       "title": "Story",
@@ -803,6 +828,10 @@
     "/stories/{storyId}": {
       "schema": { "$ref": "#/entities/Story" },
       "description": "Stores user-submitted stories for admin review and public display."
+    },
+    "/jobs/{jobId}": {
+      "schema": { "$ref": "#/entities/Job" },
+      "description": "Stores job postings for the careers page."
     }
   }
 }
