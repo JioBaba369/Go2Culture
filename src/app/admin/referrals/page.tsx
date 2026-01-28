@@ -17,7 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { User } from '@/lib/types';
+import { User, ReferredUser } from '@/lib/types';
 import { collection, query, where, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -76,7 +76,7 @@ function ReferralSummary({ users, isLoading }: { users: User[] | null, isLoading
           <Gift className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">$10 for each</div>
+          <div className="text-2xl font-bold">Give $10, Get $10</div>
           <p className="text-xs text-muted-foreground">After first experience is completed.</p>
         </CardContent>
       </Card>
@@ -85,7 +85,7 @@ function ReferralSummary({ users, isLoading }: { users: User[] | null, isLoading
 }
 
 
-function ReferralRow({ referredUser }: { referredUser: User }) {
+function ReferralRow({ referredUser }: { referredUser: ReferredUser }) {
   const firestore = useFirestore();
 
   const referrerRef = useMemoFirebase(
@@ -138,7 +138,7 @@ function ReferralRow({ referredUser }: { referredUser: User }) {
   )
 }
 
-function ReferralCardMobile({ referredUser }: { referredUser: User }) {
+function ReferralCardMobile({ referredUser }: { referredUser: ReferredUser }) {
   const firestore = useFirestore();
 
   const referrerRef = useMemoFirebase(
