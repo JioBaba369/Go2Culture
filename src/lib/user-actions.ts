@@ -106,7 +106,7 @@ export async function requestReschedule(
   const booking = bookingSnap.data() as Booking;
 
   const rescheduleRequest = {
-    requestedBy: booking.guestId,
+    requestedBy: actorAuth.uid,
     newDate,
     status: 'pending',
     createdAt: serverTimestamp(),
