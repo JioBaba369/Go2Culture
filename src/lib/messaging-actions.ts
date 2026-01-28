@@ -39,8 +39,11 @@ export async function sendMessage(
 
   // 2. Create or update the conversation document
   const conversationRef = doc(firestore, 'conversations', booking.id);
-  const conversationData: Conversation = {
+  
+  // This data will be merged into an existing document or used to create a new one.
+  const conversationUpdateData = {
     id: booking.id,
+    bookingId: booking.id,
     participants: [currentUser.id, recipient.id],
     participantInfo: {
       [currentUser.id]: {
@@ -61,13 +64,22 @@ export async function sendMessage(
       timestamp: serverTimestamp(),
       senderId: currentUser.id,
     },
-    readBy: {
-        [currentUser.id]: serverTimestamp()
-    },
+    updatedAt: serverTimestamp(),
   };
 
-  // Using set with merge: true will create if not exists, and update if it does.
-  batch.set(conversationRef, conversationData, { merge: true });
+  // Use set with merge to create the doc if it doesn't exist,
+  // or update it if it does. `createdAt` will only be set once.
+  batch.set(conversationRef, {
+    ...conversationUpdateData,
+    createdAt: serverTimestamp(),
+  }, { merge: true });
+
+  // Separately update the `readBy` map to avoid overwriting it.
+  // This uses dot notation to update a specific field in the map.
+  batch.update(conversationRef, {
+      [`readBy.${currentUser.id}`]: serverTimestamp()
+  });
+
 
   try {
     await batch.commit();
@@ -85,7 +97,7 @@ export async function sendMessage(
       new FirestorePermissionError({
         path: `batch write (messages, conversations/${booking.id})`,
         operation: 'write',
-        requestResourceData: { newMessage, conversationData },
+        requestResourceData: { newMessage, conversationUpdateData },
       })
     );
     throw serverError;

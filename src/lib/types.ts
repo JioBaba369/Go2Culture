@@ -273,7 +273,7 @@ export type Conversation = {
   };
   readBy: { [key: string]: any }; // Map of userId to timestamp
   createdAt: any;
-  updatedAt?: any;
+  updatedAt: any;
 };
 
 export type Notification = {
