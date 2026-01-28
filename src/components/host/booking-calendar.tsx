@@ -19,6 +19,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 
 function GuestListItem({ booking }: { booking: Booking }) {
@@ -102,31 +104,39 @@ function BookingCalendar() {
     booked: 'font-bold text-primary',
   };
 
-  const handleBlockDate = async () => {
-    if (!selectedDate || !host || !user) return;
+  const handleBlockDate = () => {
+    if (!selectedDate || !host || !user || !firestore) return;
     setIsUpdating(true);
     const dateString = format(selectedDate, 'yyyy-MM-dd');
     const isBlocked = host.blockedDates?.includes(dateString);
     
-    try {
-      const hostDocRef = doc(firestore, 'users', user.uid, 'hosts', user.uid);
-      await updateDoc(hostDocRef, {
+    const hostDocRef = doc(firestore, 'users', user.uid, 'hosts', user.uid);
+    const updateData = {
         blockedDates: isBlocked ? arrayRemove(dateString) : arrayUnion(dateString)
+    };
+
+    updateDoc(hostDocRef, updateData)
+      .then(() => {
+        toast({
+          title: isBlocked ? "Date Unblocked" : "Date Blocked",
+          description: `Guests can ${isBlocked ? 'now' : 'no longer'} book ${format(selectedDate, 'PPP')}.`,
+        });
+      })
+      .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: hostDocRef.path,
+            operation: 'update',
+            requestResourceData: updateData
+        }));
+        toast({ variant: 'destructive', title: 'Update Failed', description: 'Could not update your availability.' });
+      })
+      .finally(() => {
+        setIsUpdating(false);
       });
-      toast({
-        title: isBlocked ? "Date Unblocked" : "Date Blocked",
-        description: `Guests can ${isBlocked ? 'now' : 'no longer'} book ${format(selectedDate, 'PPP')}.`,
-      });
-    } catch (error) {
-      console.error(error);
-      toast({ variant: 'destructive', title: 'Update Failed', description: 'Could not update your availability.' });
-    } finally {
-      setIsUpdating(false);
-    }
   };
 
-  const handleBlockRange = async () => {
-    if (!range?.from || !host || !user) {
+  const handleBlockRange = () => {
+    if (!range?.from || !host || !user || !firestore) {
       toast({ variant: 'destructive', title: 'No date range selected', description: 'Please select a start and end date.' });
       return;
     }
@@ -136,23 +146,31 @@ function BookingCalendar() {
       start: range.from,
       end: range.to || range.from,
     }).map(d => format(d, 'yyyy-MM-dd'));
-
-    try {
-      const hostDocRef = doc(firestore, 'users', user.uid, 'hosts', user.uid);
-      await updateDoc(hostDocRef, {
+    
+    const hostDocRef = doc(firestore, 'users', user.uid, 'hosts', user.uid);
+    const updateData = {
         blockedDates: arrayUnion(...datesToBlock)
+    };
+
+    updateDoc(hostDocRef, updateData)
+      .then(() => {
+        toast({
+          title: "Dates Blocked",
+          description: `${datesToBlock.length} date(s) have been blocked successfully.`,
+        });
+        setRange(undefined);
+      })
+      .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: hostDocRef.path,
+            operation: 'update',
+            requestResourceData: updateData
+        }));
+        toast({ variant: 'destructive', title: 'Update Failed', description: 'Could not block the selected date range.' });
+      })
+      .finally(() => {
+        setIsUpdating(false);
       });
-      toast({
-        title: "Dates Blocked",
-        description: `${datesToBlock.length} date(s) have been blocked successfully.`,
-      });
-      setRange(undefined);
-    } catch (error) {
-      console.error('Failed to block date range', error);
-      toast({ variant: 'destructive', title: 'Update Failed', description: 'Could not block the selected date range.' });
-    } finally {
-      setIsUpdating(false);
-    }
   };
   
   const isLoading = isUserLoading || isHostLoading || areBookingsLoading;

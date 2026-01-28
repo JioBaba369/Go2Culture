@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,6 +14,8 @@ import { doc, updateDoc } from 'firebase/firestore';
 import type { Host } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function HostContractPage() {
   const { user, firestore, isUserLoading } = useFirebase();
@@ -43,22 +46,31 @@ export default function HostContractPage() {
 
   const allAgreed = agreedToContract && agreedToInsurance && agreedToRegulations && agreedToIndependentStatus;
 
-  const handleAccept = async () => {
+  const handleAccept = () => {
     if (!hostRef) return;
     setIsSubmitting(true);
-    try {
-        await updateDoc(hostRef, {
-            'compliance.contractAccepted': true,
-            'compliance.insurancePolicyAccepted': true,
-            'compliance.understandsFoodRegulations': true,
-            'compliance.acceptsIndependentHostStatus': true,
+    const updateData = {
+        'compliance.contractAccepted': true,
+        'compliance.insurancePolicyAccepted': true,
+        'compliance.understandsFoodRegulations': true,
+        'compliance.acceptsIndependentHostStatus': true,
+    };
+
+    updateDoc(hostRef, updateData)
+        .then(() => {
+            toast({ title: "Agreement Saved", description: "Thank you for confirming your host responsibilities." });
+        })
+        .catch((serverError) => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: hostRef.path,
+                operation: 'update',
+                requestResourceData: updateData,
+            }));
+            toast({ variant: 'destructive', title: 'Error', description: "Could not save your agreement. Please try again." });
+        })
+        .finally(() => {
+            setIsSubmitting(false);
         });
-        toast({ title: "Agreement Saved", description: "Thank you for confirming your host responsibilities." });
-    } catch (error: any) {
-        toast({ variant: 'destructive', title: 'Error', description: "Could not save your agreement. Please try again." });
-    } finally {
-        setIsSubmitting(false);
-    }
   }
 
   const isLoading = isUserLoading || isHostLoading;

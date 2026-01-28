@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -56,6 +57,7 @@ export async function confirmBooking(
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
   
+  // The reads for prerequisite data can be awaited up-front.
   try {
     const bookingSnap = await getDoc(bookingRef);
     if (!bookingSnap.exists()) {
@@ -63,7 +65,6 @@ export async function confirmBooking(
     }
     const booking = { id: bookingSnap.id, ...bookingSnap.data() } as Booking;
 
-    // Fetch guest and host AppUser profiles for logging, notifications, and conversation
     const guestRef = doc(firestore, 'users', booking.guestId);
     const hostRef = doc(firestore, 'users', booking.hostId);
     const [guestSnap, hostSnap] = await Promise.all([getDoc(guestRef), getDoc(hostRef)]);
@@ -73,70 +74,75 @@ export async function confirmBooking(
     const guestData = guestSnap.data() as AppUser;
     const hostData = hostSnap.data() as AppUser;
 
-    // --- Start of Fix ---
-    // The original atomic batch write fails because security rules can't read
-    // the booking's 'Confirmed' status within the same transaction.
-    // We now perform sequential writes to ensure the booking is updated first.
+    const bookingUpdateData = { status: 'Confirmed' };
+    updateDoc(bookingRef, bookingUpdateData)
+      .then(() => {
+        // After booking is confirmed, check if conversation exists
+        const conversationRef = doc(firestore, 'conversations', booking.id);
+        return getDoc(conversationRef).then(conversationSnap => {
+            if (!conversationSnap.exists()) {
+                const conversationData: Conversation = {
+                    id: booking.id,
+                    bookingId: booking.id,
+                    participants: [booking.guestId, booking.hostId],
+                    participantInfo: {
+                        [booking.guestId]: {
+                            fullName: guestData.fullName,
+                            profilePhotoId: guestData.profilePhotoId || 'guest-1',
+                        },
+                        [booking.hostId]: {
+                            fullName: hostData.fullName,
+                            profilePhotoId: hostData.profilePhotoId || 'guest-1',
+                        },
+                    },
+                    bookingInfo: {
+                        experienceTitle: booking.experienceTitle,
+                        experienceId: booking.experienceId,
+                    },
+                    lastMessage: {
+                        senderId: 'system',
+                        text: 'Your booking is confirmed! Feel free to coordinate details with your host.',
+                        timestamp: serverTimestamp()
+                    },
+                    readBy: {},
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                };
+                // Return this promise to chain it
+                return setDoc(conversationRef, conversationData);
+            }
+            // If it exists, just resolve the promise
+            return Promise.resolve();
+        });
+      })
+      .then(() => {
+          // This .then() runs after the conversation is created (or found to exist)
+          logAudit(firestore, {
+              actor: hostData,
+              action: 'CONFIRM_BOOKING',
+              target: { type: 'booking', id: bookingId }
+          });
+          createNotification(
+            firestore,
+            booking.guestId,
+            'BOOKING_CONFIRMED',
+            booking.id
+          );
+      })
+      .catch(serverError => {
+        // This single catch block will handle errors from any of the writes.
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: bookingRef.path, // Use bookingRef path as primary context
+          operation: 'write',
+          requestResourceData: { bookingUpdate: bookingUpdateData },
+        }));
+        throw serverError; // Re-throw for the UI to catch
+      });
 
-    // 1. Update booking status and wait for it to complete.
-    await updateDoc(bookingRef, { status: 'Confirmed' });
-
-    // 2. Now that booking is confirmed, create the conversation.
-    // Check if it exists first to be idempotent.
-    const conversationRef = doc(firestore, 'conversations', booking.id);
-    const conversationSnap = await getDoc(conversationRef);
-    if (!conversationSnap.exists()) {
-        const conversationData: Conversation = {
-            id: booking.id,
-            bookingId: booking.id,
-            participants: [booking.guestId, booking.hostId],
-            participantInfo: {
-                [booking.guestId]: {
-                    fullName: guestData.fullName,
-                    profilePhotoId: guestData.profilePhotoId || 'guest-1',
-                },
-                [booking.hostId]: {
-                    fullName: hostData.fullName,
-                    profilePhotoId: hostData.profilePhotoId || 'guest-1',
-                },
-            },
-            bookingInfo: {
-                experienceTitle: booking.experienceTitle,
-                experienceId: booking.experienceId,
-            },
-            lastMessage: {
-                senderId: 'system',
-                text: 'Your booking is confirmed! Feel free to coordinate details with your host.',
-                timestamp: serverTimestamp()
-            },
-            readBy: {},
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-        };
-        await setDoc(conversationRef, conversationData);
-    }
-    
-    // 3. Log audit and send notification after successful writes.
-    await logAudit(firestore, {
-        actor: hostData,
-        action: 'CONFIRM_BOOKING',
-        target: { type: 'booking', id: bookingId }
-    });
-
-    await createNotification(
-      firestore,
-      booking.guestId,
-      'BOOKING_CONFIRMED',
-      booking.id
-    );
-
-  } catch (serverError) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: bookingRef.path, // Simplification for error context
-        operation: 'write',
-        requestResourceData: { bookingUpdate: { status: 'Confirmed' } },
-      }));
-      throw serverError;
+  } catch (readError) {
+      // Catch errors from the initial getDoc calls
+      console.error("Failed to read required data for booking confirmation:", readError);
+      throw readError;
   }
 }
 
