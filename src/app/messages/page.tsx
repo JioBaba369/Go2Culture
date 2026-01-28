@@ -24,6 +24,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { formatDistanceToNow } from 'date-fns';
 import { ADMIN_UID } from '@/lib/auth';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 
 // --- Sub-components for the Messages Page ---
@@ -192,7 +194,15 @@ function ChatView({ conversationId }: { conversationId: string }) {
       const myReadTimestamp = conversation.readBy?.[user.uid]?.toDate();
       const lastMessageTimestamp = conversation.lastMessage.timestamp?.toDate();
       if (!myReadTimestamp || (lastMessageTimestamp && myReadTimestamp < lastMessageTimestamp)) {
-         updateDoc(conversationRef, { [`readBy.${user.uid}`]: serverTimestamp() });
+        const updateData = { [`readBy.${user.uid}`]: serverTimestamp() };
+        updateDoc(conversationRef, updateData)
+            .catch(serverError => {
+                errorEmitter.emit('permission-error', new FirestorePermissionError({
+                    path: conversationRef.path,
+                    operation: 'update',
+                    requestResourceData: updateData
+                }));
+            });
       }
     }
   }, [conversation, conversationRef, user]);

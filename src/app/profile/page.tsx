@@ -33,6 +33,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Textarea } from '@/components/ui/textarea';
+import { logAudit } from '@/lib/audit-actions';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -187,10 +190,9 @@ export default function ProfilePage() {
       return;
     }
     setProfileSaveState('saving');
-    try {
-      const userRef = doc(firestore, 'users', user.uid);
-      
-      const dataToSave: Partial<User> = {
+    
+    const userRef = doc(firestore, 'users', user.uid);
+    const dataToSave: Partial<User> = {
         fullName: data.fullName,
         bio: data.bio,
         profession: data.profession,
@@ -215,32 +217,30 @@ export default function ProfilePage() {
             dietary: data.preferences?.dietary ? data.preferences.dietary.split(',').map(s => s.trim()).filter(Boolean) : [],
         },
         updatedAt: serverTimestamp()
-      };
-
-      await updateDoc(userRef, dataToSave as any);
-
-      if (auth.currentUser.displayName !== data.fullName) {
-        await updateProfile(auth.currentUser, { displayName: data.fullName });
-      }
-      
-      toast({
-        title: "Profile Updated",
-        description: "Your profile has been successfully updated.",
-      });
-      
-      setProfileSaveState('saved');
-      await auth.currentUser.reload();
-      router.refresh(); 
-      form.reset(data);
-      setTimeout(() => setProfileSaveState('idle'), 3000);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "Could not update your profile. Please try again.",
-      });
-      setProfileSaveState('idle');
-    }
+    };
+    
+    // Non-blocking update to Firestore
+    updateDoc(userRef, dataToSave as any)
+        .then(async () => {
+            // After successful Firestore update, update Auth profile and UI
+            if (auth.currentUser!.displayName !== data.fullName) {
+                await updateProfile(auth.currentUser!, { displayName: data.fullName });
+            }
+            logAudit(firestore, { actor: userProfile!, action: 'UPDATE_PROFILE', target: { type: 'user', id: user.uid }});
+            toast({ title: "Profile Updated", description: "Your profile has been successfully updated." });
+            setProfileSaveState('saved');
+            form.reset(data);
+            setTimeout(() => setProfileSaveState('idle'), 3000);
+            await auth.currentUser!.reload(); // Reload auth user to get latest profile
+        })
+        .catch(serverError => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: userRef.path,
+                operation: 'update',
+                requestResourceData: dataToSave
+            }));
+            setProfileSaveState('idle');
+        });
   }
 
   async function onPasswordChangeSubmit(data: PasswordFormValues) {

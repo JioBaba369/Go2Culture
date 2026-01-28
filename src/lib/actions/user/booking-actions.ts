@@ -15,31 +15,31 @@ export async function cancelBookingByGuest(
 ) {
   const bookingRef = doc(firestore, 'bookings', bookingId);
   const updatedData = { status: 'Cancelled', cancellationReason: 'Cancelled by guest' };
-  try {
-    const bookingSnap = await getDoc(bookingRef);
-    if (!bookingSnap.exists()) {
-        throw new Error("Booking not found!");
-    }
-    const booking = bookingSnap.data() as Booking;
-
-    await updateDoc(bookingRef, updatedData);
-
-    await logAudit(firestore, { actor, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'guest' } });
-
-    await createNotification(
-        firestore,
-        booking.hostId,
-        'BOOKING_CANCELLED',
-        booking.id
-    );
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: bookingRef.path,
-      operation: 'update',
-      requestResourceData: updatedData,
-    }));
-    throw serverError;
+  
+  const bookingSnap = await getDoc(bookingRef);
+  if (!bookingSnap.exists()) {
+      throw new Error("Booking not found!");
   }
+  const booking = bookingSnap.data() as Booking;
+
+  return updateDoc(bookingRef, updatedData)
+    .then(() => {
+        logAudit(firestore, { actor, action: 'CANCEL_BOOKING', target: { type: 'booking', id: bookingId }, metadata: { cancelledBy: 'guest' } });
+        createNotification(
+            firestore,
+            booking.hostId,
+            'BOOKING_CANCELLED',
+            booking.id
+        );
+    })
+    .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: bookingRef.path,
+        operation: 'update',
+        requestResourceData: updatedData,
+        }));
+        throw serverError;
+    });
 }
 
 export async function requestReschedule(
@@ -55,7 +55,7 @@ export async function requestReschedule(
   const booking = bookingSnap.data() as Booking;
 
   const rescheduleRequest = {
-    requestedBy: booking.guestId,
+    requestedBy: actor.id,
     newDate,
     status: 'pending',
     createdAt: serverTimestamp(),
@@ -63,23 +63,22 @@ export async function requestReschedule(
 
   const updatedData = { rescheduleRequest };
 
-  try {
-    await updateDoc(bookingRef, updatedData as any);
-    
-    await logAudit(firestore, { actor, action: 'REQUEST_RESCHEDULE', target: { type: 'booking', id: bookingId }, metadata: { newDate: newDate.toISOString() }});
-
-    await createNotification(
-      firestore,
-      booking.hostId,
-      'RESCHEDULE_REQUEST',
-      booking.id
-    );
-  } catch (serverError) {
-    errorEmitter.emit('permission-error', new FirestorePermissionError({
-      path: bookingRef.path,
-      operation: 'update',
-      requestResourceData: updatedData,
-    }));
-    throw serverError;
-  }
+  return updateDoc(bookingRef, updatedData as any)
+    .then(() => {
+        logAudit(firestore, { actor, action: 'REQUEST_RESCHEDULE', target: { type: 'booking', id: bookingId }, metadata: { newDate: newDate.toISOString() }});
+        createNotification(
+        firestore,
+        booking.hostId,
+        'RESCHEDULE_REQUEST',
+        booking.id
+        );
+    })
+    .catch((serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: bookingRef.path,
+        operation: 'update',
+        requestResourceData: updatedData,
+        }));
+        throw serverError;
+    });
 }

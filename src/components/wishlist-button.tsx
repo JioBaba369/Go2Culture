@@ -4,11 +4,15 @@
 import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { logAudit } from '@/lib/audit-actions';
+import { User as AppUser } from '@/lib/types';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 interface WishlistButtonProps {
   experienceId: string;
@@ -48,30 +52,52 @@ export function WishlistButton({ experienceId, className }: WishlistButtonProps)
 
     setIsProcessing(true);
     const docRef = doc(firestore, 'users', user.uid, 'wishlist', experienceId);
+    
+    // Fetch user profile for audit logging
+    const userProfileSnap = await getDoc(doc(firestore, 'users', user.uid));
+    if (!userProfileSnap.exists()) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not find your user profile.'});
+        setIsProcessing(false);
+        return;
+    }
+    const actorProfile = userProfileSnap.data() as AppUser;
 
-    try {
-      if (isWishlisted) {
-        // Optimistically update UI
-        setIsWishlisted(false);
-        await deleteDoc(docRef);
-        toast({ title: 'Removed from wishlist' });
-      } else {
-        // Optimistically update UI
-        setIsWishlisted(true);
-        await setDoc(docRef, { createdAt: serverTimestamp() });
-        toast({ title: 'Added to wishlist!' });
-      }
-    } catch (error) {
-      // Revert optimistic update on error
-      setIsWishlisted(!isWishlisted);
-      console.error('Failed to update wishlist:', error);
-      toast({
-        title: 'Something went wrong',
-        description: 'Could not update your wishlist. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsProcessing(false);
+    if (isWishlisted) {
+      // Optimistically update UI
+      setIsWishlisted(false);
+      deleteDoc(docRef)
+        .then(() => {
+          toast({ title: 'Removed from wishlist' });
+          logAudit(firestore, { actor: actorProfile, action: 'REMOVE_FROM_WISHLIST', target: { type: 'experience', id: experienceId } });
+        })
+        .catch(serverError => {
+          // Revert optimistic update on error
+          setIsWishlisted(true);
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'delete'
+          }));
+        })
+        .finally(() => setIsProcessing(false));
+    } else {
+      // Optimistically update UI
+      setIsWishlisted(true);
+      const data = { createdAt: serverTimestamp() };
+      setDoc(docRef, data)
+        .then(() => {
+          toast({ title: 'Added to wishlist!' });
+          logAudit(firestore, { actor: actorProfile, action: 'ADD_TO_WISHLIST', target: { type: 'experience', id: experienceId } });
+        })
+        .catch(serverError => {
+          // Revert optimistic update on error
+          setIsWishlisted(false);
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'create',
+            requestResourceData: data
+          }));
+        })
+        .finally(() => setIsProcessing(false));
     }
   };
   
