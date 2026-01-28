@@ -39,7 +39,7 @@ export default function Home() {
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
           <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-lg">
-            Your Seat at the Global Table.
+            Experience Authentic Food & Culture. Go where culture lives.
           </h1>
           <p className="mt-4 max-w-2xl text-lg md:text-xl text-neutral-200 drop-shadow-md">
             Experience authentic food and culture, right in someone's home.
