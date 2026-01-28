@@ -112,7 +112,7 @@ service cloud.firestore {
       // A user can only create a booking for themselves.
       allow create: if isSelf(request.resource.data.guestId);
       // Only participants of the booking or an admin can read it.
-      allow read: if isBookingParticipant(bookingId) || isAdmin();
+      allow read: if (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid) || isAdmin();
       
       // Complex update logic to handle various state transitions securely.
       allow update: if (isAdmin() || (isBookingParticipant(bookingId)
