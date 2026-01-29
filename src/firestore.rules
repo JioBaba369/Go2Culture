@@ -49,7 +49,7 @@ service cloud.firestore {
       allow read: if isSelf(userId) || isAdmin();
       // A user can only create their own user document.
       allow create: if isSelf(userId);
-      // Users can update their own profile, but cannot change their role or status.
+      // Users can update their own profile, but not role/status.
       allow update: if isSelf(userId)
         && !('role' in request.resource.data.diff(resource.data).affectedKeys())
         && !('status' in request.resource.data.diff(resource.data).affectedKeys());
@@ -112,8 +112,7 @@ service cloud.firestore {
       // A user can only create a booking for themselves.
       allow create: if isSelf(request.resource.data.guestId);
       // Only participants of the booking or an admin can read/list.
-      // This rule works for queries like `where('guestId', '==', uid)` or `where('hostId', '==', uid)`.
-      allow read: if (isSignedIn() && (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid)) || isAdmin();
+      allow read: if (isSignedIn() && request.auth.uid in [resource.data.guestId, resource.data.hostId]) || isAdmin();
       
       // Complex update logic to handle various state transitions securely.
       allow update: if (isAdmin() || (isBookingParticipant(bookingId)
@@ -159,7 +158,8 @@ service cloud.firestore {
 
     match /conversations/{bookingId} {
       // Only participants or admin can list/read conversations.
-      allow read, list: if (request.auth.uid in resource.data.participants) || isAdmin();
+      allow get: if isBookingParticipant(bookingId) || isAdmin();
+      allow list: if (isSignedIn() && request.auth.uid in resource.data.participants) || isAdmin();
       // Conversation is created atomically when booking is confirmed.
       allow create: if isBookingParticipant(bookingId)
                     && get(/databases/$(database)/documents/bookings/$(bookingId)).data.status == 'Confirmed'
@@ -224,3 +224,5 @@ service cloud.firestore {
     }
   }
 }
+
+    
