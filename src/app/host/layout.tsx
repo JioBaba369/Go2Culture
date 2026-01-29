@@ -1,3 +1,4 @@
+
 'use client';
 import { ReactNode } from 'react';
 import Link from 'next/link';
@@ -133,8 +134,8 @@ export default function HostLayout({ children }: { children: ReactNode }) {
                                     <AvatarFallback>{userProfile.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div className="overflow-hidden whitespace-nowrap group-data-[collapsible=icon]:hidden">
-                                    <p className="font-semibold text-sm">{userProfile.fullName}</p>
-                                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                                    <p className="font-semibold text-sm truncate">{userProfile.fullName}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                                 </div>
                             </Link>
                         </SidebarMenuItem>

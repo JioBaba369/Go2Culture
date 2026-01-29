@@ -1,3 +1,4 @@
+
 'use client';
 import {
   SidebarProvider,
@@ -141,8 +142,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {user.photoURL ? <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} /> : <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>}
                 </Avatar>
                 <div className="overflow-hidden whitespace-nowrap group-data-[collapsible=icon]:hidden">
-                  <p className="font-semibold text-sm">{user.displayName || 'User Profile'}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <p className="font-semibold text-sm truncate">{user.displayName || 'User Profile'}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
               </Link>
             </SidebarMenuItem>
