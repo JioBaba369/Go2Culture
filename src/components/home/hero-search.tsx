@@ -26,19 +26,19 @@ export function HeroSearch() {
 
   return (
     <div className="mt-8 bg-transparent w-full max-w-lg">
-      <div className="flex bg-background rounded-full border h-auto w-full overflow-hidden items-center pr-2">
+      <div className="flex bg-background/90 backdrop-blur-sm rounded-full border border-white/20 shadow-lg h-auto w-full overflow-hidden items-center p-1 transition-all focus-within:ring-2 focus-within:ring-primary/50">
         <div className="relative flex-grow">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
             <Input
                 type="text"
                 placeholder="Search by city, cuisine, or experience..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="h-14 w-full border-none bg-transparent pl-14 pr-4 text-base focus-visible:ring-0"
+                className="h-14 w-full border-none bg-transparent pl-12 pr-4 text-base focus-visible:ring-0"
             />
         </div>
-        <Button onClick={handleSearch} size="lg" className="rounded-full font-semibold px-8">
+        <Button onClick={handleSearch} size="lg" className="rounded-full font-semibold px-6">
           Search
         </Button>
       </div>
