@@ -45,8 +45,9 @@ service cloud.firestore {
     /* ────────────────────────────────── */
 
     match /users/{userId} {
-      // Admins can read any user profile. Users can only read their own.
-      allow read: if isSelf(userId) || isAdmin();
+      // Public can get user profiles. List is restricted to admins.
+      allow get: if true;
+      allow list: if isAdmin();
       // A user can only create their own user document.
       allow create: if isSelf(userId);
       // Users can update their own profile (but not role/status), and admins can update user profiles.
@@ -110,13 +111,13 @@ service cloud.firestore {
 
     match /bookings/{bookingId} {
       // A user can only create a booking for themselves.
-      allow create: if isSelf(request.resource.data.guestId);
+      allow create: if isSignedIn() && isSelf(request.resource.data.guestId);
       
       // GET: Allow if user is a participant or admin.
       allow get: if isBookingParticipant(bookingId) || isAdmin();
       
       // LIST: Allow if query is scoped to the user's ID. This requires client-side queries to use `where()`.
-      allow list: if (isSignedIn() && (request.auth.uid == resource.data.guestId || request.auth.uid == resource.data.hostId)) || isAdmin();
+      allow list: if (isSignedIn() && (request.auth.uid == request.query.filters.guestId || request.auth.uid == request.query.filters.hostId)) || isAdmin();
       
       // Complex update logic to handle various state transitions securely.
       allow update: if (isAdmin() || (isBookingParticipant(bookingId)
@@ -161,9 +162,9 @@ service cloud.firestore {
     /* ────────────────────────────────── */
 
     match /conversations/{bookingId} {
-      // Only participants or admin can read conversations.
-      allow read: if isBookingParticipant(bookingId) || isAdmin();
       allow list: if (isSignedIn() && request.auth.uid in resource.data.participants) || isAdmin();
+      // Only participants or admin can read conversations.
+      allow get: if isBookingParticipant(bookingId) || isAdmin();
 
       // Conversation is created atomically when booking is confirmed.
       allow create: if isBookingParticipant(bookingId)
