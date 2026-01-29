@@ -68,7 +68,7 @@ export function sendMessage(
   return batch.commit()
     .then(() => {
       // After message is sent successfully, create notification for the recipient
-      return createNotification(
+      createNotification(
         firestore,
         recipient.id,
         'NEW_MESSAGE',
