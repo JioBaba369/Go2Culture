@@ -401,7 +401,7 @@ export default function ProfilePage() {
             </div>
             
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-muted-foreground">
-                {userProfile.brandName && (<p className="text-lg">{userProfile.brandName}</p>)}
+                {userProfile.brandName && (<p className="text-lg font-medium">{userProfile.brandName}</p>)}
                 
                 {userProfile.location?.city && user.location?.country && <span className="hidden sm:block text-muted-foreground/50 mx-1">•</span>}
 
@@ -481,13 +481,13 @@ export default function ProfilePage() {
                             <FormItem><FormLabel>Instagram</FormLabel><FormControl><div className="relative flex items-center">
                                 <Instagram className="absolute left-3 h-4 w-4 text-muted-foreground" />
                                 <Input {...field} className="pl-9" placeholder="https://instagram.com/username"/>
-                            </div>FormControl><FormMessage/></FormItem>
+                            </div></FormControl><FormMessage /></FormItem>
                         )}/>
                          <FormField control={form.control} name="socialMedia.facebook" render={({ field }) => (
                             <FormItem><FormLabel>Facebook</FormLabel><FormControl><div className="relative flex items-center">
                                 <Facebook className="absolute left-3 h-4 w-4 text-muted-foreground" />
                                 <Input {...field} className="pl-9" placeholder="https://facebook.com/username"/>
-                            </div></FormControl><FormMessage/></FormItem>
+                            </div></FormControl><FormMessage /></FormItem>
                         )}/>
                     </CardContent>
                 </Card>
@@ -513,7 +513,7 @@ export default function ProfilePage() {
                             </FormItem>
                         )}/>
                          <FormField control={form.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>Phone number</FormLabel><FormControl><Input {...field} /></FormControl><FormDescription>Only shared with hosts/guests after a booking is confirmed.</FormMessage><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Phone number</FormLabel><FormControl><Input {...field} /></FormControl><FormDescription>Only shared with hosts/guests after a booking is confirmed.</FormDescription><FormMessage /></FormItem>
                         )}/>
                         <Separator/>
                          <FormField control={form.control} name="preferences.guiltyPleasures" render={({ field }) => (
@@ -770,5 +770,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
