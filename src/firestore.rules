@@ -49,10 +49,10 @@ service cloud.firestore {
       allow read: if isSelf(userId) || isAdmin();
       // A user can only create their own user document.
       allow create: if isSelf(userId);
-      // Users can update their own profile, but not role/status.
-      allow update: if isSelf(userId)
+      // Users can update their own profile (but not role/status), and admins can update user profiles.
+      allow update: if (isSelf(userId)
         && !('role' in request.resource.data.diff(resource.data).affectedKeys())
-        && !('status' in request.resource.data.diff(resource.data).affectedKeys());
+        && !('status' in request.resource.data.diff(resource.data).affectedKeys())) || isAdmin();
       // Soft deletes are handled by updating the `status` field, not direct deletion.
       allow delete: if false;
 
@@ -112,7 +112,7 @@ service cloud.firestore {
       // A user can only create a booking for themselves.
       allow create: if isSelf(request.resource.data.guestId);
       // Only participants of the booking or an admin can read/list.
-      allow read: if (isSignedIn() && request.auth.uid in [resource.data.guestId, resource.data.hostId]) || isAdmin();
+      allow read: if (isSignedIn() && (request.auth.uid == resource.data.guestId || request.auth.uid == resource.data.hostId)) || isAdmin();
       
       // Complex update logic to handle various state transitions securely.
       allow update: if (isAdmin() || (isBookingParticipant(bookingId)
@@ -224,5 +224,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
