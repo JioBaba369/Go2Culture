@@ -1,6 +1,6 @@
 
 'use client';
-import { Firestore, collection, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { Firestore, collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import type { Booking, Review, User as AppUser } from '@/lib/types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -8,9 +8,9 @@ import { createNotification } from '@/lib/notification-actions';
 import { logAudit } from '@/lib/audit-actions';
 import type { User as AuthUser } from 'firebase/auth';
 
-export function submitReview(
+export async function submitReview(
   firestore: Firestore,
-  actor: AppUser,
+  actorAuth: AuthUser,
   booking: Booking,
   rating: number,
   comment: string
@@ -30,9 +30,14 @@ export function submitReview(
   };
 
   const reviewsColRef = collection(firestore, 'reviews');
+
+  const actorProfileSnap = await getDoc(doc(firestore, 'users', actorAuth.uid));
+  if (!actorProfileSnap.exists()) throw new Error("Actor profile not found.");
+  const actorProfile = { id: actorProfileSnap.id, ...actorProfileSnap.data() } as AppUser;
+
   return addDoc(reviewsColRef, reviewData)
     .then((newReviewRef) => {
-      logAudit(firestore, { actor, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
+      logAudit(firestore, { actor: actorProfile, action: 'CREATE_REVIEW', target: { type: 'review', id: newReviewRef.id }, metadata: { bookingId: booking.id, experienceId: booking.experienceId, rating } });
       createNotification(
         firestore,
         booking.hostId,
@@ -49,5 +54,3 @@ export function submitReview(
       throw serverError;
     });
 }
-
-    
