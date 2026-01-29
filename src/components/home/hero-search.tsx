@@ -1,27 +1,33 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, Tag } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { Experience } from '@/lib/types';
 
-const categories = [
-  "In-Home Dining",
-  "Cooking Class",
-  "Restaurant Experience",
-  "Special Event",
-  "Art & Craft",
-  "Music & Dance",
-  "History & Walks"
-];
 
 export function HeroSearch() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState('');
+  const firestore = useFirestore();
+
+  const experiencesQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'experiences'), where('status', '==', 'live')) : null),
+    [firestore]
+  );
+  const { data: experiences, isLoading: areExperiencesLoading } = useCollection<Experience>(experiencesQuery);
+  
+  const categories = useMemo(() => {
+    if (!experiences) return [];
+    return [...new Set(experiences.map(exp => exp.category))].sort();
+  }, [experiences]);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -58,7 +64,7 @@ export function HeroSearch() {
         </div>
         <div className="relative w-full sm:w-52 flex items-center">
           <Tag className="absolute left-3 h-5 w-5 text-muted-foreground pointer-events-none" />
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={setCategory} disabled={areExperiencesLoading}>
             <SelectTrigger className="h-12 w-full rounded-lg border-input bg-background/50 pl-10 text-base focus:ring-2 focus:ring-primary">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
