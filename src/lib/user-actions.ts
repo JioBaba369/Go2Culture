@@ -7,6 +7,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { createNotification } from './notification-actions';
 import { logAudit } from './audit-actions';
 import type { User as AuthUser } from 'firebase/auth';
+import { ADMIN_UID } from './auth';
 
 export async function submitReview(
   firestore: Firestore,
@@ -143,6 +144,9 @@ export async function softDeleteUserAccount(
   firestore: Firestore,
   actor: AppUser,
 ) {
+  if (actor.id === ADMIN_UID) {
+    throw new Error("The admin account cannot be deleted.");
+  }
   const userRef = doc(firestore, 'users', actor.id);
   const updatedData = { 
       status: 'deleted',
