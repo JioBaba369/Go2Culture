@@ -111,7 +111,8 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       // A user can only create a booking for themselves.
       allow create: if isSelf(request.resource.data.guestId);
-      // Only participants of the booking or an admin can read it.
+      // Only participants of the booking or an admin can read/list.
+      // This rule works for queries like `where('guestId', '==', uid)` or `where('hostId', '==', uid)`.
       allow read: if (resource.data.guestId == request.auth.uid || resource.data.hostId == request.auth.uid) || isAdmin();
       
       // Complex update logic to handle various state transitions securely.
@@ -158,7 +159,7 @@ service cloud.firestore {
 
     match /conversations/{bookingId} {
       // Only participants or admin can list/read conversations.
-      allow read, list: if isBookingParticipant(bookingId) || isAdmin();
+      allow read, list: if request.auth.uid in resource.data.participants || isAdmin();
       // Conversation is created atomically when booking is confirmed.
       allow create: if isBookingParticipant(bookingId)
                     && get(/databases/$(database)/documents/bookings/$(bookingId)).data.status == 'Confirmed'
