@@ -138,3 +138,28 @@ export async function requestReschedule(
       throw serverError;
     });
 }
+
+export async function softDeleteUserAccount(
+  firestore: Firestore,
+  actor: AppUser,
+) {
+  const userRef = doc(firestore, 'users', actor.id);
+  const updatedData = { 
+      status: 'deleted',
+      deletedAt: serverTimestamp(),
+      deletedBy: 'user'
+   };
+
+  return updateDoc(userRef, updatedData as any)
+    .then(() => {
+      logAudit(firestore, { actor, action: 'DELETE_ACCOUNT', target: { type: 'user', id: actor.id } });
+    })
+    .catch((serverError) => {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: userRef.path,
+        operation: 'update',
+        requestResourceData: updatedData,
+      }));
+      throw serverError;
+    });
+}

@@ -5,20 +5,20 @@ import React, { useState, useEffect } from 'react';
 import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { doc, updateDoc, serverTimestamp, collection, where, query } from 'firebase/firestore';
-import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from 'firebase/auth';
+import { updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile, signOut } from 'firebase/auth';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck, Trophy, Award, Languages, CalendarIcon } from 'lucide-react';
+import { Loader2, Check, Twitter, Instagram, Facebook, Eye, Globe, Flag, ShieldCheck, Trophy, Award, Languages, CalendarIcon, Trash2 } from 'lucide-react';
 import { User, Host, Experience } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -36,6 +36,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { logAudit } from '@/lib/audit-actions';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { softDeleteUserAccount } from '@/lib/user-actions';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -97,6 +99,7 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [profileSaveState, setProfileSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [passwordSaveState, setPasswordSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (firestore && user) {
@@ -274,6 +277,34 @@ export default function ProfilePage() {
          setPasswordSaveState('idle');
     }
   }
+
+  const handleDeleteAccount = async () => {
+    if (!user || !userProfile || !firestore || !auth) return;
+    setIsDeleting(true);
+    try {
+        await softDeleteUserAccount(firestore, userProfile);
+
+        // Sign the user out after successful soft-delete
+        if (auth) {
+            await signOut(auth);
+        }
+        
+        toast({
+            title: "Account Deleted",
+            description: "Your account has been successfully deleted. We're sad to see you go.",
+        });
+
+        router.push('/');
+
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Deletion Failed",
+            description: error.message || "An error occurred while deleting your account.",
+        });
+        setIsDeleting(false);
+    }
+  };
 
   const isLoading = isUserLoading || isProfileLoading || isHostLoading;
 
@@ -688,6 +719,39 @@ export default function ProfilePage() {
                         </CardFooter>
                     </form>
                 </Form>
+            </Card>
+
+            <Card className="border-destructive">
+                <CardHeader>
+                    <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                    <CardDescription>
+                        This action is permanent and cannot be undone.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete My Account
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will permanently delete your account and all associated data. You will be logged out immediately. This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteAccount} disabled={isDeleting} className={cn(buttonVariants({ variant: "destructive" }))}>
+                                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+                                    Yes, Delete My Account
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </CardContent>
             </Card>
         </div>
       </div>

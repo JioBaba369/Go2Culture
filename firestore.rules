@@ -55,10 +55,11 @@ service cloud.firestore {
       allow list: if isAdmin();
       // A user can only create their own user document.
       allow create: if isSelf(userId);
-      // Users can update their own profile, but cannot change their role or status. Admins can update anything.
-      allow update: if (isSelf(userId)
-        && !('role' in request.resource.data.diff(resource.data).affectedKeys())
-        && !('status' in request.resource.data.diff(resource.data).affectedKeys())) || isAdmin();
+      // Users can update their own profile, but cannot change their role.
+      // They can only update their own status to 'deleted'. Admins can update anything.
+      allow update: if (isAdmin()) || (isSelf(userId)
+          && !('role' in request.resource.data.diff(resource.data).affectedKeys())
+          && (!('status' in request.resource.data.diff(resource.data).affectedKeys()) || request.resource.data.status == 'deleted'));
       // Users cannot delete their accounts directly; this is handled via status field.
       allow delete: if false;
 
