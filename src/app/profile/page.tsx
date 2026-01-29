@@ -366,6 +366,7 @@ export default function ProfilePage() {
   const userImage = PlaceHolderImages.find(p => p.id === userProfile?.profilePhotoId);
   const countryName = userProfile.location?.country ? countries.find(c => c.id === userProfile.location.country)?.name : '';
   const isHost = userProfile.role === 'host' || userProfile.role === 'both';
+  const isAdmin = user.id === ADMIN_UID;
 
 
   const roleVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive" | null | undefined> = {
@@ -383,7 +384,7 @@ export default function ProfilePage() {
               <AvatarFallback className="text-3xl">{userProfile?.fullName?.charAt(0) || user.email?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-             <div className="flex items-center gap-2">
+             <div className="flex items-center gap-3">
                 <h1 className="font-headline text-4xl font-bold">{userProfile.fullName}</h1>
                 {isHost && host?.verification?.idVerified && (
                   <TooltipProvider>
@@ -480,7 +481,7 @@ export default function ProfilePage() {
                             <FormItem><FormLabel>Instagram</FormLabel><FormControl><div className="relative flex items-center">
                                 <Instagram className="absolute left-3 h-4 w-4 text-muted-foreground" />
                                 <Input {...field} className="pl-9" placeholder="https://instagram.com/username"/>
-                            </div></FormControl><FormMessage/></FormItem>
+                            </div>FormControl><FormMessage/></FormItem>
                         )}/>
                          <FormField control={form.control} name="socialMedia.facebook" render={({ field }) => (
                             <FormItem><FormLabel>Facebook</FormLabel><FormControl><div className="relative flex items-center">
@@ -512,7 +513,7 @@ export default function ProfilePage() {
                             </FormItem>
                         )}/>
                          <FormField control={form.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>Phone number</FormLabel><FormControl><Input {...field} /></FormControl><FormDescription>Only shared with hosts/guests after a booking is confirmed.</FormDescription><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Phone number</FormLabel><FormControl><Input {...field} /></FormControl><FormDescription>Only shared with hosts/guests after a booking is confirmed.</FormMessage><FormMessage /></FormItem>
                         )}/>
                         <Separator/>
                          <FormField control={form.control} name="preferences.guiltyPleasures" render={({ field }) => (
@@ -742,7 +743,7 @@ export default function ProfilePage() {
                 <CardContent>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive">
+                            <Button variant="destructive" disabled={isAdmin}>
                                 <Trash2 className="mr-2 h-4 w-4" /> Delete My Account
                             </Button>
                         </AlertDialogTrigger>
@@ -769,3 +770,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
