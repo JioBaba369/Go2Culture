@@ -7,37 +7,41 @@ service cloud.firestore {
     /*           Helper Functions         */
     /* ────────────────────────────────── */
 
+    // Is the requesting user signed in?
     function isSignedIn() {
       return request.auth != null;
     }
 
+    // Does the requesting user's UID match the provided userId?
     function isSelf(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
     
+    // Is the requesting user an admin?
     function isAdmin() {
       // In a production app, this should be a custom claim, not a hardcoded UID.
       // For example: `return request.auth.token.admin == true;`
       return isSignedIn() && request.auth.uid == '9vjYTvqyLHSOZj27shGfhgpwgDw1';
     }
-
-    function isBookingParticipant(bookingId) {
-      let booking = get(/databases/$(database)/documents/bookings/$(bookingId)).data;
-      return booking != null && (isSelf(booking.guestId) || isSelf(booking.hostId));
-    }
     
-    function hasAttendedBooking(bookingId) {
+    // Can the user create a review for this booking?
+    function canCreateReview(bookingId) {
       let booking = get(/databases/$(database)/documents/bookings/$(bookingId)).data;
+      // User must be the guest, and the booking must be confirmed and in the past.
       return booking != null &&
              isSelf(booking.guestId) &&
              booking.status == 'Confirmed' &&
              booking.bookingDate < request.time;
     }
     
+    // Rate limit function for sending messages
     function canSendMessage() {
-      let lastMessageTime = get(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat).data.lastMessageAt;
-      return !exists(/databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat)
-        || request.time > lastMessageTime + duration.value(1, "s");
+      // Path to the user's rate limit document for chat.
+      let limitDocPath = /databases/$(database)/documents/users/$(request.auth.uid)/rateLimits/chat;
+      // If the doc doesn't exist, they can send.
+      // If it exists, check if the request time is at least 1s after the last message.
+      return !exists(limitDocPath)
+        || request.time > get(limitDocPath).data.lastMessageAt + duration.value(1, "s");
     }
 
     /* ────────────────────────────────── */
@@ -45,22 +49,22 @@ service cloud.firestore {
     /* ────────────────────────────────── */
 
     match /users/{userId} {
-      // Public can get user profiles. List is restricted to admins.
+      // Public can get user profiles.
       allow get: if true;
+      // Listing all users is restricted to admins.
       allow list: if isAdmin();
       // A user can only create their own user document.
       allow create: if isSelf(userId);
-      // Users can update their own profile (but not role/status), and admins can update user profiles.
+      // Users can update their own profile, but cannot change their role or status. Admins can update anything.
       allow update: if (isSelf(userId)
         && !('role' in request.resource.data.diff(resource.data).affectedKeys())
         && !('status' in request.resource.data.diff(resource.data).affectedKeys())) || isAdmin();
-      // Soft deletes are handled by updating the `status` field, not direct deletion.
+      // Users cannot delete their accounts directly; this is handled via status field.
       allow delete: if false;
 
-      // Host sub-collection for host-specific details.
+      // Host sub-collection contains public and private host-specific details.
       match /hosts/{hostId} {
-        // SECURITY NOTE: Host profiles are public to allow anonymous users to see details on experience pages.
-        // A more secure model would use a separate public-only collection.
+        // Anyone can read a host's profile.
         allow read: if true;
         // Only the user themselves or an admin can create/update their host profile.
         allow write: if isSelf(userId) || isAdmin();
@@ -80,15 +84,13 @@ service cloud.firestore {
 
       // Users can manage their own notifications.
       match /notifications/{notificationId} {
-        // A user can read, update (mark as read), and delete their own notifications.
         allow read, update, delete: if isSelf(userId);
-        // Any signed-in user can create a notification for another user,
-        // as long as the notification is correctly addressed to that user.
-        // This is necessary for client-side actions like sending messages or confirming bookings.
+        // Any signed-in user can create a notification for another user if the payload is correct.
+        // This allows clients to trigger notifications for other users (e.g., host confirms booking for guest).
         allow create: if isSignedIn() && request.resource.data.userId == userId;
       }
       
-      // Used for rate-limiting client-side actions like sending messages.
+      // Used for client-side rate-limiting.
       match /rateLimits/{document=**} {
         allow read, write: if isSelf(userId);
       }
@@ -99,7 +101,7 @@ service cloud.firestore {
     /* ────────────────────────────────── */
 
     match /experiences/{experienceId} {
-      // Public can read live experiences. Owners and Admins can read any.
+      // Anyone can read live experiences. Owners and Admins can read any status.
       allow read: if resource.data.status == 'live' || (isSignedIn() && isSelf(resource.data.userId)) || isAdmin();
       // Only a host (or admin) can create an experience for themselves.
       allow create: if isSignedIn() && (isSelf(request.resource.data.userId) || isAdmin());
@@ -114,21 +116,24 @@ service cloud.firestore {
       allow create: if isSignedIn() && isSelf(request.resource.data.guestId);
       
       // GET: Allow if user is a participant or admin.
-      allow get: if isBookingParticipant(bookingId) || isAdmin();
+      allow get: if isSignedIn() && (isSelf(resource.data.guestId) || isSelf(resource.data.hostId) || isAdmin());
       
       // LIST: Allow if query is scoped to the user's ID. This requires client-side queries to use `where()`.
       allow list: if (isSignedIn() && (request.auth.uid == request.query.filters.guestId || request.auth.uid == request.query.filters.hostId)) || isAdmin();
       
       // Complex update logic to handle various state transitions securely.
-      allow update: if (isAdmin() || (isBookingParticipant(bookingId)
-          // Immutable fields check
+      allow update: if (isAdmin() || (isSignedIn()
+          // 1. User must be a participant in the booking.
+          && (isSelf(resource.data.guestId) || isSelf(resource.data.hostId))
+          // 2. Certain core fields must be immutable.
           && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['pricing', 'policySnapshot', 'payment', 'guestId', 'hostId', 'experienceId'])
+          // 3. Define allowed state changes.
           && (
-              // Guest can cancel their own booking.
+              // A. Guest can cancel their own booking.
               (isSelf(resource.data.guestId) && request.resource.data.status == "Cancelled") ||
-              // Host can confirm a pending booking.
+              // B. Host can confirm a pending booking.
               (isSelf(resource.data.hostId) && request.resource.data.status == "Confirmed" && resource.data.status == "Pending") ||
-              // Either participant can update the reschedule request.
+              // C. Either participant can add or modify a reschedule request.
               ('rescheduleRequest' in request.resource.data.diff(resource.data).affectedKeys())
           )
       ));
@@ -139,9 +144,7 @@ service cloud.firestore {
       // Reviews are public.
       allow read: if true;
       // A guest can only create a review for a booking they attended.
-      allow create: if isSignedIn() && 
-                     isSelf(request.resource.data.guestId) &&
-                     hasAttendedBooking(request.resource.data.bookingId);
+      allow create: if canCreateReview(request.resource.data.bookingId);
       // A guest can update their own review. Admin can also moderate.
       allow update: if (isSignedIn() && isSelf(resource.data.guestId)) || isAdmin();
       allow delete: if isAdmin();
@@ -162,27 +165,33 @@ service cloud.firestore {
     /* ────────────────────────────────── */
 
     match /conversations/{bookingId} {
-      allow list: if (isSignedIn() && request.auth.uid in resource.data.participants) || isAdmin();
-      // Only participants or admin can read conversations.
-      allow get: if isBookingParticipant(bookingId) || isAdmin();
+      // LIST: A user can only list conversations they are a participant in.
+      // This relies on a client-side `where('participants', 'array-contains', uid)` query.
+      allow list: if (isSignedIn() && request.query.filters.participants.array_contains == request.auth.uid) || isAdmin();
+      
+      // GET: A user can only get a conversation they are a participant in.
+      allow get: if (isSignedIn() && request.auth.uid in resource.data.participants) || isAdmin();
 
-      // Conversation is created atomically when booking is confirmed.
-      allow create: if isBookingParticipant(bookingId)
+      // CREATE: Conversation is created when booking is confirmed.
+      // Rule ensures it's created for the correct booking and by a participant.
+      allow create: if (isSignedIn() && (request.auth.uid in request.resource.data.participants))
                     && get(/databases/$(database)/documents/bookings/$(bookingId)).data.status == 'Confirmed'
                     && request.resource.data.id == bookingId;
       
-      // Participants can update `lastMessage`, `readBy`, `updatedAt`, and `participantInfo`.
-      allow update: if (isBookingParticipant(bookingId) || isAdmin())
+      // UPDATE: Participants can update `lastMessage`, `readBy`, etc. but not core fields.
+      allow update: if (isSignedIn() && (request.auth.uid in resource.data.participants) || isAdmin())
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'readBy', 'updatedAt', 'participantInfo']);
     }
 
     match /conversations/{bookingId}/messages/{messageId} {
-        // Only participants or admin can read messages.
-        allow read, list: if isBookingParticipant(bookingId) || isAdmin();
-        // A participant can send a message, with rate limiting.
+        // READ/LIST: User must be a participant in the parent conversation.
+        allow read, list: if (isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(bookingId)).data.participants) || isAdmin();
+        
+        // CREATE: User must be sender and a participant, with rate limiting.
         allow create: if canSendMessage() 
                     && isSelf(request.resource.data.senderId)
-                    && isBookingParticipant(bookingId);
+                    && (isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(bookingId)).data.participants);
+                    
         // Messages are immutable.
         allow update, delete: if false;
     }
@@ -192,12 +201,16 @@ service cloud.firestore {
     /* ────────────────────────────────── */
     
     match /hostApplications/{applicationId} {
+      // User can create their own application.
       allow create: if isSignedIn() && isSelf(request.resource.data.userId);
+      // User can read their own application; admins can read any.
       allow read: if isAdmin() || (isSignedIn() && isSelf(resource.data.userId));
+      // Only admins can approve, reject, or delete applications.
       allow update, delete: if isAdmin();
     }
 
     match /platformSettings/{settingId} {
+        // Publicly readable settings (e.g., service fees).
         allow read: if true;
         allow write: if isAdmin();
     }
@@ -213,7 +226,9 @@ service cloud.firestore {
     }
 
     match /coupons/{couponId} {
+      // Any signed-in user can check if a coupon exists.
       allow get: if isSignedIn();
+      // Only admins can manage the full list of coupons.
       allow list, create, update, delete: if isAdmin();
     }
     
@@ -225,7 +240,7 @@ service cloud.firestore {
 
     match /auditLogs/{logId} {
         allow read: if isAdmin();
-        // SECURITY NOTE: Allowing admin-write from client to support logging without server-side functions in this project.
+        // Allow admin-write from client to support logging without server-side functions.
         allow write: if isAdmin();
     }
   }
