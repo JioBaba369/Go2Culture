@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -8,17 +7,17 @@ import { MainLayout } from '@/components/layout/main-layout';
 import { FirebaseClientProvider } from '@/firebase';
 import { CookieConsentBanner } from '@/components/cookie-consent-banner';
 import { cn } from '@/lib/utils';
-import { Lora, Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Inter, Playfair_Display } from 'next/font/google';
 
-const lora = Lora({
-  subsets: ['latin'],
-  variable: '--font-headline',
-});
-
-const inter = Inter({
+const fontSans = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
+});
+
+const fontHeadline = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-headline',
 });
 
 export const metadata: Metadata = {
@@ -36,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('antialiased font-sans', lora.variable, inter.variable)}>
+      <body className={cn('antialiased font-sans', fontSans.variable, fontHeadline.variable)}>
         <ThemeProvider
             attribute="class"
             defaultTheme="system"
