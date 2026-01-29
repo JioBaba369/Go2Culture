@@ -13,7 +13,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow, isFuture, isPast } from "date-fns";
 import { useDoc } from "@/firebase/firestore/use-doc";
 import { Skeleton } from "@/components/ui/skeleton";
-import React from "react";
+import React, { useMemo } from "react";
 
 function ActivityItem({ activity }: { activity: any }) {
     const { firestore } = useFirebase();
@@ -110,11 +110,16 @@ export default function HostDashboardPage() {
     const experiencesQuery = useMemoFirebase(() => (user && firestore ? query(collection(firestore, 'experiences'), where('userId', '==', user.uid)) : null), [user, firestore]);
     const { data: experiences, isLoading: experiencesLoading } = useCollection<Experience>(experiencesQuery);
     
-    const bookingsQuery = useMemoFirebase(() => (user && firestore ? query(collection(firestore, 'bookings'), where('hostId', '==', user.uid)) : null), [user, firestore]);
-    const { data: bookings, isLoading: bookingsLoading } = useCollection<Booking>(bookingsQuery);
+    const bookingsQuery = useMemoFirebase(() => (user && firestore ? query(collection(firestore, 'bookings'), where('participantIds', 'array-contains', user.uid)) : null), [user, firestore]);
+    const { data: allUserBookings, isLoading: bookingsLoading } = useCollection<Booking>(bookingsQuery);
 
     const reviewsQuery = useMemoFirebase(() => (user && firestore ? query(collection(firestore, 'reviews'), where('hostId', '==', user.uid)) : null), [user, firestore]);
     const { data: reviews, isLoading: reviewsLoading } = useCollection<Review>(reviewsQuery);
+    
+    const bookings = useMemo(() => {
+        if (!allUserBookings || !user) return [];
+        return allUserBookings.filter(b => b.hostId === user.uid);
+    }, [allUserBookings, user]);
 
     const isLoading = isUserLoading || experiencesLoading || bookingsLoading || reviewsLoading;
 

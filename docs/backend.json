@@ -484,6 +484,11 @@
         "experienceTitle": { "type": "string", "description": "Denormalized experience title for display." },
         "hostId": { "type": "string", "description": "Reference to Host." },
         "hostName": { "type": "string", "description": "Denormalized host name for display." },
+        "participantIds": {
+            "type": "array",
+            "description": "Array containing the guestId and hostId for easy querying.",
+            "items": { "type": "string" }
+        },
         "bookingDate": { "type": "string", "format": "date-time" },
         "numberOfGuests": { "type": "number" },
         "totalPrice": { "type": "number" },
@@ -535,7 +540,7 @@
             }
         }
       },
-      "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "bookingDate", "numberOfGuests", "totalPrice", "status", "pricing", "policySnapshot", "payment"]
+      "required": ["id", "guestId", "experienceId", "experienceTitle", "hostId", "hostName", "participantIds", "bookingDate", "numberOfGuests", "totalPrice", "status", "pricing", "policySnapshot", "payment"]
     },
     "Review": {
       "title": "Review",
@@ -848,5 +853,3 @@
     }
   }
 }
-
-    

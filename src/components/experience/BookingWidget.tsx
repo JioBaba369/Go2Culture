@@ -147,7 +147,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
       
       const serviceFeePercentage = settings?.serviceFeePercentage ?? 15;
       const serviceFee = basePrice * (serviceFeePercentage / 100);
-      const finalPrice = basePrice + serviceFee - finalDiscountAmount;
+      const totalPrice = basePrice + serviceFee - finalDiscountAmount;
 
       const bookingData: Partial<Booking> = {
         guestId: user.uid,
@@ -155,9 +155,10 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
         experienceTitle: experience!.title,
         hostId: experience!.hostId,
         hostName: experience!.hostName,
+        participantIds: [user.uid, experience!.hostId],
         bookingDate: date,
         numberOfGuests: numberOfGuests,
-        totalPrice: finalPrice,
+        totalPrice: totalPrice,
         status: isGift || experience?.instantBook ? 'Confirmed' : 'Pending',
         isGift: isGift,
         createdAt: serverTimestamp(),
@@ -169,7 +170,7 @@ export function BookingWidget({ experience, host }: BookingWidgetProps) {
           basePrice: basePrice,
           guests: numberOfGuests,
           serviceFee: serviceFee,
-          total: finalPrice,
+          total: totalPrice,
           currency: 'AUD', // Assuming AUD
         },
         policySnapshot: {

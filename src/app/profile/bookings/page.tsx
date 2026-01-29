@@ -321,7 +321,7 @@ export default function MyBookingsPage() {
   const [activeFilter, setActiveFilter] = useState('all');
 
   const bookingsQuery = useMemoFirebase(
-    () => (user && firestore ? query(collection(firestore, 'bookings'), where('guestId', '==', user.uid)) : null),
+    () => (user && firestore ? query(collection(firestore, 'bookings'), where('participantIds', 'array-contains', user.uid)) : null),
     [user, firestore, key]
   );
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);

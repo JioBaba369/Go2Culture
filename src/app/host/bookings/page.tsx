@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useMemo } from 'react';
 import {
@@ -285,21 +286,26 @@ export default function HostBookingsPage() {
   const [filter, setFilter] = useState('all');
 
   const bookingsQuery = useMemoFirebase(
-    () => (user && firestore ? query(collection(firestore, 'bookings'), where('hostId', '==', user.uid)) : null),
+    () => (user && firestore ? query(collection(firestore, 'bookings'), where('participantIds', 'array-contains', user.uid)) : null),
     [user, firestore, key]
   );
 
-  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
+  const { data: allUserBookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
   const isLoading = isUserLoading || areBookingsLoading;
+  
+  const hostBookings = useMemo(() => {
+    if (!allUserBookings || !user) return [];
+    return allUserBookings.filter(b => b.hostId === user.uid);
+  }, [allUserBookings, user]);
 
   const handleAction = () => {
     setKey(prev => prev + 1); // Increment key to trigger refetch
   };
   
   const sortedBookings = useMemo(() => {
-    if (!bookings) return [];
-    return [...bookings].sort((a, b) => b.bookingDate.toDate() - a.bookingDate.toDate());
-  }, [bookings]);
+    if (!hostBookings) return [];
+    return [...hostBookings].sort((a, b) => b.bookingDate.toDate() - a.bookingDate.toDate());
+  }, [hostBookings]);
 
   const filteredBookings = useMemo(() => {
     if (!sortedBookings) return [];

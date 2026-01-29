@@ -118,15 +118,16 @@ service cloud.firestore {
       // GET: Allow if user is a participant or admin.
       allow get: if isSignedIn() && (isSelf(resource.data.guestId) || isSelf(resource.data.hostId) || isAdmin());
       
-      // LIST: Allow if query is scoped to the user's ID. This requires client-side queries to use `where()`.
-      allow list: if (isSignedIn() && (request.auth.uid == request.query.filters.guestId || request.auth.uid == request.query.filters.hostId)) || isAdmin();
+      // LIST: A user can only list bookings they are a participant in.
+      // This relies on a client-side `where('participantIds', 'array-contains', uid)` query.
+      allow list: if (isSignedIn() && request.query.filters.participantIds.array_contains == request.auth.uid) || isAdmin();
       
       // Complex update logic to handle various state transitions securely.
       allow update: if (isAdmin() || (isSignedIn()
           // 1. User must be a participant in the booking.
           && (isSelf(resource.data.guestId) || isSelf(resource.data.hostId))
           // 2. Certain core fields must be immutable.
-          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['pricing', 'policySnapshot', 'payment', 'guestId', 'hostId', 'experienceId'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['pricing', 'policySnapshot', 'payment', 'guestId', 'hostId', 'experienceId', 'participantIds'])
           // 3. Define allowed state changes.
           && (
               // A. Guest can cancel their own booking.

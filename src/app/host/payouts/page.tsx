@@ -135,10 +135,15 @@ export default function HostPayoutsSettingsPage() {
     const { data: host, isLoading: isHostLoading } = useDoc<Host>(hostRef);
 
     const bookingsQuery = useMemoFirebase(
-        () => (user && firestore ? query(collection(firestore, 'bookings'), where('hostId', '==', user.uid)) : null),
+        () => (user && firestore ? query(collection(firestore, 'bookings'), where('participantIds', 'array-contains', user.uid)) : null),
         [user, firestore]
     );
-    const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
+    const { data: allUserBookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
+
+    const bookings = useMemo(() => {
+        if (!allUserBookings || !user) return [];
+        return allUserBookings.filter(b => b.hostId === user.uid);
+    }, [allUserBookings, user]);
 
     const pastConfirmedBookings = useMemo(() => {
         if (!bookings) return [];
@@ -477,5 +482,3 @@ export default function HostPayoutsSettingsPage() {
         </div>
     );
 }
-
-    
