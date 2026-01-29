@@ -106,7 +106,7 @@ export function SignupForm() {
       })
       .then(() => {
         toast({ title: "Account Created!", description: "Welcome to Go2Culture. Please check your email to verify your account." });
-        router.push('/');
+        router.push('/profile');
       })
       .catch((error: any) => {
         console.error(error);
