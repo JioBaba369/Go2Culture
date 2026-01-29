@@ -28,21 +28,22 @@ function ReferredUserRow({ referredUser }: { referredUser: ReferredUser }) {
     const userProfileRef = useMemoFirebase(() => (firestore ? doc(firestore, 'users', referredUser.id) : null), [firestore, referredUser.id]);
     const { data: userProfile, isLoading } = useDoc<User>(userProfileRef);
 
-    const userImage = userProfile ? PlaceHolderImages.find(p => p.id === userProfile.profilePhotoId) : null;
-    
-    if (isLoading) {
+    if (isLoading || !userProfile) {
         return <TableRow><TableCell colSpan={3}><Skeleton className="h-10" /></TableCell></TableRow>
     }
+    
+    const displayName = userProfile.fullName || referredUser.fullName;
+    const userImage = PlaceHolderImages.find(p => p.id === userProfile.profilePhotoId);
 
     return (
         <TableRow>
             <TableCell>
                 <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9">
-                        {userImage && <AvatarImage src={userImage.imageUrl} alt={referredUser.fullName} />}
-                        <AvatarFallback>{referredUser.fullName ? referredUser.fullName.charAt(0) : '?'}</AvatarFallback>
+                        {userImage && <AvatarImage src={userImage.imageUrl} alt={displayName} />}
+                        <AvatarFallback>{displayName ? displayName.charAt(0) : '?'}</AvatarFallback>
                     </Avatar>
-                    <span className="font-medium">{referredUser.fullName}</span>
+                    <span className="font-medium">{displayName}</span>
                 </div>
             </TableCell>
             <TableCell>
