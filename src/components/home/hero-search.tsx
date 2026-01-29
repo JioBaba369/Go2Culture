@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -36,10 +35,10 @@ export function HeroSearch() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="h-16 w-full border-none bg-transparent pl-14 pr-4 text-base focus-visible:ring-0"
+                className="h-14 w-full border-none bg-transparent pl-14 pr-4 text-base focus-visible:ring-0"
             />
         </div>
-        <Button onClick={handleSearch} size="lg" className="h-12 rounded-full font-semibold px-8">
+        <Button onClick={handleSearch} size="lg" className="rounded-full font-semibold px-8">
           Search
         </Button>
       </div>
