@@ -38,6 +38,7 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { softDeleteUserAccount } from '@/lib/user-actions';
+import { ADMIN_UID } from '@/lib/auth';
 
 const profileFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -280,6 +281,16 @@ export default function ProfilePage() {
 
   const handleDeleteAccount = async () => {
     if (!user || !userProfile || !firestore || !auth) return;
+
+    if (user.uid === ADMIN_UID) {
+        toast({
+            variant: "destructive",
+            title: "Action Forbidden",
+            description: "The admin account cannot be deleted.",
+        });
+        return;
+    }
+
     setIsDeleting(true);
     try {
         await softDeleteUserAccount(firestore, userProfile);
